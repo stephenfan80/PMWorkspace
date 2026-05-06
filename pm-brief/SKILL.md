@@ -31,13 +31,14 @@ done
 1. Read `../pmworkspace-shared/references/product-plan-handoff.md`.
 2. Read `../pmworkspace-shared/references/production-reference-gate.md`，并写入页面类型和线上参考状态。
 3. Read `../pmworkspace-shared/references/decision-question-mode.md` and turn PM decision items into choice questions.
-4. Read `../pmworkspace-shared/references/zoon-workflow.md`.
-5. 确认已完成工作目标模式、Q 诊断、前提确认和必要 D 拍板；如果缺失，只输出短对齐摘要和下一步问题，不写完整产品简报。
-6. 根据模糊程度和风险选择快速版、标准版或深度版产品简报。
-7. 包含事实来源、版本、确认状态、工作目标模式、已确认前提、场景路由、页面类型、线上参考需求、线上参考状态、用户任务、目标、反指标、约束、不可虚构项和 PM 决策项。
-8. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
-9. Save the brief with `pmw-log brief <name>` when platform scripts are available.
-10. Create or update the Zoon online brief by default:
+4. Read `../pmworkspace-shared/references/internet-best-practice-research.md` and run lightweight internet best-practice research for the dominant scenario when tools are available.
+5. Read `../pmworkspace-shared/references/zoon-workflow.md`.
+6. 确认已完成工作目标模式、Q 诊断、前提确认和必要 D 拍板；如果缺失，只输出短对齐摘要和下一步问题，不写完整产品简报。
+7. 根据模糊程度和风险选择快速版、标准版或深度版产品简报。
+8. 包含事实来源、版本、确认状态、工作目标模式、目标人群、核心问题梳理、已确认前提、场景路由、页面类型、线上参考需求、线上参考状态、互联网案例检索、用户任务、目标、反指标、约束、原型内容重点、不可虚构项和 PM 决策项。
+9. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
+10. Save the brief with `pmw-log brief <name>` when platform scripts are available.
+11. Create or update the Zoon online brief by default:
     - If a Zoon URL is already available, append the brief with `pmw-zoon append --url <url>`.
     - If no Zoon URL exists and `zoon_auto_create` is not explicitly disabled, create one with `pmw-zoon create --title "产品设计简报：<功能名>"`.
     - After a create or append succeeds, automatically open the editable Zoon URL in the Codex built-in browser when browser tools are available. Do not use HTML, local files, or a macOS default-browser fallback as a substitute for the Zoon online brief.
@@ -60,8 +61,12 @@ Return the smallest useful brief and end with:
 - 确认状态：
 - 信息来源：
 - 工作目标模式：
+- 目标人群：
+- 核心问题梳理：
 - 已确认前提：
 - 线上参考状态：
+- 互联网案例检索：
+- 原型内容重点：
 - 已保存资产：
 - Zoon 在线简报：
 - 浏览器打开状态：

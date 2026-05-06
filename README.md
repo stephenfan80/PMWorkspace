@@ -14,10 +14,11 @@ PMWorkspace follows a gstack-inspired workbench model:
 Update check + state logging
 -> Work goal mode
 -> Scenario routing
--> Q diagnostics, one question at a time
+-> Q diagnostics, one question at a time, usually 3 core questions and at most 5
 -> Premise confirmation
 -> D decision questions for PM tradeoffs, one at a time
 -> Online reference gate for new pages that continue production flows
+-> Lightweight internet best-practice research without adding Qs
 -> Aligned product brief
 -> Zoon online brief for human edits, auto-opened in the Codex built-in browser
 -> Mobile-first image-2 prototype exploration

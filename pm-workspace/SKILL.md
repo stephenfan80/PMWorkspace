@@ -69,10 +69,11 @@ If the user provides a product task in the same message, skip the welcome menu a
 - 写图片提示词或生成图片前，必须先完成产品简报对齐。
 - 产品简报不是 `已对齐` 时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
 - 用户提供截图或线上参考时，只更新视觉基线和线上参考状态；不要自动产出完整 md 方案、HTML 或原型图。
-- 诊断问题使用 `Q`，一次只问一个；拍板问题使用 `D`，一次只展开一个，问完必须等待用户回答。
+- 诊断问题使用 `Q`，一次只问一个；默认 3 个核心 Q，只有原型重点或约束边界仍不清楚时最多追加到 5 个。拍板问题使用 `D`，一次只展开一个，问完必须等待用户回答。
 - 产品简报前必须完成前提确认；未确认前只能保持 `待确认`。
 - 关键产品决策默认使用选择题拍板；读取 `decision-question-mode.md`。
 - 新页面也要判断线上参考需求；承接线上流程、结果页、状态页或生产样式时，缺截图/录屏/相似页面参考要先问。
+- 产品简报阶段可以按主场景做轻量互联网最佳实践检索；检索结果只用于案例启发和原型重点建议，不增加 Q 数量。
 - 产品简报阶段默认创建或更新 Zoon 在线文档，并在成功后自动打开到 Codex 内置浏览器；后续原型/交付前优先读取 Zoon 最新内容。
 - 面向用户展示中文项目名；技术 slug 只用于本地目录。
 - 默认原型画布移动端优先：iPhone 17 竖屏 `402 x 874`。
@@ -99,6 +100,7 @@ Use `../pmworkspace-shared/references/` for:
 
 - `language-and-localization.md` for output language and Chinese terminology.
 - `decision-question-mode.md` for PM decision questions.
+- `internet-best-practice-research.md` for lightweight public UX/product case research.
 - `production-reference-gate.md` for online screenshot/reference checks before prototypes.
 - `welcome-guide.md` for install success and first-run onboarding.
 - `routing.md` for route selection.

@@ -14,7 +14,7 @@ PMWorkspace follows a gstack-inspired workbench model:
 Update check + state logging
 -> Work goal mode
 -> Scenario routing
--> Q diagnostics, one question at a time, usually 3 core questions and at most 5
+-> Dynamic Q diagnostics, one question at a time, usually 2-3 and at most 5
 -> Premise confirmation
 -> D decision questions for PM tradeoffs, one at a time
 -> Online reference gate for new pages that continue production flows

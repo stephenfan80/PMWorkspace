@@ -35,7 +35,7 @@ done
 5. Read `../pmworkspace-shared/references/production-reference-gate.md`，判断新页面是否仍需要线上参考。
 6. If the request is an existing-feature iteration, require current production screenshots, screen recording, or equivalent visual baseline before proceeding.
 7. 如果新页面承接线上流程、结果状态或生产样式，要求截图、录屏、相似页面参考，或用户明确确认没有线上参考。
-8. Ask `Q` diagnostic questions one at a time. 默认最多问 3 个核心 Q；只有信息不足以生成有价值原型时，最多追加到 5 个。Stop after each `Q` and wait for the user; do not batch open questions and do not output a long md plan.
+8. Ask `Q` diagnostic questions one at a time. 默认最多问 3 个动态 Q；只有信息不足以生成有价值原型时，最多追加到 5 个。Stop after each `Q` and wait for the user; do not batch open questions and do not output a long md plan.
 9. 在信息足够后，输出 2-4 条前提确认；用户不同意时回到对应 `Q` 或 `D`。
 10. Read `../pmworkspace-shared/references/decision-question-mode.md`; when a missing answer would change product direction, prototype scope, experiment framing, user promise, or handoff, ask it as a D-numbered choice question.
 11. 输出简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。未完成前提确认或关键 D 拍板时，不能标记为 `已对齐`。
@@ -43,15 +43,15 @@ done
 
 ## Jobs-Style Questioning
 
-Prioritize only the core product diagnosis:
+Prioritize a dynamic question from the diagnosis dimension pool. The dimensions are fixed; the user-facing question text and title are not fixed.
 
-- `Q1 目标人群`：谁在什么场景下最需要这个？
-- `Q2 核心问题`：他们现在卡在哪里，不解决会有什么损失？
-- `Q3 本次目标`：这次设计要提升什么行为或指标，什么不能变差？
-- `Q4 原型重点`：这个屏幕必须展示哪些信息、元素和重点？
-- `Q5 约束边界`：哪些数据、承诺、状态或能力不能虚构？
+- 目标人群与使用场景
+- 核心问题与当前损失
+- 本次目标与反指标
+- 原型内容重点
+- 约束边界与不可虚构项
 
-诊断问题使用 `Q`，一次只问一个。创建快速对齐产品简报前，通常只问 Q1-Q3 并完成前提确认；只有原型结构仍不清楚时追加 Q4，只有数据、承诺或状态边界不清楚时追加 Q5。用户回答模糊时，在当前 Q 内追问一次把答案压实，不新增一串问题。如果用户要求“直接出图”，列出最少假设并问一个最关键 Q，而不是跳过对齐。
+诊断问题使用 `Q`，一次只问一个。每轮根据用户输入、场景路由、线上参考状态和当前信息缺口，选择一个最会影响产品简报或原型结构的维度来动态生成问题；如果用户已经回答了某个维度，就跳过该维度。Q 标题使用中文短标题，格式为 `Qn <当前意图>`，例如 `Q1 转化对象`、`Q2 首屏价值`、`Q3 数据承诺边界`。创建快速对齐产品简报前，通常覆盖 2-3 个关键诊断维度并完成前提确认；只有原型内容或约束边界仍不清楚时，才追加到 5 个 Q。用户回答模糊时，在当前 Q 内追问一次把答案压实，不新增一串问题。如果用户要求“直接出图”，列出最少假设并问一个最关键 Q，而不是跳过对齐。
 
 如果用户只提供截图或线上参考，先提取视觉基线和当前页面目的，再继续 `Q` 诊断；这不等于可以生成原型。
 

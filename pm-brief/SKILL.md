@@ -60,6 +60,6 @@ Return the smallest useful brief and end with:
 - 已保存资产：
 - Zoon 在线简报：
 - 项目名称：
-- 待拍板选择题：
+- 当前 D / 后续 D 队列：
 - 建议下一步：
 ```

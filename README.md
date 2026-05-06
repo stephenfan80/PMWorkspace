@@ -16,7 +16,7 @@ Update check + state logging
 -> Scenario routing
 -> Q diagnostics, one question at a time
 -> Premise confirmation
--> D decision questions for PM tradeoffs
+-> D decision questions for PM tradeoffs, one at a time
 -> Online reference gate for new pages that continue production flows
 -> Aligned product brief
 -> Zoon online brief for human edits

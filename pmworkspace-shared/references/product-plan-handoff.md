@@ -193,7 +193,7 @@ For Chinese users, call this artifact `产品简报` in user-facing output. Keep
 - 对原型的影响：
 
 ## 请 PM 补充或拍板
-使用选择题，不只列开放问题。参照 `decision-question-mode.md`：
+使用选择题，不只列开放问题。每次只展开一个完整 `D`，其余只保留标题队列。参照 `decision-question-mode.md`：
 
 D1 - {决策标题}
 为什么重要：{一句话说明}
@@ -203,6 +203,7 @@ D1 - {决策标题}
 选项 C：{选项}
 取舍：{本质权衡}
 默认假设：如果你不改，我会按 {推荐选择} 继续。
+后续待拍板：D2 {只写标题}、D3 {只写标题}
 ```
 
 ## 场景模块

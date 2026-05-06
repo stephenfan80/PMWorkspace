@@ -27,4 +27,4 @@ cp "$ROOT/VERSION" "$DEST/pmworkspace-shared/VERSION"
 chmod +x "$DEST/pmworkspace-shared/bin/"*
 
 echo "PMWorkspace installed to $DEST"
-echo 'Start with: Use $pm-workspace to clarify a product idea before prototype design.'
+"$ROOT/bin/pmw-welcome"

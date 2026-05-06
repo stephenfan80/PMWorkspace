@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cat <<'EOF'
+PMWorkspace installed.
+
+Start here after restarting Codex:
+
+  Use $pm-workspace to show the welcome guide and help me choose a workflow.
+
+Useful first prompts:
+
+  Use $pm-workspace to clarify this product idea: <one sentence>
+  使用 $pm-workspace 帮我梳理一个新产品想法：<一句话想法>
+  使用 $pm-workspace 帮我对这个功能做 3 个移动端原型方向，每个方案单独出图：<功能描述>
+
+PMWorkspace flow:
+  pm-jobs -> pm-strategy-review -> pm-brief -> pm-prototype-shotgun -> pm-handoff
+EOF

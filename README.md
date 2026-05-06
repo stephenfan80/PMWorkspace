@@ -64,8 +64,10 @@ Manual install from this folder:
 Then invoke:
 
 ```text
-Use $pm-workspace to route this product idea and create an aligned brief.
+Use $pm-workspace to show the welcome guide and help me choose the right PM workflow.
 ```
+
+After installation, PMWorkspace should feel like opening a product app for the first time: start with `$pm-workspace`, read the welcome guide, choose a path, then provide your idea, PRD, screenshot, or handoff goal.
 
 ## Platform State
 

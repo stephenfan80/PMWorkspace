@@ -76,8 +76,10 @@ cd PMWorkspace
 然后使用：
 
 ```text
-使用 $pm-workspace 帮我梳理这个产品想法。
+使用 $pm-workspace 显示欢迎引导，并帮我选择合适的产品工作流。
 ```
+
+安装后不要让用户自己猜命令。重启 Codex 后先用 `$pm-workspace`，它会像第一次打开 App 一样说明 PMWorkspace 能做什么，并给出新想法、PRD/Zoon、原型方向、截图优化、交付稿这几条入口。
 
 ## 本地状态资产
 

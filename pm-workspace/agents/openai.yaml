@@ -2,7 +2,7 @@ interface:
   display_name: "PMWorkspace"
   short_description: "Product workbench for PMs and designers"
   brand_color: "#1677FF"
-  default_prompt: "Use $pm-workspace to clarify this product idea, route it to the right PM workflow, and create reusable product assets."
+  default_prompt: "Use $pm-workspace to show the welcome guide and help me choose the right PM workflow."
 
 policy:
   allow_implicit_invocation: true

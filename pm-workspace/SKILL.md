@@ -6,7 +6,9 @@ description: |
   into product problem definition, strategy review, brief creation, mobile-first
   image-2 prototype exploration, or handoff. Runs first-use guidance, update checks,
   local usage logging, and routes to pm-jobs, pm-strategy-review, pm-brief,
-  pm-prototype-shotgun, or pm-handoff.
+  pm-prototype-shotgun, or pm-handoff. Also use when the user has just installed
+  PMWorkspace and needs a welcome guide, onboarding, starter prompts, or help
+  choosing what to do first.
 ---
 
 # PMWorkspace
@@ -43,6 +45,14 @@ Route by the user's actual job:
 
 When unsure, start with `$pm-jobs`; product clarity comes before prototype output.
 
+## Welcome And First Run
+
+If the user invokes `$pm-workspace` with no concrete product task, asks what PMWorkspace does, or has just installed it, read `../pmworkspace-shared/references/welcome-guide.md` and give the welcome message plus the first choice menu.
+
+Do not make the user guess the command set. The first response should feel like an app onboarding screen: short orientation, clear paths, and one recommended next step.
+
+If the user provides a product task in the same message, skip the welcome menu and route directly.
+
 ## Operating Rules
 
 - Product brief alignment is required before any image prompt or image generation.
@@ -66,6 +76,7 @@ Then route to the smallest useful next skill.
 
 Use `../pmworkspace-shared/references/` for:
 
+- `welcome-guide.md` for install success and first-run onboarding.
 - `routing.md` for route selection.
 - `state-and-telemetry.md` for durable asset rules.
 - `update-workflow.md` for update prompts.

@@ -13,6 +13,12 @@ json_escape() {
   sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 
+safe_fragment() {
+  local value
+  value="$(printf '%s' "$1" | tr ' ' '-' | sed 's#[/:]#-#g; s#[[:cntrl:]]##g; s#^-*##; s#-*$##')"
+  printf '%s' "${value:-asset}"
+}
+
 ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 case "$EVENT" in
@@ -27,13 +33,29 @@ case "$EVENT" in
     ;;
   brief)
     name="${2:-brief}"
-    file="$PROJECT_DIR/briefs/$(date -u +%Y%m%dT%H%M%SZ)-$(printf '%s' "$name" | tr ' ' '-' | sed 's/[^A-Za-z0-9._-]/-/g').md"
+    file="$PROJECT_DIR/briefs/$(date -u +%Y%m%dT%H%M%SZ)-$(safe_fragment "$name").md"
     cat > "$file"
+    "$SCRIPT_DIR/pmw-project" set-latest-brief "$file" >/dev/null 2>&1 || true
     echo "$file"
+    ;;
+  question)
+    question_id="${2:-D1}"
+    title="${3:-}"
+    recommended="${4:-}"
+    user_choice="${5:-}"
+    summary="${6:-}"
+    printf '{"ts":"%s","question_id":"%s","title":"%s","recommended":"%s","user_choice":"%s","summary":"%s"}\n' \
+      "$ts" \
+      "$(printf '%s' "$question_id" | json_escape)" \
+      "$(printf '%s' "$title" | json_escape)" \
+      "$(printf '%s' "$recommended" | json_escape)" \
+      "$(printf '%s' "$user_choice" | json_escape)" \
+      "$(printf '%s' "$summary" | json_escape)" >> "$PROJECT_DIR/questions.jsonl"
+    echo "$PROJECT_DIR/questions.jsonl"
     ;;
   prototype)
     batch="${2:-batch}"
-    manifest="$PROJECT_DIR/prototypes/$(date -u +%Y%m%dT%H%M%SZ)-$(printf '%s' "$batch" | tr ' ' '-' | sed 's/[^A-Za-z0-9._-]/-/g').jsonl"
+    manifest="$PROJECT_DIR/prototypes/$(date -u +%Y%m%dT%H%M%SZ)-$(safe_fragment "$batch").jsonl"
     cat >> "$manifest"
     echo "$manifest"
     ;;
@@ -45,7 +67,7 @@ case "$EVENT" in
     echo "$profile"
     ;;
   *)
-    echo "Usage: pmw-log {usage|decision|brief|prototype|taste} ..." >&2
+    echo "Usage: pmw-log {usage|decision|brief|question|prototype|taste} ..." >&2
     exit 1
     ;;
 esac

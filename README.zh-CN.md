@@ -45,9 +45,10 @@ PMWorkspace 来自原来的 `product-prototype-designer` 技能。旧名称已�
 1. `$pm-workspace` 判断任务类型并路由。
 2. `$pm-jobs` 先问清楚产品问题和最小有价值版本。
 3. `$pm-strategy-review` 在高风险或范围不清时挑战方向。
-4. `$pm-brief` 写出可确认、可复用的产品简报。
-5. 产品简报达到“已对齐”后，`$pm-prototype-shotgun` 生成 image-2 原型图。
-6. `$pm-handoff` 把选定方向转成可交付文档。
+4. 关键 PM 决策用选择题拍板，一次最多 3 个问题。
+5. `$pm-brief` 写出可确认、可复用的产品简报，并默认创建 Zoon 在线文档。
+6. 产品简报达到“已对齐”后，`$pm-prototype-shotgun` 先读取 Zoon 最新内容，再生成 image-2 原型图。
+7. `$pm-handoff` 把选定方向转成可交付文档。
 
 ## 原型输出规则
 
@@ -91,6 +92,8 @@ PMWorkspace 默认把资产保存在本地：
   analytics/usage.jsonl
   projects/<slug>/briefs/
   projects/<slug>/decisions.jsonl
+  projects/<slug>/questions.jsonl
+  projects/<slug>/project.json
   projects/<slug>/prototypes/
   projects/<slug>/taste-profile.jsonl
 ```
@@ -98,7 +101,9 @@ PMWorkspace 默认把资产保存在本地：
 会保存：
 
 - 技能使用记录。
+- 中文项目名和 Zoon 在线简报链接。
 - 用户确认过的产品/设计决策。
+- 选择题拍板记录。
 - 产品简报 Markdown。
 - 原型批次清单。
 - 用户批准或拒绝的设计偏好。
@@ -108,12 +113,46 @@ PMWorkspace 默认把资产保存在本地：
 - token、owner secret、API key、cookie。
 - 原始客户资料、内部录音、敏感截图。
 - 未脱敏 Zoon 内容。
+- Zoon ownerSecret 或 API 原始响应。
 - 用户没有明确要求保存的私密 PRD 原文。
 
 查看配置：
 
 ```bash
 bin/pmw-config list
+```
+
+项目记录：
+
+```bash
+bin/pmw-project get-name
+bin/pmw-project set-name "通用券站外召回方案"
+bin/pmw-project show
+```
+
+Zoon 在线简报：
+
+```bash
+cat brief.md | bin/pmw-zoon create --title "产品设计简报：通用券站外召回方案"
+cat brief.md | bin/pmw-zoon append --url "<Zoon URL>"
+bin/pmw-zoon read --url "<Zoon URL>"
+```
+
+## 选择题拍板
+
+PMWorkspace 不应只输出“还需要你拍板 5 个问题”。凡是会改变产品方向、原型范围、实验口径、用户承诺或交付稿的关键点，都要变成选择题：
+
+```text
+D1 - “全品牌可用”的对外口径
+为什么重要：口径过大容易形成无条件承诺，用户发现部分品牌不可领时会损害信任。
+推荐选择：A，因为它既能表达覆盖面，又保留真实业务边界。
+
+选项 A：参与品牌可领取
+选项 B：全品牌可参与查询
+选项 C：全品牌都有机会领
+
+取舍：增长吸引力 vs 承诺真实性。
+默认假设：如果你不改，我会按 A 继续。
 ```
 
 ## 更新提醒

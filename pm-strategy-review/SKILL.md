@@ -29,9 +29,11 @@ done
 
 1. 读取当前产品简报或 `$pm-jobs` 对齐结果。
 2. Read `../pmworkspace-shared/references/adversarial-review.md`.
-3. Select 3-5 challenge lenses relevant to the scenario.
-4. Present concrete strategy choices. Do not silently change scope.
-5. Log accepted strategy decisions when platform scripts are available.
+3. Read `../pmworkspace-shared/references/decision-question-mode.md`.
+4. Select 3-5 challenge lenses relevant to the scenario.
+5. Present concrete strategy choices. Do not silently change scope.
+6. 把“需要 PM 拍板”的点转成选择题；一次最多 3 个，超过 3 个分批问。
+7. Log accepted strategy decisions with `pmw-log question` and `pmw-log decision` when platform scripts are available.
 
 ## Review Lenses
 
@@ -55,6 +57,6 @@ done
 - 策略选择：
 - 范围外：
 - 对原型的影响：
-- 需要 PM 拍板：
+- 需要 PM 拍板的选择题：
 - 建议下一步：
 ```

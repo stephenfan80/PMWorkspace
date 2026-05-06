@@ -15,7 +15,7 @@ Before user-facing output, read `../pmworkspace-shared/references/language-and-l
 
 ## Preamble
 
-Run PMWorkspace platform checks when available:
+可用时运行 PMWorkspace 平台检查：
 
 ```bash
 _PMW_BIN=""
@@ -31,9 +31,10 @@ done
 1. Read `../pmworkspace-shared/references/first-use-onboarding.md` for first contact.
 2. Read `../pmworkspace-shared/references/scenario-routing.md` to classify the dominant product scenario.
 3. Read `../pmworkspace-shared/references/product-office-hours.md` and ask only the questions that change the prototype or product direction.
-4. If the request is an existing-feature iteration, require current production screenshots, screen recording, or equivalent visual baseline before proceeding.
-5. 输出简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。
-6. Log material decisions with `pmw-log decision` when available.
+4. Read `../pmworkspace-shared/references/decision-question-mode.md`; when a missing answer would change the product direction, ask it as a D-numbered choice question.
+5. If the request is an existing-feature iteration, require current production screenshots, screen recording, or equivalent visual baseline before proceeding.
+6. 输出简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。
+7. 平台脚本可用时，用 `pmw-project set-name "<中文项目名>"` 保存中文项目名，用 `pmw-log question` 和 `pmw-log decision` 记录关键选择。
 
 ## Jobs-Style Questioning
 
@@ -63,5 +64,6 @@ Prioritize these lenses:
 - 约束：
 - 最小有价值版本：
 - 已记录决策：
+- 待拍板选择题：
 - 建议下一步：
 ```

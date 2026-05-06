@@ -13,6 +13,11 @@ default_value() {
     memory_scope) echo "artifacts-preferences" ;;
     default_canvas) echo "iphone-17-portrait-402x874" ;;
     mobile_first) echo "true" ;;
+    question_mode) echo "decision-gates" ;;
+    zoon_auto_create) echo "true" ;;
+    zoon_host) echo "https://zoon.up.railway.app" ;;
+    zoon_store_url) echo "local" ;;
+    project_display_name) echo "auto" ;;
     update_snooze_hours) echo "24" ;;
     remote_version_url) echo "https://raw.githubusercontent.com/stephenfan80/PMWorkspace/main/VERSION" ;;
     repo_url) echo "https://github.com/stephenfan80/PMWorkspace.git" ;;
@@ -30,6 +35,11 @@ ensure_config() {
 # memory_scope: artifacts-preferences | artifacts-only | full-local
 # update_check: true | false
 # auto_upgrade: false | true
+# question_mode: decision-gates | off
+# zoon_auto_create: true | false
+# zoon_host: https://zoon.up.railway.app
+# zoon_store_url: local
+# project_display_name: auto | manual
 EOF
   fi
 }
@@ -75,12 +85,12 @@ case "${1:-}" in
     cat "$CONFIG_FILE"
     echo ""
     echo "# Active values"
-    for key in update_check auto_upgrade telemetry remote_telemetry memory_scope default_canvas mobile_first update_snooze_hours remote_version_url repo_url; do
+    for key in update_check auto_upgrade telemetry remote_telemetry memory_scope default_canvas mobile_first question_mode zoon_auto_create zoon_host zoon_store_url project_display_name update_snooze_hours remote_version_url repo_url; do
       printf '%-22s %s\n' "${key}:" "$(read_value "$key")"
     done
     ;;
   defaults)
-    for key in update_check auto_upgrade telemetry remote_telemetry memory_scope default_canvas mobile_first update_snooze_hours remote_version_url repo_url; do
+    for key in update_check auto_upgrade telemetry remote_telemetry memory_scope default_canvas mobile_first question_mode zoon_auto_create zoon_host zoon_store_url project_display_name update_snooze_hours remote_version_url repo_url; do
       printf '%-22s %s\n' "${key}:" "$(default_value "$key")"
     done
     ;;

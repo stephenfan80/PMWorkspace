@@ -16,7 +16,7 @@ For Chinese users, call this artifact `产品简报` in user-facing output. Keep
 
 不要因为用户想快就跳过产品简报。追求速度的请求应转为“快速对齐产品简报”，明确列出假设，并设置确认步骤。
 
-如果用户已经提供完整 Zoon 产品文档，创建简短对齐摘要，并把最新 Zoon 快照作为事实来源。
+如果用户已经提供完整 Zoon 产品文档，创建简短对齐摘要，并把最新 Zoon 快照作为事实来源。否则产品简报生成后默认创建 Zoon 在线文档，供用户修改对齐。
 
 ## 版本与状态
 
@@ -26,6 +26,7 @@ For Chinese users, call this artifact `产品简报` in user-facing output. Keep
 - `确认状态`：`草稿`、`待确认` 或 `已对齐`。
 - `信息来源`：对话、现有 Zoon 文档、新建 Zoon 文档、截图组，或用户提供的 PRD。
 - `最近决策`：用户最新确认过的产品/设计决策。
+- `Zoon 文档`：产品简报对应的在线协作文档 URL；创建失败时写“暂未创建”。
 
 ## 简报深度
 
@@ -47,7 +48,7 @@ For Chinese users, call this artifact `产品简报` in user-facing output. Keep
 
 用于大多数产品原型任务。
 
-Include:
+包含：
 
 - 当前理解
 - 目标与任务
@@ -147,9 +148,16 @@ Include:
 - 对原型的影响：
 
 ## 请 PM 补充或拍板
-- [ ] 若为现有功能迭代，请补充线上功能截图或确认已有截图就是当前线上版本
-- [ ] {问题 1}
-- [ ] {问题 2}
+使用选择题，不只列开放问题。参照 `decision-question-mode.md`：
+
+D1 - {决策标题}
+为什么重要：{一句话说明}
+推荐选择：{A/B/C}，因为 {理由}
+选项 A：{选项}
+选项 B：{选项}
+选项 C：{选项}
+取舍：{本质权衡}
+默认假设：如果你不改，我会按 {推荐选择} 继续。
 ```
 
 ## 场景模块
@@ -217,17 +225,17 @@ Add only the modules that fit the product. Do not include all modules by default
 - 图片生成前，请用户在对话中确认，或编辑 Zoon 产品简报。
 - 如果用户在 Zoon 中改变方向，递增产品简报版本，并重新运行相关决策门槛。
 
-如果没有现有 Zoon 文档，但用户希望在线协作：
+如果没有现有 Zoon 文档：
 
-- 使用当前 Zoon 主机的公开文档创建接口，新建 Zoon 文档。
-- 如果没有提供主机，默认使用 `https://zoon.up.railway.app`。
-- 只把返回的可编辑 `url` 发给用户。
+- 默认使用 `pmw-zoon create --title "产品设计简报：<功能名>"` 新建 Zoon 文档。
+- 创建成功后，用 `pmw-project link-zoon <url>` 保存到本地项目记录。
+- 只把返回的可编辑 `url` 发给用户，不展示 API 原始响应。
 - 不暴露 `ownerSecret`、原始 token 或 API 响应内部信息。
 
 如果 Zoon 创建失败：
 
 - 在对话中提供产品简报 Markdown。
-- 简短说明失败原因，并在 Zoon 可用时提供重试。
+- 简短说明“Zoon 创建失败，可稍后重试”，并继续保存本地资产。
 
 ## 生成原型前
 

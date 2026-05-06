@@ -11,6 +11,7 @@ For Chinese users, ask and summarize in Simplified Chinese. Use Chinese status l
 - 如果是 `现有功能迭代`，必须先拿到当前线上截图或等价视觉证据，再继续对齐。
 - 使用 `scenario-routing.md` 按产品场景选择问题，不问固定清单。
 - 只问会改变原型或产品方向的问题。
+- 会改变产品方向、原型范围、实验口径、用户承诺或交付稿的问题，使用 `decision-question-mode.md` 的选择题结构。
 - 创建或更新产品简报前，最多问 2-4 个关键问题。
 - 文档、截图、Zoon 内容或用户提示里已经回答过的问题可以跳过，但不能跳过对齐阶段本身。
 - 如果用户说“直接做”“先出图”或给出完整请求，创建“快速对齐产品简报”，列明假设，请用户确认或修改。
@@ -157,11 +158,11 @@ For Chinese users, ask and summarize in Simplified Chinese. Use Chinese status l
 
 不要把产品简报当成固定 PRD 模板。它是协作资产，用来记录当前理解、假设和 PM 决策点，也是下一步原型的产品契约。
 
-Mark uncertain areas clearly:
+清楚标记不确定区域：
 
-- `当前假设：` for inferred facts.
-- `请补充：` for missing information.
-- `请拍板：` for tradeoffs.
-- `不可虚构：` for unsupported capabilities or data.
+- `当前假设：` 助手推断出来的内容。
+- `请补充：` 缺失信息。
+- `请拍板：` 需要产品取舍。
+- `不可虚构：` 无法支持的能力或数据。
 
 自适应产品简报结构和 Zoon 交接规则见 `product-plan-handoff.md`。

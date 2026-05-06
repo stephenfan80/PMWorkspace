@@ -14,7 +14,9 @@ PMWorkspace follows a gstack-inspired workbench model:
 Update check + state logging
 -> PM Jobs product interrogation
 -> Strategy review when needed
+-> Decision questions for PM tradeoffs
 -> Aligned product brief
+-> Zoon online brief for human edits
 -> Mobile-first image-2 prototype exploration
 -> Prototype QA
 -> PRD/design/experiment handoff
@@ -79,6 +81,8 @@ PMWorkspace stores durable assets locally by default:
   analytics/usage.jsonl
   projects/<slug>/briefs/
   projects/<slug>/decisions.jsonl
+  projects/<slug>/questions.jsonl
+  projects/<slug>/project.json
   projects/<slug>/prototypes/
   projects/<slug>/taste-profile.jsonl
 ```
@@ -87,8 +91,24 @@ Defaults:
 
 - Telemetry is local-first: usage logs stay on your machine.
 - Remote anonymous telemetry requires explicit opt-in.
-- Stored assets should include briefs, decisions, prototype manifests, and taste feedback.
+- Stored assets should include project display names, briefs, decision questions, decisions, Zoon URLs, prototype manifests, and taste feedback.
 - Do not store raw private customer data, tokens, internal recordings, or sensitive screenshots.
+
+Project helpers:
+
+```bash
+bin/pmw-project get-name
+bin/pmw-project set-name "通用券站外召回方案"
+bin/pmw-project show
+```
+
+Zoon helpers:
+
+```bash
+cat brief.md | bin/pmw-zoon create --title "产品设计简报：通用券站外召回方案"
+cat brief.md | bin/pmw-zoon append --url "<Zoon URL>"
+bin/pmw-zoon read --url "<Zoon URL>"
+```
 
 Inspect settings:
 

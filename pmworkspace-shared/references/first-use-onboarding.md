@@ -1,6 +1,6 @@
 # 首次使用引导
 
-Use this when the user first invokes PMWorkspace in a thread, starts a new product topic, or provides only a rough product idea. The goal is to route the work and gather the minimum context needed for a useful product brief.
+用户第一次调用 PMWorkspace、开启新产品话题，或只提供粗略想法时使用本文件。目标是完成路由，并收集足够上下文来生成有用的产品简报。
 
 For Chinese users, make the first response feel like a Chinese product app onboarding screen: short orientation, Chinese labels, one recommended next step, and no English section names unless they are product terms such as `PRD`, `Zoon`, or `image-2`.
 
@@ -15,20 +15,20 @@ For Chinese users, make the first response feel like a Chinese product app onboa
 
 ## 首轮问题
 
-Ask only the questions that are not answered by the user's prompt or attached materials.
+只问用户提示或附件材料没有回答的问题。
 
-Use these in order:
+按这个顺序使用：
 
 1. 这是新功能，还是现有线上功能迭代？
 2. 如果是现有功能迭代，当前线上截图或录屏在哪里？
 3. 这个原型要服务哪个用户问题和主产品目标？
 4. 你希望交付什么：产品简报、一个移动端屏幕、两个关联屏、多方案原型、交付稿，还是截图修改？
 
-If the user provides a Zoon URL, follow `zoon-workflow.md`, announce presence, and read the doc only after the task requires it.
+如果用户提供 Zoon URL，遵循 `zoon-workflow.md`。如果用户没有提供，产品简报阶段默认自动创建 Zoon 在线文档。
 
 ## 开始前输出
 
-Before creating the brief, summarize:
+创建产品简报前，先汇总：
 
 ```text
 开始前确认：
@@ -47,6 +47,8 @@ Before creating the brief, summarize:
 ## 默认规则
 
 - 默认输出是已对齐的产品简报，然后再进入 image-2 原型图或交付稿。
+- 产品简报阶段默认创建 Zoon 在线文档，作为后续对齐和历史项目记录。
+- 关键产品决策默认使用选择题拍板，一次最多 3 个。
 - 默认原型设备是移动端优先：iPhone 17 竖屏 `402 x 874`。
 - 只有用户明确要求桌面端，或场景是看板/内部工具且确实需要大屏密度时，才使用桌面端。
 - 默认视觉系统是 AutoDesign 生产基线。

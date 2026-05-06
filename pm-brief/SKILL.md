@@ -29,10 +29,13 @@ done
 ## Workflow
 
 1. Read `../pmworkspace-shared/references/product-plan-handoff.md`.
-2. 根据模糊程度和风险选择快速版、标准版或深度版产品简报。
-3. 包含事实来源、版本、确认状态、场景路由、用户任务、目标、反指标、约束、不可虚构项和 PM 决策项。
-4. If Zoon is provided, read `../pmworkspace-shared/references/zoon-workflow.md` and treat the latest approved Zoon snapshot as source of truth.
-5. Save the brief with `pmw-log brief <name>` when platform scripts are available.
+2. Read `../pmworkspace-shared/references/decision-question-mode.md` and turn PM decision items into choice questions.
+3. Read `../pmworkspace-shared/references/zoon-workflow.md`.
+4. 根据模糊程度和风险选择快速版、标准版或深度版产品简报。
+5. 包含事实来源、版本、确认状态、场景路由、用户任务、目标、反指标、约束、不可虚构项和 PM 决策项。
+6. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
+7. Save the brief with `pmw-log brief <name>` when platform scripts are available.
+8. If a Zoon URL is already available, append the brief with `pmw-zoon append --url <url>`; otherwise, when `zoon_auto_create` is true, create one with `pmw-zoon create --title "产品设计简报：<功能名>"`.
 
 ## Alignment Rule
 
@@ -48,5 +51,8 @@ Return the smallest useful brief and end with:
 - 确认状态：
 - 信息来源：
 - 已保存资产：
+- Zoon 在线简报：
+- 项目名称：
+- 待拍板选择题：
 - 建议下一步：
 ```

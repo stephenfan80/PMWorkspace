@@ -1,6 +1,6 @@
 # PMWorkspace 路由
 
-Use this when deciding which PMWorkspace expert should own the next step.
+决定下一步由哪个 PMWorkspace 专家负责时使用本文件。
 
 For Chinese users, use Chinese names in explanations and keep skill ids unchanged.
 
@@ -14,7 +14,7 @@ For Chinese users, use Chinese names in explanations and keep skill ids unchange
 | 需要 image-2 原型图、多方案、截图修改 | `$pm-prototype-shotgun` |
 | 需要适合 PRD、设计、实验验证或研发使用的交付稿 | `$pm-handoff` |
 
-When multiple routes fit, start with the earliest missing asset:
+多个路由都适用时，从最早缺失的资产开始：
 
 1. 产品问题不清楚 -> `$pm-jobs`。
 2. 问题清楚，但策略/范围有争议 -> `$pm-strategy-review`。
@@ -28,8 +28,9 @@ When multiple routes fit, start with the earliest missing asset:
 pm-workspace
 -> pm-jobs
 -> pm-strategy-review when strategy risk is material
--> pm-brief
--> pm-prototype-shotgun
+-> decision questions when PM tradeoffs remain
+-> pm-brief + Zoon online doc
+-> pm-prototype-shotgun reads latest Zoon brief
 -> pm-handoff
 ```
 

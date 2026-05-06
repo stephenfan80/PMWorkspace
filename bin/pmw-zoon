@@ -1,0 +1,166 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+COMMAND="${1:-}"
+[ $# -gt 0 ] && shift || true
+
+config_get() {
+  "$SCRIPT_DIR/pmw-config" get "$1" 2>/dev/null || true
+}
+
+json_payload() {
+  local mode="$1"
+  local title="${2:-}"
+  local markdown_file="$3"
+  python3 - "$mode" "$title" "$markdown_file" <<'PY'
+import json
+import sys
+
+mode, title, markdown_file = sys.argv[1:4]
+markdown = open(markdown_file, encoding="utf-8").read()
+if mode == "create":
+    print(json.dumps({"title": title, "markdown": markdown}, ensure_ascii=False))
+elif mode == "append":
+    print(json.dumps({
+        "by": "ai:pmworkspace",
+        "operations": [{"op": "insert_at_end", "markdown": "\n\n" + markdown.strip() + "\n"}],
+    }, ensure_ascii=False))
+PY
+}
+
+extract_url() {
+  python3 - <<'PY'
+import json
+import sys
+
+raw = sys.stdin.read()
+try:
+    data = json.loads(raw)
+except Exception:
+    sys.exit(1)
+
+candidates = [
+    data.get("url"),
+    data.get("editableUrl"),
+    data.get("documentUrl"),
+]
+links = data.get("links")
+if isinstance(links, dict):
+    candidates.extend([links.get("url"), links.get("editor"), links.get("html")])
+for item in candidates:
+    if isinstance(item, str) and item.startswith("http"):
+        print(item)
+        sys.exit(0)
+sys.exit(1)
+PY
+}
+
+parse_doc_url() {
+  local url="$1"
+  python3 - "$url" <<'PY'
+from urllib.parse import urlparse, parse_qs
+import sys
+
+url = sys.argv[1]
+p = urlparse(url)
+parts = [part for part in p.path.split("/") if part]
+slug = ""
+if len(parts) >= 2 and parts[0] == "d":
+    slug = parts[1]
+elif len(parts) >= 2 and parts[0] == "documents":
+    slug = parts[1]
+token = parse_qs(p.query).get("token", [""])[0]
+origin = f"{p.scheme}://{p.netloc}"
+if not origin or not slug:
+    sys.exit(1)
+print(origin)
+print(slug)
+print(token)
+PY
+}
+
+usage() {
+  echo "Usage: pmw-zoon {create --title <中文标题>|append --url <Zoon URL>|read --url <Zoon URL>}" >&2
+  exit 1
+}
+
+read_arg_value() {
+  local name="$1"
+  shift
+  local next=""
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      "$name")
+        next="${2:-}"
+        printf '%s' "$next"
+        return 0
+        ;;
+    esac
+    shift
+  done
+  return 1
+}
+
+case "$COMMAND" in
+  create)
+    TITLE="$(read_arg_value --title "$@" || true)"
+    [ -n "$TITLE" ] || usage
+    MARKDOWN_FILE="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-create.XXXXXX")"
+    trap 'rm -f "$MARKDOWN_FILE"' EXIT
+    cat > "$MARKDOWN_FILE"
+
+    if [ -n "${PMW_ZOON_MOCK_CREATE_URL:-}" ]; then
+      "$SCRIPT_DIR/pmw-project" link-zoon "$PMW_ZOON_MOCK_CREATE_URL" >/dev/null 2>&1 || true
+      printf '%s\n' "$PMW_ZOON_MOCK_CREATE_URL"
+      exit 0
+    fi
+
+    HOST="${PMW_ZOON_HOST:-$(config_get zoon_host)}"
+    HOST="${HOST:-https://zoon.up.railway.app}"
+    BODY_FILE="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-body.XXXXXX")"
+    json_payload create "$TITLE" "$MARKDOWN_FILE" > "$BODY_FILE"
+    RESPONSE="$(curl -fsS -X POST "$HOST/documents" -H "Content-Type: application/json" --data-binary @"$BODY_FILE")"
+    URL="$(printf '%s' "$RESPONSE" | extract_url)"
+    "$SCRIPT_DIR/pmw-project" link-zoon "$URL" >/dev/null 2>&1 || true
+    printf '%s\n' "$URL"
+    ;;
+  append)
+    URL="$(read_arg_value --url "$@" || true)"
+    [ -n "$URL" ] || usage
+    MARKDOWN_FILE="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-append.XXXXXX")"
+    trap 'rm -f "$MARKDOWN_FILE"' EXIT
+    cat > "$MARKDOWN_FILE"
+
+    if [ "${PMW_ZOON_MOCK_APPEND:-}" = "1" ]; then
+      printf '%s\n' "$URL"
+      exit 0
+    fi
+
+    PARSED="$(parse_doc_url "$URL")"
+    ORIGIN="$(printf '%s\n' "$PARSED" | sed -n '1p')"
+    SLUG="$(printf '%s\n' "$PARSED" | sed -n '2p')"
+    TOKEN="$(printf '%s\n' "$PARSED" | sed -n '3p')"
+    BODY_FILE="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-body.XXXXXX")"
+    json_payload append "" "$MARKDOWN_FILE" > "$BODY_FILE"
+    curl -fsS -X POST "$ORIGIN/documents/$SLUG/edit/v2" \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer $TOKEN" \
+      -H "x-share-token: $TOKEN" \
+      -H "X-Agent-Id: pmworkspace" \
+      --data-binary @"$BODY_FILE" >/dev/null
+    printf '%s\n' "$URL"
+    ;;
+  read)
+    URL="$(read_arg_value --url "$@" || true)"
+    [ -n "$URL" ] || usage
+    if [ -n "${PMW_ZOON_MOCK_READ:-}" ]; then
+      printf '%s\n' "$PMW_ZOON_MOCK_READ"
+      exit 0
+    fi
+    curl -fsS -H "Accept: text/markdown" "$URL"
+    ;;
+  *)
+    usage
+    ;;
+esac

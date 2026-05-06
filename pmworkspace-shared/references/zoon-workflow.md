@@ -1,87 +1,80 @@
-# Zoon Workflow
+# Zoon 工作流
 
-Use this when the user provides a Zoon document URL or asks to collaborate through Zoon.
+产品简报阶段默认自动创建 Zoon 在线文档。用户提供 Zoon URL 时，直接把该文档作为事实来源；用户未提供时，使用 `zoon_host` 创建新文档。
 
-## Principles
+## 原则
 
-- Never hardcode host, slug, token, or agent ID.
-- Do not reuse tokens from examples.
-- Do not publish Zoon tokens, user content, comments, or private docs in open-source artifacts.
-- Read only what is needed for the user's current task.
-- Do not process existing comments unless the user asks.
-- For prototype tasks, image generation remains the final output, but product-plan alignment happens first.
+- 不硬编码 host、slug、token 或 agent ID。
+- 不复用示例里的 token。
+- 不把 Zoon token、用户内容、评论或私密文档写入公开仓库。
+- 只读取当前任务需要的内容。
+- 除非用户要求，不处理现有评论。
+- 原型任务的最终输出仍是图片，但必须先完成产品简报对齐。
 - 产品追问后创建的产品简报，应在有 Zoon 文档时写入 Zoon，方便用户在图片生成前修改。
 
-## Connection Steps
+## 连接步骤
 
-1. Parse the Zoon URL:
-   - Host: scheme and domain.
-   - Slug: the segment after `/d/`.
-   - Share token: the `token` query parameter.
-2. Fetch the protocol once from `<host>/skill`.
-3. Choose or generate an agent ID for this session.
-4. Announce presence with the protocol's presence endpoint.
-5. Use the required headers from the invite/protocol on every API request, usually:
-   - `x-share-token: <share-token>`
-   - `X-Agent-Id: <agent-id>`
-6. Fetch the document snapshot only after the user gives a task that requires reading it.
+1. 解析 Zoon URL：
+   - Host：scheme 和 domain。
+   - Slug：`/d/` 后面的片段。
+   - Share token：`token` 查询参数。
+2. 写入时使用 `Authorization: Bearer <token>` 和 `X-Agent-Id: pmworkspace`。
+3. 创建新文档使用 `POST <host>/documents`。
+4. 追加产品简报使用 `POST <host>/documents/:slug/edit/v2`。
+5. 原型或交付前读取最新文档，优先使用共享 URL + `Accept: text/markdown`。
 
-## Design Collaboration Pattern
+## 协作模式
 
-- Extract product problems and evidence from the Zoon doc.
-- If the user asks for prototype images, first create or update the product brief and confirm alignment.
-- Keep the plan concise; do not replace images with a long PRD once alignment is complete.
-- If editing Zoon content, write new content as AI-authored additions where supported so the human can review or revise.
+- 从 Zoon 文档中提取产品问题、证据和人工修改。
+- 如果用户要求原型图片，先创建或更新产品简报，并确认对齐。
+- 对齐完成后，继续生成图片，不用长 PRD 替代原型输出。
+- 写入 Zoon 时使用 AI 作者身份，让人类能看到哪些内容由 PMWorkspace 写入。
 - 如果 Zoon 中已有产品简报，且用户要求生成原型，先重新读取最新快照，再生成图片提示词。
-- Do not generate prototypes from a Zoon brief that has not been confirmed or explicitly approved as the source of truth.
+- 不要从未确认、未批准为事实来源的 Zoon 产品简报生成原型。
 
 ## 产品简报创建
 
-当产品追问已经产出产品简报，且用户需要可在线编辑资产时使用。如果用户提供了 Zoon 文档，优先自动写入该文档。
+当产品追问已经产出产品简报时，默认创建或更新 Zoon 文档，让用户在线修改对齐。
 
-### Existing Zoon Doc
+### 已有 Zoon 文档
 
-If the user supplied a Zoon doc:
+如果用户提供了 Zoon 文档：
 
-1. Use the existing host, slug, and token.
-2. Append the brief to the doc unless the user asks for a new doc.
-3. Prefer append operations for product briefs; they do not require a snapshot or block refs.
-4. Tell the user the doc is now the source of truth for the next prototype step.
+1. 使用现有 host、slug 和 token。
+2. 除非用户要求新建，否则把产品简报追加到该文档。
+3. 优先使用 append 操作；产品简报不需要块引用。
+4. 告诉用户：这个 Zoon 文档现在是下一步原型的事实来源。
 
-### New Zoon Doc
+### 新建 Zoon 文档
 
-If there is no existing doc:
+如果没有现有文档：
 
-1. Use the user's provided Zoon host if available.
-2. If no host is provided, default to `https://zoon.up.railway.app`.
-3. Create the document with:
+1. 如果用户提供 Zoon host，使用用户提供的 host。
+2. 如果没有 host，使用配置 `zoon_host`，默认 `https://zoon.up.railway.app`。
+3. 用平台脚本创建文档：
 
-```http
-POST <host>/api/public/documents
-Content-Type: application/json
-
-{
-  "title": "产品设计简报：<功能>",
-  "markdown": "<产品简报 Markdown>"
-}
+```bash
+pmw-zoon create --title "产品设计简报：<功能名>"
 ```
 
-4. Return only the editable `url` from the response.
-5. Keep `ownerSecret` private if present.
-6. Do not hand-assemble invite messages or expose raw tokens.
+4. 只向用户返回可编辑 URL，不展示 API 原始响应。
+5. 用 `pmw-project link-zoon <url>` 把链接保存到本地项目记录。
+6. 如果创建失败，保留本地 Markdown，不阻塞下一步。
 
-### Failure Handling
+### 生成原型或交付前
 
-If Zoon creation or update fails:
+如果本地项目记录里有 Zoon URL：
 
-- Keep the brief available in chat.
-- Explain the failure in one sentence.
-- Continue only if the user wants to retry or proceed without Zoon.
+1. 使用 `pmw-zoon read --url <Zoon URL>` 读取最新 Markdown。
+2. 把最新 Markdown 作为产品事实来源。
+3. 如果用户修改了方向、约束或 PM 决策，更新本地产品简报版本。
+4. 不只依赖过期聊天上下文。
 
-## Avoid
+### 失败处理
 
-- Pre-reading a doc before the user gives a task.
-- Listing doc-specific suggestions before being asked.
-- Treating the Zoon doc as public data.
-- Assuming the same endpoint shape across all Zoon deployments without reading `<host>/skill`.
-- Generating prototypes from stale chat when the user has edited the Zoon brief.
+如果 Zoon 创建、追加或读取失败：
+
+- 在对话中保留产品简报。
+- 简短说明“Zoon 创建失败，可稍后重试”或“Zoon 读取失败，暂用本地产品简报”。
+- 不打印 token、ownerSecret 或 API 原始响应。
+- 继续保存本地资产，避免中断工作流。

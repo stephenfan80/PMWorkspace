@@ -55,6 +55,9 @@ If the user provides a product task in the same message, skip the welcome menu a
 ## Operating Rules
 
 - 写图片提示词或生成图片前，必须先完成产品简报对齐。
+- 关键产品决策默认使用选择题拍板；读取 `decision-question-mode.md`。
+- 产品简报阶段默认创建或更新 Zoon 在线文档，后续原型/交付前优先读取 Zoon 最新内容。
+- 面向用户展示中文项目名；技术 slug 只用于本地目录。
 - 默认原型画布移动端优先：iPhone 17 竖屏 `402 x 874`。
 - 只有用户明确要求桌面端，或看板/内部工具明显需要大屏工作区，才使用桌面端。
 - 一个方案 + 一个屏幕 = 一张图片。除非用户要求展示板，否则不要创建比较拼图。
@@ -76,6 +79,7 @@ Then route to the smallest useful next skill.
 Use `../pmworkspace-shared/references/` for:
 
 - `language-and-localization.md` for output language and Chinese terminology.
+- `decision-question-mode.md` for PM decision questions.
 - `welcome-guide.md` for install success and first-run onboarding.
 - `routing.md` for route selection.
 - `state-and-telemetry.md` for durable asset rules.

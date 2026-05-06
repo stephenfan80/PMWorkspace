@@ -1,6 +1,6 @@
-# PMWorkspace Welcome Guide
+# PMWorkspace 欢迎引导
 
-Use this when PMWorkspace is newly installed, the user invokes `$pm-workspace` without a concrete product task, or the user asks "what can I do next?".
+PMWorkspace 刚安装、用户只输入 `$pm-workspace`，或用户问“下一步能做什么”时使用本文件。
 
 ## Welcome Message
 
@@ -10,9 +10,11 @@ Use this when PMWorkspace is newly installed, the user invokes `$pm-workspace` w
 它不是一个直接出图的按钮，而是一个产品工作台：
 1. 先用 pm-jobs 把问题问清楚
 2. 再用 strategy-review 挑战方向和取舍
-3. 用 pm-brief 固化产品契约
+3. 用 pm-brief 固化产品契约，并自动创建 Zoon 在线简报
 4. 用 prototype-shotgun 生成移动端优先的 image-2 原型图
 5. 最后用 pm-handoff 交付给设计、研发或实验验证
+
+关键产品取舍会变成选择题让你拍板，不会只丢一串开放问题。
 ```
 
 ## First Choice Menu
@@ -26,7 +28,7 @@ A. 我有一个新想法
    发一句话想法，我会用 pm-jobs 帮你问清楚用户、场景、价值和最小版本。
 
 B. 我有 PRD / Zoon / 访谈材料
-   发文档或链接，我会提炼产品简报，并标出需要 PM 拍板的点。
+   发文档或链接，我会提炼产品简报，自动创建 Zoon 在线文档，并把关键拍板点做成选择题。
 
 C. 我想看 2-4 个原型方向
    先对齐产品简报，再用 $pm-prototype-shotgun 每个方案单独出移动端图。

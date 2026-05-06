@@ -45,19 +45,21 @@ done
 ## Workflow
 
 1. Read aligned brief and scenario route.
-2. Read `design-system-workflow.md`, `design-heuristics.md`, and `adversarial-review.md` as needed.
-3. Propose concept directions with names and tradeoffs.
-4. For each image output unit, declare scheme, screen, canvas, and brief dependency.
-5. Generate with image-2 / image generation.
-6. Run `prototype-quality-review.md`.
-7. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单。
-8. Record approved/rejected design feedback with `pmw-log taste`.
+2. If `pmw-project show` contains a Zoon URL, read the latest document with `pmw-zoon read --url <url>` and treat it as the product source of truth.
+3. Read `design-system-workflow.md`, `design-heuristics.md`, and `adversarial-review.md` as needed.
+4. Propose concept directions with names and tradeoffs.
+5. For each image output unit, declare scheme, screen, canvas, and brief dependency.
+6. Generate with image-2 / image generation.
+7. Run `prototype-quality-review.md`.
+8. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单。
+9. Record approved/rejected design feedback with `pmw-log taste`.
 
 ## 输出
 
 ```text
 原型计划：
 - 产品简报：
+- Zoon 事实来源：
 - 场景：
 - 画布：
 - 已生成 / 计划生成的图片：

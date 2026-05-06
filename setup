@@ -8,7 +8,7 @@ fi
 
 case "$HOST" in
   codex) DEST="${CODEX_SKILLS_DIR:-$HOME/.codex/skills}" ;;
-  *) echo "Unsupported host: $HOST. Supported: codex" >&2; exit 1 ;;
+  *) echo "不支持的安装目标：$HOST。当前支持：codex" >&2; exit 1 ;;
 esac
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -26,5 +26,5 @@ cp -R "$ROOT/bin/"* "$DEST/pmworkspace-shared/bin/"
 cp "$ROOT/VERSION" "$DEST/pmworkspace-shared/VERSION"
 chmod +x "$DEST/pmworkspace-shared/bin/"*
 
-echo "PMWorkspace installed to $DEST"
+echo "PMWorkspace 已安装到 $DEST"
 "$ROOT/bin/pmw-welcome"

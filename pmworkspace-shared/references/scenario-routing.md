@@ -1,87 +1,89 @@
-# Scenario Routing
+# 场景路由
 
-Use this after first-use onboarding and before PM Jobs questioning. Route the request to the dominant product scenario. A product can have secondary scenarios, but choose one primary route so the brief and prototype stay focused.
+首次引导之后、产品追问之前使用本文件。把请求路由到主产品场景。一个产品可以有次场景，但必须选择一个主场景，让产品简报和原型保持聚焦。
 
-## Routing Output
+For Chinese users, use the Chinese output labels below. Avoid English labels in routing summaries.
+
+## 路由输出
 
 ```text
-Scenario route:
-- Primary scenario:
-- Secondary scenario:
-- Required inputs:
-- Core forcing questions:
-- Prototype shape:
-- Decision gates:
+场景路由：
+- 主场景：
+- 次场景：
+- 必要输入：
+- 核心追问：
+- 原型形态：
+- 决策门槛：
 ```
 
-## New Feature Exploration
+## 新功能探索
 
-- **Use when:** there is no current production flow.
-- **Required inputs:** user problem, target user, current workaround, primary goal, usable data, constraints.
-- **Core questions:** Is the problem real? Who needs it most? What is the smallest useful version? What data can be shown honestly?
-- **Prototype shape:** concept screen, MVP flow, or screen pair that proves the value.
-- **Gate:** problem reality and MVP scope must be aligned before image generation.
+- **适用时机：** 当前没有线上流程。
+- **必要输入：** 用户问题、目标用户、当前替代方案、主目标、可用数据、约束。
+- **核心问题：** 问题真实吗？谁最需要？最小有价值版本是什么？哪些数据可以真实展示？
+- **原型形态：** 概念页、最小版本流程，或能证明价值的关联屏。
+- **门槛：** 问题真实性和最小版本范围必须先对齐，再生成图片。
 
-## Existing Feature Iteration
+## 现有功能迭代
 
-- **Use when:** improving an online page, flow, module, or shipped concept.
-- **Required inputs:** current screenshots or screen recording, current goal, known friction, metric or feedback, constraints.
-- **Core questions:** What is broken now? What must stay? What should change? What evidence supports the change?
-- **Prototype shape:** revised screen, before/after strategy, or corresponding result/detail page.
-- **Gate:** production baseline screenshots are mandatory.
+- **适用时机：** 优化线上页面、流程、模块或已发布概念。
+- **必要输入：** 当前截图或录屏、当前目标、已知阻力、指标或反馈、约束。
+- **核心问题：** 现在坏在哪里？什么必须保留？什么应该改变？有什么证据支持这次改动？
+- **原型形态：** 优化后的屏幕、前后策略说明，或对应的结果/详情页。
+- **门槛：** 必须提供生产基线截图。
 
-## Conversion Flow
+## 转化流程
 
-- **Use when:** the user is asked for signup, phone, email, payment, permission, install, booking, quote, trial, or another costly action.
-- **Required inputs:** primary conversion metric, counter-metric, required input, value shown before action, value unlocked after action.
-- **Core questions:** Is the value exchange fair? Which inputs can move later? What reduces distrust without adding fear?
-- **Prototype shape:** input page plus result/confirmation page when the action promises a result.
-- **Gate:** value exchange and input cost must be explicit.
+- **适用时机：** 用户被要求注册、留手机号、留邮箱、付款、授权、安装、预约、询价、试用，或完成其他高成本动作。
+- **必要输入：** 主转化指标、反指标、必填信息、行动前展示的价值、行动后解锁的价值。
+- **核心问题：** 价值交换公平吗？哪些输入可以后置？什么能降低不信任而不制造恐惧？
+- **原型形态：** 输入页；如果行动承诺结果，还要有结果/确认页。
+- **门槛：** 价值交换和输入成本必须明确。
 
-## Result Or Report Page
+## 结果或报告页
 
-- **Use when:** the product promises a generated result, recommendation, score, quote, eligibility, summary, report, or comparison.
-- **Required inputs:** promise made before the result, available data, data freshness, uncertainty, next step.
-- **Core questions:** Does the page fulfill the promise? What is estimated versus confirmed? What should the user do next?
-- **Prototype shape:** integrated result summary plus detailed modules.
-- **Gate:** data credibility and uncertainty labeling must be clear.
+- **适用时机：** 产品承诺生成结果、推荐、评分、报价、资格判断、摘要、报告或对比。
+- **必要输入：** 结果前的承诺、可用数据、数据新鲜度、不确定性、下一步。
+- **核心问题：** 页面兑现了承诺吗？哪些是估算，哪些已确认？用户下一步该做什么？
+- **原型形态：** 汇总结果 + 详细模块。
+- **门槛：** 数据可信度和不确定性标注必须清楚。
 
-## Dashboard Or Analytics
+## 看板或数据分析
 
-- **Use when:** the user needs to monitor, compare, diagnose, or make a decision from data.
-- **Required inputs:** decision to support, audience, metric hierarchy, data freshness, comparison baseline, action path.
-- **Core questions:** What decision changes after seeing this? What is stale or missing? What alert/action prevents passive reporting?
-- **Prototype shape:** decision-first dashboard, status overview, drilldown, or alert page.
-- **Gate:** every chart or number must support a decision.
+- **适用时机：** 用户需要用数据监控、对比、诊断或做决策。
+- **必要输入：** 支持的决策、受众、指标层级、数据新鲜度、对比基线、行动路径。
+- **核心问题：** 看完后哪个决策会改变？哪些数据过期或缺失？什么提醒/动作能避免只看不做？
+- **原型形态：** 决策优先的看板、状态总览、下钻页或提醒页。
+- **门槛：** 每个图表和数字都必须服务一个决策。
 
-## Internal Tool
+## 内部工具
 
-- **Use when:** the product improves an operational workflow, admin task, support process, review queue, or team tool.
-- **Required inputs:** repeated task, roles/permissions, current workflow, failure modes, speed or accuracy goal.
-- **Core questions:** What task is repeated? What slows users down? How do users recover from error? What state must be visible?
-- **Prototype shape:** dense workflow UI, queue, detail panel, editor, or status console.
-- **Gate:** task efficiency and error recovery must be designed.
+- **适用时机：** 产品要改善运营流程、管理任务、客服流程、审核队列或团队工具。
+- **必要输入：** 重复任务、角色/权限、当前流程、失败状态、速度或准确率目标。
+- **核心问题：** 哪个任务反复发生？什么拖慢了用户？用户如何从错误中恢复？哪些状态必须可见？
+- **原型形态：** 高密度流程界面、队列、详情面板、编辑器或状态控制台。
+- **门槛：** 必须设计任务效率和错误恢复。
 
-## Transaction Or Service Flow
+## 交易或服务流程
 
-- **Use when:** eligibility, booking, fulfillment, refund, delivery, verification, application, or partner service is involved.
-- **Required inputs:** eligibility rules, required materials, status states, human/partner dependency, exception paths.
-- **Core questions:** What is confirmed? What is pending? What can fail? How does the user recover?
-- **Prototype shape:** service application flow, status page, checklist, or exception state.
-- **Gate:** fulfillment and exception states must not be invented.
+- **适用时机：** 涉及资格、预约、履约、退款、配送、验证、申请或合作方服务。
+- **必要输入：** 资格规则、所需材料、状态、人工/合作方依赖、异常路径。
+- **核心问题：** 什么已确认？什么待处理？哪里可能失败？用户如何恢复？
+- **原型形态：** 服务申请流程、状态页、清单或异常状态。
+- **门槛：** 不能虚构履约和异常状态。
 
-## Content Or Community
+## 内容或社区
 
-- **Use when:** creation, discovery, publishing, discussion, collection, moderation, or participation loop matters.
-- **Required inputs:** user motivation, content object, quality signal, participation loop, abuse/moderation risk.
-- **Core questions:** Why contribute or consume now? What signals quality? What loop brings the user back?
-- **Prototype shape:** feed, detail page, composer, moderation flow, or contribution prompt.
-- **Gate:** motivation and quality signal must be explicit.
+- **适用时机：** 创作、发现、发布、讨论、收藏、治理或参与循环很重要。
+- **必要输入：** 用户动机、内容对象、质量信号、参与循环、滥用/审核风险。
+- **核心问题：** 为什么现在贡献或消费？什么代表质量？什么循环让用户回来？
+- **原型形态：** 信息流、详情页、发布器、审核流程或贡献引导。
+- **门槛：** 动机和质量信号必须明确。
 
-## Screenshot Revision
+## 截图修改
 
-- **Use when:** the user marks red/green boxes or gives targeted UI feedback.
-- **Required inputs:** annotated screenshot, accepted style, exact requested change.
-- **Core questions:** What changes? What stays? Does the product intent change?
-- **Prototype shape:** revised screen only, plus corresponding result/detail screen if requested.
-- **Gate:** do not redesign unrelated areas.
+- **适用时机：** 用户标注红/绿框，或给出明确 UI 修改反馈。
+- **必要输入：** 标注截图、可接受风格、明确改动要求。
+- **核心问题：** 改什么？保留什么？产品意图是否改变？
+- **原型形态：** 只输出优化后的当前屏幕；如用户要求，再补对应结果/详情页。
+- **门槛：** 不重新设计无关区域。

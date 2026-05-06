@@ -1,6 +1,6 @@
-# Design Heuristics
+# 设计启发
 
-Use these heuristics after the PM Jobs pass and adaptive adversarial review. They turn product intent into page-level design choices.
+产品追问和自适应对抗审查后使用这些启发。它们把产品意图转成页面级设计选择。
 
 ## Product Strategy
 
@@ -53,7 +53,7 @@ When an action costs the user time, attention, permission, identity, money, or p
 - Include recovery paths for ineligible, unavailable, expired, or failed states.
 - Avoid promising fulfillment that depends on unavailable data or operations.
 
-## Dashboard Or Analytics Page
+## 看板或数据分析页
 
 - Start with the decision the user needs to make.
 - Show comparison baselines and data freshness.

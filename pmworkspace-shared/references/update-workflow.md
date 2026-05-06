@@ -1,4 +1,4 @@
-# Update Workflow
+# 更新工作流
 
 Every PMWorkspace skill should check for updates before doing product work when platform scripts are available.
 
@@ -15,7 +15,7 @@ JUST_UPGRADED <old> <new>
 
 No output means current, disabled, snoozed, offline, or safely skipped.
 
-## User Prompt
+## 用户提示
 
 When `UPGRADE_AVAILABLE` appears:
 

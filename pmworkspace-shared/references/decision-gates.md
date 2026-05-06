@@ -1,73 +1,75 @@
-# Decision Gates
+# 决策门槛
 
 Use these gates to prevent vague product thinking from becoming polished but weak prototypes. Gates should be lightweight, explicit, and owned by the user. Stop only when a missing decision would materially change the prototype.
 
-## Gate Status
+For Chinese users, report statuses as `受阻`、`待确认`、`已对齐`. Internal tokens may be retained only when another script or file requires them.
 
-- `Blocked`: required input or decision is missing; stop and ask.
-- `Ready for confirmation`: the agent has a recommendation; user must confirm or edit.
-- `Aligned`: the user confirmed, approved assumptions, or updated the Zoon brief.
+## 门槛状态
 
-## Required Gates
+- `受阻`：缺少必要输入或决策；先停止并询问。
+- `待确认`：已经有建议，需要用户确认或修改。
+- `已对齐`：用户已确认、批准假设，或更新了 Zoon 产品简报。
 
-### 1. Change Type Gate
+## 必要门槛
 
-- Decide whether the work is a new feature or an existing-feature iteration.
-- If unclear, ask before any product strategy.
-- Existing-feature iteration requires current production screenshots, recording, or equivalent visual baseline.
+### 1. 变化类型
 
-### 2. Problem Reality Gate
+- 判断这是新功能还是现有功能迭代。
+- 如果不清楚，先问清楚，再进入产品策略。
+- 现有功能迭代必须有当前线上截图、录屏或等价视觉基线。
 
-- Name the user problem, current workaround, and evidence.
-- If evidence is weak, mark it as `当前假设` and shape the prototype as a learning artifact rather than a production claim.
+### 2. 问题真实性
 
-### 3. Goal And Counter-Metric Gate
+- 说清用户问题、当前替代方案和证据。
+- 如果证据较弱，标记为 `当前假设`，把原型定位为学习材料，而不是生产承诺。
 
-- Define the primary behavior or metric.
-- Define what must not get worse: trust, quality, complaint rate, retention, task success, cost, or compliance.
+### 3. 目标与反指标
 
-### 4. Value Exchange Gate
+- 定义主行为或主指标。
+- 定义不能变差的部分：信任、质量、投诉率、留存、任务成功率、成本或合规。
 
-- Use for any costly action: personal data, signup, phone, payment, permission, install, booking, or long setup.
-- Decide what value is shown before the action and what becomes better after it.
-- If the exchange is not fair, redesign around free value or lower friction.
+### 4. 价值交换
 
-### 5. Data And Feasibility Gate
+- 用于任何高成本动作：个人资料、注册、手机号、付款、授权、安装、预约或长流程设置。
+- 决定行动前展示什么价值，行动后什么会变好。
+- 如果交换不公平，围绕免费价值或更低摩擦重新设计。
 
-- Separate available, estimated, inferred, user-provided, manual, partner, and unavailable data.
-- Mark what cannot be invented.
-- Do not show functions, buttons, scores, automations, or guarantees that cannot be delivered.
+### 5. 数据与可行性
 
-### 6. Scenario Strategy Gate
+- 区分可用、估算、推断、用户提供、人工、合作方和不可用数据。
+- 标记不能虚构的内容。
+- 不展示无法交付的功能、按钮、分数、自动化或保证。
 
-- Confirm the primary scenario route and prototype shape.
-- For multi-scheme work, confirm distinct concept directions before generating images.
+### 6. 场景策略
 
-### 7. Product Brief Alignment Gate
+- 确认主场景路由和原型形态。
+- 多方案任务在生成图片前，先确认不同的概念方向。
 
-- Create or update Quick, Standard, or Deep Brief.
-- Stop until the user confirms the brief, approves assumptions, or updates the Zoon source of truth.
+### 7. 产品简报对齐
 
-### 8. Design System Gate
+- 创建或更新快速版、标准版或深度版产品简报。
+- 在用户确认产品简报、批准假设，或更新 Zoon 事实来源前，不进入图片生成。
 
-- Use AutoDesign production baseline by default.
-- If a stronger user-provided design system exists, follow it while preserving production-grade spacing, typography, component realism, and no-fake-function discipline.
+### 8. 设计系统
 
-### 9. Prototype QA Gate
+- 默认使用 AutoDesign 生产基线。
+- 如果用户提供更强的设计系统，遵循它，同时保留生产级间距、字体层级、组件真实感和“不虚构功能”原则。
 
-- After image generation, review whether the prototype matches the brief, scenario, design system, and feasibility boundaries.
-- If it fails materially, revise the prompt or generate a corrected image rather than presenting a weak artifact as final.
+### 9. 原型质量检查
 
-## Decision Brief Format
+- 生成图片后，检查原型是否匹配产品简报、场景、设计系统和可行性边界。
+- 如果存在实质问题，修改图片提示词或重新生成受影响图片，不要把弱原型作为最终结果交给用户。
 
-When a gate needs user confirmation:
+## 决策确认格式
+
+当某个门槛需要用户确认时：
 
 ```text
-Decision:
-- Recommendation:
-- Why it matters:
-- Tradeoff:
-- Default if approved:
+决策：
+- 建议：
+- 重要性：
+- 取舍：
+- 如果确认，默认这样做：
 ```
 
-Keep the decision brief short. The user decides; the agent should recommend clearly.
+决策说明要短。用户做决定，助手要给出清晰建议。

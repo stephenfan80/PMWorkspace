@@ -1,104 +1,106 @@
-# Product Plan Handoff
+# 产品简报交接
 
-Use this after first-use onboarding, scenario routing, decision gates, and the PM Jobs pass. The brief must be aligned before prototype generation.
+首次引导、场景路由、决策门槛和产品追问之后使用本文件。生成原型前，产品简报必须已对齐。
 
-The handoff is an adaptive product design brief, not a fixed PRD. Its job is to make product intent editable, confirmable, reusable by later agents, and safe to hand off to design or product partners. It is the alignment gate between product thinking and image generation.
+这个资产是自适应产品设计简报，不是固定 PRD。它的作用是让产品意图可编辑、可确认、可复用，并能安全交给设计或产品协作者。它是产品思考与图片生成之间的对齐门槛。
 
-## Always Create Or Update A Brief
+For Chinese users, call this artifact `产品简报` in user-facing output. Keep internal status tokens only when needed, and pair them with Chinese labels such as `草稿`、`待确认`、`已对齐`。
 
-Create or update a brief for every prototype request. Include version and confirmation status. Choose the smallest useful format:
+## 始终创建或更新产品简报
 
-- **Quick Brief:** screenshot iteration, narrow page change, or a single product/design decision.
-- **Standard Brief:** most product prototype requests where intent and constraints should persist.
-- **Deep Brief:** new feature, high-risk flow, cross-team collaboration, unclear evidence, or sensitive data/operations.
+每个原型请求都要创建或更新产品简报。包含版本和确认状态，并选择最小可用格式：
 
-Do not skip the brief because the user wants speed. A speed-oriented request should become a Fast Alignment Brief with explicit assumptions and a confirmation step.
+- **快速版产品简报：** 截图迭代、小范围页面改动，或单个产品/设计决策。
+- **标准版产品简报：** 大多数产品原型请求，尤其是需要沉淀意图和约束的任务。
+- **深度版产品简报：** 新功能、高风险流程、跨团队协作、证据不清，或涉及敏感数据/运营的任务。
 
-If the user already provided a complete Zoon product document, create a short alignment summary that points to the latest Zoon snapshot as the source of truth.
+不要因为用户想快就跳过产品简报。追求速度的请求应转为“快速对齐产品简报”，明确列出假设，并设置确认步骤。
 
-## Version And Status
+如果用户已经提供完整 Zoon 产品文档，创建简短对齐摘要，并把最新 Zoon 快照作为事实来源。
 
-Every brief should carry:
+## 版本与状态
 
-- `Brief version`: start at `v1`; increment when the user changes product direction.
-- `Confirmation status`: `Draft`, `Ready for PM confirmation`, or `Aligned`.
-- `Source of truth`: chat, existing Zoon doc, new Zoon doc, screenshot set, or user-provided PRD.
-- `Last decision`: the latest user-confirmed product/design decision.
+每份产品简报都应包含：
 
-## Brief Depth
+- `产品简报版本`：从 `v1` 开始；当用户改变产品方向时递增。
+- `确认状态`：`草稿`、`待确认` 或 `已对齐`。
+- `信息来源`：对话、现有 Zoon 文档、新建 Zoon 文档、截图组，或用户提供的 PRD。
+- `最近决策`：用户最新确认过的产品/设计决策。
 
-Choose the smallest useful depth.
+## 简报深度
 
-### Quick Brief
+选择最小可用深度。
 
-Use for screenshot iterations and narrow changes.
+### 快速版产品简报
+
+用于截图迭代和窄范围改动。
+
+包含：
+
+- 当前理解
+- 请求改动或目标
+- 约束
+- 原型策略
+- 需要 PM 补充或拍板的事项
+
+### 标准版产品简报
+
+用于大多数产品原型任务。
 
 Include:
 
-- Current understanding
-- Requested change or goal
-- Constraints
-- Prototype strategy
-- PM supplement or approval items
+- 当前理解
+- 目标与任务
+- 约束
+- 可用数据
+- 对抗审查后的设计取舍
+- 原型策略
+- 需要 PM 补充或拍板的事项
 
-### Standard Brief
+### 深度版产品简报
 
-Use for most product prototype work.
+用于新功能、高风险产品选择、跨团队工作、敏感数据、交易/服务流程或证据不清的任务。
 
-Include:
+在标准版基础上补充：
 
-- Current understanding
-- Goals and tasks
-- Constraints
-- Available data
-- Adversarial design tradeoffs
-- Prototype strategy
-- PM supplement or approval items
+- 证据与当前行为
+- 已考虑的替代方案
+- 设计决策记录
+- 开放问题
 
-### Deep Brief
+## 对齐门槛
 
-Use for new features, high-risk product choices, cross-team work, sensitive data, transaction/service flows, or unclear evidence.
+在写图片提示词或生成原型图片前，产品简报必须通过以下信号之一达到“已对齐”：
 
-Include everything in Standard Brief plus:
+- 用户在对话中确认产品简报。
+- 用户编辑或批准 Zoon 产品简报，并要求使用最新版本。
+- 用户明确说使用产品简报中列出的假设。
 
-- Evidence and current behavior
-- Alternatives considered
-- Design decision record
-- Open questions
+如果没有这些信号，分享产品简报或 Zoon 链接后停止，并请用户确认或编辑。
 
-## Alignment Gate
-
-Before writing image prompts or generating prototype images, the brief must be aligned by one of these signals:
-
-- The user confirms the brief in chat.
-- The user edits or approves the Zoon brief and asks the agent to use the latest version.
-- The user explicitly says to use the assumptions listed in the brief.
-
-If none of these signals exists, stop after sharing the brief or Zoon link and ask the user to confirm or edit it.
-
-For iterative screenshot changes, a Quick Brief can be as short as:
+截图迭代时，快速版产品简报可以短到：
 
 ```markdown
-## Quick Alignment Update
-- Product intent unchanged:
-- Change requested:
-- Keep unchanged:
-- Constraint:
+## 快速对齐更新
+- 产品意图不变：
+- 请求改动：
+- 保持不变：
+- 约束：
 - 请确认：按以上范围只改这些区域后再出图。
 ```
 
-## Core Shape
+## 核心结构
 
-Do not force every section to be filled. Prefer readable prose with short bullets. Mark uncertainty explicitly.
+不要强行填满所有章节。优先使用可读段落和短列表，并明确标注不确定性。
 
 ```markdown
-# 产品设计 Brief：{功能名}
+# 产品设计简报：{功能名}
 
-## Brief 状态
-- Brief version：v1
-- Confirmation status：Draft / Ready for PM confirmation / Aligned
-- Source of truth：{Chat / Zoon / PRD / Screenshot set}
-- Last decision：
+## 产品简报状态
+- 版本：v1
+- 确认状态：草稿 / 待确认 / 已对齐
+- 信息来源：{对话 / Zoon / PRD / 截图组}
+- 最近决策：
 
 ## 当前理解
 {用 3-5 句话说明用户问题、业务目标、当前约束}
@@ -106,7 +108,7 @@ Do not force every section to be filled. Prefer readable prose with short bullet
 ## 功能类型与现状基线
 - 功能类型：{全新功能 / 现有功能迭代}
 - 现有线上截图：{已提供 / 缺失 / 不适用}
-- 场景路由：{新功能 / 现有迭代 / 转化 / 结果报告 / Dashboard / 内部工具 / 交易服务 / 内容社区 / 截图迭代}
+- 场景路由：{新功能 / 现有迭代 / 转化 / 结果报告 / 看板 / 内部工具 / 交易服务 / 内容社区 / 截图迭代}
 - 现状问题：
 - 需要保留：
 
@@ -150,88 +152,88 @@ Do not force every section to be filled. Prefer readable prose with short bullet
 - [ ] {问题 2}
 ```
 
-## Scenario Modules
+## 场景模块
 
 Add only the modules that fit the product. Do not include all modules by default.
 
-### Conversion Flow
+### 转化流程
 
-- Value exchange before costly action.
-- Required versus optional input.
-- Trust, complaint, or opt-out risk.
-- Counter-metric to prevent low-quality conversion.
+- 高成本动作前先展示价值。
+- 区分必填信息和可选信息。
+- 识别信任、投诉或退出风险。
+- 设置反指标，避免低质量转化。
 
-### Result Or Report Page
+### 结果或报告页
 
-- Promise made before the result.
-- Data credibility and freshness.
-- Estimated versus confirmed values.
-- Next step and uncertainty handling.
+- 结果页是否兑现了前置承诺。
+- 数据可信度和新鲜度。
+- 区分估算值和已确认值。
+- 下一步动作和不确定性处理。
 
-### Internal Tool
+### 内部工具
 
-- Repeated task and expected speed gain.
-- Error recovery and audit trail.
-- Permissions and role boundaries.
-- Empty, partial, stale, and failed states.
+- 重复任务和预期提效。
+- 错误恢复和审计记录。
+- 权限和角色边界。
+- 空数据、部分数据、过期数据和失败状态。
 
-### Transaction Or Service
+### 交易或服务流程
 
-- Eligibility and required materials.
-- Fulfillment status.
-- Exception paths and recovery.
-- Human or partner dependency.
+- 资格判断和所需材料。
+- 履约状态。
+- 异常路径和恢复方式。
+- 人工或合作方依赖。
 
-### Content Or Community
+### 内容或社区
 
-- Creation or consumption motivation.
-- Quality signal.
-- Participation loop.
-- Moderation or abuse risk.
+- 创作或消费动机。
+- 质量信号。
+- 参与循环。
+- 治理或滥用风险。
 
-### Dashboard Or Analytics
+### 看板或数据分析
 
-- Decision the user should make.
-- Data freshness.
-- Comparison baseline.
-- Alert threshold or action trigger.
+- 用户应该做的决策。
+- 数据新鲜度。
+- 对比基线。
+- 提醒阈值或动作触发。
 
-## Markers For Collaboration
+## 协作标记
 
-Use these markers so the PM knows where to edit:
+使用这些标记，让 PM 知道哪里需要编辑：
 
-- `当前假设：` when the agent inferred something.
-- `请补充：` when missing context would improve the prototype.
-- `请拍板：` when a product tradeoff needs a decision.
-- `不可虚构：` when the design must not show unsupported data or functions.
+- `当前假设：` 助手推断出来的内容。
+- `请补充：` 缺失信息会明显改善原型。
+- `请拍板：` 产品取舍需要决策。
+- `不可虚构：` 设计中不能展示未支持的数据或功能。
 
-## Zoon Handoff
+## Zoon 交接
 
-If the user gave an existing Zoon doc:
+如果用户提供了现有 Zoon 文档：
 
-- Append the brief to that doc unless the user asks for a new doc.
-- Use the Zoon workflow and append operations.
-- Tell the user the existing doc is now the source of truth for the next prototype step.
-- Ask the user to confirm in chat or edit the Zoon brief before image generation.
-- If the user changes direction in Zoon, increment `Brief version` and re-run relevant decision gates.
+- 除非用户要求新建文档，否则把产品简报追加到现有文档。
+- 使用 Zoon 工作流和追加操作。
+- 告诉用户：现有文档现在是下一步原型的事实来源。
+- 图片生成前，请用户在对话中确认，或编辑 Zoon 产品简报。
+- 如果用户在 Zoon 中改变方向，递增产品简报版本，并重新运行相关决策门槛。
 
-If there is no existing Zoon doc and the user wants online collaboration:
+如果没有现有 Zoon 文档，但用户希望在线协作：
 
-- Create a new Zoon document using the public document creation endpoint from the active Zoon host.
-- If no host is provided, default to `https://zoon.up.railway.app`.
-- Send only the returned editable `url` to the user.
-- Do not expose `ownerSecret`, raw tokens, or API response internals.
+- 使用当前 Zoon 主机的公开文档创建接口，新建 Zoon 文档。
+- 如果没有提供主机，默认使用 `https://zoon.up.railway.app`。
+- 只把返回的可编辑 `url` 发给用户。
+- 不暴露 `ownerSecret`、原始 token 或 API 响应内部信息。
 
-If Zoon creation fails:
+如果 Zoon 创建失败：
 
-- Provide the brief markdown in chat.
-- State the failure briefly and offer to retry when Zoon is reachable.
+- 在对话中提供产品简报 Markdown。
+- 简短说明失败原因，并在 Zoon 可用时提供重试。
 
-## Before Prototype Generation
+## 生成原型前
 
-When an editable Zoon brief exists and the user has confirmed it:
+当可编辑 Zoon 产品简报存在且用户已确认：
 
-1. Re-read the latest Zoon snapshot before generating images.
-2. Treat the latest markdown as the product source of truth.
-3. Use PM edits to update product intent, constraints, and prompt content.
-4. Do not rely only on stale chat history.
+1. 生成图片前重新读取最新 Zoon 快照。
+2. 把最新 Markdown 作为产品事实来源。
+3. 用 PM 编辑更新产品意图、约束和提示词内容。
+4. 不只依赖过期的对话历史。

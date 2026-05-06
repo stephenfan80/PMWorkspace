@@ -1,16 +1,16 @@
-# State And Telemetry
+# 状态与遥测
 
-PMWorkspace stores durable product assets locally by default. It should help the user accumulate product judgment and reusable handoff material without leaking sensitive source material.
+PMWorkspace 默认在本地保存可沉淀产品资产。它应该帮助用户积累产品判断和可复用交付材料，同时避免泄露敏感源材料。
 
-## Local State Root
+## 本地状态根目录
 
-Default root:
+默认根目录：
 
 ```text
 ~/.pmworkspace/
 ```
 
-Expected structure:
+预期结构：
 
 ```text
 config.yaml
@@ -21,26 +21,26 @@ projects/<slug>/prototypes/
 projects/<slug>/taste-profile.jsonl
 ```
 
-## What To Save
+## 保存什么
 
-- Usage event: skill name, timestamp, project slug.
-- Decisions: concise product or design decisions the user approved.
-- Briefs: aligned or ready-for-confirmation markdown briefs.
-- Prototype manifests: scheme, screen, canvas, brief dependency, prompt summary.
-- Taste feedback: approved/rejected direction and the user's reason.
+- 使用事件：技能名、时间戳、项目标识。
+- 决策：用户确认过的简短产品或设计决策。
+- 产品简报：已对齐或待确认的 Markdown 产品简报。
+- 原型清单：方案、屏幕、画布、产品简报依赖和提示词摘要。
+- 偏好反馈：批准/拒绝的方向，以及用户原因。
 
-## What Not To Save
+## 不保存什么
 
-- Real tokens, owner secrets, API keys, cookies, auth headers.
-- Private customer data, raw call transcripts, internal recordings.
-- Sensitive screenshots or unredacted Zoon content.
-- Full private PRDs unless the user explicitly asks to store them locally.
+- 真实 token、owner secret、API key、cookie、鉴权头。
+- 私密客户数据、原始通话记录、内部录音。
+- 敏感截图或未脱敏 Zoon 内容。
+- 完整私密 PRD，除非用户明确要求本地保存。
 
-## Telemetry Defaults
+## 遥测默认值
 
-- `telemetry: local` means write local logs only.
-- Remote telemetry requires explicit opt-in.
-- Anonymous remote telemetry, when implemented, may include skill name, duration, outcome, version, and coarse OS only.
-- Never send project names, file paths, prompt text, screenshots, brief content, or customer data.
+- `telemetry: local` 表示只写本地日志。
+- 远程遥测必须由用户明确开启。
+- 匿名远程遥测实现后，最多包含技能名、耗时、结果、版本和粗略系统信息。
+- 不发送项目名、文件路径、提示词文本、截图、产品简报内容或客户数据。
 
-Use `bin/pmw-config list` to inspect active settings.
+使用 `bin/pmw-config list` 查看当前设置。

@@ -1,159 +1,161 @@
-# Product Office Hours
+# 产品追问
 
-Use this before every prototype generation request after first-use onboarding and scenario routing. In PMWorkspace, this is usually owned by `$pm-jobs`. It is a mandatory alignment gate that helps the product manager or designer clarify what the design must accomplish before any image prompt is written.
+在首次引导和场景路由之后、每次生成原型之前使用本文件。在 PMWorkspace 中，这一步通常由 `$pm-jobs` 负责。它是强制产品对齐门槛，帮助产品经理或设计师在写图片提示词前说清楚设计必须完成什么。
 
-## Operating Rules
+For Chinese users, ask and summarize in Simplified Chinese. Use Chinese status labels: `需要补充`、`待确认`、`已对齐`. Keep only precise terms such as `PRD`, `Zoon`, `image-2`, `API`, and `token`.
 
-- Always create an alignment moment before design work.
-- First classify the change type: `new feature`, `existing feature iteration`, or `unclear`.
-- If the change type is `existing feature iteration`, require current production screenshots or equivalent visual evidence before moving past alignment.
-- Use `scenario-routing.md` to select questions by product scenario; do not ask a fixed checklist.
-- Ask only questions that change the prototype.
-- Ask at most 2-4 questions before creating or updating the brief.
-- Smart-skip duplicate questions already answered by docs, screenshots, Zoon content, or the user's prompt, but never skip the alignment stage itself.
-- If the user says "直接做", "skip", "先出图", or gives a fully formed request, create a Fast Alignment Brief with explicit assumptions and ask the user to confirm or edit it.
-- Default prototype strategy is mobile-first unless the user explicitly requests desktop or the scenario truly requires large-screen density.
-- Do not generate image prompts while the alignment status is `Needs clarification` or `Ready for PM confirmation`.
-- Push for concrete evidence and specific user tasks, not abstract goals.
-- Do not praise vague answers; translate them into sharper assumptions or ask one harder follow-up.
+## 工作规则
 
-## Work Type Routing
+- 设计前必须先形成一次产品对齐。
+- 先判断变化类型：`新功能`、`现有功能迭代` 或 `不明确`。
+- 如果是 `现有功能迭代`，必须先拿到当前线上截图或等价视觉证据，再继续对齐。
+- 使用 `scenario-routing.md` 按产品场景选择问题，不问固定清单。
+- 只问会改变原型或产品方向的问题。
+- 创建或更新产品简报前，最多问 2-4 个关键问题。
+- 文档、截图、Zoon 内容或用户提示里已经回答过的问题可以跳过，但不能跳过对齐阶段本身。
+- 如果用户说“直接做”“先出图”或给出完整请求，创建“快速对齐产品简报”，列明假设，请用户确认或修改。
+- 默认移动端优先；只有用户明确要求桌面端，或场景确实需要大屏密度时，才使用桌面端。
+- 对齐状态为 `需要补充` 或 `待确认` 时，不生成图片提示词。
+- 推动具体证据和具体用户任务，不停留在抽象目标。
+- 不夸奖模糊答案；把它翻译成更尖锐的假设，或追问一个更关键的问题。
 
-First identify the change type:
+## 工作类型路由
 
-- **New feature:** no existing production flow is being changed; clarify the user problem, smallest useful version, constraints, and design references.
-- **Existing feature iteration:** an existing production page, flow, or module is being improved; require online screenshots and baseline behavior before prototype strategy.
-- **Unclear:** ask whether this is new or existing before asking other questions.
+先识别变化类型：
 
-Then identify the dominant work type:
+- **新功能：** 不改变现有线上流程；澄清用户问题、最小有价值版本、约束和设计参考。
+- **现有功能迭代：** 优化已有线上页面、流程或模块；在原型策略前，先要求线上截图和基线行为。
+- **不明确：** 先问这是新功能还是现有功能，再问其他问题。
 
-- **New feature exploration:** purpose, target user, evidence, smallest useful version.
-- **Existing-flow optimization:** current friction, target metric, drop-off point, constraints.
-- **Conversion flow:** value exchange, input cost, trust risk, primary action.
-- **Result/report page:** promised value, data credibility, uncertainty, next step.
-- **Internal tool:** repeated task, speed/accuracy goal, failure handling, permission boundaries.
-- **Content/community:** creation or consumption job, quality signal, participation loop.
-- **Transaction/service:** eligibility, fulfillment, status, exception handling.
-- **Dashboard/analytics:** decision to support, data freshness, comparison baseline, alert threshold.
+再识别主工作类型：
 
-Use the dominant work type to choose questions. The user always controls final tradeoffs; the agent should recommend a direction, explain why, and wait at decision gates.
+- **新功能探索：** 目的、目标用户、证据、最小有价值版本。
+- **现有流程优化：** 当前阻力、目标指标、流失点、约束。
+- **转化流程：** 价值交换、输入成本、信任风险、主动作。
+- **结果/报告页：** 承诺价值、数据可信度、不确定性、下一步。
+- **内部工具：** 重复任务、速度/准确率目标、失败处理、权限边界。
+- **内容/社区：** 创作或消费任务、质量信号、参与循环。
+- **交易/服务：** 资格、履约、状态、异常处理。
+- **看板/数据分析：** 支持的决策、数据新鲜度、对比基线、提醒阈值。
 
-## Existing Feature Iteration Gate
+用主工作类型选择问题。最终取舍由用户控制；助手负责推荐方向、解释原因，并在决策门槛处等待确认。
 
-If the request is an existing-feature iteration, do not proceed to brief alignment until the user provides at least one of:
+## 现有功能迭代门槛
 
-- Current online screenshots of the affected page or flow.
-- A screen recording or annotated screenshot showing the current behavior.
-- A Zoon/product document that includes the current screen state and enough visual detail to preserve production style.
+如果请求是现有功能迭代，在用户提供以下任一材料前，不进入产品简报对齐：
 
-Use the current screenshots to extract:
+- 受影响页面或流程的当前线上截图。
+- 展示当前行为的录屏或标注截图。
+- 包含当前屏幕状态、且有足够视觉细节能保留生产样式的 Zoon/产品文档。
 
-- Current page purpose and primary action.
-- Current information hierarchy and modules.
-- Current input burden, friction, or trust problem.
-- Existing design system, typography, color, spacing, component density, and button patterns.
-- Elements that must be preserved versus areas open to change.
+从当前截图中提取：
 
-If screenshots are missing, ask in one concise sentence:
+- 当前页面目的和主要动作。
+- 当前信息层级和模块。
+- 当前输入负担、阻力或信任问题。
+- 现有设计系统、字体、颜色、间距、组件密度和按钮模式。
+- 必须保留的元素，以及可以改动的区域。
 
-```text
-这是现有功能迭代的话，请先补充线上功能截图或当前页面录屏；我会基于现状问题和生产样式再做产品 Brief 对齐。
-```
-
-## Forcing Question Library
-
-Pick only the questions that matter for the current task.
-
-### User Problem
-
-- What specific user problem should this screen solve?
-- What is the user doing immediately before they arrive here?
-- What would make the user say this screen helped them decide or act?
-
-### Status Quo
-
-- What is the user doing today instead, even if it is manual or messy?
-- What cost does the current workaround create: time, money, risk, confusion, support, churn?
-- If the user ignores this feature, what happens?
-
-### Goal And Metric
-
-- What is the primary behavior or metric this design must improve?
-- What counter-metric protects the team from cheating the goal?
-- What should not get worse while improving the primary metric?
-
-### User Task
-
-- What is the smallest task the user must complete on this screen?
-- What information must be visible before the user can trust the next action?
-- What can be moved after the primary action without hurting the task?
-
-### Evidence
-
-- What evidence shows this is a real problem: call transcripts, complaints, drop-off data, repeated support tickets, observed behavior?
-- What user quote or behavior should shape the copy and hierarchy?
-- What assumption is currently weakest?
-
-### Constraints
-
-- What business, compliance, data, operational, or technical constraint cannot change?
-- What existing component, design system, or production pattern must be reused?
-- What function must not appear because it cannot be delivered?
-
-### Data
-
-- What data can be shown immediately?
-- What data requires personalization, freshness, inventory, eligibility, or human confirmation?
-- What data is estimated, and how should uncertainty be labeled?
-
-### Concept Direction
-
-- What product strategy should lead the prototype: lower friction, stronger trust, better comparison, clearer status, richer report, faster task completion, or sharper delight?
-- What direction should be deliberately avoided because it is off-brand, not feasible, or optimizes the wrong metric?
-- For multi-scheme work, which 2-4 directions are meaningfully different enough to compare?
-
-## Alignment Status
-
-Use one of these statuses before moving forward:
-
-- `Needs clarification`: one or more product decisions would materially change the prototype; ask focused questions.
-- `Ready for PM confirmation`: enough context exists; summarize the plan and ask the user to confirm, edit, or approve assumptions.
-- `Aligned`: the user confirmed the plan in chat, edited/approved the Zoon brief, or explicitly said to use the stated assumptions.
-
-Only `Aligned` can move to design-system review, adversarial review, image prompts, or image generation.
-
-## Compact Output
-
-Before creating a brief, summarize the answers as:
+如果缺少截图，用一句话询问：
 
 ```text
-Alignment status:
-Product intent:
-- Change type: <new feature / existing feature iteration / unclear>
-- Existing baseline: <screenshots provided / missing / not applicable>
-- Scenario route:
-- User problem:
-- User task:
-- Primary goal:
-- Counter-metric:
-- Current friction:
-- Hard constraints:
-- Usable data:
-- Concept direction:
-- Design implication:
+这是现有功能迭代的话，请先补充线上功能截图或当前页面录屏；我会基于现状问题和生产样式再做产品简报对齐。
 ```
 
-Use this summary in the product brief. After the brief is aligned, use it in the image prompt's product intent block.
+## 追问题库
 
-## Product Plan Handoff
+只选择当前任务真正需要的问题。
 
-After PM Jobs alignment, create or update an editable product brief:
+### 用户问题
 
-- **Quick Brief:** small screenshot iteration, narrow page change, or a single decision.
-- **Standard Brief:** most prototype requests where product intent and constraints should persist.
-- **Deep Brief:** new feature, high-risk flow, cross-team collaboration, unclear evidence, or sensitive data/operations.
+- 这个屏幕要解决哪个具体用户问题？
+- 用户来到这里前一刻正在做什么？
+- 什么会让用户觉得“这个页面帮我做了决定或采取了行动”？
 
-Do not treat the brief as a required PRD template. It is a collaboration artifact that captures current understanding, assumptions, and PM decision points. The brief is the product contract for the next prototype step.
+### 现状替代方案
+
+- 用户今天是怎么替代解决的，哪怕很手工、很混乱？
+- 当前替代方案造成了什么成本：时间、金钱、风险、困惑、客服压力、流失？
+- 如果用户忽略这个功能，会发生什么？
+
+### 目标与指标
+
+- 这个设计必须提升哪个主行为或主指标？
+- 哪个反指标能防止团队“作弊式”优化目标？
+- 在提升主指标时，什么不能变差？
+
+### 用户任务
+
+- 用户在这个屏幕上必须完成的最小任务是什么？
+- 用户信任下一步动作前，必须先看到什么信息？
+- 哪些内容可以放到主动作之后，而不伤害任务完成？
+
+### 证据
+
+- 什么证据说明这是真问题：通话记录、投诉、流失数据、重复客服工单、观察行为？
+- 哪句用户原话或哪个用户行为应该影响文案和层级？
+- 当前最弱的假设是什么？
+
+### 约束
+
+- 哪些业务、合规、数据、运营或技术约束不能改变？
+- 哪些现有组件、设计系统或生产模式必须复用？
+- 哪些功能因为无法交付，不能出现在原型里？
+
+### 数据
+
+- 哪些数据可以立即展示？
+- 哪些数据需要个性化、新鲜度、库存、资格判断或人工确认？
+- 哪些数据是估算，应该如何标注不确定性？
+
+### 方案方向
+
+- 原型应该由哪种产品策略主导：降低摩擦、增强信任、强化对比、明确状态、丰富报告、加快任务完成，还是制造更强惊喜？
+- 哪个方向应主动避免，因为它不符合品牌、不可行，或优化了错误指标？
+- 多方案任务里，哪 2-4 个方向有足够本质差异，值得比较？
+
+## 对齐状态
+
+继续前使用以下状态之一：
+
+- `需要补充`：一个或多个产品决策会实质改变原型；继续问聚焦问题。
+- `待确认`：已有足够上下文；总结方案，请用户确认、修改或批准假设。
+- `已对齐`：用户在对话里确认计划、编辑/批准了 Zoon 产品简报，或明确说使用列出的假设。
+
+只有 `已对齐` 可以进入设计系统检查、对抗审查、图片提示词或图片生成。
+
+## 简短输出
+
+创建产品简报前，先这样汇总：
+
+```text
+对齐状态：
+产品意图：
+- 变化类型：<新功能 / 现有功能迭代 / 不明确>
+- 现状基线：<已提供截图 / 缺失 / 不适用>
+- 场景路由：
+- 用户问题：
+- 用户任务：
+- 主目标：
+- 反指标：
+- 当前阻力：
+- 硬约束：
+- 可用数据：
+- 方案方向：
+- 设计影响：
+```
+
+把这段摘要写入产品简报。产品简报已对齐后，把它用于图片提示词里的产品意图部分。
+
+## 产品简报交接
+
+完成产品追问对齐后，创建或更新可编辑产品简报：
+
+- **快速版产品简报：** 小范围截图迭代、窄页面改动或单个决策。
+- **标准版产品简报：** 大多数需要沉淀产品意图和约束的原型请求。
+- **深度版产品简报：** 新功能、高风险流程、跨团队协作、证据不清或涉及敏感数据/运营。
+
+不要把产品简报当成固定 PRD 模板。它是协作资产，用来记录当前理解、假设和 PM 决策点，也是下一步原型的产品契约。
 
 Mark uncertain areas clearly:
 
@@ -162,4 +164,4 @@ Mark uncertain areas clearly:
 - `请拍板：` for tradeoffs.
 - `不可虚构：` for unsupported capabilities or data.
 
-See `product-plan-handoff.md` for the adaptive brief structure and Zoon handoff rules.
+自适应产品简报结构和 Zoon 交接规则见 `product-plan-handoff.md`。

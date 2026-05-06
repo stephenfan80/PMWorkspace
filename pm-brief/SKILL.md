@@ -1,19 +1,21 @@
 ---
 name: pm-brief
 description: |
-  PMWorkspace brief generator. Use when product alignment, PM Jobs output, strategy
-  review, PRD notes, Zoon docs, screenshots, or customer insights need to become a
-  reusable Quick, Standard, or Deep product brief with version, source of truth,
-  assumptions, decisions, constraints, and Aligned status before image-2 prototypes.
+  PMWorkspace 产品简报生成器。用于把产品对齐、产品追问输出、策略审查、
+  PRD 笔记、Zoon 文档、截图或客户洞察，整理成可复用的快速版、标准版或
+  深度版产品简报，包含版本、事实来源、假设、决策、约束和“已对齐”状态，
+  作为 image-2 原型前的产品契约。
 ---
 
-# PM Brief
+# 产品简报
 
-Create the product contract that later prototype, handoff, and experiment steps must read.
+创建后续原型、交付稿和实验步骤都必须读取的产品契约。
+
+Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. For Chinese users, call the artifact `产品简报`; keep `brief` only when referring to a technical file or existing English source.
 
 ## Preamble
 
-Run platform checks and usage logging when possible:
+可用时运行平台检查和使用记录：
 
 ```bash
 _PMW_BIN=""
@@ -27,24 +29,24 @@ done
 ## Workflow
 
 1. Read `../pmworkspace-shared/references/product-plan-handoff.md`.
-2. Choose Quick, Standard, or Deep Brief based on ambiguity and risk.
-3. Include source of truth, version, confirmation status, scenario route, user job, goal, counter-metric, constraints, not-invented items, and PM decision items.
+2. 根据模糊程度和风险选择快速版、标准版或深度版产品简报。
+3. 包含事实来源、版本、确认状态、场景路由、用户任务、目标、反指标、约束、不可虚构项和 PM 决策项。
 4. If Zoon is provided, read `../pmworkspace-shared/references/zoon-workflow.md` and treat the latest approved Zoon snapshot as source of truth.
 5. Save the brief with `pmw-log brief <name>` when platform scripts are available.
 
 ## Alignment Rule
 
-Only `Aligned` briefs can feed image prompts. If the user has not confirmed, mark `Ready for PM confirmation` and stop before prototype generation.
+只有“已对齐”的产品简报才能进入图片提示词。用户未确认时，标记为“待确认”，并在生成原型前停止。
 
-## Output
+## 输出
 
 Return the smallest useful brief and end with:
 
 ```text
-Brief status:
-- Version:
-- Confirmation status:
-- Source of truth:
-- Saved asset:
-- Next skill:
+产品简报状态：
+- 版本：
+- 确认状态：
+- 信息来源：
+- 已保存资产：
+- 建议下一步：
 ```

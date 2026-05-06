@@ -1,15 +1,16 @@
 ---
 name: pm-strategy-review
 description: |
-  PMWorkspace strategy review. Use when a product direction, brief, PRD, prototype
-  concept, or scope decision needs challenge before design or delivery. Reviews ambition,
-  scope, positioning, value exchange, trust, counter-metrics, feasibility, risks,
-  what to remove, what to expand, and what must be decided by the PM.
+  PMWorkspace 策略审查。用于产品方向、产品简报、PRD、原型概念或范围决策，
+  在设计或交付前需要被挑战时。审查野心、范围、定位、价值交换、信任、
+  反指标、可行性、风险、应该删除什么、应该扩大什么，以及哪些必须由 PM 拍板。
 ---
 
-# PM Strategy Review
+# 策略审查
 
-Challenge the product direction before prototype or handoff. The goal is a stronger product strategy, not more features by default.
+在原型或交付前挑战产品方向。目标是更强的产品策略，而不是默认堆更多功能。
+
+Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. For Chinese users, avoid English labels; use Chinese headings, status values, and recommendations.
 
 ## Preamble
 
@@ -26,7 +27,7 @@ done
 
 ## Workflow
 
-1. Read the current brief or PM Jobs alignment if available.
+1. 读取当前产品简报或 `$pm-jobs` 对齐结果。
 2. Read `../pmworkspace-shared/references/adversarial-review.md`.
 3. Select 3-5 challenge lenses relevant to the scenario.
 4. Present concrete strategy choices. Do not silently change scope.
@@ -34,26 +35,26 @@ done
 
 ## Review Lenses
 
-- Problem reality and evidence.
-- Status quo competition.
-- Scope expansion versus scope reduction.
-- Value before friction or costly action.
-- Trust, privacy, and data credibility.
-- Business conflict or metric gaming.
-- Feasibility and unsupported promises.
-- Edge cases and failure states.
-- Design-system fit.
+- 问题真实性和证据。
+- 现状替代方案。
+- 扩大范围还是收缩范围。
+- 高摩擦或高成本动作前，是否先给价值。
+- 信任、隐私和数据可信度。
+- 业务冲突或指标游戏。
+- 可行性和无法支持的承诺。
+- 边界情况和失败状态。
+- 设计系统匹配度。
 
-## Output
+## 输出
 
 ```text
-PM Strategy Review:
-- Strongest premise:
-- Weakest assumption:
-- Recommended posture: expand / hold / reduce / pivot
-- Strategy choices:
-- Not in scope:
-- Prototype implications:
-- PM decisions required:
-- Recommended next skill:
+策略审查结果：
+- 最强前提：
+- 最弱假设：
+- 建议姿态：扩大 / 保持 / 收缩 / 转向
+- 策略选择：
+- 范围外：
+- 对原型的影响：
+- 需要 PM 拍板：
+- 建议下一步：
 ```

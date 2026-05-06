@@ -1,16 +1,17 @@
 ---
 name: pm-jobs
 description: |
-  Jobs-style product interrogation for PMWorkspace. Use when a product manager,
-  designer, founder, or researcher has a raw idea, PRD, customer insight, screenshot,
-  Zoon doc, or "is this worth building" question and needs Steve-Jobs-level product
-  questioning before solution design. Defines user problem, target user, status quo,
-  value exchange, goal, counter-metric, constraints, and smallest valuable wedge.
+  PMWorkspace 的乔布斯式产品追问。用于产品经理、设计师、创业者或研究员拿到
+  原始想法、PRD、客户洞察、截图、Zoon 文档，或“是否值得做”的问题时，
+  在方案设计前先追问清楚用户问题、目标用户、现状替代方案、价值交换、目标、
+  反指标、约束和最小有价值版本。
 ---
 
-# PM Jobs
+# 产品追问
 
-PM Jobs is the first product-thinking gate. It acts like a demanding product partner: define the real job, not just the requested feature.
+产品追问是第一道产品思考门槛。它像严格的产品合伙人：先定义真实任务，而不是直接执行用户提出的功能形态。
+
+Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. For Chinese users, output Chinese headings and labels. Keep only skill ids and precise technical terms in English.
 
 ## Preamble
 
@@ -31,36 +32,36 @@ done
 2. Read `../pmworkspace-shared/references/scenario-routing.md` to classify the dominant product scenario.
 3. Read `../pmworkspace-shared/references/product-office-hours.md` and ask only the questions that change the prototype or product direction.
 4. If the request is an existing-feature iteration, require current production screenshots, screen recording, or equivalent visual baseline before proceeding.
-5. Produce a compact alignment summary and mark status: `Needs clarification`, `Ready for PM confirmation`, or `Aligned`.
+5. 输出简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。
 6. Log material decisions with `pmw-log decision` when available.
 
 ## Jobs-Style Questioning
 
 Prioritize these lenses:
 
-- Specific user: who feels the pain strongly enough to change behavior?
-- Status quo: what are they doing today, even if manual or messy?
-- Moment of need: what happens immediately before this product is useful?
-- Value exchange: what must the user give, and what do they get first?
-- Counter-metric: what must not get worse while optimizing the goal?
-- Smallest valuable wedge: what is the smallest version that proves the product promise?
+- 具体用户：谁痛到足以改变行为？
+- 现状替代方案：他们现在怎么做，哪怕很手工、很混乱？
+- 需求发生时刻：产品发挥价值前一刻发生了什么？
+- 价值交换：用户必须付出什么？他们先得到什么？
+- 反指标：优化主目标时，什么不能变差？
+- 最小有价值版本：证明产品承诺的最小版本是什么？
 
-Ask at most 2-4 high-impact questions before creating a Fast Alignment Brief. If the user asks to "直接出图", create assumptions and ask for confirmation instead of skipping alignment.
+创建快速对齐产品简报前，最多问 2-4 个高影响问题。如果用户要求“直接出图”，列出假设并请求确认，而不是跳过对齐。
 
-## Output
+## 输出
 
 ```text
-PM Jobs alignment:
-- Status:
-- Scenario route:
-- User:
-- Job/problem:
-- Status quo:
-- Moment of need:
-- Primary goal:
-- Counter-metric:
-- Constraints:
-- Smallest valuable wedge:
-- Decisions logged:
-- Recommended next skill:
+产品追问结果：
+- 状态：
+- 场景路由：
+- 目标用户：
+- 用户任务 / 问题：
+- 当前替代方案：
+- 需求发生时刻：
+- 主目标：
+- 反指标：
+- 约束：
+- 最小有价值版本：
+- 已记录决策：
+- 建议下一步：
 ```

@@ -1,6 +1,6 @@
-# Design System Workflow
+# 设计系统工作流
 
-Use this reference before generating prototype images. AutoDesign is the default production-quality visual baseline for PMWorkspace. A user-provided design system, Figma, screenshot, or brand rule can supersede specific visual details, but the output should still feel production-ready.
+生成原型图片前使用本参考。AutoDesign 是 PMWorkspace 默认的生产级视觉基线。用户提供的设计系统、Figma、截图或品牌规则可以覆盖具体视觉细节，但输出仍应保持生产可用感。
 
 ## Detect The Design System
 
@@ -24,24 +24,24 @@ Use the most reliable available source:
 
 If a page is accessible only in the user's browser session, inspect it with browser tools and summarize only the reusable rules. Do not paste full internal docs into generated open-source artifacts.
 
-## Build A Design Constraint Summary
+## 生成设计约束摘要
 
-Before writing an image prompt, create a compact constraint summary:
+写图片提示词前，创建简短设计约束摘要：
 
 ```text
-Design system: <name>
-Baseline role: <default production baseline / explicit brand system / screenshot source of truth>
-Canvas/device: <size>
-Colors: <primary, accent, text, background, border>
-Typography: <font family, size scale, weight rules>
-Grid/spacing: <grid and common spacing>
-Components: <NavBar, Button, Form, ToolBar, cards, result modules>
-Do not: <known anti-patterns>
+设计系统：<名称>
+基线角色：<默认生产基线 / 明确品牌系统 / 截图事实来源>
+画布/设备：<尺寸>
+颜色：<主色、强调色、文字、背景、边框>
+字体：<字体族、字号层级、字重规则>
+栅格/间距：<栅格和常用间距>
+组件：<NavBar、Button、Form、ToolBar、卡片、结果模块>
+不要：<已知反模式>
 ```
 
-For image prompts, paste the constraint summary into the `Visual requirements` section.
+用于图片提示词时，把约束摘要放进 `视觉要求` 部分。
 
-Default canvas is mobile-first iPhone 17 portrait `402 x 874`. Choose desktop only when the user explicitly asks or the scenario is a dashboard/internal tool that would be materially worse on mobile.
+默认画布是移动端优先：iPhone 17 竖屏 `402 x 874`。只有用户明确要求，或看板/内部工具在移动端会明显变差时，才选择桌面端。
 
 ## Production Design Review
 

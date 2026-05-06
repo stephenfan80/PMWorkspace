@@ -1,16 +1,17 @@
 ---
 name: pm-prototype-shotgun
 description: |
-  PMWorkspace mobile-first prototype exploration. Use when the user wants image-2 UI
-  mockups, multiple product directions, screenshot revision, design schemes, mobile
-  app prototypes, forms, result pages, dashboards, internal tools, transaction flows,
-  content/community screens, or prototype QA. Requires an Aligned brief and outputs
-  one separate image per scheme and screen.
+  PMWorkspace 移动端优先的原型探索。用于用户需要 image-2 UI 原型图、多产品方向、
+  截图修改、设计方案、移动应用原型、表单、结果页、看板、内部工具、交易流程、
+  内容/社区屏幕或原型质量检查。要求产品简报已对齐，并且每个方案、每个屏幕
+  单独输出一张图。
 ---
 
-# PM Prototype Shotgun
+# 原型方案
 
-Generate prototype schemes only after product alignment. This is product strategy made visible, not visual skin exploration.
+只在产品对齐后生成原型方案。这里要把产品策略可视化，而不是只探索视觉皮肤。
+
+Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. For Chinese users, use Chinese labels for schemes, screens, QA status, and next steps; keep `image-2` as the model/product term.
 
 ## Preamble
 
@@ -28,18 +29,18 @@ done
 ## Hard Gates
 
 - Read `../pmworkspace-shared/references/image-prompts.md`.
-- Do not write prompts or generate images unless the brief is `Aligned`.
-- Existing-feature iterations require current screenshots or equivalent visual baseline.
-- Confirm concept directions before multi-scheme generation unless the user explicitly approved defaults.
-- Default to mobile-first iPhone 17 portrait `402 x 874`.
-- Use desktop only when explicitly requested or when dashboard/internal-tool density requires it.
+- 产品简报未“已对齐”时，不写提示词，也不生成图片。
+- 现有功能迭代必须有当前截图或等价视觉基线。
+- 多方案生成前先确认概念方向，除非用户明确批准使用默认方向。
+- 默认移动端优先：iPhone 17 竖屏 `402 x 874`。
+- 只有用户明确要求，或看板/内部工具密度确实需要时，才使用桌面端。
 
 ## Multi-Scheme Rules
 
-- Directions must differ by product strategy, information architecture, interaction model, or trust model.
-- One scheme plus one screen equals one image output.
-- `3 directions x 2 screens` means six independent images.
-- Do not create collages or comparison boards unless the user asks for presentation material.
+- 方向必须在产品策略、信息架构、交互模型或信任模型上不同。
+- 一个方案 + 一个屏幕 = 一张图片。
+- `3 个方向 x 2 个屏幕` 表示六张独立图片。
+- 除非用户要求演示材料，否则不要创建拼图或比较板。
 
 ## Workflow
 
@@ -49,19 +50,19 @@ done
 4. For each image output unit, declare scheme, screen, canvas, and brief dependency.
 5. Generate with image-2 / image generation.
 6. Run `prototype-quality-review.md`.
-7. Save a prototype manifest with `pmw-log prototype <batch>` when platform scripts are available.
+7. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单。
 8. Record approved/rejected design feedback with `pmw-log taste`.
 
-## Output
+## 输出
 
 ```text
-Prototype plan / handoff:
-- Brief:
-- Scenario:
-- Canvas:
-- Images produced or planned:
-- QA status:
-- Saved manifest:
-- Taste feedback:
-- Next skill:
+原型计划：
+- 产品简报：
+- 场景：
+- 画布：
+- 已生成 / 计划生成的图片：
+- 质量检查：
+- 已保存清单：
+- 偏好反馈：
+- 建议下一步：
 ```

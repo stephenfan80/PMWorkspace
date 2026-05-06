@@ -1,33 +1,33 @@
-# Example: Screenshot Feedback Iteration
+# 示例：截图反馈迭代
 
-This is a fictional public example.
+这是一个虚构公开示例。
 
-## User Prompt
+## 用户提示
 
 ```text
-Use $pm-prototype-shotgun to revise this prototype from my annotated screenshot.
-Red boxes mean remove the explanatory modules from the form page.
-Green boxes mean keep only phone number and primary CTA.
-Product intent changed: no.
-Output: revised form page plus corresponding result page.
+使用 $pm-prototype-shotgun 根据我的标注截图修改这个原型。
+红框表示删除表单页里的解释模块。
+绿框表示只保留手机号和主要按钮。
+产品意图是否改变：否。
+输出：优化后表单页 + 对应结果页。
 ```
 
-## Expected Skill Behavior
+## 预期技能行为
 
-- Route to `Screenshot Revision`.
-- Create a Quick Alignment Update.
-- Change only specified areas.
-- Move removed form-page complexity to the result page only if it supports result value.
-- Preserve accepted visual style and AutoDesign baseline.
+- 路由到“截图修改”。
+- 创建快速对齐更新。
+- 只修改指定区域。
+- 只有当结果页价值需要时，才把表单页移除的复杂度后置到结果页。
+- 保留已接受的视觉风格和 AutoDesign 基线。
 
-## Example Handoff
+## 示例交付清单
 
 ```text
-Prototype handoff:
-- Brief source: Annotated screenshot / v1 / Aligned
-- Scenario route: Screenshot Revision
-- Screens produced: Revised form page, corresponding result page
-- Key assumptions: product intent and primary CTA are unchanged
-- Not invented: no new backend capability, no new secondary CTA
-- PM decisions remaining: confirm result-page detail priority
+原型交付清单：
+- 产品简报来源：标注截图 / v1 / 已对齐
+- 场景路由：截图修改
+- 已生成屏幕：优化后表单页、对应结果页
+- 关键假设：产品意图和主要按钮不变
+- 不可虚构：不新增后端能力、不新增次要按钮
+- PM 待决策：确认结果页详情优先级
 ```

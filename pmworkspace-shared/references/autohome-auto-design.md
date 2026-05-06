@@ -127,7 +127,7 @@ Use these rules for lead forms:
 
 ## Prompt Block
 
-When generating Autohome prototypes, include this block in the image prompt:
+生成汽车之家原型时，在图片提示词中加入这个区块：
 
 ```text
 AutoDesign production constraints:

@@ -1,8 +1,8 @@
 # PMWorkspace
 
-PMWorkspace 是一个面向产品经理、设计师、研究员、运营和创业者的产品工作台。它把产品想法、PRD、截图、访谈洞察或 Zoon 文档，沉淀成可复用的产品资产：产品决策、对齐后的 brief、移动端优先的 image-2 原型图、设计反馈和交付稿。
+PMWorkspace 是一个面向产品经理、设计师、研究员、运营和创业者的产品工作台。它把产品想法、PRD、截图、访谈洞察或 Zoon 文档，沉淀成可复用的产品资产：产品决策、对齐后的产品简报、移动端优先的 image-2 原型图、设计反馈和交付稿。
 
-PMWorkspace 来自原来的 `product-prototype-designer` skill。旧名称已废弃，后续请使用 `$pm-workspace` 和 PMWorkspace skill 套件。
+PMWorkspace 来自原来的 `product-prototype-designer` 技能。旧名称已废弃，后续请使用 `$pm-workspace` 和 PMWorkspace 技能套件。
 
 ## 它解决什么问题
 
@@ -11,21 +11,21 @@ PMWorkspace 来自原来的 `product-prototype-designer` skill。旧名称已废
 ```text
 先定义问题
 -> 再挑战策略
--> 再固化 brief
+-> 再固化产品简报
 -> 再生成移动端优先的原型图
 -> 最后沉淀可交付资产
 ```
 
-## Skill 套件
+## 技能套件
 
-| Skill | 什么时候用 |
+| 技能 | 什么时候用 |
 |---|---|
 | `$pm-workspace` | 主入口，负责路由、首次引导、更新检查和状态记录。 |
 | `$pm-jobs` | 乔布斯式产品追问：用户是谁、痛点是什么、现在怎么解决、为什么值得做。 |
 | `$pm-strategy-review` | 挑战策略、范围、价值交换、风险、反指标和取舍。 |
-| `$pm-brief` | 生成 Quick / Standard / Deep 产品 brief。 |
-| `$pm-prototype-shotgun` | 基于 Aligned brief 生成多方案 image-2 原型图。 |
-| `$pm-handoff` | 输出 PRD-ready / design-ready / experiment-ready / engineering-ready 交付稿。 |
+| `$pm-brief` | 生成快速版、标准版或深度版产品简报。 |
+| `$pm-prototype-shotgun` | 基于已对齐的产品简报生成多方案 image-2 原型图。 |
+| `$pm-handoff` | 输出适合 PRD、设计、实验验证或研发使用的交付稿。 |
 
 ## 快速开始
 
@@ -36,7 +36,7 @@ PMWorkspace 来自原来的 `product-prototype-designer` skill。旧名称已废
 用户问题：<他们现在卡在哪里>
 目标：<希望提升的行为或指标>
 约束：<数据 / 业务 / 法务 / 设计系统 / 上线范围>
-输出：<brief only / 1 个屏幕 / 2 个屏幕 / 3 个方案 / handoff>
+输出：<只要产品简报 / 1 个屏幕 / 2 个屏幕 / 3 个方案 / 交付稿>
 要求：每个方案和屏幕单独生成一张图，不要合成在同一张图里。
 ```
 
@@ -45,15 +45,15 @@ PMWorkspace 来自原来的 `product-prototype-designer` skill。旧名称已废
 1. `$pm-workspace` 判断任务类型并路由。
 2. `$pm-jobs` 先问清楚产品问题和最小有价值版本。
 3. `$pm-strategy-review` 在高风险或范围不清时挑战方向。
-4. `$pm-brief` 写出可确认、可复用的产品 brief。
-5. brief 达到 `Aligned` 后，`$pm-prototype-shotgun` 生成 image-2 原型图。
+4. `$pm-brief` 写出可确认、可复用的产品简报。
+5. 产品简报达到“已对齐”后，`$pm-prototype-shotgun` 生成 image-2 原型图。
 6. `$pm-handoff` 把选定方向转成可交付文档。
 
 ## 原型输出规则
 
 - 默认移动端优先：iPhone 17 竖屏 `402 x 874`。
-- 只有用户明确要求桌面端，或 dashboard / 内部工具确实需要大屏密度，才使用桌面端。
-- brief 没有 `Aligned` 前，不写 image prompt，也不生成图片。
+- 只有用户明确要求桌面端，或看板 / 内部工具确实需要大屏密度，才使用桌面端。
+- 产品简报没有“已对齐”前，不写图片提示词，也不生成图片。
 - 多方案必须在产品策略、信息架构、交互模型或信任模型上不同，不能只是换颜色。
 - 一个方案 + 一个屏幕 = 一张图。
 - `3 个方案 x 2 个屏幕` = 6 张独立图片。
@@ -79,7 +79,7 @@ cd PMWorkspace
 使用 $pm-workspace 显示欢迎引导，并帮我选择合适的产品工作流。
 ```
 
-安装后不要让用户自己猜命令。重启 Codex 后先用 `$pm-workspace`，它会像第一次打开 App 一样说明 PMWorkspace 能做什么，并给出新想法、PRD/Zoon、原型方向、截图优化、交付稿这几条入口。
+安装后不要让用户自己猜命令。重启 Codex 后先用 `$pm-workspace`，它会像第一次打开应用一样说明 PMWorkspace 能做什么，并给出新想法、PRD/Zoon、原型方向、截图优化、交付稿这几条入口。
 
 ## 本地状态资产
 
@@ -97,10 +97,10 @@ PMWorkspace 默认把资产保存在本地：
 
 会保存：
 
-- skill 使用记录。
+- 技能使用记录。
 - 用户确认过的产品/设计决策。
-- brief markdown。
-- 原型批次 manifest。
+- 产品简报 Markdown。
+- 原型批次清单。
 - 用户批准或拒绝的设计偏好。
 
 不会保存：
@@ -155,8 +155,8 @@ rm -rf ~/.codex/skills/product-prototype-designer
 
 ## 隐私
 
-默认遥测是本地优先，只写入 `~/.pmworkspace/analytics/usage.jsonl`。远程匿名汇总必须由用户明确开启。PMWorkspace 不应上报项目名、文件路径、prompt 内容、截图、brief 正文或客户数据。
+默认遥测是本地优先，只写入 `~/.pmworkspace/analytics/usage.jsonl`。远程匿名汇总必须由用户明确开启。PMWorkspace 不应上报项目名、文件路径、提示词内容、截图、产品简报正文或客户数据。
 
-## License
+## 许可证
 
 MIT

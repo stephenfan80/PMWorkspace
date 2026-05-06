@@ -1,8 +1,8 @@
 interface:
-  display_name: "PM Jobs"
-  short_description: "Jobs-style product questioning"
+  display_name: "产品追问"
+  short_description: "乔布斯式产品追问"
   brand_color: "#111E36"
-  default_prompt: "Use $pm-jobs to interrogate this product idea like a demanding product partner before any prototype is made."
+  default_prompt: "使用 $pm-jobs 像严格的产品合伙人一样追问这个想法，再进入原型设计。"
 
 policy:
   allow_implicit_invocation: true

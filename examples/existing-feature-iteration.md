@@ -1,40 +1,40 @@
-# Example: Existing Feature Iteration
+# 示例：现有功能迭代
 
-This is a fictional public example.
+这是一个虚构公开示例。
 
-## User Prompt
+## 用户提示
 
 ```text
-Use $pm-jobs to iterate an existing online feature, then use $pm-prototype-shotgun after the brief is aligned.
-I will provide current production screenshots of the subscription cancellation page.
-Current problem: users do not understand the difference between pause and cancel.
-Goal: reduce accidental cancellations while keeping cancellation easy to find.
-Do not change: account navigation and legal cancellation access.
-Output: revised screen plus confirmation result page.
+使用 $pm-jobs 梳理现有线上功能迭代，产品简报对齐后再使用 $pm-prototype-shotgun。
+我会提供订阅取消页的当前生产截图。
+当前问题：用户不理解“暂停”和“取消”的区别。
+目标：减少误取消，同时保持取消入口容易找到。
+不要改变：账号导航和依法取消入口。
+输出：优化后屏幕 + 确认结果页。
 ```
 
-## Expected Skill Behavior
+## 预期技能行为
 
-- Require current production screenshots before alignment.
-- Route to `Existing Feature Iteration` with secondary `Transaction Or Service Flow`.
-- Extract current hierarchy, primary actions, copy, and visual density.
-- Create a Quick or Standard Brief naming what changes and what stays.
-- Preserve production style outside the requested areas.
+- 对齐前要求当前生产截图。
+- 主路由到“现有功能迭代”，次路由到“交易或服务流程”。
+- 提取当前层级、主要动作、文案和视觉密度。
+- 创建快速版或标准版产品简报，说明改什么、保留什么。
+- 请求区域之外保留生产样式。
 
-## Example Decision Gates
+## 示例决策门槛
 
-- Change Type Gate: existing feature iteration, screenshots required.
-- Goal And Counter-Metric Gate: reduce accidental cancellation; do not hide cancellation.
-- Data And Feasibility Gate: no unsupported retention offer if backend does not support it.
+- 变化类型：现有功能迭代，需要截图。
+- 目标与反指标：减少误取消；不能隐藏取消入口。
+- 数据与可行性：如果后端不支持挽留优惠，就不展示相关能力。
 
-## Example Handoff
+## 示例交付清单
 
 ```text
-Prototype handoff:
-- Brief source: Screenshot set / v1 / Aligned
-- Scenario route: Existing Feature Iteration + Transaction Or Service Flow
-- Screens produced: Revised cancellation page, confirmation result page
-- Key assumptions: pause is available today
-- Not invented: no discount offer, no human callback, no new billing policy
-- PM decisions remaining: confirm exact pause duration choices
+原型交付清单：
+- 产品简报来源：截图组 / v1 / 已对齐
+- 场景路由：现有功能迭代 + 交易或服务流程
+- 已生成屏幕：优化后取消页、确认结果页
+- 关键假设：暂停订阅当前可用
+- 不可虚构：不展示折扣优惠、不展示人工回访、不展示新计费政策
+- PM 待决策：确认可选暂停时长
 ```

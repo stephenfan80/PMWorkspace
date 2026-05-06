@@ -10,7 +10,7 @@ Use this when the user provides a Zoon document URL or asks to collaborate throu
 - Read only what is needed for the user's current task.
 - Do not process existing comments unless the user asks.
 - For prototype tasks, image generation remains the final output, but product-plan alignment happens first.
-- Product briefs created after PM Jobs should be written to Zoon when a Zoon doc is available so the user can revise them before image generation.
+- 产品追问后创建的产品简报，应在有 Zoon 文档时写入 Zoon，方便用户在图片生成前修改。
 
 ## Connection Steps
 
@@ -32,12 +32,12 @@ Use this when the user provides a Zoon document URL or asks to collaborate throu
 - If the user asks for prototype images, first create or update the product brief and confirm alignment.
 - Keep the plan concise; do not replace images with a long PRD once alignment is complete.
 - If editing Zoon content, write new content as AI-authored additions where supported so the human can review or revise.
-- If a product brief exists in Zoon and the user asks for prototypes, re-read the latest snapshot before generating image prompts.
+- 如果 Zoon 中已有产品简报，且用户要求生成原型，先重新读取最新快照，再生成图片提示词。
 - Do not generate prototypes from a Zoon brief that has not been confirmed or explicitly approved as the source of truth.
 
-## Product Brief Creation
+## 产品简报创建
 
-Use this when PM Jobs produced a product brief and the user needs an editable online artifact. If the user supplied a Zoon doc, prefer writing the brief there automatically.
+当产品追问已经产出产品简报，且用户需要可在线编辑资产时使用。如果用户提供了 Zoon 文档，优先自动写入该文档。
 
 ### Existing Zoon Doc
 
@@ -61,8 +61,8 @@ POST <host>/api/public/documents
 Content-Type: application/json
 
 {
-  "title": "产品设计 Brief：<feature>",
-  "markdown": "<brief markdown>"
+  "title": "产品设计简报：<功能>",
+  "markdown": "<产品简报 Markdown>"
 }
 ```
 

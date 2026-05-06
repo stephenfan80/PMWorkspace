@@ -1,8 +1,8 @@
 interface:
-  display_name: "PM Handoff"
-  short_description: "Create PRD-ready product handoffs"
+  display_name: "产品交付"
+  short_description: "生成产品交付稿"
   brand_color: "#2563EB"
-  default_prompt: "Use $pm-handoff to turn this aligned brief and prototype direction into a reusable PRD-ready handoff."
+  default_prompt: "使用 $pm-handoff 把已对齐的产品简报和原型方向整理成可复用交付稿。"
 
 policy:
   allow_implicit_invocation: true

@@ -1,41 +1,41 @@
-# Example: Conversion Flow
+# 示例：转化流程
 
-This is a fictional public example.
+这是一个虚构公开示例。
 
-## User Prompt
+## 用户提示
 
 ```text
-Use $pm-prototype-shotgun to create 3 mobile-first directions for a course trial signup flow.
-Scenario: conversion flow
-User problem: learners want to know whether a course fits their level before leaving contact info.
-Goal: increase trial booking completion.
-Counter-metric: avoid low-intent bookings and complaint risk.
-Known data: course level, lesson outline, teacher availability, sample lesson clip.
-Output: signup page and booking result page.
+使用 $pm-prototype-shotgun 为课程试听报名流程创建 3 个移动端优先方向。
+场景：转化流程
+用户问题：学员在留下联系方式前，想知道课程是否适合自己的水平。
+目标：提升试听预约完成率。
+反指标：避免低意向预约和投诉风险。
+已知数据：课程等级、课程大纲、老师可约时间、试听片段。
+输出：报名页和预约结果页。
 ```
 
-## Expected Skill Behavior
+## 预期技能行为
 
-- Route to `Conversion Flow`.
-- Apply Value Exchange Gate before form design.
-- Show useful free value before contact input.
-- Keep required fields minimal and move optional precision later.
-- Explain what happens after booking only if that follow-up is real.
+- 路由到“转化流程”。
+- 表单设计前先检查价值交换。
+- 在联系方式输入前展示有用的免费价值。
+- 必填字段保持最少，把可选精度后置。
+- 只有后续跟进真实存在时，才解释预约后会发生什么。
 
-## Example Concept Directions
+## 示例方案方向
 
-- **Preview First:** show sample lesson and level fit before signup.
-- **Time First:** expose available slots first, then collect info.
-- **Fit Check:** ask one lightweight level question before recommending a trial.
+- **先给预览：** 报名前展示试听片段和等级匹配。
+- **先选时间：** 先展示可约时间，再收集信息。
+- **先做匹配：** 推荐试听前，先问一个轻量等级问题。
 
-## Example Handoff
+## 示例交付清单
 
 ```text
-Prototype handoff:
-- Brief source: Chat / v1 / Aligned
-- Scenario route: Conversion Flow
-- Screens produced: Trial signup page, booking result page
-- Key assumptions: sample lesson clip is available
-- Not invented: no guaranteed teacher match, no instant certificate, no payment
-- PM decisions remaining: choose whether level check is required or optional
+原型交付清单：
+- 产品简报来源：对话 / v1 / 已对齐
+- 场景路由：转化流程
+- 已生成屏幕：试听报名页、预约结果页
+- 关键假设：试听片段可用
+- 不可虚构：不保证老师匹配、不承诺即时证书、不展示付款
+- PM 待决策：等级测试是必填还是可选
 ```

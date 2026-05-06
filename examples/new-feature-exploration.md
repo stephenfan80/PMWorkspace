@@ -1,40 +1,40 @@
-# Example: New Feature Exploration
+# 示例：新功能探索
 
-This is a fictional public example.
+这是一个虚构公开示例。
 
-## User Prompt
+## 用户提示
 
 ```text
-Use $pm-jobs to clarify a new feature idea before design.
-Feature: Habit Match
-User problem: users want to build exercise habits but do not know which plan fits their schedule.
-Goal: increase first-week plan activation.
-Known constraints: only schedule, goal, and historical check-in data are available.
-Output: 3 prototype directions for the first screen and result screen.
+使用 $pm-jobs 在设计前澄清一个新功能想法。
+功能：习惯匹配
+用户问题：用户想建立运动习惯，但不知道哪个计划适合自己的时间安排。
+目标：提升第一周计划激活率。
+已知约束：只有时间安排、目标和历史打卡数据可用。
+输出：首屏和结果页的 3 个原型方向。
 ```
 
-## Expected Skill Behavior
+## 预期技能行为
 
-- Run first-use onboarding.
-- Route to `New Feature Exploration` with a secondary `Result Or Report Page`.
-- Ask only for missing high-impact context, such as target user and counter-metric.
-- Create a Standard Brief with current assumptions.
-- Propose distinct concept directions before image generation.
+- 运行首次使用引导。
+- 主路由到“新功能探索”，次路由到“结果或报告页”。
+- 只询问缺失的高影响上下文，例如目标用户和反指标。
+- 基于当前假设创建标准版产品简报。
+- 图片生成前先提出差异明确的方案方向。
 
-## Example Concept Directions
+## 示例方案方向
 
-- **Fast Fit:** shortest path to a recommended plan, optimized for activation.
-- **Confidence Report:** show why the recommendation fits, optimized for trust.
-- **Schedule First:** start from weekly availability, optimized for realism.
+- **快速匹配：** 用最短路径给出推荐计划，优化激活。
+- **信任报告：** 说明为什么这个推荐适合，优化信任。
+- **先排时间：** 从每周可用时间开始，优化真实可执行性。
 
-## Example Handoff
+## 示例交付清单
 
 ```text
-Prototype handoff:
-- Brief source: Chat / v1 / Aligned
-- Scenario route: New Feature Exploration + Result Or Report Page
-- Screens produced: Form/input screen, recommendation result screen
-- Key assumptions: users value schedule fit more than coaching personality
-- Not invented: no wearable sync, no AI coach chat, no guaranteed health result
-- PM decisions remaining: choose whether historical check-ins are required or optional
+原型交付清单：
+- 产品简报来源：对话 / v1 / 已对齐
+- 场景路由：新功能探索 + 结果或报告页
+- 已生成屏幕：表单/输入页、推荐结果页
+- 关键假设：用户更重视时间匹配，而不是教练人设
+- 不可虚构：不展示可穿戴设备同步、不展示 AI 教练聊天、不保证健康结果
+- PM 待决策：历史打卡数据是必需还是可选
 ```

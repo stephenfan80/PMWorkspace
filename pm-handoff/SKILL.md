@@ -1,19 +1,20 @@
 ---
 name: pm-handoff
 description: |
-  PMWorkspace handoff generator. Use when an aligned brief, chosen prototype direction,
-  PRD notes, Zoon doc, or product decision record should become PRD-ready, design-ready,
-  experiment-ready, or engineering handoff material with goals, scope, non-goals,
-  acceptance criteria, metrics, risks, open decisions, and reusable next steps.
+  PMWorkspace 交付稿生成器。用于把已对齐的产品简报、选定原型方向、PRD 笔记、
+  Zoon 文档或产品决策记录，整理成适合 PRD、设计、实验验证或研发使用的交付稿，
+  包含目标、范围、不做什么、验收标准、指标、风险、待决策项和可复用下一步。
 ---
 
-# PM Handoff
+# 产品交付稿
 
-Turn the chosen product direction into a reusable delivery artifact without pretending every unknown is solved.
+把选定产品方向整理成可复用交付稿，同时明确保留未解决的问题。
+
+Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. For Chinese users, call the artifact `交付稿` and use Chinese headings. Keep `PRD` when referring to the document type.
 
 ## Preamble
 
-Run platform checks and usage logging:
+运行平台检查和使用记录：
 
 ```bash
 _PMW_BIN=""
@@ -26,34 +27,34 @@ done
 
 ## Workflow
 
-1. Read the latest aligned brief, strategy decisions, and prototype manifest if available.
-2. Choose handoff type: PRD-ready, design-ready, experiment-ready, or engineering-ready.
-3. Include goal, target user, problem, scenario, chosen direction, scope, non-goals, acceptance criteria, metrics, risks, dependencies, and open decisions.
-4. Keep unsupported capabilities under `不可虚构 / Not invented`.
+1. 读取最新已对齐的产品简报、策略决策，以及可用的原型清单。
+2. 选择交付类型：适合 PRD、适合设计、适合实验验证或适合研发。
+3. 包含目标、目标用户、问题、场景、选定方向、范围、不做什么、验收标准、指标、风险、依赖和待决策项。
+4. Keep unsupported capabilities under `不可虚构`.
 5. Log final delivery decisions when platform scripts are available.
 
-## Output Shape
+## 输出结构
 
 ```markdown
-# PMWorkspace Handoff: <feature>
+# PMWorkspace 交付稿：<功能名>
 
-## Summary
+## 摘要
 
-## Goal And Metrics
+## 目标与指标
 
-## User / Job / Scenario
+## 用户 / 任务 / 场景
 
-## Chosen Direction
+## 选定方向
 
-## Scope
+## 范围
 
-## Non-Goals
+## 不做什么
 
-## Acceptance Criteria
+## 验收标准
 
-## Experiment Or Rollout Notes
+## 实验或上线说明
 
-## Risks And Open Decisions
+## 风险与待决策
 
-## Not Invented
+## 不可虚构
 ```

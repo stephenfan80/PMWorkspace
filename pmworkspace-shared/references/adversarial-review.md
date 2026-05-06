@@ -1,28 +1,28 @@
-# Adaptive Adversarial Review
+# 自适应对抗审查
 
-Use this before deciding the prototype strategy. The goal is to expose weak premises and convert them into better design choices. Do not run a fixed checklist. Choose the lenses that fit the product.
+决定原型策略前使用。目标是暴露薄弱前提，并把它们转成更好的设计选择。不要跑固定清单，要选择适合当前产品的审查视角。中文用户场景下，输出标题和字段全部使用中文。
 
-## Review Shape
+## 审查结构
 
-1. State the three strongest premises implied by the current direction.
-2. Select 3-5 challenge lenses from the library below.
-3. For each lens, name the risk in one sentence.
-4. Convert the review into prototype decisions.
+1. 说出当前方向隐含的三个最强前提。
+2. 从下面的问题库中选择 3-5 个审查视角。
+3. 每个视角用一句话说明风险。
+4. 把审查结果转成原型决策。
 
-Use this format:
+使用这个格式：
 
 ```text
-Adversarial review:
-- Premise 1:
-- Premise 2:
-- Premise 3:
-- Lenses used:
-- Prototype decisions:
-  - Show first:
-  - Remove or reduce:
-  - Move later:
-  - Label as estimated/uncertain:
-  - Do not invent:
+对抗审查：
+- 前提 1：
+- 前提 2：
+- 前提 3：
+- 使用视角：
+- 原型决策：
+  - 优先展示：
+  - 删除或弱化：
+  - 后置：
+  - 标注为估算/不确定：
+  - 不可虚构：
 ```
 
 ## Challenge Lens Library
@@ -131,25 +131,25 @@ Use when a design system or production constraint is named.
 - Are colors, typography, spacing, and interaction patterns plausible for production?
 - Does the screen avoid decorative filler that would not ship?
 
-## Product-Type Defaults
+## 产品类型默认审查视角
 
 Use these as starting points, then adjust.
 
-- **Conversion:** value exchange, friction cost, trust/privacy, metric gaming.
-- **Result/report:** data credibility, free information boundary, edge cases, next-step clarity.
-- **Internal tool:** status quo competition, repeated task speed, error recovery, permission boundaries.
-- **Transaction/service:** feasibility, eligibility, fulfillment state, exception handling.
-- **Content/community:** specific user, motivation loop, quality signal, moderation risk.
-- **Dashboard/analytics:** decision usefulness, data freshness, comparison baseline, alert fatigue.
-- **Lead capture:** value exchange, free information boundary, friction cost, trust/privacy, business conflict.
+- **转化：** 价值交换、摩擦成本、信任/隐私、指标游戏。
+- **结果/报告：** 数据可信度、免费信息边界、边界情况、下一步清晰度。
+- **内部工具：** 现状替代方案、重复任务效率、错误恢复、权限边界。
+- **交易/服务：** 可行性、资格判断、履约状态、异常处理。
+- **内容/社区：** 具体用户、动机循环、质量信号、治理风险。
+- **看板/数据分析：** 决策有用性、数据新鲜度、对比基线、提醒疲劳。
+- **留资：** 价值交换、免费信息边界、摩擦成本、信任/隐私、业务冲突。
 
-## Design Translation
+## 转成设计选择
 
 The review is useful only if it changes the prototype. Convert findings into choices:
 
-- Put the strongest user value before the first costly action.
-- Remove fields that do not affect the first result.
-- Move optional precision to result pages, drawers, filters, or follow-up steps.
-- Label estimates and assumptions where trust matters.
-- Explain human follow-up only when it is real.
-- Do not add buttons, functions, data, or promises that the product cannot support.
+- 把最强用户价值放到第一个高成本动作之前。
+- 删除不影响第一结果的字段。
+- 把可选精度放到结果页、抽屉、筛选器或后续步骤。
+- 在信任敏感处标注估算和假设。
+- 只有真实存在人工跟进时，才解释人工跟进。
+- 不添加产品无法支持的按钮、功能、数据或承诺。

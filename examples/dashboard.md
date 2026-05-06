@@ -1,40 +1,40 @@
-# Example: Dashboard Or Analytics
+# 示例：看板或数据分析
 
-This is a fictional public example.
+这是一个虚构公开示例。
 
-## User Prompt
+## 用户提示
 
 ```text
-Use $pm-jobs to define a dashboard prototype brief, then use $pm-prototype-shotgun after alignment.
-Decision this dashboard supports: content operators need to decide which article clusters need intervention today.
-Audience: content operations lead.
-Metrics available: traffic, completion rate, complaint count, freshness, and moderation status.
-Action after seeing data: open cluster detail, assign owner, or suppress recommendation.
-Output: dashboard + drilldown screen.
+使用 $pm-jobs 定义看板原型产品简报，对齐后再使用 $pm-prototype-shotgun。
+这个看板支持的决策：内容运营需要判断今天哪些文章簇需要干预。
+使用者：内容运营负责人。
+可用指标：流量、完读率、投诉数、新鲜度和审核状态。
+看完数据后的动作：打开文章簇详情、分配负责人或暂停推荐。
+输出：看板 + 下钻页。
 ```
 
-## Expected Skill Behavior
+## 预期技能行为
 
-- Route to `Dashboard Or Analytics`.
-- Start from the decision, not chart variety.
-- Require data freshness and comparison baseline.
-- Avoid charts that do not change an action.
-- Design stale, empty, and alert states if relevant.
+- 路由到“看板或数据分析”。
+- 从决策开始，而不是从图表种类开始。
+- 要求数据新鲜度和对比基线。
+- 避免不会改变动作的图表。
+- 如相关，设计过期、空数据和提醒状态。
 
-## Example Concept Directions
+## 示例方案方向
 
-- **Action Queue:** prioritized clusters with owner assignment.
-- **Risk Map:** traffic versus complaint risk, optimized for triage.
-- **Freshness Monitor:** stale content and moderation status first.
+- **行动队列：** 按优先级展示文章簇，并支持分配负责人。
+- **风险地图：** 对比流量和投诉风险，服务快速分诊。
+- **新鲜度监控：** 优先展示过期内容和审核状态。
 
-## Example Handoff
+## 示例交付清单
 
 ```text
-Prototype handoff:
-- Brief source: Chat / v1 / Aligned
-- Scenario route: Dashboard Or Analytics
-- Screens produced: Dashboard, cluster drilldown
-- Key assumptions: operator can assign owners from this screen
-- Not invented: no automated suppression unless existing system supports it
-- PM decisions remaining: confirm alert threshold and data freshness SLA
+原型交付清单：
+- 产品简报来源：对话 / v1 / 已对齐
+- 场景路由：看板或数据分析
+- 已生成屏幕：看板、文章簇下钻页
+- 关键假设：运营可以在此页面分配负责人
+- 不可虚构：除非现有系统支持，否则不展示自动暂停推荐
+- PM 待决策：确认提醒阈值和数据新鲜度 SLA
 ```

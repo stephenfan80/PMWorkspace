@@ -1,20 +1,22 @@
-# Prototype Quality Review
+# 原型质量检查
 
 Use this after each image generation batch and before the final response. The goal is to catch beautiful but unusable prototype output.
 
-## Review The Image Against The Brief
+For Chinese users, report the final check with Chinese labels such as `质量检查`、`已通过`、`需要重出`、`不可虚构`.
+
+## 对照产品简报检查图片
 
 Check:
 
-- Does the screen match the aligned product brief and scenario route?
-- Does it honor the mobile-first canvas decision, or clearly justify desktop?
-- Does it solve the stated user task?
-- Does it optimize the primary goal without violating the counter-metric?
-- Does it preserve required elements from the current baseline for existing-feature iteration?
-- Does it avoid unsupported functions, fake data, fake buttons, or impossible promises?
-- Does it make estimates, uncertainty, eligibility, or human follow-up honest?
+- 屏幕是否匹配已对齐的产品简报和场景路由？
+- 是否遵守移动端优先的画布决策，或清楚说明为什么使用桌面端？
+- 是否解决了声明的用户任务？
+- 是否优化主目标，同时没有违反反指标？
+- 现有功能迭代中，是否保留了当前基线里必须保留的元素？
+- 是否避免了不支持的功能、假数据、假按钮或无法兑现的承诺？
+- 是否诚实展示了估算、不确定性、资格判断或人工跟进？
 
-## Review The Image Against AutoDesign
+## 对照 AutoDesign 检查图片
 
 AutoDesign is the default production baseline. Check:
 
@@ -23,41 +25,41 @@ AutoDesign is the default production baseline. Check:
 - Layout uses 8-point structure and 4-point detail rhythm.
 - Buttons, forms, NavBar, cards, tags, result modules, and bottom bars look shippable.
 - There is one dominant primary action unless comparison is the point.
-- No excessive gradients, over-rounded cards, heavy shadows, decorative filler, or marketing-poster layout.
+- 没有过度渐变、过圆卡片、重阴影、装饰性填充或营销海报式布局。
 - No overlapping text, cramped rows, broken alignment, distorted assets, or unreadable numbers.
 
-## Review Multi-Scheme Work
+## 检查多方案任务
 
-- Schemes must differ by product strategy or information architecture, not only color.
-- Each scheme should have a clear name and tradeoff.
-- Each scheme/screen must be delivered as its own image, not merged into a collage or comparison board.
-- Form/result pairs must share data, tone, and visual system.
-- If a scheme repeats another with minor cosmetic changes, revise the weaker concept.
+- 方案必须在产品策略或信息架构上不同，不能只是换颜色。
+- 每个方案都要有清楚的名称和取舍。
+- 每个方案/屏幕必须单独交付一张图，不能合成拼贴图或比较板。
+- 表单/结果页组合必须共享一致的数据、语气和视觉系统。
+- 如果某个方案只是另一个方案的轻微视觉变化，修改较弱的概念。
 
-## If The Prototype Fails
+## 如果原型不合格
 
 If a failure is material:
 
-1. Name the failure briefly.
-2. Revise the prompt using the aligned brief.
-3. Regenerate the affected screen only.
-4. Do not ask the user to accept a prototype that violates feasibility, trust, or design-system quality.
+1. 简短指出问题。
+2. 基于已对齐的产品简报修改图片提示词。
+3. 只重新生成受影响的屏幕。
+4. 不要让用户接受违反可行性、信任或设计系统质量的原型。
 
-## Handoff Manifest
+## 交付清单
 
 After acceptable images are produced, keep the final note compact:
 
 ```text
-Prototype handoff:
-- Brief source:
-- Brief version/status:
-- Scenario route:
-- Screens produced:
-- Concept direction:
-- QA status:
-- Key assumptions:
-- Not invented:
-- PM decisions remaining:
+原型交付清单：
+- 产品简报来源：
+- 简报版本 / 状态：
+- 场景路由：
+- 已生成屏幕：
+- 方案方向：
+- 质量检查：
+- 关键假设：
+- 不可虚构：
+- PM 待决策：
 ```
 
-Keep the handoff focused on what another PM, designer, or agent needs to continue the work. Do not include long rationale unless the user asks for it.
+交付说明只保留下一位产品经理、设计师或助手继续工作所需的信息。除非用户要求，不要写长篇理由。

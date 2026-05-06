@@ -2,18 +2,18 @@
 set -euo pipefail
 
 cat <<'EOF'
-PMWorkspace installed.
+PMWorkspace 已安装。
 
-Start here after restarting Codex:
+重启 Codex 后，从这里开始：
 
-  Use $pm-workspace to show the welcome guide and help me choose a workflow.
+  使用 $pm-workspace 显示欢迎引导，并帮我选择合适的产品工作流。
 
-Useful first prompts:
+常用第一句话：
 
-  Use $pm-workspace to clarify this product idea: <one sentence>
   使用 $pm-workspace 帮我梳理一个新产品想法：<一句话想法>
+  使用 $pm-workspace 读取这份 PRD / Zoon 文档，并生成可确认的产品简报：<链接或内容>
   使用 $pm-workspace 帮我对这个功能做 3 个移动端原型方向，每个方案单独出图：<功能描述>
 
-PMWorkspace flow:
-  pm-jobs -> pm-strategy-review -> pm-brief -> pm-prototype-shotgun -> pm-handoff
+PMWorkspace 工作流：
+  产品追问 -> 策略审查 -> 产品简报 -> 原型方案 -> 交付稿
 EOF

@@ -1,58 +1,60 @@
-# Intake
+# 信息收集
 
-Use this when first-use onboarding and PM Jobs show that the user gave a rough idea without enough context to design safely. Ask the fewest questions needed; do not turn prototype work into a long workshop.
+当首次引导和产品追问发现用户只给了粗略想法、上下文不足以安全设计时，使用本文件。只问必要问题，不把原型任务变成长工作坊。
 
-## Minimum Context To Extract
+For Chinese users, use Chinese labels in every summary and question. Keep only necessary terms such as `PRD`, `Zoon`, `image-2`, `API`, and `token`.
 
-- Product or feature name
-- Change type: new feature or existing feature iteration
-- Current production screenshots or screen recording when iterating an existing feature
-- Scenario route and expected output shape
-- Target user and moment of use
-- Primary goal or metric
-- Counter-metric or guardrail
-- Current problem or evidence
-- Required screens and count
-- Device size and platform
-- Design baseline: AutoDesign by default, or user-provided stronger design system
-- Data that can realistically be shown
-- Operational constraints: human follow-up, fulfillment, support, compliance
+## 最小上下文
 
-## Fast Question Set
+- 产品或功能名称
+- 变化类型：新功能或现有功能迭代
+- 现有功能迭代时的当前线上截图或录屏
+- 场景路由和期望输出形态
+- 目标用户和使用时刻
+- 主目标或指标
+- 反指标或护栏
+- 当前问题或证据
+- 所需屏幕和数量
+- 设备尺寸和平台
+- 设计基线：默认 AutoDesign，或用户提供的更强设计系统
+- 可以真实展示的数据
+- 运营约束：人工跟进、履约、客服、合规
 
-Ask at most three questions in one turn:
+## 快速问题
 
-1. Is this a new feature or an iteration on an existing online feature?
-2. If it is an existing-feature iteration, can you provide the current production screenshots or screen recording?
-3. What is the primary metric this prototype should improve, and what must not get worse?
+一轮最多问三个问题：
 
-If the user does not answer, create a Fast Alignment Brief with explicit assumptions and ask the user to approve those assumptions before image generation.
+1. 这是新功能，还是现有线上功能迭代？
+2. 如果是现有功能迭代，可以提供当前线上截图或录屏吗？
+3. 这个原型最应该提升哪个指标？同时什么不能变差？
 
-## Default Assumptions
+如果用户没有回答，创建“快速对齐产品简报”，明确列出假设，并在生成图片前请用户确认。
 
-- Mobile-first screen unless the user says otherwise.
-- One dominant action per screen.
-- Show a useful preview before asking for sensitive input.
-- Put complex personalization, confirmations, and human follow-up on the result page.
-- Prefer realistic product UI over marketing-style presentation.
+## 默认假设
 
-## Input Summary Template
+- 用户没有特别说明时，默认移动端优先。
+- 每个屏幕只保留一个主要动作。
+- 在索取敏感信息前，先展示有价值的预览。
+- 复杂个性化、确认信息和人工跟进，优先放到结果页处理。
+- 优先使用真实产品界面，不做营销海报式展示。
+
+## 输入摘要模板
 
 Summarize the task before product-plan alignment:
 
 ```text
-Alignment status: <Needs clarification / Ready for PM confirmation / Aligned>
-Change type: <new feature / existing feature iteration / unclear>
-Existing baseline: <screenshots provided / missing / not applicable>
-Scenario route: <new feature / existing iteration / conversion / result-report / dashboard / internal tool / transaction-service / content-community / screenshot revision>
-Goal: <metric / behavior>
-Counter-metric: <trust / quality / complaint / retention / completion / cost / compliance>
-Audience: <user segment>
-Current friction: <problem>
-Hook: <why the user would continue>
-Free value: <shown before input>
-Gated value: <shown after input>
-Constraints: <business / data / legal / operational>
-Screens: <list>
-Visual reference: <screenshot / brand style>
+对齐状态：<需要补充 / 待确认 / 已对齐>
+变化类型：<新功能 / 现有功能迭代 / 不明确>
+现状基线：<已提供截图 / 缺失 / 不适用>
+场景路由：<新功能 / 现有迭代 / 转化 / 结果报告 / 看板 / 内部工具 / 交易服务 / 内容社区 / 截图修改>
+目标：<指标 / 用户行为>
+反指标：<信任 / 质量 / 投诉 / 留存 / 完成率 / 成本 / 合规>
+目标用户：<用户分群>
+当前阻力：<问题>
+继续理由：<用户为什么愿意继续>
+前置信息价值：<输入前先展示什么>
+后置信息价值：<输入后展示什么>
+约束：<业务 / 数据 / 法务 / 运营>
+屏幕：<列表>
+视觉参考：<截图 / 品牌风格>
 ```

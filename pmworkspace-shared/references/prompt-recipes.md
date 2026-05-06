@@ -1,90 +1,90 @@
-# Prompt Recipes
+# 启动话术
 
-Use these recipes when the user asks how to start, when the input is vague, or when the agent needs to suggest a compact next prompt. These are user-facing starters, not rigid templates.
+当用户不知道如何开始、输入很模糊，或需要给用户一个可直接复制的下一句话时，使用这些话术。它们是面向用户的启动句，不是固定模板。
 
-## New Feature
+## 新功能
 
 ```text
-Use $pm-jobs to clarify this new feature idea before design.
-Feature: <name>
-User problem: <who has what problem>
-Goal: <primary metric or behavior>
-Known constraints: <data / policy / operations / design system>
-Output: <brief only / one screen / screen pair / 3 directions>
+使用 $pm-jobs 在设计前先澄清这个新功能想法。
+功能名称：<名称>
+用户问题：<谁遇到了什么问题>
+目标：<希望提升的指标或行为>
+已知约束：<数据 / 政策 / 运营 / 设计系统>
+输出：<只要产品简报 / 1 个屏幕 / 2 个屏幕 / 3 个方向>
 ```
 
-## Existing Feature Iteration
+## 现有功能迭代
 
 ```text
-Use $pm-jobs to iterate an existing online feature, then use $pm-prototype-shotgun after the brief is aligned.
-I will provide current production screenshots.
-Current problem: <what is not working>
-Goal: <metric or user behavior>
-Do not change: <parts that must stay>
-Output: <revised screen / screen pair / 3 options>
+使用 $pm-jobs 梳理现有线上功能的迭代，再在产品简报对齐后使用 $pm-prototype-shotgun。
+我会提供当前线上截图。
+当前问题：<哪里不好用>
+目标：<指标或用户行为>
+不要改变：<必须保留的部分>
+输出：<优化后的单屏 / 两个关联屏幕 / 3 个方案>
 ```
 
-## Zoon Product Doc
+## Zoon 产品文档
 
 ```text
-Use $pm-workspace with this Zoon doc.
-First align the product brief in Zoon, then generate image-2 prototypes after I confirm.
-Doc: <Zoon URL>
-Output: <screen list or scheme count>
+使用 $pm-workspace 处理这份 Zoon 文档。
+先在 Zoon 里对齐产品简报，我确认后再生成 image-2 原型图。
+文档：<Zoon URL>
+输出：<屏幕列表或方案数量>
 ```
 
-## Multi-Scheme Prototype
+## 多方案原型
 
 ```text
-Use $pm-prototype-shotgun to create multiple prototype directions from an Aligned PMWorkspace brief.
-Scenario: <conversion / result report / dashboard / internal tool / service flow / content community>
-Goal: <primary metric>
-Counter-metric: <what must not get worse>
-Please confirm concept directions before image-2 generation.
-Output: <number of directions x screen list>; generate each scheme/screen as a separate image.
+使用 $pm-prototype-shotgun 基于已对齐的 PMWorkspace 产品简报创建多个原型方向。
+场景：<转化 / 结果报告 / 看板 / 内部工具 / 服务流程 / 内容社区>
+目标：<主指标>
+反指标：<不能变差的指标或体验>
+请先确认方案方向，再生成 image-2 原型图。
+输出：<方向数量 x 屏幕列表>；每个方案、每个屏幕都单独生成一张图。
 ```
 
-## Chinese Quick Start
+## 中文快速开始
 
 ```text
-使用 $pm-workspace 帮我把这个想法路由到 PMWorkspace 工作台：先用 $pm-jobs 梳理产品 brief，并在我确认后用 $pm-prototype-shotgun 生成 image-2 原型图。
+使用 $pm-workspace 帮我把这个想法路由到 PMWorkspace 工作台：先用 $pm-jobs 梳理产品简报，并在我确认后用 $pm-prototype-shotgun 生成 image-2 原型图。
 产品想法：<一句话描述>
 目标用户：<谁>
 用户问题：<他们现在卡在哪里>
 目标：<希望提升的行为或指标>
 约束：<数据 / 业务 / 法务 / 设计系统 / 上线范围>
-输出：<brief only / 1 个屏幕 / 2 个屏幕 / 3 个方案>
+输出：<只要产品简报 / 1 个屏幕 / 2 个屏幕 / 3 个方案>
 要求：每个方案和屏幕单独生成一张图，不要合成在同一张图里。
 ```
 
-## Screenshot Feedback
+## 截图反馈
 
 ```text
-Use $pm-prototype-shotgun to revise this prototype from my annotated screenshot.
-Red boxes mean: <remove / reduce / move / revise>
-Green boxes mean: <keep / simplify / strengthen>
-Product intent changed: <yes / no>
-Output: <revised screen only / plus corresponding result page>
+使用 $pm-prototype-shotgun 根据我的标注截图修改这个原型。
+红框表示：<删除 / 弱化 / 移动 / 修改>
+绿框表示：<保留 / 简化 / 强化>
+产品意图是否改变：<是 / 否>
+输出：<只修改当前屏幕 / 同时补充对应结果页>
 ```
 
-## Dashboard Or Analytics
+## 看板或数据分析
 
 ```text
-Use $pm-jobs to define a dashboard prototype brief, then use $pm-prototype-shotgun after alignment.
-Decision this dashboard supports: <decision>
-Audience: <role>
-Metrics available: <metrics and freshness>
-Action after seeing data: <what user should do>
-Output: <one dashboard / dashboard + drilldown>
+使用 $pm-jobs 定义看板原型的产品简报，对齐后再使用 $pm-prototype-shotgun。
+这个看板支持的决策：<决策>
+使用者：<角色>
+可用指标：<指标和新鲜度>
+看完数据后的动作：<用户应该做什么>
+输出：<一个看板 / 看板 + 下钻页>
 ```
 
-## Internal Tool
+## 内部工具
 
 ```text
-Use $pm-jobs to define this internal tool workflow, then use $pm-prototype-shotgun after alignment.
-Repeated task: <task>
-Role: <operator / support / reviewer / admin>
-Current workflow: <current workaround>
-Failure modes: <empty / stale / error / permission / conflict>
-Output: <workflow screen / queue + detail / status console>
+使用 $pm-jobs 定义这个内部工具流程，对齐后再使用 $pm-prototype-shotgun。
+重复任务：<任务>
+角色：<运营 / 客服 / 审核员 / 管理员>
+当前流程：<现在的临时做法>
+失败状态：<空数据 / 数据过期 / 报错 / 权限不足 / 冲突>
+输出：<流程页 / 队列 + 详情 / 状态控制台>
 ```

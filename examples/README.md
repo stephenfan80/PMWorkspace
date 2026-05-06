@@ -1,13 +1,13 @@
-# Examples
+# 示例
 
-These fictional examples show how to use `PMWorkspace` across common product prototype scenarios.
+这些虚构示例展示 `PMWorkspace` 在常见产品原型场景中的用法。
 
-| Example | Best For | Output Shape |
+| 示例 | 适合场景 | 输出形态 |
 |---|---|---|
-| `new-feature-exploration.md` | Validating a new idea before UI design | Brief + concept directions + prototype pair |
-| `existing-feature-iteration.md` | Improving a shipped screen or flow | Screenshot-grounded brief + revised screen |
-| `conversion-flow.md` | Asking for signup, contact, booking, payment, or permission | Form/input screen + result/confirmation screen |
-| `dashboard.md` | Helping a role monitor, compare, and decide | Dashboard + optional drilldown |
-| `screenshot-feedback-iteration.md` | Revising a generated or production screenshot | Revised screen only unless another screen is requested |
+| `new-feature-exploration.md` | UI 设计前验证新想法 | 产品简报 + 方案方向 + 原型组合 |
+| `existing-feature-iteration.md` | 优化已上线屏幕或流程 | 基于截图的产品简报 + 优化后屏幕 |
+| `conversion-flow.md` | 注册、留资、预约、付款或授权 | 表单/输入页 + 结果/确认页 |
+| `dashboard.md` | 帮助角色监控、对比和决策 | 看板 + 可选下钻页 |
+| `screenshot-feedback-iteration.md` | 修改已生成或生产截图 | 默认只输出修改后屏幕，除非用户要求补充其他屏幕 |
 
-Generation rule: default mobile-first canvas is iPhone 17 portrait `402 x 874`; each scheme and each screen should be produced as a separate image. Use multiple images for multi-scheme work, not one combined comparison board.
+生成规则：默认移动端优先，画布为 iPhone 17 竖屏 `402 x 874`；每个方案、每个屏幕都应单独生成一张图。多方案任务输出多张图，不合成一张比较板。

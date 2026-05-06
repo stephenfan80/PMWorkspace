@@ -32,7 +32,7 @@ done
 3. Read `../pmworkspace-shared/references/decision-question-mode.md`.
 4. Select 3-5 challenge lenses relevant to the scenario.
 5. Present concrete strategy choices. Do not silently change scope.
-6. 把“需要 PM 拍板”的点转成选择题；一次最多 3 个，超过 3 个分批问。
+6. 把“需要 PM 拍板”的点转成选择题；每轮只展开一个完整 `D`，其余只提示后续标题队列。
 7. Log accepted strategy decisions with `pmw-log question` and `pmw-log decision` when platform scripts are available.
 
 ## Review Lenses

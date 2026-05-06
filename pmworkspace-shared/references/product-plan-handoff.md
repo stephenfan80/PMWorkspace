@@ -29,7 +29,7 @@ For Chinese users, call this artifact `产品简报` in user-facing output. Keep
 
 快速对齐也必须先确认最少前提：通常只列 1-3 条假设和一个关键确认问题。用户确认前，状态保持 `待确认`。
 
-如果用户已经提供完整 Zoon 产品文档，创建简短对齐摘要，并把最新 Zoon 快照作为事实来源。否则产品简报生成后默认创建 Zoon 在线文档，供用户修改对齐。
+如果用户已经提供完整 Zoon 产品文档，创建简短对齐摘要，并把最新 Zoon 快照作为事实来源。否则产品简报生成后默认创建 Zoon 在线文档，供用户修改对齐。创建或更新成功后，自动在 Codex 内置浏览器中打开可编辑 URL。
 
 ## 版本与状态
 
@@ -40,7 +40,8 @@ For Chinese users, call this artifact `产品简报` in user-facing output. Keep
 - `信息来源`：对话、现有 Zoon 文档、新建 Zoon 文档、截图组，或用户提供的 PRD。
 - `最近决策`：用户最新确认过的产品/设计决策。
 - `已确认前提`：用户明确同意、修改后同意，或批准按假设继续的前提。
-- `Zoon 文档`：产品简报对应的在线协作文档 URL；创建失败时写“暂未创建”。
+- `Zoon 文档`：产品简报对应的在线协作文档 URL；创建失败时写“创建失败”，并保留本地 Markdown。
+- `浏览器打开状态`：`已打开`、`打开失败，可手动打开`，或 `未尝试（说明原因）`。
 - `线上参考状态`：已提供线上参考、无线上参考已确认、缺失待补充，或不适用。
 
 ## 简报深度
@@ -267,6 +268,7 @@ Add only the modules that fit the product. Do not include all modules by default
 
 - 除非用户要求新建文档，否则把产品简报追加到现有文档。
 - 使用 Zoon 工作流和追加操作。
+- 追加成功后，自动在 Codex 内置浏览器中打开该 Zoon 文档。
 - 告诉用户：现有文档现在是下一步原型的事实来源。
 - 图片生成前，请用户在对话中确认，或编辑 Zoon 产品简报。
 - 如果用户在 Zoon 中改变方向，递增产品简报版本，并重新运行相关决策门槛。
@@ -275,6 +277,7 @@ Add only the modules that fit the product. Do not include all modules by default
 
 - 默认使用 `pmw-zoon create --title "产品设计简报：<功能名>"` 新建 Zoon 文档。
 - 创建成功后，用 `pmw-project link-zoon <url>` 保存到本地项目记录。
+- 创建成功后，自动在 Codex 内置浏览器中打开可编辑 URL，方便用户直接编辑。
 - 只把返回的可编辑 `url` 发给用户，不展示 API 原始响应。
 - 不暴露 `ownerSecret`、原始 token 或 API 响应内部信息。
 
@@ -282,6 +285,11 @@ Add only the modules that fit the product. Do not include all modules by default
 
 - 在对话中提供产品简报 Markdown。
 - 简短说明“Zoon 创建失败，可稍后重试”，并继续保存本地资产。
+
+如果 Zoon 已创建但浏览器打开失败：
+
+- 仍返回 Zoon URL。
+- 写明 `浏览器打开状态：打开失败，可手动打开`，并保持 Zoon 文档字段为已创建的 URL。
 
 ## 生成原型前
 

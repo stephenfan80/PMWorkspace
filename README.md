@@ -19,7 +19,7 @@ Update check + state logging
 -> D decision questions for PM tradeoffs, one at a time
 -> Online reference gate for new pages that continue production flows
 -> Aligned product brief
--> Zoon online brief for human edits
+-> Zoon online brief for human edits, auto-opened in the Codex built-in browser
 -> Mobile-first image-2 prototype exploration
 -> Prototype QA
 -> PRD/design/experiment handoff

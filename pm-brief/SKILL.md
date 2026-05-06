@@ -37,7 +37,12 @@ done
 7. 包含事实来源、版本、确认状态、工作目标模式、已确认前提、场景路由、页面类型、线上参考需求、线上参考状态、用户任务、目标、反指标、约束、不可虚构项和 PM 决策项。
 8. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
 9. Save the brief with `pmw-log brief <name>` when platform scripts are available.
-10. If a Zoon URL is already available, append the brief with `pmw-zoon append --url <url>`; otherwise, when `zoon_auto_create` is true, create one with `pmw-zoon create --title "产品设计简报：<功能名>"`.
+10. Create or update the Zoon online brief by default:
+    - If a Zoon URL is already available, append the brief with `pmw-zoon append --url <url>`.
+    - If no Zoon URL exists and `zoon_auto_create` is not explicitly disabled, create one with `pmw-zoon create --title "产品设计简报：<功能名>"`.
+    - After a create or append succeeds, automatically open the editable Zoon URL in the Codex built-in browser when browser tools are available. Do not use HTML, local files, or a macOS default-browser fallback as a substitute for the Zoon online brief.
+    - If browser opening fails, still return the editable URL and mark the open status as `打开失败，可手动打开`.
+    - Do not leave the Zoon field as a passive uncreated state. If Zoon is disabled or creation fails, write `未启用（原因）` or `创建失败（原因）`.
 
 ## Alignment Rule
 
@@ -59,6 +64,7 @@ Return the smallest useful brief and end with:
 - 线上参考状态：
 - 已保存资产：
 - Zoon 在线简报：
+- 浏览器打开状态：
 - 项目名称：
 - 当前 D / 后续 D 队列：
 - 建议下一步：

@@ -12,9 +12,11 @@ PMWorkspace follows a gstack-inspired workbench model:
 
 ```text
 Update check + state logging
--> PM Jobs product interrogation
--> Strategy review when needed
--> Decision questions for PM tradeoffs
+-> Work goal mode
+-> Scenario routing
+-> Q diagnostics, one question at a time
+-> Premise confirmation
+-> D decision questions for PM tradeoffs
 -> Online reference gate for new pages that continue production flows
 -> Aligned product brief
 -> Zoon online brief for human edits
@@ -23,7 +25,7 @@ Update check + state logging
 -> PRD/design/experiment handoff
 ```
 
-The core rule is simple: define the product problem before generating prototype images.
+The core rule is simple: define the product problem, goals, counter-metrics, constraints, and premises before generating prototype images.
 
 ## Skill Suite
 
@@ -49,6 +51,8 @@ Output: <brief only / one screen / screen pair / 3 directions / handoff>
 ```
 
 For prototype work, PMWorkspace defaults to mobile-first iPhone 17 portrait `402 x 874`. Desktop is used only when the user asks for it or when a dashboard/internal tool truly needs large-screen density.
+
+Prototype work is locked to image-2 / image generation unless the user explicitly asks for HTML, an interactive web prototype, or frontend implementation. If the product brief is not `Aligned`, PMWorkspace should ask the next diagnostic or decision question instead of producing images, HTML, or a long plan.
 
 ## Install
 

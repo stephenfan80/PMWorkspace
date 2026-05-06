@@ -14,6 +14,18 @@ PMWorkspace 是产品工作台，用于把原始产品上下文沉淀成可复�
 
 Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. For Chinese users, use Chinese headings, labels, status values, and recommendations; keep English only for skill ids, commands, file paths, and precise technical terms such as `token`, `API`, `PRD`, `Zoon`, `image-2`, and `URL`.
 
+## Product Workbench State Machine
+
+PMWorkspace is not a prototype shortcut. It must first clarify product value, goals, counter-metrics, constraints, and premises, then turn aligned product judgment into image-2 prototypes.
+
+Use this state machine for prototype-related work:
+
+```text
+工作目标模式 -> 场景路由 -> Q 诊断 -> 前提确认 -> D 拍板 -> 产品简报 -> image-2 原型
+```
+
+If any required step is incomplete, route to `$pm-jobs` or `$pm-brief` instead of generating prototypes.
+
 ## Platform Preamble
 
 Run this before the workflow when shell access is available:
@@ -55,13 +67,19 @@ If the user provides a product task in the same message, skip the welcome menu a
 ## Operating Rules
 
 - 写图片提示词或生成图片前，必须先完成产品简报对齐。
+- 产品简报不是 `已对齐` 时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
+- 用户提供截图或线上参考时，只更新视觉基线和线上参考状态；不要自动产出完整 md 方案、HTML 或原型图。
+- 诊断问题使用 `Q`，一次只问一个；拍板问题使用 `D`，一次最多 3 个。
+- 产品简报前必须完成前提确认；未确认前只能保持 `待确认`。
 - 关键产品决策默认使用选择题拍板；读取 `decision-question-mode.md`。
 - 新页面也要判断线上参考需求；承接线上流程、结果页、状态页或生产样式时，缺截图/录屏/相似页面参考要先问。
 - 产品简报阶段默认创建或更新 Zoon 在线文档，后续原型/交付前优先读取 Zoon 最新内容。
 - 面向用户展示中文项目名；技术 slug 只用于本地目录。
 - 默认原型画布移动端优先：iPhone 17 竖屏 `402 x 874`。
 - 只有用户明确要求桌面端，或看板/内部工具明显需要大屏工作区，才使用桌面端。
+- 设计原型默认只能使用 image-2 / 图像生成；HTML 只在用户明确要求可交互网页、HTML 原型或前端实现时允许。
 - 一个方案 + 一个屏幕 = 一张图片。除非用户要求展示板，否则不要创建比较拼图。
+- 每张图片必须绑定方案名、屏幕任务、主目标、反指标、不可虚构项和产品简报版本。
 - 平台脚本可用时，保存可沉淀资产：使用日志、决策、产品简报 Markdown、原型清单和偏好反馈。
 - 不要把真实 token、私密客户数据、内部录音、敏感截图或未脱敏 Zoon 内容保存到本地资产。
 

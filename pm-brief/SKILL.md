@@ -32,15 +32,18 @@ done
 2. Read `../pmworkspace-shared/references/production-reference-gate.md`，并写入页面类型和线上参考状态。
 3. Read `../pmworkspace-shared/references/decision-question-mode.md` and turn PM decision items into choice questions.
 4. Read `../pmworkspace-shared/references/zoon-workflow.md`.
-5. 根据模糊程度和风险选择快速版、标准版或深度版产品简报。
-6. 包含事实来源、版本、确认状态、场景路由、页面类型、线上参考需求、线上参考状态、用户任务、目标、反指标、约束、不可虚构项和 PM 决策项。
-7. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
-8. Save the brief with `pmw-log brief <name>` when platform scripts are available.
-9. If a Zoon URL is already available, append the brief with `pmw-zoon append --url <url>`; otherwise, when `zoon_auto_create` is true, create one with `pmw-zoon create --title "产品设计简报：<功能名>"`.
+5. 确认已完成工作目标模式、Q 诊断、前提确认和必要 D 拍板；如果缺失，只输出短对齐摘要和下一步问题，不写完整产品简报。
+6. 根据模糊程度和风险选择快速版、标准版或深度版产品简报。
+7. 包含事实来源、版本、确认状态、工作目标模式、已确认前提、场景路由、页面类型、线上参考需求、线上参考状态、用户任务、目标、反指标、约束、不可虚构项和 PM 决策项。
+8. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
+9. Save the brief with `pmw-log brief <name>` when platform scripts are available.
+10. If a Zoon URL is already available, append the brief with `pmw-zoon append --url <url>`; otherwise, when `zoon_auto_create` is true, create one with `pmw-zoon create --title "产品设计简报：<功能名>"`.
 
 ## Alignment Rule
 
-只有“已对齐”的产品简报才能进入图片提示词。用户未确认时，标记为“待确认”，并在生成原型前停止。如果页面需要线上参考但状态是“缺失待补充”，确认状态不能写成“已对齐”。
+只有“已对齐”的产品简报才能进入图片提示词。用户未确认时，标记为“待确认”，并在生成原型前停止。未完成前提确认或关键 D 拍板时，确认状态不能写成“已对齐”。如果页面需要线上参考但状态是“缺失待补充”，确认状态不能写成“已对齐”。
+
+产品简报不是“已对齐”时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
 
 ## 输出
 
@@ -51,6 +54,8 @@ Return the smallest useful brief and end with:
 - 版本：
 - 确认状态：
 - 信息来源：
+- 工作目标模式：
+- 已确认前提：
 - 线上参考状态：
 - 已保存资产：
 - Zoon 在线简报：

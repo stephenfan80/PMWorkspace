@@ -24,4 +24,10 @@ git clone --depth 1 "$REPO_URL" "$tmp/PMWorkspace"
 
 mkdir -p "$STATE_DIR"
 [ -n "$old" ] && printf '%s' "$old" > "$STATE_DIR/just-upgraded-from"
-echo "PMWorkspace upgraded from ${old:-unknown} to $(tr -d '[:space:]' < "$tmp/PMWorkspace/VERSION")"
+new="$(tr -d '[:space:]' < "$tmp/PMWorkspace/VERSION")"
+rev="$(git -C "$tmp/PMWorkspace" rev-parse --short HEAD 2>/dev/null || true)"
+if [ -n "$rev" ]; then
+  echo "PMWorkspace upgraded from ${old:-unknown} to ${new}@${rev}"
+else
+  echo "PMWorkspace upgraded from ${old:-unknown} to ${new}"
+fi

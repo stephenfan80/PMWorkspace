@@ -22,6 +22,55 @@ find_version_file() {
   return 1
 }
 
+find_revision_file() {
+  for candidate in \
+    "${PMW_DIR:-}/REVISION" \
+    "$SCRIPT_DIR/../REVISION" \
+    "$SCRIPT_DIR/../../REVISION" \
+    "$HOME/.codex/skills/pmworkspace-shared/REVISION"; do
+    if [ "$candidate" != "/REVISION" ] && [ -n "${candidate:-}" ] && [ -f "$candidate" ]; then
+      echo "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+short_rev() {
+  rev="$1"
+  case "$rev" in
+    ""|"unknown") printf '' ;;
+    *) printf '%s' "$rev" | cut -c1-7 ;;
+  esac
+}
+
+display_id() {
+  version="$1"
+  rev="$2"
+  short="$(short_rev "$rev")"
+  if [ -n "$short" ]; then
+    printf '%s@%s' "$version" "$short"
+  else
+    printf '%s' "$version"
+  fi
+}
+
+version_gt() {
+  awk -v remote="$1" -v local="$2" '
+    BEGIN {
+      split(remote, r, ".")
+      split(local, l, ".")
+      for (i = 1; i <= 4; i++) {
+        rv = r[i] + 0
+        lv = l[i] + 0
+        if (rv > lv) exit 0
+        if (rv < lv) exit 1
+      }
+      exit 1
+    }
+  '
+}
+
 if [ "${1:-}" = "--force" ]; then
   rm -f "$CACHE_FILE" "$SNOOZE_FILE"
 fi
@@ -38,6 +87,17 @@ LOCAL="$(tr -d '[:space:]' < "$VERSION_FILE")"
 
 mkdir -p "$STATE_DIR"
 
+REVISION_FILE="$(find_revision_file || true)"
+LOCAL_REV=""
+LOCAL_REV_FROM_GIT="false"
+if [ -n "$REVISION_FILE" ]; then
+  LOCAL_REV="$(tr -d '[:space:]' < "$REVISION_FILE" 2>/dev/null || true)"
+fi
+if [ -z "$LOCAL_REV" ] || [ "$LOCAL_REV" = "unknown" ]; then
+  LOCAL_REV="$(git -C "$SCRIPT_DIR/.." rev-parse HEAD 2>/dev/null || true)"
+  [ -n "$LOCAL_REV" ] && LOCAL_REV_FROM_GIT="true"
+fi
+
 if [ -f "$MARKER_FILE" ]; then
   OLD="$(tr -d '[:space:]' < "$MARKER_FILE" 2>/dev/null || true)"
   rm -f "$MARKER_FILE" "$SNOOZE_FILE"
@@ -46,13 +106,8 @@ fi
 
 REMOTE_URL="${PMW_REMOTE_VERSION_URL:-$("$CONFIG_BIN" get remote_version_url 2>/dev/null || true)}"
 [ -n "$REMOTE_URL" ] || REMOTE_URL="https://raw.githubusercontent.com/stephenfan80/PMWorkspace/main/VERSION"
-
-cache_ttl_minutes() {
-  case "$1" in
-    UPGRADE_AVAILABLE*) echo 720 ;;
-    *) echo 60 ;;
-  esac
-}
+REPO_URL="${PMW_REPO_URL:-$("$CONFIG_BIN" get repo_url 2>/dev/null || true)}"
+[ -n "$REPO_URL" ] || REPO_URL="https://github.com/stephenfan80/PMWorkspace.git"
 
 is_snoozed() {
   [ -f "$SNOOZE_FILE" ] || return 1
@@ -64,34 +119,40 @@ is_snoozed() {
   [ "$now" -lt $((snoozed_epoch + hours * 3600)) ]
 }
 
-if [ -f "$CACHE_FILE" ]; then
-  cached="$(cat "$CACHE_FILE" 2>/dev/null || true)"
-  ttl="$(cache_ttl_minutes "$cached")"
-  stale="$(find "$CACHE_FILE" -mmin +"$ttl" 2>/dev/null || true)"
-  if [ -z "$stale" ] && [ -n "$cached" ]; then
-    case "$cached" in
-      UP_TO_DATE\ "$LOCAL") exit 0 ;;
-      UPGRADE_AVAILABLE\ "$LOCAL"\ *)
-        remote="$(printf '%s\n' "$cached" | awk '{print $3}')"
-        is_snoozed "$remote" && exit 0
-        echo "$cached"
-        exit 0
-        ;;
-    esac
+REMOTE="$(curl -sf --max-time 5 "$REMOTE_URL" 2>/dev/null | tr -d '[:space:]' || true)"
+if ! printf '%s' "$REMOTE" | grep -qE '^[0-9]+(\.[0-9]+){1,3}$'; then
+  REMOTE=""
+fi
+
+REMOTE_REV="$(GIT_TERMINAL_PROMPT=0 git ls-remote "$REPO_URL" refs/heads/main 2>/dev/null | awk 'NR==1 {print $1}' || true)"
+
+REMOTE_FOR_DISPLAY="${REMOTE:-unknown}"
+LOCAL_DISPLAY="$(display_id "$LOCAL" "$LOCAL_REV")"
+REMOTE_DISPLAY="$(display_id "$REMOTE_FOR_DISPLAY" "$REMOTE_REV")"
+
+REMOTE_REV_IS_NEWER="false"
+if [ -n "$REMOTE_REV" ] && [ -n "$LOCAL_REV" ] && [ "$LOCAL_REV" != "unknown" ] && [ "$LOCAL_REV" != "$REMOTE_REV" ]; then
+  if [ "$LOCAL_REV_FROM_GIT" = "true" ]; then
+    if git -C "$SCRIPT_DIR/.." merge-base --is-ancestor "$LOCAL_REV" "$REMOTE_REV" 2>/dev/null; then
+      REMOTE_REV_IS_NEWER="true"
+    fi
+  else
+    REMOTE_REV_IS_NEWER="true"
   fi
 fi
 
-REMOTE="$(curl -sf --max-time 5 "$REMOTE_URL" 2>/dev/null | tr -d '[:space:]' || true)"
-if ! printf '%s' "$REMOTE" | grep -qE '^[0-9]+(\.[0-9]+){1,3}$'; then
-  echo "UP_TO_DATE $LOCAL" > "$CACHE_FILE"
+if [ "$REMOTE_REV_IS_NEWER" = "true" ]; then
+  echo "UPGRADE_AVAILABLE $LOCAL_DISPLAY $REMOTE_DISPLAY" > "$CACHE_FILE"
+  is_snoozed "$REMOTE_DISPLAY" && exit 0
+  echo "UPGRADE_AVAILABLE $LOCAL_DISPLAY $REMOTE_DISPLAY"
   exit 0
 fi
 
-if [ "$LOCAL" = "$REMOTE" ]; then
-  echo "UP_TO_DATE $LOCAL" > "$CACHE_FILE"
+if [ -n "$REMOTE" ] && version_gt "$REMOTE" "$LOCAL"; then
+  echo "UPGRADE_AVAILABLE $LOCAL_DISPLAY $REMOTE_DISPLAY" > "$CACHE_FILE"
+  is_snoozed "$REMOTE_DISPLAY" && exit 0
+  echo "UPGRADE_AVAILABLE $LOCAL_DISPLAY $REMOTE_DISPLAY"
   exit 0
 fi
 
-echo "UPGRADE_AVAILABLE $LOCAL $REMOTE" > "$CACHE_FILE"
-is_snoozed "$REMOTE" && exit 0
-echo "UPGRADE_AVAILABLE $LOCAL $REMOTE"
+echo "UP_TO_DATE $LOCAL_DISPLAY" > "$CACHE_FILE"

@@ -4,7 +4,12 @@ Every PMWorkspace skill should check for updates before doing product work when 
 
 ## Check
 
-Use `pmw-update-check`.
+Use `pmw-update-check`. It checks GitHub on every run when `update_check` is enabled:
+
+- `VERSION` via the configured remote version URL.
+- `main` branch commit via the configured repository URL.
+
+This means PMWorkspace can detect both formal version bumps and same-version documentation / skill-rule updates.
 
 Possible output:
 
@@ -39,6 +44,12 @@ Default remote version URL:
 https://raw.githubusercontent.com/stephenfan80/PMWorkspace/main/VERSION
 ```
 
+Default repository URL:
+
+```text
+https://github.com/stephenfan80/PMWorkspace.git
+```
+
 Users can override with:
 
 ```bash
@@ -49,4 +60,16 @@ or:
 
 ```bash
 bin/pmw-config set remote_version_url <url>
+```
+
+For repository checks:
+
+```bash
+PMW_REPO_URL=<url>
+```
+
+or:
+
+```bash
+bin/pmw-config set repo_url <url>
 ```

@@ -166,7 +166,7 @@ D1 - “全品牌可用”的对外口径
 
 ## 更新提醒
 
-每个 skill 使用前会尝试检查 `VERSION`。如果 GitHub 上有新版本，会提示：
+每个 skill 使用前都会检查 GitHub：同时比较 `VERSION` 和 `main` 分支最新提交。因此即使没有正式升版本号，只要 GitHub 上的技能规则或文档有新提交，也会提示：
 
 ```text
 UPGRADE_AVAILABLE <local> <remote>
@@ -181,7 +181,7 @@ bin/pmw-upgrade --host codex
 暂缓某个版本：
 
 ```bash
-bin/pmw-snooze-update <remote-version>
+bin/pmw-snooze-update <remote-version-or-commit>
 ```
 
 关闭更新检查：

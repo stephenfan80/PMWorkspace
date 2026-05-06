@@ -123,7 +123,7 @@ bin/pmw-config list
 
 ## Updates
 
-Each skill checks `VERSION` before use when platform scripts are available. If a newer GitHub version exists, PMWorkspace reports:
+Each skill checks GitHub before use when platform scripts are available. It compares both `VERSION` and the latest `main` branch commit, so same-version skill-rule updates are detected too. If a newer GitHub version or commit exists, PMWorkspace reports:
 
 ```text
 UPGRADE_AVAILABLE <local> <remote>
@@ -147,7 +147,13 @@ The default remote version URL is:
 https://raw.githubusercontent.com/stephenfan80/PMWorkspace/main/VERSION
 ```
 
-Override with `PMW_REMOTE_VERSION_URL` or `bin/pmw-config set remote_version_url <url>`.
+The default repository URL is:
+
+```text
+https://github.com/stephenfan80/PMWorkspace.git
+```
+
+Override with `PMW_REMOTE_VERSION_URL`, `PMW_REPO_URL`, `bin/pmw-config set remote_version_url <url>`, or `bin/pmw-config set repo_url <url>`.
 
 ## Prototype Rules
 

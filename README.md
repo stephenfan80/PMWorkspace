@@ -15,6 +15,7 @@ Update check + state logging
 -> PM Jobs product interrogation
 -> Strategy review when needed
 -> Decision questions for PM tradeoffs
+-> Online reference gate for new pages that continue production flows
 -> Aligned product brief
 -> Zoon online brief for human edits
 -> Mobile-first image-2 prototype exploration
@@ -147,6 +148,7 @@ Override with `PMW_REMOTE_VERSION_URL` or `bin/pmw-config set remote_version_url
 ## Prototype Rules
 
 - The brief must be `Aligned` before image prompts or image generation.
+- New pages still need an online-reference check. If a screen continues an existing flow, result state, or production style, provide screenshots/recordings/similar pages or explicitly confirm there is no online reference before image generation.
 - Multi-scheme concepts must differ by product strategy, information architecture, interaction model, or trust model.
 - One scheme plus one screen equals one image.
 - `3 directions x 2 screens` means six separate image outputs.

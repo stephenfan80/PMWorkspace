@@ -29,8 +29,10 @@ done
 ## Hard Gates
 
 - Read `../pmworkspace-shared/references/image-prompts.md`.
+- Read `../pmworkspace-shared/references/production-reference-gate.md`.
 - 产品简报未“已对齐”时，不写提示词，也不生成图片。
 - 现有功能迭代必须有当前截图或等价视觉基线。
+- 新页面如果承接线上流程、结果页、状态页或生产样式，必须先拿到线上参考，或得到用户明确确认“没有线上参考，按新页面概念稿推进”。
 - 多方案生成前先确认概念方向，除非用户明确批准使用默认方向。
 - 默认移动端优先：iPhone 17 竖屏 `402 x 874`。
 - 只有用户明确要求，或看板/内部工具密度确实需要时，才使用桌面端。
@@ -46,13 +48,14 @@ done
 
 1. Read aligned brief and scenario route.
 2. If `pmw-project show` contains a Zoon URL, read the latest document with `pmw-zoon read --url <url>` and treat it as the product source of truth.
-3. Read `design-system-workflow.md`, `design-heuristics.md`, and `adversarial-review.md` as needed.
-4. Propose concept directions with names and tradeoffs.
-5. For each image output unit, declare scheme, screen, canvas, and brief dependency.
-6. Generate with image-2 / image generation.
-7. Run `prototype-quality-review.md`.
-8. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单。
-9. Record approved/rejected design feedback with `pmw-log taste`.
+3. 对每个请求的屏幕运行线上参考门槛；如果必要参考是 `缺失待补充`，先停下来问。
+4. Read `design-system-workflow.md`, `design-heuristics.md`, and `adversarial-review.md` as needed.
+5. Propose concept directions with names and tradeoffs.
+6. For each image output unit, declare scheme, screen, canvas, 线上参考状态, and brief dependency.
+7. Generate with image-2 / image generation.
+8. Run `prototype-quality-review.md`.
+9. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单。
+10. Record approved/rejected design feedback with `pmw-log taste`.
 
 ## 输出
 
@@ -61,6 +64,7 @@ done
 - 产品简报：
 - Zoon 事实来源：
 - 场景：
+- 线上参考：
 - 画布：
 - 已生成 / 计划生成的图片：
 - 质量检查：

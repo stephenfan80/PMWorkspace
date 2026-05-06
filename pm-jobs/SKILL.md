@@ -30,11 +30,13 @@ done
 
 1. Read `../pmworkspace-shared/references/first-use-onboarding.md` for first contact.
 2. Read `../pmworkspace-shared/references/scenario-routing.md` to classify the dominant product scenario.
-3. Read `../pmworkspace-shared/references/product-office-hours.md` and ask only the questions that change the prototype or product direction.
-4. Read `../pmworkspace-shared/references/decision-question-mode.md`; when a missing answer would change the product direction, ask it as a D-numbered choice question.
-5. If the request is an existing-feature iteration, require current production screenshots, screen recording, or equivalent visual baseline before proceeding.
-6. 输出简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。
-7. 平台脚本可用时，用 `pmw-project set-name "<中文项目名>"` 保存中文项目名，用 `pmw-log question` 和 `pmw-log decision` 记录关键选择。
+3. Read `../pmworkspace-shared/references/production-reference-gate.md`，判断新页面是否仍需要线上参考。
+4. Read `../pmworkspace-shared/references/product-office-hours.md` and ask only the questions that change the prototype or product direction.
+5. Read `../pmworkspace-shared/references/decision-question-mode.md`; when a missing answer would change the product direction, ask it as a D-numbered choice question.
+6. If the request is an existing-feature iteration, require current production screenshots, screen recording, or equivalent visual baseline before proceeding.
+7. 如果新页面承接线上流程、结果状态或生产样式，要求截图、录屏、相似页面参考，或用户明确确认没有线上参考。
+8. 输出简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。
+9. 平台脚本可用时，用 `pmw-project set-name "<中文项目名>"` 保存中文项目名，用 `pmw-log question` 和 `pmw-log decision` 记录关键选择。
 
 ## Jobs-Style Questioning
 
@@ -59,6 +61,8 @@ Prioritize these lenses:
 - 用户任务 / 问题：
 - 当前替代方案：
 - 需求发生时刻：
+- 线上参考需求：
+- 线上参考状态：
 - 主目标：
 - 反指标：
 - 约束：

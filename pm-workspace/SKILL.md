@@ -56,6 +56,7 @@ If the user provides a product task in the same message, skip the welcome menu a
 
 - 写图片提示词或生成图片前，必须先完成产品简报对齐。
 - 关键产品决策默认使用选择题拍板；读取 `decision-question-mode.md`。
+- 新页面也要判断线上参考需求；承接线上流程、结果页、状态页或生产样式时，缺截图/录屏/相似页面参考要先问。
 - 产品简报阶段默认创建或更新 Zoon 在线文档，后续原型/交付前优先读取 Zoon 最新内容。
 - 面向用户展示中文项目名；技术 slug 只用于本地目录。
 - 默认原型画布移动端优先：iPhone 17 竖屏 `402 x 874`。
@@ -80,6 +81,7 @@ Use `../pmworkspace-shared/references/` for:
 
 - `language-and-localization.md` for output language and Chinese terminology.
 - `decision-question-mode.md` for PM decision questions.
+- `production-reference-gate.md` for online screenshot/reference checks before prototypes.
 - `welcome-guide.md` for install success and first-run onboarding.
 - `routing.md` for route selection.
 - `state-and-telemetry.md` for durable asset rules.

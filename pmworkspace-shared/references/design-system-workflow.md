@@ -10,6 +10,7 @@ Load a design-system profile when:
 - The user names a brand or system, such as AutoDesign, 汽车之家, 之家, or Autohome.
 - The user asks for production-ready, design-system-compliant, or component-aligned prototypes.
 - The user provides design-system URLs, screenshots, Figma links, or existing product screenshots.
+- 新页面仍需要匹配现有线上流程、结果状态或生产样式。
 
 Read `autohome-auto-design.md` by default for production baseline tokens, spacing, components, and anti-patterns. For non-Autohome products, use AutoDesign as a quality baseline, not as brand copy or domain content.
 
@@ -22,6 +23,8 @@ Use the most reliable available source:
 3. Local AutoDesign reference profile.
 4. User-provided verbal rules.
 
+新页面回退到 AutoDesign 前，先读取 `production-reference-gate.md`。如果页面需要线上参考且状态是 `缺失待补充`，停止并索取截图，或让用户明确确认没有线上参考。
+
 If a page is accessible only in the user's browser session, inspect it with browser tools and summarize only the reusable rules. Do not paste full internal docs into generated open-source artifacts.
 
 ## 生成设计约束摘要
@@ -31,6 +34,7 @@ If a page is accessible only in the user's browser session, inspect it with brow
 ```text
 设计系统：<名称>
 基线角色：<默认生产基线 / 明确品牌系统 / 截图事实来源>
+线上参考状态：<已提供线上参考 / 无线上参考已确认 / 缺失待补充 / 不适用>
 画布/设备：<尺寸>
 颜色：<主色、强调色、文字、背景、边框>
 字体：<字体族、字号层级、字重规则>

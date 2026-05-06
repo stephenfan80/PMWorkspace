@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CONFIG_BIN="${PMW_CONFIG_BIN:-$SCRIPT_DIR/pmw-config}"
+STATE_DIR="${PMW_HOME:-$HOME/.pmworkspace}"
+REPO_URL="${PMW_REPO_URL:-$("$CONFIG_BIN" get repo_url 2>/dev/null || echo "https://github.com/stephenfan80/PMWorkspace.git")}"
+HOST="${1:---host}"
+HOST_VALUE="${2:-codex}"
+
+tmp="$(mktemp -d "${TMPDIR:-/tmp}/pmworkspace-upgrade.XXXXXX")"
+trap 'rm -rf "$tmp"' EXIT
+
+old=""
+for version_file in "$SCRIPT_DIR/../VERSION" "$SCRIPT_DIR/../../VERSION" "$HOME/.codex/skills/pmworkspace-shared/VERSION"; do
+  if [ -f "$version_file" ]; then
+    old="$(tr -d '[:space:]' < "$version_file")"
+    break
+  fi
+done
+
+git clone --depth 1 "$REPO_URL" "$tmp/PMWorkspace"
+"$tmp/PMWorkspace/setup" "$HOST" "$HOST_VALUE"
+
+mkdir -p "$STATE_DIR"
+[ -n "$old" ] && printf '%s' "$old" > "$STATE_DIR/just-upgraded-from"
+echo "PMWorkspace upgraded from ${old:-unknown} to $(tr -d '[:space:]' < "$tmp/PMWorkspace/VERSION")"

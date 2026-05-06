@@ -1,0 +1,8 @@
+interface:
+  display_name: "PM Handoff"
+  short_description: "Create PRD-ready product handoffs"
+  brand_color: "#2563EB"
+  default_prompt: "Use $pm-handoff to turn this aligned brief and prototype direction into a reusable PRD-ready handoff."
+
+policy:
+  allow_implicit_invocation: true

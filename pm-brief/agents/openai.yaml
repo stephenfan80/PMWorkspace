@@ -1,0 +1,8 @@
+interface:
+  display_name: "PM Brief"
+  short_description: "Create reusable product briefs"
+  brand_color: "#0F766E"
+  default_prompt: "Use $pm-brief to turn this product alignment into a reusable Quick, Standard, or Deep brief."
+
+policy:
+  allow_implicit_invocation: true

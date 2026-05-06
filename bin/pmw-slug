@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+base="$(basename "$root")"
+slug="$(printf '%s' "$root" | shasum 2>/dev/null | awk '{print $1}' | cut -c1-10 || date +%s)"
+safe_base="$(printf '%s' "$base" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9._-]+/-/g; s/-+/-/g; s/^-+//; s/-+$//')"
+printf '%s-%s\n' "${safe_base:-project}" "$slug"

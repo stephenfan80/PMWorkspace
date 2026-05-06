@@ -1,0 +1,8 @@
+interface:
+  display_name: "PM Prototype Shotgun"
+  short_description: "Mobile-first image-2 prototype schemes"
+  brand_color: "#FF6600"
+  default_prompt: "Use $pm-prototype-shotgun to create mobile-first image-2 prototype schemes from an Aligned PMWorkspace brief."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,8 @@
+interface:
+  display_name: "PM Jobs"
+  short_description: "Jobs-style product questioning"
+  brand_color: "#111E36"
+  default_prompt: "Use $pm-jobs to interrogate this product idea like a demanding product partner before any prototype is made."
+
+policy:
+  allow_implicit_invocation: true

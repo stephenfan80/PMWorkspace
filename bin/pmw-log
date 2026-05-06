@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+STATE_DIR="${PMW_HOME:-$HOME/.pmworkspace}"
+SLUG="${PMW_PROJECT_SLUG:-$("$SCRIPT_DIR/pmw-slug")}"
+PROJECT_DIR="$STATE_DIR/projects/$SLUG"
+EVENT="${1:-}"
+
+mkdir -p "$PROJECT_DIR/briefs" "$PROJECT_DIR/prototypes" "$STATE_DIR/analytics"
+
+json_escape() {
+  sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+case "$EVENT" in
+  usage)
+    skill="${2:-pm-workspace}"
+    printf '{"ts":"%s","skill":"%s","project":"%s"}\n' "$ts" "$skill" "$SLUG" >> "$STATE_DIR/analytics/usage.jsonl"
+    ;;
+  decision)
+    title="${2:-decision}"
+    body="${3:-}"
+    printf '{"ts":"%s","title":"%s","body":"%s"}\n' "$ts" "$(printf '%s' "$title" | json_escape)" "$(printf '%s' "$body" | json_escape)" >> "$PROJECT_DIR/decisions.jsonl"
+    ;;
+  brief)
+    name="${2:-brief}"
+    file="$PROJECT_DIR/briefs/$(date -u +%Y%m%dT%H%M%SZ)-$(printf '%s' "$name" | tr ' ' '-' | sed 's/[^A-Za-z0-9._-]/-/g').md"
+    cat > "$file"
+    echo "$file"
+    ;;
+  prototype)
+    batch="${2:-batch}"
+    manifest="$PROJECT_DIR/prototypes/$(date -u +%Y%m%dT%H%M%SZ)-$(printf '%s' "$batch" | tr ' ' '-' | sed 's/[^A-Za-z0-9._-]/-/g').jsonl"
+    cat >> "$manifest"
+    echo "$manifest"
+    ;;
+  taste)
+    action="${2:-approved}"
+    note="${3:-}"
+    profile="$PROJECT_DIR/taste-profile.jsonl"
+    printf '{"ts":"%s","action":"%s","note":"%s"}\n' "$ts" "$action" "$(printf '%s' "$note" | json_escape)" >> "$profile"
+    echo "$profile"
+    ;;
+  *)
+    echo "Usage: pmw-log {usage|decision|brief|prototype|taste} ..." >&2
+    exit 1
+    ;;
+esac

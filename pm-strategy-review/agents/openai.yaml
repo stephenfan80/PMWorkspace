@@ -1,0 +1,8 @@
+interface:
+  display_name: "PM Strategy Review"
+  short_description: "Challenge product strategy and scope"
+  brand_color: "#7C3AED"
+  default_prompt: "Use $pm-strategy-review to challenge this product direction before we create prototypes or handoff."
+
+policy:
+  allow_implicit_invocation: true

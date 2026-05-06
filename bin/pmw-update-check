@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+STATE_DIR="${PMW_HOME:-$HOME/.pmworkspace}"
+CONFIG_BIN="${PMW_CONFIG_BIN:-$SCRIPT_DIR/pmw-config}"
+CACHE_FILE="$STATE_DIR/last-update-check"
+SNOOZE_FILE="$STATE_DIR/update-snoozed"
+MARKER_FILE="$STATE_DIR/just-upgraded-from"
+
+find_version_file() {
+  for candidate in \
+    "${PMW_DIR:-}/VERSION" \
+    "$SCRIPT_DIR/../VERSION" \
+    "$SCRIPT_DIR/../../VERSION" \
+    "$HOME/.codex/skills/pmworkspace-shared/VERSION"; do
+    if [ "$candidate" != "/VERSION" ] && [ -n "${candidate:-}" ] && [ -f "$candidate" ]; then
+      echo "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+if [ "${1:-}" = "--force" ]; then
+  rm -f "$CACHE_FILE" "$SNOOZE_FILE"
+fi
+
+UPDATE_CHECK="$("$CONFIG_BIN" get update_check 2>/dev/null || echo true)"
+if [ "$UPDATE_CHECK" = "false" ]; then
+  exit 0
+fi
+
+VERSION_FILE="$(find_version_file || true)"
+[ -n "$VERSION_FILE" ] || exit 0
+LOCAL="$(tr -d '[:space:]' < "$VERSION_FILE")"
+[ -n "$LOCAL" ] || exit 0
+
+mkdir -p "$STATE_DIR"
+
+if [ -f "$MARKER_FILE" ]; then
+  OLD="$(tr -d '[:space:]' < "$MARKER_FILE" 2>/dev/null || true)"
+  rm -f "$MARKER_FILE" "$SNOOZE_FILE"
+  [ -n "$OLD" ] && echo "JUST_UPGRADED $OLD $LOCAL"
+fi
+
+REMOTE_URL="${PMW_REMOTE_VERSION_URL:-$("$CONFIG_BIN" get remote_version_url 2>/dev/null || true)}"
+[ -n "$REMOTE_URL" ] || REMOTE_URL="https://raw.githubusercontent.com/stephenfan80/PMWorkspace/main/VERSION"
+
+cache_ttl_minutes() {
+  case "$1" in
+    UPGRADE_AVAILABLE*) echo 720 ;;
+    *) echo 60 ;;
+  esac
+}
+
+is_snoozed() {
+  [ -f "$SNOOZE_FILE" ] || return 1
+  read -r snoozed_ver snoozed_epoch < "$SNOOZE_FILE" || return 1
+  [ "$snoozed_ver" = "$1" ] || return 1
+  hours="$("$CONFIG_BIN" get update_snooze_hours 2>/dev/null || echo 24)"
+  case "$hours" in *[!0-9]*|"") hours=24 ;; esac
+  now="$(date +%s)"
+  [ "$now" -lt $((snoozed_epoch + hours * 3600)) ]
+}
+
+if [ -f "$CACHE_FILE" ]; then
+  cached="$(cat "$CACHE_FILE" 2>/dev/null || true)"
+  ttl="$(cache_ttl_minutes "$cached")"
+  stale="$(find "$CACHE_FILE" -mmin +"$ttl" 2>/dev/null || true)"
+  if [ -z "$stale" ] && [ -n "$cached" ]; then
+    case "$cached" in
+      UP_TO_DATE\ "$LOCAL") exit 0 ;;
+      UPGRADE_AVAILABLE\ "$LOCAL"\ *)
+        remote="$(printf '%s\n' "$cached" | awk '{print $3}')"
+        is_snoozed "$remote" && exit 0
+        echo "$cached"
+        exit 0
+        ;;
+    esac
+  fi
+fi
+
+REMOTE="$(curl -sf --max-time 5 "$REMOTE_URL" 2>/dev/null | tr -d '[:space:]' || true)"
+if ! printf '%s' "$REMOTE" | grep -qE '^[0-9]+(\.[0-9]+){1,3}$'; then
+  echo "UP_TO_DATE $LOCAL" > "$CACHE_FILE"
+  exit 0
+fi
+
+if [ "$LOCAL" = "$REMOTE" ]; then
+  echo "UP_TO_DATE $LOCAL" > "$CACHE_FILE"
+  exit 0
+fi
+
+echo "UPGRADE_AVAILABLE $LOCAL $REMOTE" > "$CACHE_FILE"
+is_snoozed "$REMOTE" && exit 0
+echo "UPGRADE_AVAILABLE $LOCAL $REMOTE"

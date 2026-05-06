@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+HOST="codex"
+if [ "${1:-}" = "--host" ]; then
+  HOST="${2:-codex}"
+fi
+
+case "$HOST" in
+  codex) DEST="${CODEX_SKILLS_DIR:-$HOME/.codex/skills}" ;;
+  *) echo "Unsupported host: $HOST. Supported: codex" >&2; exit 1 ;;
+esac
+
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+mkdir -p "$DEST"
+
+for skill in pm-workspace pm-jobs pm-strategy-review pm-brief pm-prototype-shotgun pm-handoff; do
+  rm -rf "$DEST/$skill"
+  cp -R "$ROOT/$skill" "$DEST/$skill"
+done
+
+rm -rf "$DEST/pmworkspace-shared"
+cp -R "$ROOT/pmworkspace-shared" "$DEST/pmworkspace-shared"
+mkdir -p "$DEST/pmworkspace-shared/bin"
+cp -R "$ROOT/bin/"* "$DEST/pmworkspace-shared/bin/"
+cp "$ROOT/VERSION" "$DEST/pmworkspace-shared/VERSION"
+chmod +x "$DEST/pmworkspace-shared/bin/"*
+
+echo "PMWorkspace installed to $DEST"
+echo 'Start with: Use $pm-workspace to clarify a product idea before prototype design.'

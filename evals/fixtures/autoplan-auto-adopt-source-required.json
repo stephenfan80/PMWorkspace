@@ -1,0 +1,37 @@
+{
+  "id": "autoplan-auto-adopt-source-required",
+  "title": "自动采用项必须说明来源和不需要拍板的理由",
+  "category": "autoplan",
+  "primary_skill": "pm-autoplan",
+  "prompt": "自动评审准备采用移动端优先、默认轻量包结构和已有 Zoon append。",
+  "expected": {
+    "mode": "quick",
+    "status": "待确认",
+    "must_stop": false,
+    "gate": "自动采用来源",
+    "required_behaviors": [
+      "每个自动采用项说明来源",
+      "每个自动采用项说明不需要 D 的理由",
+      "不能把无来源判断自动采用"
+    ],
+    "forbidden_behaviors": [
+      "只列自动采用项名称",
+      "把承诺口径自动采用",
+      "把数据真实性自动采用"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "每个自动采用项都必须说明来源和不需要 PM 拍板的理由"
+    },
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "默认移动端优先。来源：PMWorkspace 默认规则。原因：不改变产品方向或用户承诺。"
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "Every item in `已自动采用` must include source and why no PM decision is needed"
+    }
+  ]
+}

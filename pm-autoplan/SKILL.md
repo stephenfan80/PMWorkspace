@@ -45,18 +45,22 @@ done
 11. Read `../pmworkspace-shared/references/product-plan-handoff.md`.
 12. Read `../pmworkspace-shared/references/zoon-workflow.md` and `../pmworkspace-shared/references/zoon-drift-check.md`.
 13. Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run，不要重新 `pmw-run start`；如果用户直接调用 `$pm-autoplan` 且没有当前 run，再 start `pmw-run start --skill pm-autoplan --mode <quick|deep> --goal "<本轮目标>"`.
-14. Build the automatic review control panel from `autoplan-workflow.md`: 模式来源、事实来源优先级、当前阶段、最早阻塞门槛、可自动采用项、必须 PM 拍板项、下一技能.
+14. Build the automatic review control panel from `autoplan-workflow.md`: 靠谱产品负责人姿态、模式来源、事实来源优先级、当前阶段、最早阻塞门槛、门槛等级、门槛来源、可自动采用项、必须 PM 拍板项、下一技能和交接上下文.
 15. 快速成型模式：先做生产/高风险升级检查；如果出现生产流程、高风险承诺、真实数据、线索/交易/隐私或研发交付信号，升级到深度交付门槛，不要继续轻量包。
 16. 快速成型模式：按最早门槛顺序只检测会影响轻量包结构的缺口：核心用户/场景、核心问题、主目标/反指标、不可虚构项、原型屏幕范围、方案差异、假设确认。默认最多问 2-3 个 `Q`。
 17. 快速成型模式：列出关键假设、方案方向和每张图的不可虚构项，请用户确认“按这些假设继续”。确认前不生成图片，并用 `pmw-run event --type gate` 记录当前门槛。
 18. 快速成型模式：确认后输出轻量包：标注假设的产品简报、2-3 个方案方向、每个方案 1 张移动端 image-2 原型图计划，并把状态写成 `基于假设，可讨论`。
 19. 深度交付模式：按最早门槛顺序推进：工作目标模式、场景路由、Q 诊断、前提确认、必要 D、策略审查、产品简报、Zoon 同步、Zoon 漂移检查、线上参考和设计系统基线、原型准备度或交付准备度。
 20. 深度交付模式：Use `pm-decision-principles.md` to auto-decide only low-risk defaults that do not change product direction; surface any direction-changing item as a single `D` choice question and stop.
-21. When enough information exists, create the smallest useful product brief and save it with `pmw-log brief <name>`. Because `pmw-log brief` auto-syncs, this should create or append to Zoon when enabled.
-22. If a Zoon URL exists before prototype preparation, run `pmw-zoon drift --url <url>` when available. If it returns `DRIFT`, read the latest Zoon snapshot and update the product brief version before continuing.
-23. Map the earliest blocking gate to one next skill: `$pm-jobs`, `$pm-strategy-review`, `$pm-brief`, `$pm-prototype-shotgun`, `$pm-prototype-review`, or `$pm-handoff`. Do not pretend all downstream skills have completed when only the next gate is ready.
-24. At each gate, record evidence, decisions, artifacts, or reviews with `pmw-run event`; before final output, run `pmw-dashboard status` when available.
-25. End with a readiness state: `需要补充`、`待确认`、`基于假设，可讨论`、`已对齐`、`可进入原型复审`、or `可交付`. Call `pmw-run finish` only when the current run reaches a terminal readiness state; if waiting for Q/D/证据 or handing off to a child skill, keep the current run open for reuse.
+21. Give the user a conclusion-first review: first output `自动评审结论` with `我建议` and `理由`, then output `评审控制面板`.
+22. For the earliest gate, always declare `门槛等级` as `阻断`、`高风险`、`可自动采用` or `可延后`, and declare `门槛来源`.
+23. Every item in `已自动采用` must include source and why no PM decision is needed, for example `默认移动端优先。来源：PMWorkspace 默认规则。原因：不改变产品方向或用户承诺。`
+24. When enough information exists, create the smallest useful product brief and save it with `pmw-log brief <name>`. Because `pmw-log brief` auto-syncs, this should create or append to Zoon when enabled.
+25. If a Zoon URL exists before prototype preparation, run `pmw-zoon drift --url <url>` when available. If it returns `DRIFT`, read the latest Zoon snapshot and update the product brief version before continuing.
+26. Map the earliest blocking gate to one next skill: `$pm-jobs`, `$pm-strategy-review`, `$pm-brief`, `$pm-prototype-shotgun`, `$pm-prototype-review`, or `$pm-handoff`. Do not pretend all downstream skills have completed when only the next gate is ready.
+27. `下一技能` cannot be only a skill id; include `交接上下文` with 来源门槛、已确认事实、未决 Q/D、证据状态 and 交给它的原因.
+28. At each gate, record evidence, decisions, artifacts, or reviews with `pmw-run event`; before final output, run `pmw-dashboard status` when available.
+29. End with a readiness state: `需要补充`、`待确认`、`基于假设，可讨论`、`已对齐`、`可进入原型复审`、or `可交付`. Call `pmw-run finish` only when the current run reaches a terminal readiness state; if waiting for Q/D/证据 or handing off to a child skill, keep the current run open for reuse.
 
 ## Auto-Decide Rules
 
@@ -64,11 +68,11 @@ done
 
 自动接受：
 
-- 用户已经明说或文档中明确写出的事实。
-- 默认移动端优先画布。
-- 不影响方向的格式、标题、状态字段。
-- 已有 Zoon URL 时优先 append，不新建文档。
-- 快速成型模式中，不影响方案结构的轻量包格式和默认输出数量。
+- 用户已经明说或文档中明确写出的事实。输出时说明来源：用户本轮明确输入 / 已对齐产品简报 / 最新 Zoon。
+- 默认移动端优先画布。输出时说明来源：PMWorkspace 默认规则；原因：不改变产品方向或用户承诺。
+- 不影响方向的格式、标题、状态字段。输出时说明来源：PMWorkspace 输出协议；原因：不改变范围、承诺或验收。
+- 已有 Zoon URL 时优先 append，不新建文档。输出时说明来源：Zoon 协议；原因：保持在线事实来源连续。
+- 快速成型模式中，不影响方案结构的轻量包格式和默认输出数量。输出时说明来源：快速成型协议；原因：不改变产品事实。
 
 必须提问：
 
@@ -85,6 +89,16 @@ done
 
 ```text
 自动评审结果：
+
+自动评审结论：
+- 我建议：
+- 理由：
+- 当前最早门槛：
+- 门槛等级：<阻断 / 高风险 / 可自动采用 / 可延后>
+- 下一技能：
+- 交接上下文：
+
+评审控制面板：
 - 状态：
 - run_id：
 - 模式：<快速成型 / 深度交付>
@@ -92,10 +106,13 @@ done
 - 推进阶段：
 - 当前门槛：
 - 最早门槛：
+- 门槛等级：
+- 门槛来源：
 - 停止原因：
 - 下一技能：
 - 已自动采用：
 - 需要 PM 拍板：
+- 证据状态：
 - 证据状态页：
 - 产品简报：
 - 方案方向：

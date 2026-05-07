@@ -1,0 +1,38 @@
+{
+  "id": "strategy-decision-d-impact-brief-writein",
+  "title": "策略 D 必须说明推荐项、风险、影响和写入简报方式",
+  "category": "pm-strategy-review",
+  "primary_skill": "pm-strategy-review",
+  "prompt": "团队需要在免费展示价值和先留手机号之间拍板。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "策略 D 写入产品简报",
+    "required_behaviors": [
+      "策略 D 包含推荐项",
+      "策略 D 包含风险",
+      "说明会影响什么",
+      "说明进入产品简报的写法"
+    ],
+    "forbidden_behaviors": [
+      "只给 A/B 选项",
+      "不说明风险",
+      "不说明如何写入产品简报"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/adversarial-review.md",
+      "contains": "策略 `D` 必须包含推荐项、选项、风险、会影响什么、进入产品简报的写法。"
+    },
+    {
+      "path": "pm-strategy-review/SKILL.md",
+      "contains": "策略 `D` 必须包含推荐项、选项、风险、会影响什么、进入产品简报的写法。"
+    },
+    {
+      "path": "pm-strategy-review/SKILL.md",
+      "contains": "- 进入产品简报的写法："
+    }
+  ]
+}

@@ -57,7 +57,7 @@ Every handoff between skills should preserve the current mode/status, current or
 | `$pm-workspace` | Start here; route product work and run PMWorkspace platform checks. |
 | `$pm-autoplan` | Run the automatic product review pipeline through brief readiness and Zoon sync. |
 | `$pm-jobs` | Clarify product value before solution design: painful user, trigger, substitute, loss, and narrow wedge. |
-| `$pm-strategy-review` | Challenge scope, value exchange, ambition, risks, and tradeoffs. |
+| `$pm-strategy-review` | Judge strategic tradeoffs: expand, hold, shrink, or pivot, then turn the core contradiction into a PM decision. |
 | `$pm-brief` | Create a reusable Quick, Standard, or Deep product brief. |
 | `$pm-prototype-shotgun` | Generate mobile-first image-2 prototype schemes from an Aligned brief. |
 | `$pm-prototype-review` | Review generated prototype screens against the brief, Zoon, and non-fiction boundaries. |

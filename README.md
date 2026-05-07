@@ -2,13 +2,18 @@
 
 [中文说明](README.zh-CN.md)
 
-PMWorkspace is a product workbench for PMs, designers, researchers, operators, and founders. It turns raw product context into durable product assets: product decisions, aligned briefs, mobile-first image-2 prototype screens, design feedback, and handoff documents.
+PMWorkspace is a product solution workbench for PMs, designers, researchers, operators, and founders: **shape fast, deliver deep**. It turns raw product context into durable product assets: product intros / briefs, solution directions, mobile-first image-2 prototype screens, PRDs, design feedback, and handoff documents.
 
 PMWorkspace evolved from the former `product-prototype-designer` skill. The old name is intentionally retired; use `$pm-workspace` and the PMWorkspace skill suite going forward.
 
 ## What It Does
 
-PMWorkspace follows a gstack-inspired workbench model:
+PMWorkspace helps PMs turn an idea that still feels vague into product assets that can be discussed, reviewed, and handed off. It has two entry modes:
+
+- **Quick shaping mode:** produce a 10-minute light package: product brief, 2-3 solution directions, and prototype images. This is for team discussion, leadership review, or early product exploration.
+- **Deep delivery mode:** use the full diagnostic workflow, Zoon alignment, prototype review, and handoff flow to upgrade the chosen direction into PRD, design, experiment, or engineering delivery assets.
+
+Deep delivery follows a gstack-inspired workbench model:
 
 ```text
 Update check + state logging
@@ -43,6 +48,24 @@ The core rule is simple: define the product problem, goals, counter-metrics, con
 
 ## Quick Start
 
+### 10-Minute Light Package
+
+```text
+Use $pm-workspace to quickly shape this product idea into a light package: product brief, 2-3 solution directions, and one mobile prototype image per direction.
+Idea: <one sentence>
+Known context: <optional user / scenario / constraints / references>
+Requirement: You may proceed with clearly marked assumptions, but ask me to approve those assumptions before image generation.
+```
+
+The light package includes:
+
+- A product brief with assumptions clearly marked.
+- 2-3 solution directions that differ by product strategy, information architecture, interaction model, or trust model.
+- Separate image-2 prototype screens, following one direction plus one screen equals one image.
+- Suggested next step: deepen into PRD, run prototype review, or produce handoff.
+
+### Deep Delivery
+
 ```text
 Use $pm-workspace to clarify this product idea before prototype design.
 Idea: <one sentence>
@@ -55,9 +78,21 @@ Output: <brief only / one screen / screen pair / 3 directions / handoff>
 
 For prototype work, PMWorkspace defaults to mobile-first iPhone 17 portrait `402 x 874`. Desktop is used only when the user asks for it or when a dashboard/internal tool truly needs large-screen density.
 
-Prototype work is locked to image-2 / image generation unless the user explicitly asks for HTML, an interactive web prototype, or frontend implementation. If the product brief is not `Aligned`, PMWorkspace should ask the next diagnostic or decision question instead of producing images, HTML, or a long plan.
+Prototype work is locked to image-2 / image generation unless the user explicitly asks for HTML, an interactive web prototype, or frontend implementation. In deep delivery mode, if the product brief is not `Aligned`, PMWorkspace should ask the next diagnostic or decision question instead of producing images, HTML, or a long plan. In quick shaping mode, PMWorkspace may generate the light package after the user approves clearly marked assumptions; the package must be labeled as discussion-ready, not final PRD truth.
 
 Briefs saved through `pmw-log brief` automatically sync to Zoon when enabled: existing Zoon URLs are appended, and new documents are created when `zoon_auto_create` is true. Before prototype or handoff work, PMWorkspace checks for Zoon drift so edits made in the conversation or in Zoon do not fall out of sync.
+
+## Runtime
+
+PMWorkspace works best in **Codex**.
+
+The full experience includes mobile-first image-2 prototype generation, so the host environment needs image generation capability. Codex can run the product diagnostics, product briefs, solution directions, image-2 prototype screens, and handoff workflow together, so the recommended setup is:
+
+```bash
+./setup --host codex
+```
+
+Other Codex skill-compatible hosts can still use PMWorkspace for product questioning, briefs, PRDs, and handoff documents. If the host does not provide image-2 / image generation, prototype image output is limited. Do not replace image-2 prototypes with HTML or Markdown wireframes unless the user explicitly asks for HTML, an interactive web prototype, or frontend implementation.
 
 ## Install
 
@@ -168,7 +203,8 @@ Override with `PMW_REMOTE_VERSION_URL`, `PMW_REPO_URL`, `bin/pmw-config set remo
 
 ## Prototype Rules
 
-- The brief must be `Aligned` before image prompts or image generation.
+- Deep delivery: the brief must be `Aligned` before image prompts or image generation.
+- Quick shaping: image generation requires explicit approval to proceed with listed assumptions, plus non-fiction boundaries for every image.
 - New pages still need an online-reference check. If a screen continues an existing flow, result state, or production style, provide screenshots/recordings/similar pages or explicitly confirm there is no online reference before image generation.
 - Multi-scheme concepts must differ by product strategy, information architecture, interaction model, or trust model.
 - One scheme plus one screen equals one image.

@@ -2,14 +2,16 @@
 name: pm-autoplan
 description: |
   PMWorkspace 自动产品评审流水线。用于用户希望“一次跑完整产品评审”“自动把
-  产品方向梳理到可出原型前”“按推荐推进但关键点让我拍板”时。顺序串联
+  产品方向梳理到可出原型前”“按推荐推进但关键点让我拍板”，或希望快速产出
+  “产品简报 + 方案方向 + 原型图”轻量包时。支持快速成型模式和深度交付模式。
+  快速成型模式用最少追问确认假设后产出可讨论轻量包；深度交付模式顺序串联
   pm-jobs、pm-strategy-review、pm-brief、Zoon 同步、Zoon 漂移检查和原型
   准备度检查，只把会改变方向的 D 选择题交给用户确认。
 ---
 
 # 自动产品评审
 
-`$pm-autoplan` 是 PMWorkspace 的一键评审模式：把零散想法推进到可确认的产品简报，而不是跳过产品判断直接出图。
+`$pm-autoplan` 是 PMWorkspace 的一键推进模式：把零散想法推进成可讨论轻量包，或推进到可确认的产品简报与交付资产。它不是跳过产品判断直接出图。
 
 Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. 面向中文用户时，输出中文标题、状态和建议；只保留 `$pm-*`、Zoon、PRD、image-2、URL 等必要术语。
 
@@ -34,11 +36,17 @@ done
 3. Read `../pmworkspace-shared/references/adversarial-review.md`.
 4. Read `../pmworkspace-shared/references/product-plan-handoff.md`.
 5. Read `../pmworkspace-shared/references/zoon-workflow.md` and `../pmworkspace-shared/references/zoon-drift-check.md`.
-6. Detect the earliest missing gate in this order: 工作目标模式、场景路由、Q 诊断、前提确认、必要 D、产品简报、Zoon 同步、原型准备度。
-7. Auto-decide only low-risk defaults that do not change product direction; surface any direction-changing item as a single `D` choice question and stop.
-8. When enough information exists, create the smallest useful product brief and save it with `pmw-log brief <name>`. Because `pmw-log brief` auto-syncs, this should create or append to Zoon when enabled.
-9. If a Zoon URL exists before prototype preparation, run `pmw-zoon drift --url <url>` when available. If it returns `DRIFT`, read the latest Zoon snapshot and update the product brief version before continuing.
-10. End with a readiness state: `需要补充`、`待确认`、`已对齐`、或 `可进入原型复审`.
+6. Choose mode:
+   - 快速成型模式：用户要求轻量包、先看方案、快速出可讨论材料，或是新 idea 且没有明确 PRD/交付要求。
+   - 深度交付模式：用户要求 PRD、Zoon 对齐、已有线上截图/生产流程、设计/研发交付、或高风险业务流程。
+7. 快速成型模式：只检测最早会影响轻量包的缺口：核心用户/场景、核心问题、主目标/反指标、不可虚构项、原型屏幕范围。默认最多问 2-3 个 `Q`。
+8. 快速成型模式：列出关键假设、方案方向和每张图的不可虚构项，请用户确认“按这些假设继续”。确认前不生成图片。
+9. 快速成型模式：确认后输出轻量包：标注假设的产品简报、2-3 个方案方向、每个方案 1 张移动端 image-2 原型图计划，并把状态写成 `基于假设，可讨论`。
+10. 深度交付模式：Detect the earliest missing gate in this order: 工作目标模式、场景路由、Q 诊断、前提确认、必要 D、产品简报、Zoon 同步、原型准备度。
+11. 深度交付模式：Auto-decide only low-risk defaults that do not change product direction; surface any direction-changing item as a single `D` choice question and stop.
+12. When enough information exists, create the smallest useful product brief and save it with `pmw-log brief <name>`. Because `pmw-log brief` auto-syncs, this should create or append to Zoon when enabled.
+13. If a Zoon URL exists before prototype preparation, run `pmw-zoon drift --url <url>` when available. If it returns `DRIFT`, read the latest Zoon snapshot and update the product brief version before continuing.
+14. End with a readiness state: `需要补充`、`待确认`、`基于假设，可讨论`、`已对齐`、或 `可进入原型复审`.
 
 ## Auto-Decide Rules
 
@@ -48,6 +56,7 @@ done
 - 默认移动端优先画布。
 - 不影响方向的格式、标题、状态字段。
 - 已有 Zoon URL 时优先 append，不新建文档。
+- 快速成型模式中，不影响方案结构的轻量包格式和默认输出数量。
 
 必须提问：
 
@@ -56,18 +65,23 @@ done
 - 线上参考需要但缺失。
 - Zoon 最新内容和本地产品简报冲突。
 - 用户承诺、数据真实性、线索/交易/隐私口径需要 PM 拍板。
+- 快速成型模式出图前，用户尚未确认“按这些假设继续”。
 
 ## 输出
 
 ```text
 自动评审结果：
 - 状态：
+- 模式：<快速成型 / 深度交付>
 - 当前门槛：
 - 已自动采用：
 - 需要 PM 拍板：
 - 产品简报：
+- 方案方向：
+- 轻量包图片计划：
 - Zoon 同步：
 - Zoon 漂移检查：
 - 原型准备度：
+- 可升级到：
 - 建议下一步：
 ```

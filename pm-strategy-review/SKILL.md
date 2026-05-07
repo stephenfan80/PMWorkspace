@@ -32,10 +32,16 @@ done
 3. Read `../pmworkspace-shared/references/decision-question-mode.md`.
 4. Read `../pmworkspace-shared/references/scenario-experts.md` and use the dominant scenario lens.
 5. Read `../pmworkspace-shared/references/product-memory.md`; use memory only as preference signal, not as fact source.
-6. Select 3-5 challenge lenses relevant to the scenario.
-7. Present concrete strategy choices. Do not silently change scope.
-8. 把“需要 PM 拍板”的点转成选择题；每轮只展开一个完整 `D`，其余只提示后续标题队列。
-9. Log accepted strategy decisions with `pmw-log question` and `pmw-log decision` when platform scripts are available.
+6. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 策略审查 stage fields.
+7. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-strategy-review` 且没有当前 run，再创建 runtime run.
+8. Build the 策略取舍控制器 from `adversarial-review.md`: 来源门槛、已确认事实、策略风险类型、3-5 个审查视角、建议姿态、策略取舍、当前 D / 后续 D 队列、下一技能.
+9. 如果来自 `$pm-jobs`，只接住产品追问交出的策略门槛：范围、价值交换、信任/风险、反指标、可行性、定位或业务冲突；不要重新展开 Q 诊断全流程。
+10. If basic facts such as user, problem, main goal, anti-metric, or non-fiction boundary are missing, route back to `$pm-jobs` with one focused `Q`; do not use strategy review to invent missing facts.
+11. Select 3-5 challenge lenses relevant to the strategy risk type and scenario.
+12. Present concrete strategy choices. Do not silently change scope, add promises, move anti-metrics, or include unsupported capabilities.
+13. 把“需要 PM 拍板”的点转成选择题；每轮只展开一个完整 `D`，其余只提示后续标题队列。
+14. If strategy review resolves the tradeoff, route next to `$pm-brief` by default so the decision becomes part of the product contract. If the brief is already aligned and only direction review was requested, route next to `$pm-prototype-shotgun` or `$pm-handoff`.
+15. Log accepted strategy decisions with `pmw-log question` and `pmw-log decision` when platform scripts are available.
 
 ## Review Lenses
 
@@ -53,12 +59,19 @@ done
 
 ```text
 策略审查结果：
+- run_id：
+- 来源门槛：
+- 策略风险类型：
+- 使用视角：
+- 证据状态：
 - 最强前提：
 - 最弱假设：
 - 建议姿态：扩大 / 保持 / 收缩 / 转向
-- 策略选择：
+- 策略取舍：
 - 范围外：
 - 对原型的影响：
-- 需要 PM 拍板的选择题：
+- 当前 D：
+- 后续 D 队列：
+- 下一技能：
 - 建议下一步：
 ```

@@ -4,6 +4,21 @@
 
 For Chinese users, keep planning notes, output contracts, final summaries, and generated UI copy in Simplified Chinese. The prompt may keep precise technical terms such as `image-2`, `UI`, `token`, `API`, device names, colors, and component names when useful for image quality.
 
+## 原型方案控制器
+
+`$pm-prototype-shotgun` 写图片提示词或调用 image-2 前，先建立原型方案控制器。控制器至少记录：
+
+- `产品简报来源`：已对齐产品简报版本、Zoon URL / 快照状态、最新漂移检查结论。
+- `图片生成前门槛`：产品简报已对齐、Zoon 无实质漂移、线上参考门槛通过、设计系统已载入、image-2 可用。
+- `方案差异质量`：每个方案差异来自产品策略、信息架构、交互模型或信任模型；如果只是配色、圆角、插画、卡片皮肤不同，停止并重拟方向。
+- `方案方向确认`：用户已确认方向，或明确批准使用默认方向；未确认时只输出方向和取舍，不写图片提示词。
+- `输出单元清单`：把每个 `方案 + 屏幕任务` 拆成一张独立图片，并绑定主目标、反指标、不可虚构项、产品简报版本、线上参考状态和画布。
+- `方案比较板写入`：生成前用 `pmw-prototype-board add` 登记计划单元，生成后补充图片路径或 URL；脚本不可用时在输出中标记原因。
+- `生成后复审`：每批图片后运行 `prototype-quality-review.md`，实质问题交给 `$pm-prototype-review`。
+- `证据状态`：产品简报、Zoon、线上参考、设计系统、方案方向、输出单元、方案比较板和图片资产的状态。
+
+如果任一图片生成前门槛未通过，停止在对应门槛，不写 image-2 提示词，不生成图片，不用 HTML、Markdown 线框、拼贴图或比较板替代。
+
 ## 提示词前置门槛
 
 以下条件全部成立前，不要写图片提示词：
@@ -19,6 +34,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - 多方案任务已有命名方案方向，并得到用户确认或批准作为默认方向。
 - 输出计划已经把每个方案/屏幕映射为一张独立图片，不把多个方案合成一张比较图。
 - 每张图片已经绑定方案名、屏幕任务、主目标、反指标、不可虚构项和产品简报版本。
+- 每个输出单元已经登记到 Prototype Shotgun Board，或已说明脚本不可用的原因。
 - 画布决策遵循移动端优先：iPhone 17 竖屏 `402 x 874`；除非用户明确要求桌面端，或看板/内部工具确实需要大屏密度。
 - 已通过 `design-system-workflow.md` 载入 AutoDesign 生产基线。
 - 对抗审查中的实质改动已写回产品简报。
@@ -41,6 +57,8 @@ C. <名称> - <产品策略和取舍>
 ```
 
 Directions must differ by product strategy, information architecture, interaction model, or trust model. Do not offer three visual skins of the same idea. After confirmation, generate each direction/screen as a separate image, even when several images are generated in one batch.
+
+方案差异质量不通过时，不要降级成“先出几张看看”。先重拟方向，直到差异能映射到产品判断；视觉风格只能作为已确认方案内的表达，不是方案本身。
 
 ## 图片输出契约
 

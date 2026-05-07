@@ -1,0 +1,37 @@
+{
+  "id": "pmworkspace-quick-route-keeps-confirmation-gate",
+  "title": "快速成型路由仍保留假设确认出图门槛",
+  "category": "pm-workspace-routing",
+  "primary_skill": "pm-workspace",
+  "prompt": "帮我快速成型一个新想法，先给 3 个方向并出图。",
+  "expected": {
+    "mode": "quick",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "假设确认",
+    "required_behaviors": [
+      "路由到快速成型",
+      "列出关键假设",
+      "确认前不生成图片"
+    ],
+    "forbidden_behaviors": [
+      "跳过假设确认",
+      "把轻量包包装成最终 PRD",
+      "直接生成 image-2 图片"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "快速成型生成图片前，必须先让用户确认“按这些假设继续”。"
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "确认前不生成图片"
+    },
+    {
+      "path": "pmworkspace-shared/references/welcome-guide.md",
+      "contains": "A. 我要快速成型"
+    }
+  ]
+}

@@ -23,8 +23,26 @@ PMWorkspace 有两个入口：
 -> D 拍板
 -> 产品简报
 -> image-2 原型
+-> 原型复审
 -> 交付资产
 ```
+
+## 端到端工作台地图
+
+PMWorkspace 的全链路地图由 `pmworkspace-shared/references/pm-workbench-map.md` 维护，README、routing、eval 和各技能状态字段都以它为同一张地图：
+
+```text
+$pm-workspace
+-> $pm-autoplan
+-> $pm-jobs
+-> $pm-strategy-review
+-> $pm-brief
+-> $pm-prototype-shotgun
+-> $pm-prototype-review
+-> $pm-handoff
+```
+
+每一环都必须说明：当前模式 / 状态、当前门槛或最早门槛、下一技能、run_id、证据状态、当前 Q / D、产物清单和建议下一步。这样用户不会在“已经出图了吗”“能交付了吗”“缺什么证据”之间来回猜。
 
 ## 技能套件
 
@@ -119,10 +137,13 @@ PMWorkspace 的完整体验包含移动端优先的 image-2 原型图输出，�
 PMWorkspace v0.2 把技能套件升级成本地产品运行系统：
 
 - **Runtime Kernel：** `pmw-run` 为每次工作生成 `run_id`，记录模式、门槛、决策、证据、产物、复审和下一步。
+- **Workbench Map：** `pm-workbench-map.md` 统一 README、路由、eval 分类和技能间状态字段。
 - **Evidence Dashboard：** `pmw-dashboard status` 输出中文证据状态页，汇总产品简报版本、Zoon 状态、线上参考、假设、不可虚构项、原型清单、复审结论和问题偏好。
 - **Prototype Shotgun Board：** `pmw-prototype-board` 登记每个独立 image-2 图片单元，并用表格比较方案；不把多张图合成一张图。
 - **PM Review Army：** 原型复审使用策略、信任 / 风险、设计系统和数据可行性四个视角，最终合并为可通过、需要重出或需要 PM 拍板。
 - **Question Tuning：** `pmw-question-tuning` 记录用户对 Q/D 的偏好，例如永远问、高风险才问、默认采用推荐或除非阻塞否则少问。
+- **PM Eval：** `pmw-eval` 用无依赖 fixture 检查核心门槛和输出契约，防止 skill 规则退化。
+- **自动决策原则：** 统一事实优先级和停止门槛，明确低风险默认项可以自动采用，用户承诺、数据真实性、范围、实验口径、线索 / 交易 / 隐私边界必须 PM 拍板。
 
 ## 安装
 
@@ -162,6 +183,7 @@ PMWorkspace 默认把资产保存在本地：
   projects/<slug>/prototype-board.jsonl
   projects/<slug>/question-tuning.jsonl
   projects/<slug>/prototypes/
+  projects/<slug>/handoffs/
   projects/<slug>/taste-profile.jsonl
   projects/<slug>/learnings.jsonl
 ```
@@ -175,6 +197,7 @@ PMWorkspace 默认把资产保存在本地：
 - 每次运行的本地审计轨迹。
 - 产品简报 Markdown。
 - 原型批次清单。
+- PRD / 设计 / 实验 / 研发交付稿。
 - 方案比较板。
 - Q/D 问题偏好。
 - 用户批准或拒绝的设计偏好。
@@ -213,7 +236,11 @@ bin/pmw-prototype-board add --scheme "方案 A" --screen "首页" --brief-versio
 bin/pmw-prototype-board list
 bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --reason "低风险轻量包默认采用推荐"
 bin/pmw-question-tuning summary
+bin/pmw-eval list
+bin/pmw-eval run
 ```
+
+Eval fixture 保存在仓库的 `evals/fixtures/`，安装时会复制到 shared skill bundle，供维护检查使用。
 
 Zoon 在线简报：
 

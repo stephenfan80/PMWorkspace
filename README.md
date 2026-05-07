@@ -33,6 +33,23 @@ Update check + state logging
 
 The core rule is simple: define the product problem, goals, counter-metrics, constraints, and premises before generating prototype images.
 
+## End-to-End Workbench Map
+
+The canonical end-to-end map lives in `pmworkspace-shared/references/pm-workbench-map.md`. README, routing, eval categories, and skill-to-skill state fields should all point back to that single map:
+
+```text
+$pm-workspace
+-> $pm-autoplan
+-> $pm-jobs
+-> $pm-strategy-review
+-> $pm-brief
+-> $pm-prototype-shotgun
+-> $pm-prototype-review
+-> $pm-handoff
+```
+
+Every handoff between skills should preserve the current mode/status, current or earliest gate, next skill, run_id, evidence state, current Q/D, artifact list, and recommended next step.
+
 ## Skill Suite
 
 | Skill | Use When |
@@ -99,10 +116,13 @@ Other Codex skill-compatible hosts can still use PMWorkspace for product questio
 PMWorkspace v0.2 turns the skill suite into a local product runtime:
 
 - **Runtime Kernel:** `pmw-run` gives each workflow a `run_id`, mode, gate events, decisions, evidence, artifacts, reviews, and next step.
+- **Workbench Map:** `pm-workbench-map.md` aligns README, routing, eval categories, and shared state fields across skills.
 - **Evidence Dashboard:** `pmw-dashboard status` renders a Chinese Markdown status page with brief version, Zoon state, references, assumptions, non-fiction boundaries, prototype list, reviews, and question preferences.
 - **Prototype Shotgun Board:** `pmw-prototype-board` registers each independent image-2 unit and compares schemes without merging multiple screens into one image.
 - **PM Review Army:** prototype review uses strategy, trust/risk, design system, and data feasibility lenses, then merges findings into pass, regenerate, or PM decision.
 - **Question Tuning:** `pmw-question-tuning` records whether a Q/D dimension should always be asked, asked only at high risk, defaulted to the recommendation, or avoided unless blocking.
+- **PM Eval:** `pmw-eval` uses dependency-free fixtures to check core gates and output contracts, so skill rules do not silently regress.
+- **Auto-Decision Principles:** shared fact priority and stop gates clarify which low-risk defaults can be auto-accepted and which user promises, data-truth, scope, experiment, lead, transaction, or privacy choices require PM decision.
 
 ## Install
 
@@ -142,6 +162,7 @@ PMWorkspace stores durable assets locally by default:
   projects/<slug>/prototype-board.jsonl
   projects/<slug>/question-tuning.jsonl
   projects/<slug>/prototypes/
+  projects/<slug>/handoffs/
   projects/<slug>/taste-profile.jsonl
   projects/<slug>/learnings.jsonl
 ```
@@ -152,6 +173,7 @@ Defaults:
 - Remote anonymous telemetry requires explicit opt-in.
 - Stored assets should include project display names, briefs, decision questions, decisions, Zoon URLs, prototype manifests, taste feedback, and sanitized product learnings.
 - Runtime assets include local run audit trails, evidence dashboard inputs, prototype board entries, and question tuning preferences.
+- Handoff assets include PRD-ready, design-ready, experiment-ready, and engineering-ready documents under `handoffs/`.
 - Do not store raw private customer data, tokens, internal recordings, or sensitive screenshots.
 
 Project helpers:
@@ -173,7 +195,11 @@ bin/pmw-prototype-board add --scheme "方案 A" --screen "首页" --brief-versio
 bin/pmw-prototype-board list
 bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --reason "低风险轻量包默认采用推荐"
 bin/pmw-question-tuning summary
+bin/pmw-eval list
+bin/pmw-eval run
 ```
+
+Eval fixtures live in the repository at `evals/fixtures/`, and are copied into the installed shared skill bundle for maintenance checks.
 
 Zoon helpers:
 
@@ -247,10 +273,12 @@ pm-jobs/
 pm-strategy-review/
 pm-brief/
 pm-prototype-shotgun/
+pm-prototype-review/
 pm-handoff/
 pmworkspace-shared/
   references/
 bin/
+evals/
 examples/
 ```
 

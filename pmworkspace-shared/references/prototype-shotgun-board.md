@@ -14,7 +14,18 @@ pmw-prototype-board add \
   --goal "<主目标>" \
   --anti-metric "<反指标>" \
   --non-fiction "<不可虚构项>" \
-  --image "<图片路径或 URL，可为空>"
+  --image "<图片路径或 URL，可为空>" \
+  --status "计划生成"
+```
+
+生成后把图片路径或 URL 补写到同一个方案/屏幕单元：
+
+```bash
+pmw-prototype-board image \
+  --scheme "<方案名>" \
+  --screen "<屏幕任务>" \
+  --image "<图片路径或 URL>" \
+  --status "已生成"
 ```
 
 用户反馈后记录评分：
@@ -35,4 +46,6 @@ pmw-prototype-board list
 - 不把配色、插画、圆角或风格皮肤包装成多方案。
 - 默认输出“方案对比表 + 单图清单”，不是拼图。
 - 只有用户明确要求展示材料时，才可以额外做展示板。
-
+- 方案比较板是审计和比较记录，不是 image-2 图片的替代物。
+- 每个 board item 必须能追溯到已对齐产品简报版本、主目标、反指标和不可虚构项。
+- 如果 `pmw-prototype-board add` 或 `pmw-prototype-board image` 不可用，原型计划必须写明 `方案比较板：未写入（原因）`，不能假装已经记录。

@@ -1,0 +1,41 @@
+{
+  "id": "brief-missing-upstream-gates-route-back",
+  "title": "产品追问基础事实未解决时产品简报必须退回上游",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "$pm-jobs 交来一个新功能想法，但目标人群、反指标和不可虚构项仍缺失，用户要求直接写已对齐产品简报。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要补充",
+    "must_stop": true,
+    "gate": "基础事实缺失",
+    "required_behaviors": [
+      "标出缺失门槛",
+      "退回 $pm-jobs",
+      "只展开一个当前 Q"
+    ],
+    "forbidden_behaviors": [
+      "用产品简报补写事实",
+      "把缺失事实写成已确认",
+      "标记为已对齐"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "如果来自 `$pm-jobs` 的基础事实仍缺失，下一技能是 `$pm-jobs`"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "如果基础事实仍缺失，退回 `$pm-jobs`，只展开一个当前 Q"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "如果这些门槛仍未解决，`$pm-brief` 只能把它们写成缺失门槛并退回对应技能"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "不能写成已对齐产品契约"
+    }
+  ]
+}

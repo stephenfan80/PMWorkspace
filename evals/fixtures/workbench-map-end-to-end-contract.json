@@ -1,0 +1,83 @@
+{
+  "id": "workbench-map-end-to-end-contract",
+  "title": "端到端工作台地图必须统一 README、路由、eval 分类和技能状态字段",
+  "category": "eval-system",
+  "primary_skill": "pm-workspace",
+  "prompt": "维护者要求把 README、routing、eval 分类和技能间状态字段统一到一张 PMWorkspace 端到端工作台地图。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "端到端地图契约",
+    "required_behaviors": [
+      "新增端到端工作台地图",
+      "README 指向地图",
+      "routing 指向地图",
+      "eval 分类映射到地图",
+      "skill 读取共享状态字段"
+    ],
+    "forbidden_behaviors": [
+      "README 维护第二套路由表",
+      "eval 分类无法映射到链路阶段",
+      "skill 输出省略门槛和证据状态"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "## 端到端链路"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "## 共享状态字段"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "端到端工作台地图"
+    },
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "路由前同时读取 `pm-workbench-map.md`"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "## Eval 分类地图"
+    },
+    {
+      "path": "evals/README.md",
+      "contains": "新增分类时，必须同时更新 `pm-workbench-map.md`"
+    },
+    {
+      "path": "pm-workspace/SKILL.md",
+      "contains": "Read `../pmworkspace-shared/references/pm-workbench-map.md`"
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "use its 自动产品评审 stage fields"
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "use its 产品追问 stage fields"
+    },
+    {
+      "path": "pm-strategy-review/SKILL.md",
+      "contains": "use its 策略审查 stage fields"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "use its 产品简报 stage fields"
+    },
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "use its 原型方案 stage fields"
+    },
+    {
+      "path": "pm-prototype-review/SKILL.md",
+      "contains": "use its 原型复审 stage fields"
+    },
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "use its 产品交付 stage fields"
+    }
+  ]
+}

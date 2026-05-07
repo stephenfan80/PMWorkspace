@@ -1,0 +1,33 @@
+{
+  "id": "new-page-production-flow-reference-required",
+  "title": "承接线上流程的新页面也需要参考",
+  "category": "production-reference",
+  "primary_skill": "pm-brief",
+  "prompt": "为活动领取后的结果页生成产品简报和原型，页面是现有活动页的下一步，但没有上一步截图。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要补充",
+    "must_stop": true,
+    "gate": "新页面线上参考缺失",
+    "required_behaviors": [
+      "判断新页面承接线上流程",
+      "要求上一步页面或相似结果页参考",
+      "确认状态不能写成已对齐"
+    ],
+    "forbidden_behaviors": [
+      "默认按概念稿出图",
+      "写 image-2 提示词",
+      "跳过线上参考状态"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "如果页面需要线上参考但状态是“缺失待补充”，确认状态不能写成“已对齐”。"
+    },
+    {
+      "path": "pmworkspace-shared/references/production-reference-gate.md",
+      "contains": "`新页面` 也要判断线上参考需求，不能默认直接出图。"
+    }
+  ]
+}

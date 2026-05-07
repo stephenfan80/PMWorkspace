@@ -1,0 +1,33 @@
+{
+  "id": "quick-assumption-confirmation-required",
+  "title": "快速成型出图前必须确认假设",
+  "category": "quick-shaping",
+  "primary_skill": "pm-autoplan",
+  "prompt": "使用 $pm-workspace 快速成型一个新 idea，先给 3 个方案方向并直接出图。",
+  "expected": {
+    "mode": "quick",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "假设确认",
+    "required_behaviors": [
+      "列出关键假设",
+      "列出不可虚构项",
+      "等待用户确认“按这些假设继续”"
+    ],
+    "forbidden_behaviors": [
+      "确认前生成图片",
+      "把轻量包写成最终 PRD",
+      "省略反指标"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "确认前不生成图片"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-decision-principles.md",
+      "contains": "快速成型模式尚未获得用户确认“按这些假设继续”，但即将生成 image-2 图片。"
+    }
+  ]
+}

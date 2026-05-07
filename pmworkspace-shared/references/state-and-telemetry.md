@@ -23,6 +23,7 @@ projects/<slug>/runs/
 projects/<slug>/prototype-board.jsonl
 projects/<slug>/question-tuning.jsonl
 projects/<slug>/prototypes/
+projects/<slug>/handoffs/
 projects/<slug>/taste-profile.jsonl
 projects/<slug>/learnings.jsonl
 ```
@@ -33,12 +34,13 @@ projects/<slug>/learnings.jsonl
 - 决策：用户确认过的简短产品或设计决策。
 - 拍板问题：问题标题、推荐项、用户选择和最终决策摘要。
 - 产品简报：已对齐或待确认的 Markdown 产品简报。
+- 交付稿：PRD、设计交付、实验验证或研发交付的 Markdown 资产。
 - 项目元数据：中文展示名、技术 slug、最新产品简报路径和 Zoon 文档链接。
 - 运行审计：run id、模式、门槛、证据、决策、产物、复审和下一步。
 - 原型清单：方案、屏幕、画布、产品简报依赖和提示词摘要。
 - 原型方案比较板：方案、屏幕、主目标、反指标、不可虚构项、brief 版本、评分和评论。
 - 问题偏好：用户对 Q/D 追问方式的脱敏偏好。
-- 偏好反馈：批准/拒绝的方向，以及用户原因。
+- 偏好反馈：批准/拒绝的方向、脱敏原因、场景、反馈对象、来源、适用边界和置信度。
 - 产品学习：脱敏后的复用判断、常见边界和后续偏好。
 
 ## 不保存什么

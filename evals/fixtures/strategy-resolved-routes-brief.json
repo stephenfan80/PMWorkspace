@@ -1,0 +1,38 @@
+{
+  "id": "strategy-resolved-routes-brief",
+  "title": "策略取舍完成后默认进入产品简报",
+  "category": "pm-strategy-review",
+  "primary_skill": "pm-strategy-review",
+  "prompt": "策略审查已经收敛，PM 选择了收缩范围并先展示免费价值。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": false,
+    "gate": "策略决策写入产品契约",
+    "required_behaviors": [
+      "记录策略决策",
+      "下一技能指向 $pm-brief",
+      "不直接生成原型",
+      "不跳过产品简报"
+    ],
+    "forbidden_behaviors": [
+      "策略审查后直接写 image-2 提示词",
+      "跳过产品简报",
+      "不记录范围外"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/adversarial-review.md",
+      "contains": "策略审查完成后，默认下一技能是 `$pm-brief`"
+    },
+    {
+      "path": "pm-strategy-review/SKILL.md",
+      "contains": "route next to `$pm-brief` by default so the decision becomes part of the product contract"
+    },
+    {
+      "path": "pm-strategy-review/SKILL.md",
+      "contains": "- 范围外："
+    }
+  ]
+}

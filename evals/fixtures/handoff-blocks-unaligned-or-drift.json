@@ -1,0 +1,38 @@
+{
+  "id": "handoff-blocks-unaligned-or-drift",
+  "title": "未对齐简报或 Zoon 实质漂移不能交付",
+  "category": "pm-handoff",
+  "primary_skill": "pm-handoff",
+  "prompt": "本地 brief 待确认，Zoon 又修改了范围和用户承诺，但用户要求直接输出研发交付稿。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "交付事实来源未对齐",
+    "required_behaviors": [
+      "检查产品简报已对齐",
+      "检查 Zoon 实质漂移",
+      "退回 $pm-brief 或 $pm-strategy-review",
+      "不输出 PRD 或研发验收"
+    ],
+    "forbidden_behaviors": [
+      "沿用旧 brief",
+      "忽略 Zoon 漂移",
+      "输出完整交付稿"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "产品简报不是 `已对齐` 时，不输出 PRD、设计交付、实验方案或研发验收；退回 `$pm-brief`。"
+    },
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "若存在实质漂移，读取最新文档，作为交付事实来源，并退回 `$pm-brief` 或 `$pm-strategy-review`"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "产品简报未已对齐、Zoon 有实质漂移"
+    }
+  ]
+}

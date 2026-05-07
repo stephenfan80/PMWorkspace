@@ -28,17 +28,27 @@ done
 
 ## Workflow
 
-1. 读取最新已对齐的产品简报、策略决策，以及可用的原型清单。
-2. Read `../pmworkspace-shared/references/runtime-kernel.md`.
-3. Read `../pmworkspace-shared/references/evidence-dashboard.md` and run `pmw-dashboard status` when available.
-4. Read `../pmworkspace-shared/references/prototype-shotgun-board.md`; if a selected prototype direction exists, include the board result instead of relying on memory.
-5. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
-6. 如果 `pmw-project show` 中有 Zoon URL，先运行 `pmw-zoon drift`；若存在漂移，读取最新文档，作为交付事实来源，并更新产品简报版本。
-7. 选择交付类型：适合 PRD、适合设计、适合实验验证或适合研发。
-8. 包含目标、目标用户、问题、场景、选定方向、范围、不做什么、验收标准、指标、风险、依赖和待决策项。
-9. Keep unsupported capabilities under `不可虚构`.
-10. 未决交付取舍继续使用 `decision-question-mode.md` 的选择题结构。
-11. Log final delivery decisions and `pmw-run event --type artifact` when platform scripts are available; finish the run as `可交付` when handoff is complete.
+1. Read `../pmworkspace-shared/references/delivery-handoff.md`.
+2. Read `../pmworkspace-shared/references/product-plan-handoff.md`; require the latest product brief to be `已对齐`.
+3. Read `../pmworkspace-shared/references/prototype-quality-review.md` and require prototype-dependent delivery to have `原型复审状态：可通过`.
+4. Read `../pmworkspace-shared/references/pm-review-army.md`; unresolved review findings must not be hidden in delivery notes.
+5. Read `../pmworkspace-shared/references/pm-decision-principles.md`; unresolved user promise, data truth, scope, experiment, lead, transaction, privacy, compliance, or acceptance boundary issues must become `需要 PM 拍板`.
+6. Read `../pmworkspace-shared/references/decision-question-mode.md`; 每轮只展开一个当前 `D`，不要批量写多个验收相关决策。
+7. Read `../pmworkspace-shared/references/runtime-kernel.md`.
+8. Read `../pmworkspace-shared/references/evidence-dashboard.md` and run `pmw-dashboard status` when available.
+9. Read `../pmworkspace-shared/references/prototype-shotgun-board.md`; if a selected prototype direction exists, include the board result instead of relying on memory.
+10. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
+11. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 产品交付 stage fields.
+12. Read `../pmworkspace-shared/references/pm-eval-system.md` and preserve delivery contracts.
+13. Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-handoff` 且没有当前 run，再创建 runtime run.
+14. 建立交付控制器，记录 `交付目标`、`事实来源`、`交付前门槛`、`原型复审状态`、`未决拍板`、`交付类型`、`验收写入边界`、`范围外`、`下一技能` 和 `证据状态`。
+15. 如果 `pmw-project show` 中有 Zoon URL，先运行 `pmw-zoon drift`；若存在实质漂移，读取最新文档，作为交付事实来源，并退回 `$pm-brief` 或 `$pm-strategy-review`，不要沿用旧交付口径。
+16. 如果产品简报不是 `已对齐`，退回 `$pm-brief`；如果交付依赖原型但复审不是 `可通过`，退回 `$pm-prototype-review`、`$pm-prototype-shotgun` 或当前 `D`。
+17. 如果仍有会改变范围、用户承诺、实验口径、数据真实性、线索/交易/隐私/合规边界或验收标准的未决 D，停止在 `需要 PM 拍板`，只输出一个当前 `D`，不写研发验收标准。
+18. 选择交付类型：PRD、设计交付、实验验证、研发交付，或组合；只输出当前需要的深度。
+19. 包含目标、目标用户、问题、场景、选定方向、范围、范围外、验收标准、指标、风险、依赖和待决策项。
+20. Keep unsupported capabilities under `不可虚构`; unsupported capabilities, unverified data, unresolved commitments, and future ideas must not appear as acceptance criteria.
+21. 平台脚本可用时，用 `pmw-log handoff <name>` 保存交付稿，记录 `pmw-run event --type artifact`，并且只有交付前门槛全部通过时才 `pmw-run finish --status "可交付"`。
 
 ## 输出结构
 
@@ -46,6 +56,17 @@ done
 # PMWorkspace 交付稿：<功能名>
 
 ## 证据状态
+
+- run_id：
+- 交付目标：
+- 事实来源：
+- 交付前门槛：
+- 原型复审状态：
+- 未决拍板：
+- 交付类型：
+- 验收写入边界：
+- 下一技能：
+- 已保存资产：
 
 ## 摘要
 

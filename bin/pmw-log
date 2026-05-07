@@ -7,7 +7,7 @@ SLUG="${PMW_PROJECT_SLUG:-$("$SCRIPT_DIR/pmw-slug")}"
 PROJECT_DIR="$STATE_DIR/projects/$SLUG"
 EVENT="${1:-}"
 
-mkdir -p "$PROJECT_DIR/briefs" "$PROJECT_DIR/prototypes" "$STATE_DIR/analytics"
+mkdir -p "$PROJECT_DIR/briefs" "$PROJECT_DIR/prototypes" "$PROJECT_DIR/handoffs" "$STATE_DIR/analytics"
 
 json_escape() {
   sed 's/\\/\\\\/g; s/"/\\"/g'
@@ -70,15 +70,72 @@ case "$EVENT" in
     cat >> "$manifest"
     echo "$manifest"
     ;;
+  handoff)
+    name="${2:-handoff}"
+    file="$PROJECT_DIR/handoffs/$(date -u +%Y%m%dT%H%M%SZ)-$(safe_fragment "$name").md"
+    cat > "$file"
+    echo "$file"
+    ;;
   taste)
     action="${2:-approved}"
     note="${3:-}"
+    scenario=""
+    target=""
+    scope="本项目"
+    source="用户反馈"
+    confidence="0.4"
+    if [ "$#" -ge 3 ]; then
+      shift 3
+    else
+      set --
+    fi
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --scenario)
+          scenario="${2:-}"
+          shift
+          [ "$#" -gt 0 ] && shift
+          ;;
+        --target)
+          target="${2:-}"
+          shift
+          [ "$#" -gt 0 ] && shift
+          ;;
+        --scope)
+          scope="${2:-}"
+          shift
+          [ "$#" -gt 0 ] && shift
+          ;;
+        --source)
+          source="${2:-}"
+          shift
+          [ "$#" -gt 0 ] && shift
+          ;;
+        --confidence)
+          confidence="${2:-}"
+          shift
+          [ "$#" -gt 0 ] && shift
+          ;;
+        *)
+          echo "Unknown taste option: $1" >&2
+          exit 1
+          ;;
+      esac
+    done
     profile="$PROJECT_DIR/taste-profile.jsonl"
-    printf '{"ts":"%s","action":"%s","note":"%s"}\n' "$ts" "$action" "$(printf '%s' "$note" | json_escape)" >> "$profile"
+    printf '{"ts":"%s","action":"%s","note":"%s","scenario":"%s","target":"%s","scope":"%s","source":"%s","confidence":"%s"}\n' \
+      "$ts" \
+      "$(printf '%s' "$action" | json_escape)" \
+      "$(printf '%s' "$note" | json_escape)" \
+      "$(printf '%s' "$scenario" | json_escape)" \
+      "$(printf '%s' "$target" | json_escape)" \
+      "$(printf '%s' "$scope" | json_escape)" \
+      "$(printf '%s' "$source" | json_escape)" \
+      "$(printf '%s' "$confidence" | json_escape)" >> "$profile"
     echo "$profile"
     ;;
   *)
-    echo "Usage: pmw-log {usage|decision|brief|question|prototype|taste} ..." >&2
+    echo "Usage: pmw-log {usage|decision|brief|question|prototype|handoff|taste} ..." >&2
     exit 1
     ;;
 esac

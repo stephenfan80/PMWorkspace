@@ -92,12 +92,25 @@ def main() -> int:
             return 0
         approved = [r for r in rows if str(r.get("action", "")).lower() in {"approved", "accept", "喜欢", "通过"}]
         rejected = [r for r in rows if str(r.get("action", "")).lower() in {"rejected", "reject", "不喜欢", "拒绝"}]
+
+        def describe(row: dict) -> str:
+            note = str(row.get("note", "")).strip()
+            scenario = str(row.get("scenario", "")).strip()
+            target = str(row.get("target", "")).strip()
+            scope = str(row.get("scope", "")).strip()
+            source = str(row.get("source", "")).strip()
+            confidence = str(row.get("confidence", "")).strip()
+            meta = " / ".join(part for part in [scenario, target, scope, source, confidence] if part)
+            if note and meta:
+                return f"{note}（{meta}）"
+            return note or meta
+
         print("偏好记忆：")
         print(f"- 记录数：{len(rows)}")
         if approved:
-            print("- 最近喜欢：" + "；".join(str(r.get("note", "")).strip() for r in approved[-3:] if r.get("note")))
+            print("- 最近喜欢：" + "；".join(describe(r) for r in approved[-3:] if describe(r)))
         if rejected:
-            print("- 最近拒绝：" + "；".join(str(r.get("note", "")).strip() for r in rejected[-3:] if r.get("note")))
+            print("- 最近拒绝：" + "；".join(describe(r) for r in rejected[-3:] if describe(r)))
         return 0
 
     if command == "summary":

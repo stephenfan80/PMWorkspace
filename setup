@@ -21,6 +21,13 @@ done
 
 rm -rf "$DEST/pmworkspace-shared"
 cp -R "$ROOT/pmworkspace-shared" "$DEST/pmworkspace-shared"
+for doc in README.md README.zh-CN.md; do
+  [ -f "$ROOT/$doc" ] && cp "$ROOT/$doc" "$DEST/pmworkspace-shared/$doc"
+done
+if [ -d "$ROOT/evals" ]; then
+  rm -rf "$DEST/pmworkspace-shared/evals"
+  cp -R "$ROOT/evals" "$DEST/pmworkspace-shared/evals"
+fi
 mkdir -p "$DEST/pmworkspace-shared/bin"
 cp -R "$ROOT/bin/"* "$DEST/pmworkspace-shared/bin/"
 cp "$ROOT/VERSION" "$DEST/pmworkspace-shared/VERSION"

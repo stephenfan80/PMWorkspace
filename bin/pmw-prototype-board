@@ -83,6 +83,7 @@ def command_score(args: argparse.Namespace) -> int:
         "ts": now(),
         "record_type": "score",
         "scheme": args.scheme,
+        "screen": args.screen,
         "score": args.score,
         "note": args.note,
         "status": args.status,
@@ -92,13 +93,33 @@ def command_score(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_image(args: argparse.Namespace) -> int:
+    row = {
+        "ts": now(),
+        "record_type": "image",
+        "scheme": args.scheme,
+        "screen": args.screen,
+        "image": args.image,
+        "status": args.status,
+        "note": args.note,
+    }
+    append_row(row)
+    print(board_path())
+    return 0
+
+
 def command_list(_args: argparse.Namespace) -> int:
     rows = read_rows()
     items = [r for r in rows if r.get("record_type", "item") == "item"]
+    images = {}
     scores = {}
     for row in rows:
+        key = (row.get("scheme", ""), row.get("screen", ""))
+        scheme_key = (row.get("scheme", ""), "")
+        if row.get("record_type") == "image":
+            images[key] = row
         if row.get("record_type") == "score":
-            scores[row.get("scheme", "")] = row
+            scores[key if row.get("screen") else scheme_key] = row
     print("# 原型方案比较板")
     print("")
     if not items:
@@ -107,11 +128,14 @@ def command_list(_args: argparse.Namespace) -> int:
     print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 图片 | 评分 | 状态 |")
     print("|---|---|---|---|---|---|---|---|---|")
     for item in items:
-        score = scores.get(item.get("scheme", ""), {})
+        key = (item.get("scheme", ""), item.get("screen", ""))
+        scheme_key = (item.get("scheme", ""), "")
+        image_row = images.get(key, {})
+        score = scores.get(key) or scores.get(scheme_key, {})
         score_text = str(score.get("score", "未评分"))
         if score.get("note"):
             score_text += f"：{score.get('note')}"
-        status = score.get("status") or item.get("status") or "计划生成"
+        status = score.get("status") or image_row.get("status") or item.get("status") or "计划生成"
         values = [
             item.get("scheme", ""),
             item.get("screen", ""),
@@ -119,7 +143,7 @@ def command_list(_args: argparse.Namespace) -> int:
             item.get("main_goal", ""),
             item.get("anti_metric", ""),
             item.get("non_fiction", ""),
-            item.get("image", ""),
+            image_row.get("image") or item.get("image", ""),
             score_text,
             status,
         ]
@@ -144,10 +168,19 @@ def build_parser() -> argparse.ArgumentParser:
 
     score = sub.add_parser("score")
     score.add_argument("--scheme", required=True)
+    score.add_argument("--screen", default="")
     score.add_argument("--score", required=True, type=int)
     score.add_argument("--note", required=True)
     score.add_argument("--status", default="待选择")
     score.set_defaults(func=command_score)
+
+    image = sub.add_parser("image")
+    image.add_argument("--scheme", required=True)
+    image.add_argument("--screen", required=True)
+    image.add_argument("--image", required=True)
+    image.add_argument("--status", default="已生成")
+    image.add_argument("--note", default="")
+    image.set_defaults(func=command_image)
 
     listing = sub.add_parser("list")
     listing.set_defaults(func=command_list)

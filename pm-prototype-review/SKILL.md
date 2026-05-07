@@ -36,14 +36,21 @@ done
 5. Read `../pmworkspace-shared/references/pm-review-army.md`.
 6. Read `../pmworkspace-shared/references/prototype-shotgun-board.md`.
 7. Read `../pmworkspace-shared/references/evidence-dashboard.md`.
-8. If `pmw-project show` contains a Zoon URL, run `pmw-zoon drift` when available. If drift exists, read the latest Zoon snapshot before judging the image.
-9. For every image, check the bound output unit: 方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本。
-10. Score each screen on five dimensions: 产品一致性、任务完成、信任与反指标、设计系统、可交付性.
-11. Use PM Review Army lenses for strategy, trust/risk, design system, and data feasibility; merge into `可通过`、`需要重出`、or `需要 PM 拍板`.
-12. If a screen has material failure, mark `需要重出` and produce a concise repair brief for `$pm-prototype-shotgun`; do not accept a pretty but misleading image.
-13. Log approved/rejected preferences with `pmw-log taste` when the user gives feedback; log scheme scores with `pmw-prototype-board score` when applicable.
-14. If repeated preferences emerge, save a learning with `pmw-memory add-learning`.
-15. 复审结束时用 `pmw-run event --type review` 记录结论，并运行 `pmw-dashboard status`。
+8. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 原型复审 stage fields.
+9. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-prototype-review` 且没有当前 run，再创建 runtime run.
+10. Read `../pmworkspace-shared/references/pm-decision-principles.md`; unresolved user promise, data truth, scope, experiment, lead, transaction, privacy, or compliance issues must become `需要 PM 拍板`, not visual fixes.
+11. Read `../pmworkspace-shared/references/pm-eval-system.md` and preserve prototype review contracts.
+12. 建立原型复审控制器，记录 `复审输入`、`输出单元绑定`、`复审视角`、`判定原因`、`行动结论`、`修正方向`、`PM 拍板`、`偏好沉淀` 和 `证据状态`。
+13. If `pmw-project show` contains a Zoon URL, run `pmw-zoon drift` when available. If drift exists, read the latest Zoon snapshot before judging the image. If drift changes product facts, route back to `$pm-brief` or `$pm-strategy-review` before accepting the image.
+14. For every image, check the bound output unit: 方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本. If an image is not bound to one output unit or prototype-board item, mark `需要补充参考` and do not pass it by visual impression.
+15. Score each screen on five dimensions: 产品一致性、任务完成、信任与反指标、设计系统、可交付性. Scores are diagnostic only; any hard violation overrides the average.
+16. Use PM Review Army lenses for strategy, trust/risk, design system, and data feasibility; merge into `可通过`、`需要重出`、`需要 PM 拍板`, or `需要补充参考`.
+17. If a screen violates the product brief, anti-metric, non-fiction boundary, online reference, or design system, mark `需要重出` and produce a concise repair brief for `$pm-prototype-shotgun`; do not accept a pretty but misleading image.
+18. If the issue is unresolved user promise, data truth, scope, experiment, lead, transaction, privacy, or compliance boundary, mark `需要 PM 拍板`, output one current D, and do not create repair prompts until the D is resolved.
+19. Log approved/rejected preferences with `pmw-log taste` only for user feedback or review-confirmed preferences; include scenario, feedback target, source, scope, and confidence. Do not save fact violations, anti-metric risks, non-fiction failures, missing references, or unresolved promises as taste.
+20. Log scheme scores with `pmw-prototype-board score --screen <屏幕任务>` when applicable.
+21. If repeated preferences emerge, save a learning with `pmw-memory add-learning`, but keep it脱敏 and scoped.
+22. 复审结束时用 `pmw-run event --type review` 记录结论，并运行 `pmw-dashboard status`。
 
 ## 复审标准
 
@@ -51,6 +58,7 @@ done
 - `需要重出`：违反产品简报、反指标、不可虚构项、线上参考或设计系统。
 - `需要 PM 拍板`：问题来自产品取舍未决，不应靠改图解决。
 - `需要补充参考`：图的问题来自缺少线上截图、设计系统或真实数据边界。
+- `可通过` 只能用于不影响产品判断或交付使用的问题；轻微审美偏好可以记录 taste，但不能覆盖当前 brief、Zoon、反指标或不可虚构项。
 
 ## 输出
 
@@ -59,11 +67,18 @@ done
 - 产品简报 / Zoon 来源：
 - run_id：
 - Zoon 漂移检查：
+- 复审输入：
+- 输出单元绑定：
+- 证据状态：
 - PM Review Army：
 - 已检查图片：
+- 五维评分：
 - 逐屏结论：
 - 需要重出的屏幕：
 - 修正方向：
+- 需要 PM 拍板：
+- 当前 D：
 - 偏好记忆更新：
+- 方案比较板评分：
 - 建议下一步：
 ```

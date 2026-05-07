@@ -1,0 +1,38 @@
+{
+  "id": "jobs-premise-confirmation-before-brief",
+  "title": "信息足够后先做前提确认再进入产品简报",
+  "category": "pm-jobs",
+  "primary_skill": "pm-jobs",
+  "prompt": "用户已经回答了核心用户、核心问题、目标、反指标和不可虚构项。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "前提确认",
+    "required_behaviors": [
+      "输出 2-4 条前提确认",
+      "等待用户同意或修改",
+      "未确认不能标记已对齐",
+      "不直接写完整产品简报"
+    ],
+    "forbidden_behaviors": [
+      "跳过前提确认",
+      "直接标记已对齐",
+      "直接写 image-2 提示词"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "如果已经覆盖足够诊断维度，输出 2-4 条前提确认；不要为了凑数继续问 Q。"
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "在信息足够后，输出 2-4 条前提确认"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "未完成前提确认时，产品简报不能标记为 `已对齐`。"
+    }
+  ]
+}

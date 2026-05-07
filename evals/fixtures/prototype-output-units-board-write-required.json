@@ -1,0 +1,46 @@
+{
+  "id": "prototype-output-units-board-write-required",
+  "title": "每图输出单元必须写入 prototype-board",
+  "category": "pm-prototype-shotgun",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "产品简报已对齐，为 2 个方案各生成表单页和结果页。",
+  "expected": {
+    "mode": "deep",
+    "status": "可生成",
+    "must_stop": false,
+    "gate": "输出单元和 board 写入",
+    "required_behaviors": [
+      "拆成 4 个独立输出单元",
+      "每个单元绑定主目标、反指标、不可虚构项和 brief 版本",
+      "生成前 pmw-prototype-board add",
+      "生成后 pmw-prototype-board image"
+    ],
+    "forbidden_behaviors": [
+      "把多屏合成一张拼图",
+      "不写入方案比较板",
+      "省略图片路径或 URL 补写"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "contains": "每个输出单元已经登记到 Prototype Shotgun Board"
+    },
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "一个输出单元等于一张图片，不能把多个方案或多个屏幕合成拼图。"
+    },
+    {
+      "path": "pmworkspace-shared/references/prototype-shotgun-board.md",
+      "contains": "pmw-prototype-board image"
+    },
+    {
+      "path": "bin/pmw-prototype-board",
+      "contains": "def command_image"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "生成前用 `pmw-prototype-board add` 登记，生成后用 `pmw-prototype-board image` 补充图片路径或 URL"
+    }
+  ]
+}

@@ -28,12 +28,13 @@ done
 ## Workflow
 
 1. 读取最新已对齐的产品简报、策略决策，以及可用的原型清单。
-2. 如果 `pmw-project show` 中有 Zoon URL，先用 `pmw-zoon read --url <url>` 读取最新文档，作为交付事实来源。
-3. 选择交付类型：适合 PRD、适合设计、适合实验验证或适合研发。
-4. 包含目标、目标用户、问题、场景、选定方向、范围、不做什么、验收标准、指标、风险、依赖和待决策项。
-5. Keep unsupported capabilities under `不可虚构`.
-6. 未决交付取舍继续使用 `decision-question-mode.md` 的选择题结构。
-7. Log final delivery decisions when platform scripts are available.
+2. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
+3. 如果 `pmw-project show` 中有 Zoon URL，先运行 `pmw-zoon drift`；若存在漂移，读取最新文档，作为交付事实来源，并更新产品简报版本。
+4. 选择交付类型：适合 PRD、适合设计、适合实验验证或适合研发。
+5. 包含目标、目标用户、问题、场景、选定方向、范围、不做什么、验收标准、指标、风险、依赖和待决策项。
+6. Keep unsupported capabilities under `不可虚构`.
+7. 未决交付取舍继续使用 `decision-question-mode.md` 的选择题结构。
+8. Log final delivery decisions when platform scripts are available.
 
 ## 输出结构
 

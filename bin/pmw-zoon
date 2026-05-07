@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 COMMAND="${1:-}"
 [ $# -gt 0 ] && shift || true
+STATE_DIR="${PMW_HOME:-$HOME/.pmworkspace}"
+PROTOCOL_DIR="$STATE_DIR/zoon/protocol"
 
 config_get() {
   "$SCRIPT_DIR/pmw-config" get "$1" 2>/dev/null || true
@@ -16,21 +18,31 @@ json_payload() {
   python3 - "$mode" "$title" "$markdown_file" <<'PY'
 import json
 import sys
+from datetime import datetime, timezone
 
 mode, title, markdown_file = sys.argv[1:4]
-markdown = open(markdown_file, encoding="utf-8").read()
+markdown = open(markdown_file, encoding="utf-8").read().strip()
 if mode == "create":
-    print(json.dumps({"title": title, "markdown": markdown}, ensure_ascii=False))
+    print(json.dumps({
+        "title": title,
+        "markdown": markdown,
+        "content": markdown,
+        "initialMarkdown": markdown,
+        "by": "ai:pmworkspace",
+    }, ensure_ascii=False))
 elif mode == "append":
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    wrapped = "\n\n<!-- PMWorkspace brief sync start: %s -->\n\n%s\n\n<!-- PMWorkspace brief sync end -->\n" % (ts, markdown)
     print(json.dumps({
         "by": "ai:pmworkspace",
-        "operations": [{"op": "insert_at_end", "markdown": "\n\n" + markdown.strip() + "\n"}],
+        "operations": [{"op": "insert_at_end", "markdown": wrapped}],
+        "markdown": wrapped,
     }, ensure_ascii=False))
 PY
 }
 
 extract_url() {
-  python3 - <<'PY'
+  python3 -c '
 import json
 import sys
 
@@ -41,19 +53,60 @@ except Exception:
     sys.exit(1)
 
 candidates = [
+    data.get("tokenUrl"),
+    data.get("tokenURL"),
     data.get("url"),
     data.get("editableUrl"),
     data.get("documentUrl"),
+    data.get("shareUrl"),
+    data.get("editUrl"),
 ]
 links = data.get("links")
 if isinstance(links, dict):
-    candidates.extend([links.get("url"), links.get("editor"), links.get("html")])
+    candidates.extend([
+        links.get("tokenUrl"),
+        links.get("url"),
+        links.get("editor"),
+        links.get("editable"),
+        links.get("share"),
+        links.get("html"),
+    ])
+for item in candidates:
+    if isinstance(item, str) and item.startswith("http") and "token=" in item:
+        print(item)
+        sys.exit(0)
+
+share = data.get("shareUrl") or data.get("documentUrl") or data.get("url")
+access_token = data.get("accessToken") or data.get("token") or data.get("shareToken") or data.get("publicToken")
+if isinstance(share, str) and share.startswith("http") and isinstance(access_token, str) and access_token:
+    sep = "&" if "?" in share else "?"
+    print(share + sep + "token=" + access_token)
+    sys.exit(0)
+
 for item in candidates:
     if isinstance(item, str) and item.startswith("http"):
         print(item)
         sys.exit(0)
+
+slug = data.get("slug") or data.get("id") or data.get("documentId")
+token = (
+    data.get("token")
+    or data.get("shareToken")
+    or data.get("publicToken")
+    or data.get("accessToken")
+)
+host = data.get("host") or data.get("origin") or ""
+if isinstance(slug, str) and slug:
+    if not host:
+        host = sys.argv[1] if len(sys.argv) > 1 else ""
+    if host.startswith("http"):
+        url = host.rstrip("/") + "/d/" + slug
+        if isinstance(token, str) and token:
+            url += "?token=" + token
+        print(url)
+        sys.exit(0)
 sys.exit(1)
-PY
+' "${1:-}"
 }
 
 parse_doc_url() {
@@ -81,7 +134,7 @@ PY
 }
 
 usage() {
-  echo "Usage: pmw-zoon {create --title <中文标题>|append --url <Zoon URL>|read --url <Zoon URL>}" >&2
+  echo "Usage: pmw-zoon {protocol --host <Zoon host-or-url>|create --title <中文标题>|append --url <Zoon URL>|sync --title <中文标题> [--url <Zoon URL>] [--brief <path>]|read --url <Zoon URL>|drift [--url <Zoon URL>] [--brief <path>]}" >&2
   exit 1
 }
 
@@ -102,7 +155,345 @@ read_arg_value() {
   return 1
 }
 
+project_value() {
+  local key="$1"
+  local raw
+  raw="$("$SCRIPT_DIR/pmw-project" show 2>/dev/null || true)"
+  python3 - "$key" "$raw" <<'PY' || true
+import json
+import sys
+
+key = sys.argv[1]
+try:
+    data = json.loads(sys.argv[2])
+except Exception:
+    sys.exit(0)
+value = data.get(key, "")
+if isinstance(value, str):
+    print(value)
+PY
+}
+
+curl_post_json() {
+  local url="$1"
+  local body_file="$2"
+  shift 2
+  local key
+  key="$(idempotency_key)"
+  curl -fsS --connect-timeout "${PMW_ZOON_CONNECT_TIMEOUT:-5}" --max-time "${PMW_ZOON_MAX_TIME:-20}" \
+    -X POST "$url" "$@" \
+    -H "Content-Type: application/json" \
+    -H "X-Agent-Id: pmworkspace" \
+    -H "Idempotency-Key: $key" \
+    --data-binary @"$body_file"
+}
+
+idempotency_key() {
+  if command -v uuidgen >/dev/null 2>&1; then
+    printf 'pmworkspace-%s\n' "$(uuidgen | tr '[:upper:]' '[:lower:]')"
+  else
+    printf 'pmworkspace-%s-%s\n' "$(date +%s)" "$$"
+  fi
+}
+
+origin_from_url() {
+  local value="$1"
+  python3 - "$value" <<'PY'
+from urllib.parse import urlparse
+import sys
+
+value = sys.argv[1]
+if "://" not in value:
+    value = "https://" + value
+p = urlparse(value)
+if not p.scheme or not p.netloc:
+    raise SystemExit(1)
+print(f"{p.scheme}://{p.netloc}".rstrip("/"))
+PY
+}
+
+protocol_key() {
+  local origin="$1"
+  printf '%s' "$origin" | shasum 2>/dev/null | awk '{print $1}' | cut -c1-16
+}
+
+protocol_cache_file() {
+  local origin="$1"
+  local key
+  key="$(protocol_key "$origin")"
+  printf '%s/%s.json' "$PROTOCOL_DIR" "$key"
+}
+
+protocol_cache_fresh() {
+  local cache_file="$1"
+  local ttl="$2"
+  python3 - "$cache_file" "$ttl" <<'PY' >/dev/null 2>&1
+import json
+import time
+import sys
+
+path, ttl = sys.argv[1], int(sys.argv[2] or "0")
+with open(path, encoding="utf-8") as f:
+    data = json.load(f)
+fetched = int(data.get("fetched_at_epoch", 0))
+if ttl <= 0 or time.time() - fetched <= ttl:
+    raise SystemExit(0)
+raise SystemExit(1)
+PY
+}
+
+protocol_cache_value() {
+  local cache_file="$1"
+  local key="$2"
+  python3 - "$cache_file" "$key" <<'PY' 2>/dev/null || true
+import json
+import sys
+
+path, key = sys.argv[1:3]
+with open(path, encoding="utf-8") as f:
+    data = json.load(f)
+value = data
+for part in key.split("."):
+    if not isinstance(value, dict):
+        raise SystemExit(0)
+    value = value.get(part, "")
+if isinstance(value, str):
+    print(value)
+PY
+}
+
+http_ok() {
+  case "$1" in
+    2??) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+write_protocol_cache() {
+  local origin="$1"
+  local skill_file="$2"
+  local docs_file="$3"
+  local skill_headers="$4"
+  local docs_headers="$5"
+  local cache_file="$6"
+  mkdir -p "$PROTOCOL_DIR"
+  python3 - "$origin" "$skill_file" "$docs_file" "$skill_headers" "$docs_headers" "$cache_file" <<'PY'
+import json
+import re
+import sys
+import time
+from datetime import datetime, timezone
+
+origin, skill_file, docs_file, skill_headers, docs_headers, cache_file = sys.argv[1:7]
+skill = open(skill_file, encoding="utf-8").read()
+docs = open(docs_file, encoding="utf-8").read()
+
+def header_value(path, name):
+    try:
+        raw = open(path, encoding="utf-8", errors="ignore").read()
+    except Exception:
+        return ""
+    for line in raw.splitlines():
+        if line.lower().startswith(name.lower() + ":"):
+            return line.split(":", 1)[1].strip()
+    return ""
+
+routes = sorted(set(re.findall(r"(?:GET|POST|PUT|PATCH|DELETE)\s+(/[A-Za-z0-9_./:$?=&-]+)", skill + "\n" + docs)))
+ops = sorted(set(re.findall(r"`((?:insert|replace|delete|find)[A-Za-z0-9_/-]*)`", skill + "\n" + docs)))
+summary = {
+    "agent_name": "pmworkspace",
+    "preferred_routes": [r for r in routes if r.startswith("/documents")][:20],
+    "mentions_edit_v2": "/edit/v2" in skill or "/edit/v2" in docs,
+    "mentions_content_negotiation": "Accept: application/json" in skill + docs and "Accept: text/markdown" in skill + docs,
+    "edit_ops": ops,
+}
+data = {
+    "origin": origin,
+    "skill_url": origin.rstrip("/") + "/skill",
+    "agent_docs_url": origin.rstrip("/") + "/agent-docs",
+    "etag": {
+        "skill": header_value(skill_headers, "etag"),
+        "agent_docs": header_value(docs_headers, "etag"),
+    },
+    "fetched_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    "fetched_at_epoch": int(time.time()),
+    "source": {
+        "skill": origin.rstrip("/") + "/skill",
+        "agent_docs": origin.rstrip("/") + "/agent-docs",
+    },
+    "summary": summary,
+    "skill_markdown": skill,
+    "agent_docs_markdown": docs,
+}
+tmp = cache_file + ".tmp"
+with open(tmp, "w", encoding="utf-8") as f:
+    json.dump(data, f, ensure_ascii=False, indent=2, sort_keys=True)
+    f.write("\n")
+import os
+os.replace(tmp, cache_file)
+PY
+}
+
+protocol_builtin_notice() {
+  local origin="$1"
+  mkdir -p "$PROTOCOL_DIR"
+  cat > "$(protocol_cache_file "$origin").builtin" <<EOF
+PMWorkspace Zoon protocol fallback
+origin=$origin
+routes=/documents /documents/:slug/edit/v2 shared-url Accept application/json,text/markdown
+EOF
+}
+
+protocol_discover() {
+  local host_or_url="$1"
+  local mode="${PMW_ZOON_PROTOCOL_MODE:-$(config_get zoon_protocol_mode)}"
+  local ttl="${PMW_ZOON_PROTOCOL_CACHE_TTL:-$(config_get zoon_protocol_cache_ttl)}"
+  local origin cache_file skill_file docs_file skill_headers docs_headers
+  local skill_status docs_status etag
+
+  origin="$(origin_from_url "$host_or_url" 2>/dev/null || true)"
+  [ -n "$origin" ] || return 0
+  cache_file="$(protocol_cache_file "$origin")"
+  mode="${mode:-dynamic}"
+  ttl="${ttl:-300}"
+
+  if [ "$mode" = "builtin" ]; then
+    protocol_builtin_notice "$origin"
+    return 0
+  fi
+
+  if [ -f "$cache_file" ] && { [ "$mode" = "cached" ] || protocol_cache_fresh "$cache_file" "$ttl"; }; then
+    return 0
+  fi
+
+  if [ "$mode" = "cached" ]; then
+    protocol_builtin_notice "$origin"
+    return 0
+  fi
+
+  skill_file="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-skill.XXXXXX")"
+  docs_file="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-docs.XXXXXX")"
+  skill_headers="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-skill-headers.XXXXXX")"
+  docs_headers="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-docs-headers.XXXXXX")"
+
+  if [ -n "${PMW_ZOON_MOCK_PROTOCOL_FAIL:-}" ]; then
+    rm -f "$skill_file" "$docs_file" "$skill_headers" "$docs_headers"
+    if [ -f "$cache_file" ]; then
+      return 0
+    fi
+    protocol_builtin_notice "$origin"
+    return 0
+  fi
+
+  if [ -n "${PMW_ZOON_MOCK_SKILL:-}" ]; then
+    printf '%s\n' "$PMW_ZOON_MOCK_SKILL" > "$skill_file"
+    printf 'etag: mock-skill\n' > "$skill_headers"
+  else
+    etag="$([ -f "$cache_file" ] && protocol_cache_value "$cache_file" etag.skill || true)"
+    if [ -n "$etag" ]; then
+      skill_status="$(curl -sS --connect-timeout "${PMW_ZOON_CONNECT_TIMEOUT:-5}" --max-time "${PMW_ZOON_MAX_TIME:-20}" \
+        -D "$skill_headers" -H "Accept: text/markdown" -H "If-None-Match: $etag" \
+        -o "$skill_file" -w "%{http_code}" "$origin/skill" 2>/dev/null || true)"
+    else
+      skill_status="$(curl -sS --connect-timeout "${PMW_ZOON_CONNECT_TIMEOUT:-5}" --max-time "${PMW_ZOON_MAX_TIME:-20}" \
+        -D "$skill_headers" -H "Accept: text/markdown" \
+        -o "$skill_file" -w "%{http_code}" "$origin/skill" 2>/dev/null || true)"
+    fi
+    if [ "$skill_status" = "304" ] && [ -f "$cache_file" ]; then
+      rm -f "$skill_file" "$docs_file" "$skill_headers" "$docs_headers"
+      return 0
+    fi
+    if ! http_ok "$skill_status"; then
+      rm -f "$skill_file" "$docs_file" "$skill_headers" "$docs_headers"
+      if [ -f "$cache_file" ]; then
+        return 0
+      fi
+      protocol_builtin_notice "$origin"
+      return 0
+    fi
+  fi
+
+  if [ -n "${PMW_ZOON_MOCK_AGENT_DOCS:-}" ]; then
+    printf '%s\n' "$PMW_ZOON_MOCK_AGENT_DOCS" > "$docs_file"
+    printf 'etag: mock-agent-docs\n' > "$docs_headers"
+  else
+    etag="$([ -f "$cache_file" ] && protocol_cache_value "$cache_file" etag.agent_docs || true)"
+    if [ -n "$etag" ]; then
+      docs_status="$(curl -sS --connect-timeout "${PMW_ZOON_CONNECT_TIMEOUT:-5}" --max-time "${PMW_ZOON_MAX_TIME:-20}" \
+        -D "$docs_headers" -H "Accept: text/markdown" -H "If-None-Match: $etag" \
+        -o "$docs_file" -w "%{http_code}" "$origin/agent-docs" 2>/dev/null || true)"
+    else
+      docs_status="$(curl -sS --connect-timeout "${PMW_ZOON_CONNECT_TIMEOUT:-5}" --max-time "${PMW_ZOON_MAX_TIME:-20}" \
+        -D "$docs_headers" -H "Accept: text/markdown" \
+        -o "$docs_file" -w "%{http_code}" "$origin/agent-docs" 2>/dev/null || true)"
+    fi
+    if [ "$docs_status" = "304" ] && [ -f "$cache_file" ]; then
+      protocol_cache_value "$cache_file" agent_docs_markdown > "$docs_file"
+    elif ! http_ok "$docs_status"; then
+      : > "$docs_file"
+      : > "$docs_headers"
+    fi
+  fi
+
+  write_protocol_cache "$origin" "$skill_file" "$docs_file" "$skill_headers" "$docs_headers" "$cache_file"
+  rm -f "$skill_file" "$docs_file" "$skill_headers" "$docs_headers"
+}
+
+protocol_print() {
+  local host_or_url="$1"
+  local origin cache_file mode
+  origin="$(origin_from_url "$host_or_url")"
+  mode="${PMW_ZOON_PROTOCOL_MODE:-$(config_get zoon_protocol_mode)}"
+  mode="${mode:-dynamic}"
+  protocol_discover "$origin"
+  if [ "$mode" = "builtin" ]; then
+    printf '{"origin":"%s","mode":"builtin","summary":{"mentions_edit_v2":true,"mentions_content_negotiation":true}}\n' "$origin"
+    return 0
+  fi
+  cache_file="$(protocol_cache_file "$origin")"
+  if [ -f "$cache_file" ]; then
+    cat "$cache_file"
+  else
+    printf '{"origin":"%s","mode":"builtin","summary":{"mentions_edit_v2":true,"mentions_content_negotiation":true}}\n' "$origin"
+  fi
+}
+
+json_markdown() {
+  python3 -c '
+import json
+import sys
+
+raw = sys.stdin.read()
+try:
+    data = json.loads(raw)
+except Exception:
+    raise SystemExit(1)
+
+markdown = data.get("markdown")
+if not isinstance(markdown, str):
+    document = data.get("document")
+    if isinstance(document, dict):
+        markdown = document.get("markdown")
+if not isinstance(markdown, str):
+    snapshot = data.get("snapshot")
+    if isinstance(snapshot, dict):
+        markdown = snapshot.get("markdown")
+if not isinstance(markdown, str):
+    raise SystemExit(1)
+print(markdown)
+'
+}
+
 case "$COMMAND" in
+  protocol)
+    HOST="$(read_arg_value --host "$@" || true)"
+    if [ -z "$HOST" ]; then
+      HOST="$(read_arg_value --url "$@" || true)"
+    fi
+    [ -n "$HOST" ] || HOST="${PMW_ZOON_HOST:-$(config_get zoon_host)}"
+    [ -n "$HOST" ] || HOST="https://zoon.up.railway.app"
+    protocol_print "$HOST"
+    ;;
   create)
     TITLE="$(read_arg_value --title "$@" || true)"
     [ -n "$TITLE" ] || usage
@@ -118,10 +509,19 @@ case "$COMMAND" in
 
     HOST="${PMW_ZOON_HOST:-$(config_get zoon_host)}"
     HOST="${HOST:-https://zoon.up.railway.app}"
+    protocol_discover "$HOST"
     BODY_FILE="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-body.XXXXXX")"
     json_payload create "$TITLE" "$MARKDOWN_FILE" > "$BODY_FILE"
-    RESPONSE="$(curl -fsS -X POST "$HOST/documents" -H "Content-Type: application/json" --data-binary @"$BODY_FILE")"
-    URL="$(printf '%s' "$RESPONSE" | extract_url)"
+    AUTH_ARGS=()
+    if [ -n "${PMW_ZOON_TOKEN:-}" ]; then
+      AUTH_ARGS=(-H "Authorization: Bearer $PMW_ZOON_TOKEN")
+    fi
+    if [ "${#AUTH_ARGS[@]}" -gt 0 ]; then
+      RESPONSE="$(curl_post_json "$HOST/documents" "$BODY_FILE" "${AUTH_ARGS[@]}")"
+    else
+      RESPONSE="$(curl_post_json "$HOST/documents" "$BODY_FILE")"
+    fi
+    URL="$(printf '%s' "$RESPONSE" | extract_url "$HOST")"
     "$SCRIPT_DIR/pmw-project" link-zoon "$URL" >/dev/null 2>&1 || true
     printf '%s\n' "$URL"
     ;;
@@ -141,15 +541,51 @@ case "$COMMAND" in
     ORIGIN="$(printf '%s\n' "$PARSED" | sed -n '1p')"
     SLUG="$(printf '%s\n' "$PARSED" | sed -n '2p')"
     TOKEN="$(printf '%s\n' "$PARSED" | sed -n '3p')"
+    protocol_discover "$ORIGIN"
     BODY_FILE="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-body.XXXXXX")"
     json_payload append "" "$MARKDOWN_FILE" > "$BODY_FILE"
-    curl -fsS -X POST "$ORIGIN/documents/$SLUG/edit/v2" \
-      -H "Content-Type: application/json" \
-      -H "Authorization: Bearer $TOKEN" \
-      -H "x-share-token: $TOKEN" \
-      -H "X-Agent-Id: pmworkspace" \
-      --data-binary @"$BODY_FILE" >/dev/null
+    AUTH_ARGS=()
+    if [ -n "$TOKEN" ]; then
+      AUTH_ARGS=(-H "Authorization: Bearer $TOKEN" -H "x-share-token: $TOKEN")
+    elif [ -n "${PMW_ZOON_TOKEN:-}" ]; then
+      AUTH_ARGS=(-H "Authorization: Bearer $PMW_ZOON_TOKEN")
+    fi
+    if [ "${#AUTH_ARGS[@]}" -gt 0 ]; then
+      curl_post_json "$ORIGIN/documents/$SLUG/edit/v2" "$BODY_FILE" "${AUTH_ARGS[@]}" >/dev/null
+    else
+      curl_post_json "$ORIGIN/documents/$SLUG/edit/v2" "$BODY_FILE" >/dev/null
+    fi
+    "$SCRIPT_DIR/pmw-project" link-zoon "$URL" >/dev/null 2>&1 || true
     printf '%s\n' "$URL"
+    ;;
+  sync)
+    TITLE="$(read_arg_value --title "$@" || true)"
+    URL="$(read_arg_value --url "$@" || true)"
+    BRIEF_PATH="$(read_arg_value --brief "$@" || true)"
+    [ -n "$TITLE" ] || TITLE="产品设计简报"
+    if [ -z "$URL" ]; then
+      URL="$(project_value zoon_url)"
+    fi
+    if [ -n "$BRIEF_PATH" ]; then
+      [ -f "$BRIEF_PATH" ] || { echo "Brief not found: $BRIEF_PATH" >&2; exit 1; }
+      MARKDOWN_FILE="$BRIEF_PATH"
+    else
+      MARKDOWN_FILE="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-sync.XXXXXX")"
+      trap 'rm -f "$MARKDOWN_FILE"' EXIT
+      cat > "$MARKDOWN_FILE"
+    fi
+    if [ -n "$URL" ]; then
+      RESULT="$("$0" append --url "$URL" < "$MARKDOWN_FILE")"
+    else
+      AUTO_CREATE="${PMW_ZOON_AUTO_CREATE:-$(config_get zoon_auto_create)}"
+      if [ "$AUTO_CREATE" = "false" ]; then
+        echo "Zoon auto create disabled" >&2
+        exit 2
+      fi
+      RESULT="$("$0" create --title "$TITLE" < "$MARKDOWN_FILE")"
+    fi
+    "$SCRIPT_DIR/pmw-project" set-zoon-sync "$RESULT" "$BRIEF_PATH" >/dev/null 2>&1 || true
+    printf '%s\n' "$RESULT"
     ;;
   read)
     URL="$(read_arg_value --url "$@" || true)"
@@ -158,7 +594,95 @@ case "$COMMAND" in
       printf '%s\n' "$PMW_ZOON_MOCK_READ"
       exit 0
     fi
-    curl -fsS -H "Accept: text/markdown" "$URL"
+    if [ -n "${PMW_ZOON_MOCK_READ_JSON:-}" ]; then
+      printf '%s\n' "$PMW_ZOON_MOCK_READ_JSON" | json_markdown
+      exit 0
+    fi
+    PARSED="$(parse_doc_url "$URL" 2>/dev/null || true)"
+    if [ -n "$PARSED" ]; then
+      ORIGIN="$(printf '%s\n' "$PARSED" | sed -n '1p')"
+      TOKEN="$(printf '%s\n' "$PARSED" | sed -n '3p')"
+      protocol_discover "$ORIGIN"
+      AUTH_ARGS=()
+      if [ -n "$TOKEN" ]; then
+        AUTH_ARGS=(-H "Authorization: Bearer $TOKEN" -H "x-share-token: $TOKEN")
+      elif [ -n "${PMW_ZOON_TOKEN:-}" ]; then
+        AUTH_ARGS=(-H "Authorization: Bearer $PMW_ZOON_TOKEN")
+      fi
+      JSON_FILE="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-json.XXXXXX")"
+      if [ "${#AUTH_ARGS[@]}" -gt 0 ]; then
+        if curl -fsS --connect-timeout "${PMW_ZOON_CONNECT_TIMEOUT:-5}" --max-time "${PMW_ZOON_MAX_TIME:-20}" \
+          -H "Accept: application/json" "${AUTH_ARGS[@]}" "$URL" > "$JSON_FILE" 2>/dev/null \
+          && json_markdown < "$JSON_FILE"; then
+          rm -f "$JSON_FILE"
+          exit 0
+        fi
+        rm -f "$JSON_FILE"
+        curl -fsS --connect-timeout "${PMW_ZOON_CONNECT_TIMEOUT:-5}" --max-time "${PMW_ZOON_MAX_TIME:-20}" \
+          -H "Accept: text/markdown" "${AUTH_ARGS[@]}" "$URL"
+      else
+        if curl -fsS --connect-timeout "${PMW_ZOON_CONNECT_TIMEOUT:-5}" --max-time "${PMW_ZOON_MAX_TIME:-20}" \
+          -H "Accept: application/json" "$URL" > "$JSON_FILE" 2>/dev/null \
+          && json_markdown < "$JSON_FILE"; then
+          rm -f "$JSON_FILE"
+          exit 0
+        fi
+        rm -f "$JSON_FILE"
+        curl -fsS --connect-timeout "${PMW_ZOON_CONNECT_TIMEOUT:-5}" --max-time "${PMW_ZOON_MAX_TIME:-20}" \
+          -H "Accept: text/markdown" "$URL"
+      fi
+    else
+      ORIGIN="$(origin_from_url "$URL" 2>/dev/null || true)"
+      [ -n "$ORIGIN" ] && protocol_discover "$ORIGIN"
+      JSON_FILE="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-json.XXXXXX")"
+      if curl -fsS --connect-timeout "${PMW_ZOON_CONNECT_TIMEOUT:-5}" --max-time "${PMW_ZOON_MAX_TIME:-20}" \
+        -H "Accept: application/json" "$URL" > "$JSON_FILE" 2>/dev/null \
+        && json_markdown < "$JSON_FILE"; then
+        rm -f "$JSON_FILE"
+        exit 0
+      fi
+      rm -f "$JSON_FILE"
+      curl -fsS --connect-timeout "${PMW_ZOON_CONNECT_TIMEOUT:-5}" --max-time "${PMW_ZOON_MAX_TIME:-20}" \
+        -H "Accept: text/markdown" "$URL"
+    fi
+    ;;
+  drift)
+    URL="$(read_arg_value --url "$@" || true)"
+    BRIEF_PATH="$(read_arg_value --brief "$@" || true)"
+    [ -n "$URL" ] || URL="$(project_value zoon_url)"
+    [ -n "$BRIEF_PATH" ] || BRIEF_PATH="$(project_value latest_brief)"
+    if [ -z "$URL" ]; then
+      echo "NO_ZOON_URL"
+      exit 3
+    fi
+    protocol_discover "$URL"
+    if [ -z "$BRIEF_PATH" ] || [ ! -f "$BRIEF_PATH" ]; then
+      echo "NO_LOCAL_BRIEF"
+      exit 3
+    fi
+    ZOON_FILE="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-read.XXXXXX")"
+    trap 'rm -f "$ZOON_FILE"' EXIT
+    if ! "$0" read --url "$URL" > "$ZOON_FILE"; then
+      echo "READ_FAILED"
+      exit 3
+    fi
+    python3 - "$BRIEF_PATH" "$ZOON_FILE" <<'PY'
+import re
+import sys
+
+brief = open(sys.argv[1], encoding="utf-8").read()
+zoon = open(sys.argv[2], encoding="utf-8").read()
+
+def norm(text: str) -> str:
+    text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
+    return re.sub(r"\s+", "", text)
+
+if norm(brief) and norm(brief) in norm(zoon):
+    print("IN_SYNC")
+    raise SystemExit(0)
+print("DRIFT")
+raise SystemExit(2)
+PY
     ;;
   *)
     usage

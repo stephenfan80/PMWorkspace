@@ -30,6 +30,8 @@ done
 
 - Read `../pmworkspace-shared/references/image-prompts.md`.
 - Read `../pmworkspace-shared/references/production-reference-gate.md`.
+- Read `../pmworkspace-shared/references/zoon-drift-check.md`.
+- Read `../pmworkspace-shared/references/product-memory.md`.
 - 产品简报未“已对齐”时，不写提示词，不生成图片，不生成 HTML，不输出交付稿。
 - 现有功能迭代必须有当前截图或等价视觉基线。
 - 新页面如果承接线上流程、结果页、状态页或生产样式，必须先拿到线上参考，或得到用户明确确认“没有线上参考，按新页面概念稿推进”。
@@ -50,15 +52,16 @@ done
 ## Workflow
 
 1. Read aligned brief and scenario route.
-2. If `pmw-project show` contains a Zoon URL, read the latest document with `pmw-zoon read --url <url>` and treat it as the product source of truth.
+2. If `pmw-project show` contains a Zoon URL, run `pmw-zoon drift --url <url>` when available, then read the latest document with `pmw-zoon read --url <url>` and treat it as the product source of truth. If drift exists, update the brief version before writing prompts.
 3. 对每个请求的屏幕运行线上参考门槛；如果必要参考是 `缺失待补充`，先停下来问。
-4. Read `design-system-workflow.md`, `design-heuristics.md`, and `adversarial-review.md` as needed.
-5. Propose concept directions with names and tradeoffs.
-6. For each image output unit, declare scheme, screen task, canvas, main goal, anti-metric, non-fiction boundary, 线上参考状态, and brief dependency.
-7. Generate with image-2 / image generation.
-8. Run `prototype-quality-review.md`.
-9. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单。
-10. Record approved/rejected design feedback with `pmw-log taste`.
+4. Read `design-system-workflow.md`, `design-heuristics.md`, `scenario-experts.md`, and `adversarial-review.md` as needed.
+5. Use `pmw-memory taste-summary` when available so rejected directions are not repeated as “new”方案.
+6. Propose concept directions with names and tradeoffs.
+7. For each image output unit, declare scheme, screen task, canvas, main goal, anti-metric, non-fiction boundary, 线上参考状态, and brief dependency.
+8. Generate with image-2 / image generation.
+9. Run `prototype-quality-review.md`, then route substantial post-image review to `$pm-prototype-review`.
+10. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单。
+11. Record approved/rejected design feedback with `pmw-log taste`.
 
 ## 输出
 
@@ -66,6 +69,7 @@ done
 原型计划：
 - 产品简报：
 - Zoon 事实来源：
+- Zoon 漂移检查：
 - 场景：
 - 线上参考：
 - 画布：
@@ -74,5 +78,6 @@ done
 - 质量检查：
 - 已保存清单：
 - 偏好反馈：
+- 原型复审：
 - 建议下一步：
 ```

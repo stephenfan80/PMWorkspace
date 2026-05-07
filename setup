@@ -14,7 +14,7 @@ esac
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 mkdir -p "$DEST"
 
-for skill in pm-workspace pm-jobs pm-strategy-review pm-brief pm-prototype-shotgun pm-handoff; do
+for skill in pm-workspace pm-jobs pm-strategy-review pm-brief pm-prototype-shotgun pm-prototype-review pm-autoplan pm-handoff; do
   rm -rf "$DEST/$skill"
   cp -R "$ROOT/$skill" "$DEST/$skill"
 done

@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+import json
+import os
+import pathlib
+import subprocess
+import sys
+from datetime import datetime, timezone
+
+
+SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
+
+
+def now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def slug() -> str:
+    env_slug = os.environ.get("PMW_PROJECT_SLUG")
+    if env_slug:
+        return env_slug
+    try:
+        return subprocess.check_output([str(SCRIPT_DIR / "pmw-slug")], text=True).strip()
+    except Exception:
+        return "local-project"
+
+
+def project_dir() -> pathlib.Path:
+    path = STATE_DIR / "projects" / slug()
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def append_jsonl(path: pathlib.Path, row: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+
+
+def read_jsonl(path: pathlib.Path) -> list[dict]:
+    rows = []
+    if not path.exists():
+        return rows
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            value = json.loads(line)
+        except Exception:
+            continue
+        if isinstance(value, dict):
+            rows.append(value)
+    return rows
+
+
+def usage() -> int:
+    print(
+        "Usage: pmw-memory {add-learning <note>|search <query>|summary|taste-summary}",
+        file=sys.stderr,
+    )
+    return 1
+
+
+def main() -> int:
+    command = sys.argv[1] if len(sys.argv) > 1 else ""
+    root = project_dir()
+
+    if command == "add-learning":
+        note = " ".join(sys.argv[2:]).strip()
+        if not note:
+            return usage()
+        append_jsonl(root / "learnings.jsonl", {"ts": now(), "note": note})
+        print(root / "learnings.jsonl")
+        return 0
+
+    if command == "search":
+        query = " ".join(sys.argv[2:]).strip().lower()
+        if not query:
+            return usage()
+        rows = read_jsonl(root / "learnings.jsonl") + read_jsonl(root / "taste-profile.jsonl")
+        matches = []
+        for row in rows:
+            text = json.dumps(row, ensure_ascii=False).lower()
+            if query in text:
+                matches.append(row)
+        for row in matches[-10:]:
+            print(json.dumps(row, ensure_ascii=False, sort_keys=True))
+        return 0
+
+    if command == "taste-summary":
+        rows = read_jsonl(root / "taste-profile.jsonl")
+        if not rows:
+            print("偏好记忆：暂无")
+            return 0
+        approved = [r for r in rows if str(r.get("action", "")).lower() in {"approved", "accept", "喜欢", "通过"}]
+        rejected = [r for r in rows if str(r.get("action", "")).lower() in {"rejected", "reject", "不喜欢", "拒绝"}]
+        print("偏好记忆：")
+        print(f"- 记录数：{len(rows)}")
+        if approved:
+            print("- 最近喜欢：" + "；".join(str(r.get("note", "")).strip() for r in approved[-3:] if r.get("note")))
+        if rejected:
+            print("- 最近拒绝：" + "；".join(str(r.get("note", "")).strip() for r in rejected[-3:] if r.get("note")))
+        return 0
+
+    if command == "summary":
+        learnings = read_jsonl(root / "learnings.jsonl")
+        tastes = read_jsonl(root / "taste-profile.jsonl")
+        decisions = read_jsonl(root / "decisions.jsonl")
+        print("PMWorkspace 项目记忆：")
+        print(f"- 产品学习：{len(learnings)} 条")
+        print(f"- 偏好反馈：{len(tastes)} 条")
+        print(f"- 已记录决策：{len(decisions)} 条")
+        if learnings:
+            print("- 最近学习：" + "；".join(str(r.get("note", "")).strip() for r in learnings[-3:] if r.get("note")))
+        if decisions:
+            print("- 最近决策：" + "；".join(str(r.get("title", "")).strip() for r in decisions[-3:] if r.get("title")))
+        return 0
+
+    return usage()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

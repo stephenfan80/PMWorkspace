@@ -30,16 +30,19 @@ done
 
 1. Read `../pmworkspace-shared/references/first-use-onboarding.md` for first contact.
 2. Read `../pmworkspace-shared/references/product-office-hours.md` and follow the diagnostic state machine: 工作目标模式 -> 场景路由 -> Q 诊断 -> 前提确认 -> D 拍板 -> 产品简报状态.
-3. 先确认或推断 `工作目标模式`：验证价值、优化线上指标、业务评审、设计评审或研发交付；如果无法从上下文判断，用一个选择题询问。
-4. Read `../pmworkspace-shared/references/scenario-routing.md` to classify the dominant product scenario.
-5. Read `../pmworkspace-shared/references/production-reference-gate.md`，判断新页面是否仍需要线上参考。
-6. If the request is an existing-feature iteration, require current production screenshots, screen recording, or equivalent visual baseline before proceeding.
-7. 如果新页面承接线上流程、结果状态或生产样式，要求截图、录屏、相似页面参考，或用户明确确认没有线上参考。
-8. Ask `Q` diagnostic questions one at a time. 默认最多问 3 个动态 Q；只有信息不足以生成有价值原型时，最多追加到 5 个。Stop after each `Q` and wait for the user; do not batch open questions and do not output a long md plan.
-9. 在信息足够后，输出 2-4 条前提确认；用户不同意时回到对应 `Q` 或 `D`。
-10. Read `../pmworkspace-shared/references/decision-question-mode.md`; when a missing answer would change product direction, prototype scope, experiment framing, user promise, or handoff, ask it as a D-numbered choice question.
-11. 输出简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。未完成前提确认或关键 D 拍板时，不能标记为 `已对齐`。
-12. 平台脚本可用时，用 `pmw-project set-name "<中文项目名>"` 保存中文项目名，用 `pmw-log question` 和 `pmw-log decision` 记录关键选择。
+3. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory summary` when available to avoid repeating known preferences or resolved decisions.
+4. 先确认或推断 `工作目标模式`：验证价值、优化线上指标、业务评审、设计评审或研发交付；如果无法从上下文判断，用一个选择题询问。
+5. Read `../pmworkspace-shared/references/scenario-routing.md` to classify the dominant product scenario.
+6. Read `../pmworkspace-shared/references/scenario-experts.md` and select only the dominant expert lens.
+7. Read `../pmworkspace-shared/references/browser-evidence.md` when the user provides URL、线上页面、竞品或 Zoon 参考。
+8. Read `../pmworkspace-shared/references/production-reference-gate.md`，判断新页面是否仍需要线上参考。
+9. If the request is an existing-feature iteration, require current production screenshots, screen recording, or equivalent visual baseline before proceeding.
+10. 如果新页面承接线上流程、结果状态或生产样式，要求截图、录屏、相似页面参考，或用户明确确认没有线上参考。
+11. Ask `Q` diagnostic questions one at a time. 默认最多问 3 个动态 Q；只有信息不足以生成有价值原型时，最多追加到 5 个。Stop after each `Q` and wait for the user; do not batch open questions and do not output a long md plan.
+12. 在信息足够后，输出 2-4 条前提确认；用户不同意时回到对应 `Q` 或 `D`。
+13. Read `../pmworkspace-shared/references/decision-question-mode.md`; when a missing answer would change product direction, prototype scope, experiment framing, user promise, or handoff, ask it as a D-numbered choice question.
+14. 输出简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。未完成前提确认或关键 D 拍板时，不能标记为 `已对齐`。
+15. 平台脚本可用时，用 `pmw-project set-name "<中文项目名>"` 保存中文项目名，用 `pmw-log question` 和 `pmw-log decision` 记录关键选择。
 
 ## Jobs-Style Questioning
 

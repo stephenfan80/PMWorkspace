@@ -15,6 +15,9 @@ default_value() {
     mobile_first) echo "true" ;;
     question_mode) echo "decision-gates" ;;
     zoon_auto_create) echo "true" ;;
+    zoon_sync_on_brief) echo "true" ;;
+    zoon_protocol_cache_ttl) echo "300" ;;
+    zoon_protocol_mode) echo "dynamic" ;;
     zoon_host) echo "https://zoon.up.railway.app" ;;
     zoon_store_url) echo "local" ;;
     project_display_name) echo "auto" ;;
@@ -37,6 +40,9 @@ ensure_config() {
 # auto_upgrade: false | true
 # question_mode: decision-gates | off
 # zoon_auto_create: true | false
+# zoon_sync_on_brief: true | false
+# zoon_protocol_cache_ttl: 300
+# zoon_protocol_mode: dynamic | cached | builtin
 # zoon_host: https://zoon.up.railway.app
 # zoon_store_url: local
 # project_display_name: auto | manual
@@ -85,12 +91,12 @@ case "${1:-}" in
     cat "$CONFIG_FILE"
     echo ""
     echo "# Active values"
-    for key in update_check auto_upgrade telemetry remote_telemetry memory_scope default_canvas mobile_first question_mode zoon_auto_create zoon_host zoon_store_url project_display_name update_snooze_hours remote_version_url repo_url; do
+    for key in update_check auto_upgrade telemetry remote_telemetry memory_scope default_canvas mobile_first question_mode zoon_auto_create zoon_sync_on_brief zoon_protocol_cache_ttl zoon_protocol_mode zoon_host zoon_store_url project_display_name update_snooze_hours remote_version_url repo_url; do
       printf '%-22s %s\n' "${key}:" "$(read_value "$key")"
     done
     ;;
   defaults)
-    for key in update_check auto_upgrade telemetry remote_telemetry memory_scope default_canvas mobile_first question_mode zoon_auto_create zoon_host zoon_store_url project_display_name update_snooze_hours remote_version_url repo_url; do
+    for key in update_check auto_upgrade telemetry remote_telemetry memory_scope default_canvas mobile_first question_mode zoon_auto_create zoon_sync_on_brief zoon_protocol_cache_ttl zoon_protocol_mode zoon_host zoon_store_url project_display_name update_snooze_hours remote_version_url repo_url; do
       printf '%-22s %s\n' "${key}:" "$(default_value "$key")"
     done
     ;;

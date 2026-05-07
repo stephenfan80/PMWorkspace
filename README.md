@@ -33,10 +33,12 @@ The core rule is simple: define the product problem, goals, counter-metrics, con
 | Skill | Use When |
 |---|---|
 | `$pm-workspace` | Start here; route product work and run PMWorkspace platform checks. |
+| `$pm-autoplan` | Run the automatic product review pipeline through brief readiness and Zoon sync. |
 | `$pm-jobs` | Interrogate a raw idea like a demanding product partner before solution design. |
 | `$pm-strategy-review` | Challenge scope, value exchange, ambition, risks, and tradeoffs. |
 | `$pm-brief` | Create a reusable Quick, Standard, or Deep product brief. |
 | `$pm-prototype-shotgun` | Generate mobile-first image-2 prototype schemes from an Aligned brief. |
+| `$pm-prototype-review` | Review generated prototype screens against the brief, Zoon, and non-fiction boundaries. |
 | `$pm-handoff` | Create PRD-ready, design-ready, experiment-ready, or engineering-ready handoff. |
 
 ## Quick Start
@@ -54,6 +56,8 @@ Output: <brief only / one screen / screen pair / 3 directions / handoff>
 For prototype work, PMWorkspace defaults to mobile-first iPhone 17 portrait `402 x 874`. Desktop is used only when the user asks for it or when a dashboard/internal tool truly needs large-screen density.
 
 Prototype work is locked to image-2 / image generation unless the user explicitly asks for HTML, an interactive web prototype, or frontend implementation. If the product brief is not `Aligned`, PMWorkspace should ask the next diagnostic or decision question instead of producing images, HTML, or a long plan.
+
+Briefs saved through `pmw-log brief` automatically sync to Zoon when enabled: existing Zoon URLs are appended, and new documents are created when `zoon_auto_create` is true. Before prototype or handoff work, PMWorkspace checks for Zoon drift so edits made in the conversation or in Zoon do not fall out of sync.
 
 ## Install
 
@@ -91,13 +95,14 @@ PMWorkspace stores durable assets locally by default:
   projects/<slug>/project.json
   projects/<slug>/prototypes/
   projects/<slug>/taste-profile.jsonl
+  projects/<slug>/learnings.jsonl
 ```
 
 Defaults:
 
 - Telemetry is local-first: usage logs stay on your machine.
 - Remote anonymous telemetry requires explicit opt-in.
-- Stored assets should include project display names, briefs, decision questions, decisions, Zoon URLs, prototype manifests, and taste feedback.
+- Stored assets should include project display names, briefs, decision questions, decisions, Zoon URLs, prototype manifests, taste feedback, and sanitized product learnings.
 - Do not store raw private customer data, tokens, internal recordings, or sensitive screenshots.
 
 Project helpers:
@@ -111,10 +116,15 @@ bin/pmw-project show
 Zoon helpers:
 
 ```bash
+bin/pmw-zoon protocol --host "https://zoon.up.railway.app"
 cat brief.md | bin/pmw-zoon create --title "产品设计简报：通用券站外召回方案"
 cat brief.md | bin/pmw-zoon append --url "<Zoon URL>"
+cat brief.md | bin/pmw-zoon sync --title "产品设计简报：通用券站外召回方案"
+bin/pmw-zoon drift --url "<Zoon URL>"
 bin/pmw-zoon read --url "<Zoon URL>"
 ```
+
+`protocol` dynamically reads Zoon's `/skill` and `/agent-docs` and caches a protocol summary for 300 seconds by default, so PMWorkspace can follow Zoon upgrades instead of relying only on built-in routes.
 
 Inspect settings:
 

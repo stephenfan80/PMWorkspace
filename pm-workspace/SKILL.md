@@ -4,7 +4,8 @@ description: |
   PMWorkspace 主入口，面向产品经理和设计师。用于把产品想法、PRD、Zoon 文档、
   截图、客户洞察或原型请求，路由到问题定义、策略审查、产品简报、移动端优先
   image-2 原型探索或交付稿。负责首次引导、更新检查、本地使用记录，并路由到
-  pm-jobs、pm-strategy-review、pm-brief、pm-prototype-shotgun 或 pm-handoff。
+  pm-jobs、pm-strategy-review、pm-brief、pm-prototype-shotgun、pm-prototype-review、
+  pm-autoplan 或 pm-handoff。
   也用于用户刚安装 PMWorkspace 后需要欢迎引导、启动话术或选择第一步。
 ---
 
@@ -50,8 +51,10 @@ Route by the user's actual job:
 
 - 原始想法、模糊产品请求、“帮我想想”、问题定义 -> 使用 `$pm-jobs`。
 - 范围、野心、策略取舍、“想大一点”、“是否值得做” -> 使用 `$pm-strategy-review`。
+- 需要“一次自动跑完整产品评审”“按推荐推进但关键点拍板” -> 使用 `$pm-autoplan`。
 - 需要可编辑的产品简报、Zoon 对齐或决策记录 -> 使用 `$pm-brief`。
 - 需要原型方向、image-2 设计图、多方案、截图修改 -> 使用 `$pm-prototype-shotgun`。
+- 需要复审已生成原型图、判断是否重出、沉淀偏好 -> 使用 `$pm-prototype-review`。
 - 需要适合 PRD、设计、实验验证或研发使用的交付稿 -> 使用 `$pm-handoff`。
 
 When unsure, start with `$pm-jobs`; product clarity comes before prototype output.
@@ -75,6 +78,8 @@ If the user provides a product task in the same message, skip the welcome menu a
 - 新页面也要判断线上参考需求；承接线上流程、结果页、状态页或生产样式时，缺截图/录屏/相似页面参考要先问。
 - 产品简报阶段可以按主场景做轻量互联网最佳实践检索；检索结果只用于案例启发和原型重点建议，不增加 Q 数量。
 - 产品简报阶段默认创建或更新 Zoon 在线文档，并在成功后自动打开到 Codex 内置浏览器；后续原型/交付前优先读取 Zoon 最新内容。
+- 用户在对话或 Zoon 中调整产品简报后，必须重新保存并同步到 Zoon；原型或交付前使用 Zoon 漂移检查。
+- 原型图生成后，批量交付前默认使用 `$pm-prototype-review` 做产品一致性、设计系统、不可虚构项和反指标复审。
 - 面向用户展示中文项目名；技术 slug 只用于本地目录。
 - 默认原型画布移动端优先：iPhone 17 竖屏 `402 x 874`。
 - 只有用户明确要求桌面端，或看板/内部工具明显需要大屏工作区，才使用桌面端。
@@ -89,7 +94,7 @@ If the user provides a product task in the same message, skip the welcome menu a
 For a new user or new project, briefly explain:
 
 ```text
-PMWorkspace 像一个产品团队：先用 $pm-jobs 问清楚真实问题，再用 $pm-strategy-review 挑战方向，用 $pm-brief 固化产品简报，用 $pm-prototype-shotgun 生成移动端优先的 image-2 原型方案，最后用 $pm-handoff 整理交付稿。
+PMWorkspace 像一个产品团队：先用 $pm-jobs 问清楚真实问题，再用 $pm-strategy-review 挑战方向，用 $pm-brief 固化并同步 Zoon 产品简报，用 $pm-prototype-shotgun 生成移动端优先的 image-2 原型方案，用 $pm-prototype-review 复审原型，最后用 $pm-handoff 整理交付稿。
 ```
 
 Then route to the smallest useful next skill.
@@ -100,6 +105,11 @@ Use `../pmworkspace-shared/references/` for:
 
 - `language-and-localization.md` for output language and Chinese terminology.
 - `decision-question-mode.md` for PM decision questions.
+- `autoplan-workflow.md` for automatic product review sequencing.
+- `zoon-drift-check.md` for syncing adjusted briefs and detecting stale Zoon state.
+- `product-memory.md` for local preference and learning summaries.
+- `browser-evidence.md` for online reference capture.
+- `scenario-experts.md` for scenario-specific review lenses.
 - `internet-best-practice-research.md` for lightweight public UX/product case research.
 - `production-reference-gate.md` for online screenshot/reference checks before prototypes.
 - `welcome-guide.md` for install success and first-run onboarding.

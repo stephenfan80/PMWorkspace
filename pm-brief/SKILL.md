@@ -33,14 +33,17 @@ done
 3. Read `../pmworkspace-shared/references/decision-question-mode.md` and turn PM decision items into choice questions.
 4. Read `../pmworkspace-shared/references/internet-best-practice-research.md` and run lightweight internet best-practice research for the dominant scenario when tools are available.
 5. Read `../pmworkspace-shared/references/zoon-workflow.md`.
-6. 确认已完成工作目标模式、Q 诊断、前提确认和必要 D 拍板；如果缺失，只输出短对齐摘要和下一步问题，不写完整产品简报。
-7. 根据模糊程度和风险选择快速版、标准版或深度版产品简报。
-8. 包含事实来源、版本、确认状态、工作目标模式、目标人群、核心问题梳理、已确认前提、场景路由、页面类型、线上参考需求、线上参考状态、互联网案例检索、用户任务、目标、反指标、约束、原型内容重点、不可虚构项和 PM 决策项。
-9. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
-10. Save the brief with `pmw-log brief <name>` when platform scripts are available.
-11. Create or update the Zoon online brief by default:
+6. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
+7. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory summary` when available.
+8. 确认已完成工作目标模式、Q 诊断、前提确认和必要 D 拍板；如果缺失，只输出短对齐摘要和下一步问题，不写完整产品简报。
+9. 如果已有 Zoon URL，先运行 `pmw-zoon drift` 或读取最新 Zoon 快照；用户在 Zoon 或对话中调整 brief 时，递增版本并重新保存。
+10. 根据模糊程度和风险选择快速版、标准版或深度版产品简报。
+11. 包含事实来源、版本、确认状态、工作目标模式、目标人群、核心问题梳理、已确认前提、场景路由、页面类型、线上参考需求、线上参考状态、互联网案例检索、用户任务、目标、反指标、约束、原型内容重点、不可虚构项和 PM 决策项。
+12. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
+13. Save the brief with `pmw-log brief <name>` when platform scripts are available. This automatically creates or appends the brief to Zoon when `zoon_sync_on_brief` is enabled.
+14. Create or update the Zoon online brief by default:
     - If a Zoon URL is already available, append the brief with `pmw-zoon append --url <url>`.
-    - If no Zoon URL exists and `zoon_auto_create` is not explicitly disabled, create one with `pmw-zoon create --title "产品设计简报：<功能名>"`.
+    - If no Zoon URL exists and `zoon_auto_create` is not explicitly disabled, create one with `pmw-zoon sync --title "产品设计简报：<功能名>"` or `pmw-zoon create --title "产品设计简报：<功能名>"`.
     - After a create or append succeeds, automatically open the editable Zoon URL in the Codex built-in browser when browser tools are available. Do not use HTML, local files, or a macOS default-browser fallback as a substitute for the Zoon online brief.
     - If browser opening fails, still return the editable URL and mark the open status as `打开失败，可手动打开`.
     - Do not leave the Zoon field as a passive uncreated state. If Zoon is disabled or creation fails, write `未启用（原因）` or `创建失败（原因）`.
@@ -50,6 +53,8 @@ done
 只有“已对齐”的产品简报才能进入图片提示词。用户未确认时，标记为“待确认”，并在生成原型前停止。未完成前提确认或关键 D 拍板时，确认状态不能写成“已对齐”。如果页面需要线上参考但状态是“缺失待补充”，确认状态不能写成“已对齐”。
 
 产品简报不是“已对齐”时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
+
+用户在沟通过程中调整产品简报后，必须重新运行 `pmw-log brief <name>` 保存并自动同步 Zoon；不能只在对话中更新口径。
 
 ## 输出
 
@@ -69,6 +74,8 @@ Return the smallest useful brief and end with:
 - 原型内容重点：
 - 已保存资产：
 - Zoon 在线简报：
+- Zoon 同步状态：
+- Zoon 漂移检查：
 - 浏览器打开状态：
 - 项目名称：
 - 当前 D / 后续 D 队列：

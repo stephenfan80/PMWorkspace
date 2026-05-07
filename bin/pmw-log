@@ -36,6 +36,17 @@ case "$EVENT" in
     file="$PROJECT_DIR/briefs/$(date -u +%Y%m%dT%H%M%SZ)-$(safe_fragment "$name").md"
     cat > "$file"
     "$SCRIPT_DIR/pmw-project" set-latest-brief "$file" >/dev/null 2>&1 || true
+    sync_on_brief="${PMW_ZOON_SYNC_ON_BRIEF:-$("$SCRIPT_DIR/pmw-config" get zoon_sync_on_brief 2>/dev/null || echo true)}"
+    if [ "$sync_on_brief" != "false" ] && [ -x "$SCRIPT_DIR/pmw-zoon" ]; then
+      sync_err="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-sync.XXXXXX")"
+      if zoon_url="$("$SCRIPT_DIR/pmw-zoon" sync --title "产品设计简报：$name" --brief "$file" 2>"$sync_err")"; then
+        printf 'ZOON_URL=%s\n' "$zoon_url" >&2
+      else
+        err="$(tr '\n' ' ' < "$sync_err" 2>/dev/null | sed 's/[[:space:]]*$//')"
+        printf 'ZOON_SYNC_FAILED=%s\n' "${err:-unknown}" >&2
+      fi
+      rm -f "$sync_err" 2>/dev/null || true
+    fi
     echo "$file"
     ;;
   question)

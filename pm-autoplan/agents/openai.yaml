@@ -1,0 +1,8 @@
+interface:
+  display_name: "自动产品评审"
+  short_description: "自动串联产品追问、策略审查、产品简报和 Zoon 同步"
+  brand_color: "#0F172A"
+  default_prompt: "使用 $pm-autoplan 自动跑完整产品评审，只把关键产品取舍交给我拍板。"
+
+policy:
+  allow_implicit_invocation: true

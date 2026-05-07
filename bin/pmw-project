@@ -64,7 +64,10 @@ def write_project(path: pathlib.Path, data: dict) -> None:
 
 
 def usage() -> int:
-    print("Usage: pmw-project {get-name|set-name|link-zoon|set-latest-brief|show} ...", file=sys.stderr)
+    print(
+        "Usage: pmw-project {get-name|set-name|link-zoon|set-latest-brief|set-zoon-sync|show} ...",
+        file=sys.stderr,
+    )
     return 1
 
 
@@ -107,6 +110,21 @@ def main() -> int:
         data.setdefault("display_name", fallback_name())
         write_project(path, data)
         print(latest)
+        return 0
+
+    if command == "set-zoon-sync":
+        url = sys.argv[2].strip() if len(sys.argv) > 2 else ""
+        latest = sys.argv[3].strip() if len(sys.argv) > 3 else ""
+        if not url:
+            print("Usage: pmw-project set-zoon-sync <Zoon URL> [brief path]", file=sys.stderr)
+            return 1
+        data["zoon_url"] = url
+        data["last_zoon_sync_at"] = now()
+        if latest:
+            data["last_zoon_sync_brief"] = latest
+        data.setdefault("display_name", fallback_name())
+        write_project(path, data)
+        print(url)
         return 0
 
     if command == "show":

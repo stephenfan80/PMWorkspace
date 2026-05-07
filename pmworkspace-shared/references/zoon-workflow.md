@@ -11,19 +11,24 @@
 - 除非用户要求，不处理现有评论。
 - 原型任务的最终输出仍是图片，但必须先完成产品简报对齐。
 - 产品追问后创建的产品简报，应在有 Zoon 文档时写入 Zoon，方便用户在图片生成前修改。
+- 用户在对话中调整产品简报后，也必须重新保存并同步到 Zoon；不能只更新对话里的口径。
 - 创建或更新 Zoon 成功后，必须尝试自动打开可编辑 URL；不能只保存本地 Markdown 后结束。
 - 只有用户明确关闭 Zoon、平台脚本不可用或创建失败时，才能把 Zoon 状态标为未创建，并说明原因。
 
 ## 连接步骤
 
-1. 解析 Zoon URL：
+1. 先做可升级协议发现：
+   - 默认读取 `<origin>/skill`，再读取 `<origin>/agent-docs`。
+   - 使用 `pmw-zoon protocol --host <Zoon host-or-url>` 缓存协议摘要。
+   - 网络失败时使用本地缓存；没有缓存时回退到内置 `/documents/*` 契约。
+2. 解析 Zoon URL：
    - Host：scheme 和 domain。
    - Slug：`/d/` 后面的片段。
    - Share token：`token` 查询参数。
-2. 写入时使用 `Authorization: Bearer <token>` 和 `X-Agent-Id: pmworkspace`。
-3. 创建新文档使用 `POST <host>/documents`。
-4. 追加产品简报使用 `POST <host>/documents/:slug/edit/v2`。
-5. 原型或交付前读取最新文档，优先使用共享 URL + `Accept: text/markdown`。
+3. 写入时使用 `Authorization: Bearer <token>`、`X-Agent-Id: pmworkspace`、`Idempotency-Key` 和 `by: "ai:pmworkspace"`。
+4. 创建新文档使用当前协议推荐的 `POST <host>/documents`。
+5. 追加产品简报使用 `POST <host>/documents/:slug/edit/v2`，默认 `insert_at_end`，不做 rewrite。
+6. 原型或交付前读取最新文档，优先使用共享 URL + `Accept: application/json` 取 `markdown/revision/_links/agent`，失败再回退 `Accept: text/markdown`。
 
 ## 协作模式
 
@@ -32,11 +37,28 @@
 - 对齐完成后，继续生成图片，不用长 PRD 替代原型输出。
 - 写入 Zoon 时使用 AI 作者身份，让人类能看到哪些内容由 PMWorkspace 写入。
 - 如果 Zoon 中已有产品简报，且用户要求生成原型，先重新读取最新快照，再生成图片提示词。
+- 如果本地产品简报和 Zoon 快照不一致，先按 `zoon-drift-check.md` 处理漂移。
 - 不要从未确认、未批准为事实来源的 Zoon 产品简报生成原型。
 
 ## 产品简报创建
 
 当产品追问已经产出产品简报时，默认创建或更新 Zoon 文档，让用户在线修改对齐。
+
+### 可升级协议发现
+
+Zoon 会升级，PMWorkspace 不应只依赖写死接口。平台脚本可用时，先运行：
+
+```bash
+pmw-zoon protocol --host "https://zoon.up.railway.app"
+```
+
+规则：
+
+- 动态模式 `zoon_protocol_mode: dynamic`：缓存未过期时使用缓存，过期后重新拉取 `/skill` 和 `/agent-docs`。
+- 缓存模式 `zoon_protocol_mode: cached`：只使用本地缓存，适合离线或固定版本调试。
+- 内置模式 `zoon_protocol_mode: builtin`：完全使用 PMWorkspace 内置 `/documents/*` 契约。
+- 默认缓存 TTL 是 `zoon_protocol_cache_ttl: 300` 秒。
+- 兼容路由只做兜底；新集成优先 `/documents/*`、`edit/v2`、内容协商和 `X-Agent-Id`。
 
 ### 自动打开
 
@@ -63,16 +85,18 @@
 
 1. 如果用户提供 Zoon host，使用用户提供的 host。
 2. 如果没有 host，使用配置 `zoon_host`，默认 `https://zoon.up.railway.app`。
-3. 用平台脚本创建文档：
+3. 用平台脚本创建文档，或使用自动同步：
 
 ```bash
 pmw-zoon create --title "产品设计简报：<功能名>"
+pmw-zoon sync --title "产品设计简报：<功能名>"
 ```
 
 4. 只向用户返回可编辑 URL，不展示 API 原始响应。
 5. 用 `pmw-project link-zoon <url>` 把链接保存到本地项目记录。
-6. 创建成功后自动打开可编辑 URL。
-7. 如果创建失败，保留本地 Markdown，不阻塞下一步，并说明失败原因。
+6. 推荐使用 `pmw-log brief <功能名>` 保存产品简报；它会在 `zoon_sync_on_brief` 未关闭时自动调用 `pmw-zoon sync`。
+7. 创建成功后自动打开可编辑 URL。
+8. 如果创建失败，保留本地 Markdown，不阻塞下一步，并说明失败原因。
 
 ### 生成原型或交付前
 
@@ -82,6 +106,20 @@ pmw-zoon create --title "产品设计简报：<功能名>"
 2. 把最新 Markdown 作为产品事实来源。
 3. 如果用户修改了方向、约束或 PM 决策，更新本地产品简报版本。
 4. 不只依赖过期聊天上下文。
+
+### 漂移检查
+
+原型或交付前运行：
+
+```bash
+pmw-zoon drift --url "<Zoon URL>"
+```
+
+如果返回 `DRIFT`，读取最新 Zoon 快照，递增产品简报版本，并把变化同步回本地资产。用户在对话中修改 brief 后，重新执行：
+
+```bash
+pmw-log brief "<功能名>"
+```
 
 ### 失败处理
 

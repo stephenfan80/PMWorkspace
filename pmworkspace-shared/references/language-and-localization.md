@@ -49,6 +49,8 @@ Keep skill ids unchanged:
 - `$pm-strategy-review`
 - `$pm-brief`
 - `$pm-prototype-shotgun`
+- `$pm-prototype-review`
+- `$pm-autoplan`
 - `$pm-handoff`
 
 When explaining them to Chinese users, add a Chinese role name:
@@ -57,4 +59,6 @@ When explaining them to Chinese users, add a Chinese role name:
 - `$pm-strategy-review`：策略审查
 - `$pm-brief`：产品简报
 - `$pm-prototype-shotgun`：原型方案
+- `$pm-prototype-review`：原型复审
+- `$pm-autoplan`：自动产品评审
 - `$pm-handoff`：交付稿

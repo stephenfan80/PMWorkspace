@@ -304,11 +304,12 @@ Add only the modules that fit the product. Do not include all modules by default
 - 追加成功后，自动在 Codex 内置浏览器中打开该 Zoon 文档。
 - 告诉用户：现有文档现在是下一步原型的事实来源。
 - 图片生成前，请用户在对话中确认，或编辑 Zoon 产品简报。
-- 如果用户在 Zoon 中改变方向，递增产品简报版本，并重新运行相关决策门槛。
+- 如果用户在 Zoon 或对话中改变方向，递增产品简报版本，重新运行相关决策门槛，并用 `pmw-log brief <功能名>` 重新同步。
 
 如果没有现有 Zoon 文档：
 
-- 默认使用 `pmw-zoon create --title "产品设计简报：<功能名>"` 新建 Zoon 文档。
+- 默认使用 `pmw-log brief <功能名>` 保存产品简报；它会自动调用 `pmw-zoon sync`，没有 Zoon URL 时再创建文档。
+- 也可以直接使用 `pmw-zoon create --title "产品设计简报：<功能名>"` 新建 Zoon 文档。
 - 创建成功后，用 `pmw-project link-zoon <url>` 保存到本地项目记录。
 - 创建成功后，自动在 Codex 内置浏览器中打开可编辑 URL，方便用户直接编辑。
 - 只把返回的可编辑 `url` 发给用户，不展示 API 原始响应。
@@ -329,7 +330,7 @@ Add only the modules that fit the product. Do not include all modules by default
 当可编辑 Zoon 产品简报存在且用户已确认：
 
 1. 生成图片前重新读取最新 Zoon 快照。
-2. 把最新 Markdown 作为产品事实来源。
+2. 先运行 `pmw-zoon drift --url <Zoon URL>`；若返回 `DRIFT`，把最新 Markdown 作为产品事实来源并更新 brief 版本。
 3. 用 PM 编辑更新产品意图、约束和提示词内容。
 4. 不只依赖过期的对话历史。
 

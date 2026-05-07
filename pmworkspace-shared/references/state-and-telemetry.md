@@ -21,6 +21,7 @@ projects/<slug>/questions.jsonl
 projects/<slug>/project.json
 projects/<slug>/prototypes/
 projects/<slug>/taste-profile.jsonl
+projects/<slug>/learnings.jsonl
 ```
 
 ## 保存什么
@@ -32,6 +33,7 @@ projects/<slug>/taste-profile.jsonl
 - 项目元数据：中文展示名、技术 slug、最新产品简报路径和 Zoon 文档链接。
 - 原型清单：方案、屏幕、画布、产品简报依赖和提示词摘要。
 - 偏好反馈：批准/拒绝的方向，以及用户原因。
+- 产品学习：脱敏后的复用判断、常见边界和后续偏好。
 
 ## 不保存什么
 

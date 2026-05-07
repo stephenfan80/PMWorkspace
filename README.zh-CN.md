@@ -24,10 +24,12 @@ PMWorkspace 来自原来的 `product-prototype-designer` 技能。旧名称已�
 | 技能 | 什么时候用 |
 |---|---|
 | `$pm-workspace` | 主入口，负责路由、首次引导、更新检查和状态记录。 |
+| `$pm-autoplan` | 自动串联产品追问、策略审查、产品简报、Zoon 同步和原型准备度检查。 |
 | `$pm-jobs` | 乔布斯式产品追问：用户是谁、痛点是什么、现在怎么解决、为什么值得做。 |
 | `$pm-strategy-review` | 挑战策略、范围、价值交换、风险、反指标和取舍。 |
 | `$pm-brief` | 生成快速版、标准版或深度版产品简报。 |
 | `$pm-prototype-shotgun` | 基于已对齐的产品简报生成多方案 image-2 原型图。 |
+| `$pm-prototype-review` | 复审已生成原型图，判断是否需要重出并沉淀偏好。 |
 | `$pm-handoff` | 输出适合 PRD、设计、实验验证或研发使用的交付稿。 |
 
 ## 快速开始
@@ -52,9 +54,11 @@ PMWorkspace 来自原来的 `product-prototype-designer` 技能。旧名称已�
 5. 关键 PM 决策用 `D` 选择题拍板，一次只展开一个完整问题；多个待拍板只提示后续标题队列。
 6. 新页面如果承接线上流程或生产样式，先完成线上参考检查。
 7. `$pm-brief` 按主场景做轻量互联网最佳实践检索，但不增加 Q 数量。
-8. `$pm-brief` 写出可确认、可复用的产品简报，并默认创建或更新 Zoon 在线文档，成功后自动打开到 Codex 内置浏览器。
-9. 产品简报达到“已对齐”后，`$pm-prototype-shotgun` 先读取 Zoon 最新内容，再生成 image-2 原型图。
-10. `$pm-handoff` 把选定方向转成可交付文档。
+8. `$pm-brief` 写出可确认、可复用的产品简报；`pmw-log brief` 会自动创建或追加 Zoon 在线文档。
+9. 用户在对话或 Zoon 中调整 brief 后，重新保存并同步 Zoon；原型前运行 Zoon 漂移检查。
+10. 产品简报达到“已对齐”后，`$pm-prototype-shotgun` 先读取 Zoon 最新内容，再生成 image-2 原型图。
+11. `$pm-prototype-review` 复审原型是否符合 brief、线上参考、反指标和不可虚构项。
+12. `$pm-handoff` 把选定方向转成可交付文档。
 
 ## 原型输出规则
 
@@ -106,6 +110,7 @@ PMWorkspace 默认把资产保存在本地：
   projects/<slug>/project.json
   projects/<slug>/prototypes/
   projects/<slug>/taste-profile.jsonl
+  projects/<slug>/learnings.jsonl
 ```
 
 会保存：
@@ -117,6 +122,7 @@ PMWorkspace 默认把资产保存在本地：
 - 产品简报 Markdown。
 - 原型批次清单。
 - 用户批准或拒绝的设计偏好。
+- 脱敏后的产品学习和复用判断。
 
 不会保存：
 
@@ -143,10 +149,15 @@ bin/pmw-project show
 Zoon 在线简报：
 
 ```bash
+bin/pmw-zoon protocol --host "https://zoon.up.railway.app"
 cat brief.md | bin/pmw-zoon create --title "产品设计简报：通用券站外召回方案"
 cat brief.md | bin/pmw-zoon append --url "<Zoon URL>"
+cat brief.md | bin/pmw-zoon sync --title "产品设计简报：通用券站外召回方案"
+bin/pmw-zoon drift --url "<Zoon URL>"
 bin/pmw-zoon read --url "<Zoon URL>"
 ```
+
+`protocol` 会动态读取 Zoon 的 `/skill` 和 `/agent-docs`，并缓存协议摘要，默认 TTL 为 300 秒；Zoon 升级时优先跟随远端协议说明。
 
 ## 选择题拍板
 

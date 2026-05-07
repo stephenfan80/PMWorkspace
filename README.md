@@ -13,7 +13,7 @@ PMWorkspace helps PMs turn an idea that still feels vague into product assets th
 - **Quick shaping mode:** produce a 10-minute light package: product brief, 2-3 solution directions, and prototype images. This is for team discussion, leadership review, or early product exploration.
 - **Deep delivery mode:** use the full diagnostic workflow, Zoon alignment, prototype review, and handoff flow to upgrade the chosen direction into PRD, design, experiment, or engineering delivery assets.
 
-Deep delivery follows a gstack-inspired workbench model:
+Deep delivery follows a product runtime workbench model:
 
 ```text
 Update check + state logging
@@ -94,6 +94,16 @@ The full experience includes mobile-first image-2 prototype generation, so the h
 
 Other Codex skill-compatible hosts can still use PMWorkspace for product questioning, briefs, PRDs, and handoff documents. If the host does not provide image-2 / image generation, prototype image output is limited. Do not replace image-2 prototypes with HTML or Markdown wireframes unless the user explicitly asks for HTML, an interactive web prototype, or frontend implementation.
 
+## Product Runtime
+
+PMWorkspace v0.2 turns the skill suite into a local product runtime:
+
+- **Runtime Kernel:** `pmw-run` gives each workflow a `run_id`, mode, gate events, decisions, evidence, artifacts, reviews, and next step.
+- **Evidence Dashboard:** `pmw-dashboard status` renders a Chinese Markdown status page with brief version, Zoon state, references, assumptions, non-fiction boundaries, prototype list, reviews, and question preferences.
+- **Prototype Shotgun Board:** `pmw-prototype-board` registers each independent image-2 unit and compares schemes without merging multiple screens into one image.
+- **PM Review Army:** prototype review uses strategy, trust/risk, design system, and data feasibility lenses, then merges findings into pass, regenerate, or PM decision.
+- **Question Tuning:** `pmw-question-tuning` records whether a Q/D dimension should always be asked, asked only at high risk, defaulted to the recommendation, or avoided unless blocking.
+
 ## Install
 
 ```bash
@@ -128,6 +138,9 @@ PMWorkspace stores durable assets locally by default:
   projects/<slug>/decisions.jsonl
   projects/<slug>/questions.jsonl
   projects/<slug>/project.json
+  projects/<slug>/runs/
+  projects/<slug>/prototype-board.jsonl
+  projects/<slug>/question-tuning.jsonl
   projects/<slug>/prototypes/
   projects/<slug>/taste-profile.jsonl
   projects/<slug>/learnings.jsonl
@@ -138,6 +151,7 @@ Defaults:
 - Telemetry is local-first: usage logs stay on your machine.
 - Remote anonymous telemetry requires explicit opt-in.
 - Stored assets should include project display names, briefs, decision questions, decisions, Zoon URLs, prototype manifests, taste feedback, and sanitized product learnings.
+- Runtime assets include local run audit trails, evidence dashboard inputs, prototype board entries, and question tuning preferences.
 - Do not store raw private customer data, tokens, internal recordings, or sensitive screenshots.
 
 Project helpers:
@@ -146,6 +160,19 @@ Project helpers:
 bin/pmw-project get-name
 bin/pmw-project set-name "通用券站外召回方案"
 bin/pmw-project show
+```
+
+Runtime helpers:
+
+```bash
+bin/pmw-run start --skill pm-autoplan --mode quick --goal "10 分钟轻量包"
+bin/pmw-run event --type gate --status "待确认" --title "假设确认" --summary "等待 PM 确认"
+bin/pmw-run finish --status "基于假设，可讨论" --next "进入 image-2 原型"
+bin/pmw-dashboard status
+bin/pmw-prototype-board add --scheme "方案 A" --screen "首页" --brief-version "v1"
+bin/pmw-prototype-board list
+bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --reason "低风险轻量包默认采用推荐"
+bin/pmw-question-tuning summary
 ```
 
 Zoon helpers:

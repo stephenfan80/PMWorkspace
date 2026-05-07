@@ -24,6 +24,7 @@ for _CANDIDATE in "$PWD/bin" "$PWD/pmworkspace-shared/bin" "$HOME/.codex/skills/
 done
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-update-check" 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-prototype-shotgun >/dev/null 2>&1 || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
 ```
 
 ## Hard Gates
@@ -32,6 +33,9 @@ done
 - Read `../pmworkspace-shared/references/production-reference-gate.md`.
 - Read `../pmworkspace-shared/references/zoon-drift-check.md`.
 - Read `../pmworkspace-shared/references/product-memory.md`.
+- Read `../pmworkspace-shared/references/runtime-kernel.md`.
+- Read `../pmworkspace-shared/references/evidence-dashboard.md`.
+- Read `../pmworkspace-shared/references/prototype-shotgun-board.md`.
 - 产品简报未“已对齐”时，不写提示词，不生成图片，不生成 HTML，不输出交付稿。
 - 现有功能迭代必须有当前截图或等价视觉基线。
 - 新页面如果承接线上流程、结果页、状态页或生产样式，必须先拿到线上参考，或得到用户明确确认“没有线上参考，按新页面概念稿推进”。
@@ -58,16 +62,19 @@ done
 5. Use `pmw-memory taste-summary` when available so rejected directions are not repeated as “new”方案.
 6. Propose concept directions with names and tradeoffs.
 7. For each image output unit, declare scheme, screen task, canvas, main goal, anti-metric, non-fiction boundary, 线上参考状态, and brief dependency.
-8. Generate with image-2 / image generation.
-9. Run `prototype-quality-review.md`, then route substantial post-image review to `$pm-prototype-review`.
-10. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单。
-11. Record approved/rejected design feedback with `pmw-log taste`.
+8. 平台脚本可用时，先用 `pmw-prototype-board add` 登记每个方案/屏幕单元；出图后补充图片路径或 URL，用户反馈后用 `pmw-prototype-board score` 记录评分。
+9. Generate with image-2 / image generation.
+10. Run `prototype-quality-review.md`, then route substantial post-image review to `$pm-prototype-review`.
+11. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单，并用 `pmw-run event --type artifact` 记录产物。
+12. Record approved/rejected design feedback with `pmw-log taste`.
+13. 批量输出后运行 `pmw-dashboard status`，在最终说明中给出方案比较板状态。
 
 ## 输出
 
 ```text
 原型计划：
 - 产品简报：
+- run_id：
 - Zoon 事实来源：
 - Zoon 漂移检查：
 - 场景：
@@ -77,6 +84,7 @@ done
 - 已生成 / 计划生成的图片：
 - 质量检查：
 - 已保存清单：
+- 方案比较板：
 - 偏好反馈：
 - 原型复审：
 - 建议下一步：

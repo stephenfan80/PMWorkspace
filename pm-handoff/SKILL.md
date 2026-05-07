@@ -23,23 +23,29 @@ for _CANDIDATE in "$PWD/bin" "$PWD/pmworkspace-shared/bin" "$HOME/.codex/skills/
 done
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-update-check" 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-handoff >/dev/null 2>&1 || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
 ```
 
 ## Workflow
 
 1. 读取最新已对齐的产品简报、策略决策，以及可用的原型清单。
-2. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
-3. 如果 `pmw-project show` 中有 Zoon URL，先运行 `pmw-zoon drift`；若存在漂移，读取最新文档，作为交付事实来源，并更新产品简报版本。
-4. 选择交付类型：适合 PRD、适合设计、适合实验验证或适合研发。
-5. 包含目标、目标用户、问题、场景、选定方向、范围、不做什么、验收标准、指标、风险、依赖和待决策项。
-6. Keep unsupported capabilities under `不可虚构`.
-7. 未决交付取舍继续使用 `decision-question-mode.md` 的选择题结构。
-8. Log final delivery decisions when platform scripts are available.
+2. Read `../pmworkspace-shared/references/runtime-kernel.md`.
+3. Read `../pmworkspace-shared/references/evidence-dashboard.md` and run `pmw-dashboard status` when available.
+4. Read `../pmworkspace-shared/references/prototype-shotgun-board.md`; if a selected prototype direction exists, include the board result instead of relying on memory.
+5. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
+6. 如果 `pmw-project show` 中有 Zoon URL，先运行 `pmw-zoon drift`；若存在漂移，读取最新文档，作为交付事实来源，并更新产品简报版本。
+7. 选择交付类型：适合 PRD、适合设计、适合实验验证或适合研发。
+8. 包含目标、目标用户、问题、场景、选定方向、范围、不做什么、验收标准、指标、风险、依赖和待决策项。
+9. Keep unsupported capabilities under `不可虚构`.
+10. 未决交付取舍继续使用 `decision-question-mode.md` 的选择题结构。
+11. Log final delivery decisions and `pmw-run event --type artifact` when platform scripts are available; finish the run as `可交付` when handoff is complete.
 
 ## 输出结构
 
 ```markdown
 # PMWorkspace 交付稿：<功能名>
+
+## 证据状态
 
 ## 摘要
 

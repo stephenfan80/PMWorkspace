@@ -7,7 +7,8 @@ description: |
   问题定义、策略审查、Zoon 对齐、原型复审、PRD 或交付稿。负责首次引导、更新检查、
   本地使用记录，并路由到 pm-jobs、pm-strategy-review、pm-brief、
   pm-prototype-shotgun、pm-prototype-review、pm-autoplan 或 pm-handoff。
-  也用于用户刚安装 PMWorkspace 后需要欢迎引导、启动话术或选择第一步。
+  也用于用户刚安装 PMWorkspace 后需要欢迎引导、启动话术或选择第一步。v0.2 起
+  负责启动 PMWorkspace runtime run，并把证据、决策、产物和下一步写入本地审计轨迹。
 ---
 
 # PMWorkspace
@@ -66,6 +67,14 @@ fi
 
 If output contains `UPGRADE_AVAILABLE old new`, tell the user PMWorkspace has an update and offer to run `pmw-upgrade`. If `auto_upgrade` is `true`, upgrade automatically and say what changed only after upgrade succeeds.
 
+After deciding 快速成型模式 or 深度交付模式, start a runtime run when scripts are available:
+
+```bash
+"$_PMW_BIN/pmw-run" start --skill pm-workspace --mode <quick|deep> --goal "<本轮产品目标>"
+```
+
+Use `pmw-run event` for gates, decisions, evidence, artifacts, and reviews; use `pmw-run finish` before the final response. If scripts are unavailable, mark `运行审计：未启用`.
+
 ## Workbench Routing
 
 Route by the user's actual job:
@@ -110,6 +119,7 @@ If the user provides a product task in the same message, skip the welcome menu a
 - 一个方案 + 一个屏幕 = 一张图片。除非用户要求展示板，否则不要创建比较拼图。
 - 每张图片必须绑定方案名、屏幕任务、主目标、反指标、不可虚构项和产品简报版本。
 - 平台脚本可用时，保存可沉淀资产：使用日志、决策、产品简报 Markdown、原型清单和偏好反馈。
+- 平台脚本可用时，使用 `pmw-dashboard status` 汇总当前证据状态；不要让 Zoon、线上参考、原型清单和待决策项散落在对话里。
 - 不要把真实 token、私密客户数据、内部录音、敏感截图或未脱敏 Zoon 内容保存到本地资产。
 
 ## First-Use Message
@@ -133,14 +143,19 @@ Then route to the smallest useful next skill.
 Use `../pmworkspace-shared/references/` for:
 
 - `language-and-localization.md` for output language and Chinese terminology.
+- `runtime-kernel.md` for run ids, shared statuses, audit events, and final run state.
+- `evidence-dashboard.md` for evidence status pages.
 - `decision-question-mode.md` for PM decision questions.
 - `autoplan-workflow.md` for automatic product review sequencing.
 - `zoon-drift-check.md` for syncing adjusted briefs and detecting stale Zoon state.
 - `product-memory.md` for local preference and learning summaries.
+- `question-tuning.md` for user-specific Q/D questioning preferences.
 - `browser-evidence.md` for online reference capture.
 - `scenario-experts.md` for scenario-specific review lenses.
 - `internet-best-practice-research.md` for lightweight public UX/product case research.
 - `production-reference-gate.md` for online screenshot/reference checks before prototypes.
+- `prototype-shotgun-board.md` for multi-scheme comparison without merging images.
+- `pm-review-army.md` for structured multi-lens review.
 - `welcome-guide.md` for install success and first-run onboarding.
 - `routing.md` for route selection.
 - `state-and-telemetry.md` for durable asset rules.

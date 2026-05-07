@@ -1,0 +1,166 @@
+#!/usr/bin/env python3
+import argparse
+import json
+import os
+import pathlib
+import subprocess
+from datetime import datetime, timezone
+from typing import Optional
+
+
+SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
+
+
+def current_slug() -> str:
+    env_slug = os.environ.get("PMW_PROJECT_SLUG")
+    if env_slug:
+        return env_slug
+    try:
+        return subprocess.check_output([str(SCRIPT_DIR / "pmw-slug")], text=True).strip()
+    except Exception:
+        return "local-project"
+
+
+def project_dir() -> pathlib.Path:
+    return STATE_DIR / "projects" / current_slug()
+
+
+def read_json(path: pathlib.Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+        return value if isinstance(value, dict) else {}
+    except Exception:
+        return {}
+
+
+def read_jsonl(path: pathlib.Path) -> list[dict]:
+    rows = []
+    if not path.exists():
+        return rows
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            value = json.loads(line)
+        except Exception:
+            continue
+        if isinstance(value, dict):
+            rows.append(value)
+    return rows
+
+
+def all_jsonl(pattern: str) -> list[dict]:
+    rows = []
+    for path in sorted(project_dir().glob(pattern)):
+        rows.extend(read_jsonl(path))
+    return rows
+
+
+def read_run(run_id: Optional[str]) -> tuple[str, list[dict]]:
+    data = read_json(project_dir() / "project.json")
+    chosen = run_id or str(data.get("current_run_id") or data.get("latest_run_id") or "")
+    if not chosen:
+        runs = sorted((project_dir() / "runs").glob("*.jsonl"))
+        chosen = runs[-1].stem if runs else ""
+    if not chosen:
+        return "", []
+    return chosen, read_jsonl(project_dir() / "runs" / f"{chosen}.jsonl")
+
+
+def latest_brief_summary(path_value: str) -> tuple[str, str]:
+    if not path_value:
+        return "未记录", "未记录"
+    path = pathlib.Path(path_value)
+    if not path.exists():
+        return path_value, "未读取"
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    status = "未标注"
+    version = "未标注"
+    for line in text.splitlines()[:80]:
+        stripped = line.strip()
+        if "状态" in stripped and status == "未标注":
+            status = stripped.replace("#", "").strip()
+        if ("版本" in stripped or "简报版本" in stripped) and version == "未标注":
+            version = stripped.replace("#", "").strip()
+    return f"{path.name}", f"{version}；{status}"
+
+
+def bullet_or_empty(rows: list[str], empty: str = "暂无") -> list[str]:
+    return [f"- {row}" for row in rows] if rows else [f"- {empty}"]
+
+
+def render_status(run_id: Optional[str]) -> str:
+    root = project_dir()
+    project = read_json(root / "project.json")
+    chosen_run, events = read_run(run_id)
+    latest_status = project.get("latest_run_status") or (events[-1].get("status") if events else "暂无")
+    brief_name, brief_meta = latest_brief_summary(str(project.get("latest_brief", "")))
+    decisions = read_jsonl(root / "decisions.jsonl")[-5:]
+    questions = read_jsonl(root / "questions.jsonl")[-5:]
+    board = [r for r in read_jsonl(root / "prototype-board.jsonl") if r.get("record_type", "item") == "item"]
+    board_scores = {}
+    for row in read_jsonl(root / "prototype-board.jsonl"):
+        if row.get("record_type") == "score":
+            board_scores[row.get("scheme", "")] = row
+    prototypes = all_jsonl("prototypes/*.jsonl")
+    reviews = [e for e in events if e.get("event") == "review"]
+    evidence = [e for e in events if e.get("event") == "evidence"]
+    artifacts = [e for e in events if e.get("event") == "artifact"]
+    run_decisions = [e for e in events if e.get("event") == "decision"]
+    tuning = read_jsonl(root / "question-tuning.jsonl")[-5:]
+
+    lines = [
+        "# PMWorkspace 证据状态页",
+        "",
+        f"- 项目：{project.get('display_name') or pathlib.Path.cwd().name}",
+        f"- 技术标识：{project.get('slug') or current_slug()}",
+        f"- 当前 run：{chosen_run or '暂无'}",
+        f"- 当前状态：{latest_status}",
+        f"- 生成时间：{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}",
+        "",
+        "## 产品简报与 Zoon",
+        "",
+        f"- 最新简报：{brief_name}",
+        f"- 简报状态：{brief_meta}",
+        f"- Zoon URL：{project.get('zoon_url') or '未记录'}",
+        f"- 最近 Zoon 同步：{project.get('last_zoon_sync_at') or '未记录'}",
+        "",
+        "## 证据与门槛",
+        "",
+    ]
+    lines.extend(bullet_or_empty([f"{r.get('status', '')}｜{r.get('title', '')}：{r.get('summary', '')}" for r in evidence]))
+    lines.extend(["", "## 决策与问题", ""])
+    decision_rows = [f"{r.get('status', '')}｜{r.get('title', '')}：{r.get('summary', '')}" for r in run_decisions]
+    decision_rows.extend([f"{r.get('title', r.get('question_id', ''))}：{r.get('body') or r.get('summary') or r.get('user_choice') or ''}" for r in decisions + questions])
+    lines.extend(bullet_or_empty(decision_rows))
+    lines.extend(["", "## 原型与方案板", ""])
+    board_rows = [
+        f"{r.get('scheme', '未命名')} / {r.get('screen', '未命名屏幕')}｜{board_scores.get(r.get('scheme', ''), {}).get('score', '未评分')}｜brief {r.get('brief_version', '未标注')}"
+        for r in board[-10:]
+    ]
+    manifest_rows = [f"{r.get('scheme', r.get('方案名', '原型项'))}｜{r.get('screen', r.get('屏幕任务', ''))}" for r in prototypes[-10:]]
+    lines.extend(bullet_or_empty(board_rows + manifest_rows))
+    lines.extend(["", "## 复审结论", ""])
+    lines.extend(bullet_or_empty([f"{r.get('status', '')}｜{r.get('title', '')}：{r.get('summary', '')}" for r in reviews]))
+    lines.extend(["", "## 产物清单", ""])
+    lines.extend(bullet_or_empty([f"{r.get('status', '')}｜{r.get('title', '')}：{r.get('summary', '')}" for r in artifacts]))
+    lines.extend(["", "## 问题偏好", ""])
+    lines.extend(bullet_or_empty([f"{r.get('dimension', '')}：{r.get('policy', '')}｜{r.get('reason', '')}" for r in tuning]))
+    return "\n".join(lines) + "\n"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(prog="pmw-dashboard")
+    sub = parser.add_subparsers(dest="command", required=True)
+    status = sub.add_parser("status")
+    status.add_argument("--run")
+    args = parser.parse_args()
+    if args.command == "status":
+        print(render_status(args.run), end="")
+        return 0
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

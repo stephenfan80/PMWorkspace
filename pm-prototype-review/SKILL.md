@@ -24,6 +24,7 @@ done
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-update-check" 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-prototype-review >/dev/null 2>&1 || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" taste-summary 2>/dev/null || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
 ```
 
 ## Workflow
@@ -32,12 +33,17 @@ done
 2. Read `../pmworkspace-shared/references/image-prompts.md`.
 3. Read `../pmworkspace-shared/references/design-system-workflow.md`.
 4. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
-5. If `pmw-project show` contains a Zoon URL, run `pmw-zoon drift` when available. If drift exists, read the latest Zoon snapshot before judging the image.
-6. For every image, check the bound output unit: 方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本。
-7. Score each screen on five dimensions: 产品一致性、任务完成、信任与反指标、设计系统、可交付性.
-8. If a screen has material failure, mark `需要重出` and produce a concise repair brief for `$pm-prototype-shotgun`; do not accept a pretty but misleading image.
-9. Log approved/rejected preferences with `pmw-log taste` when the user gives feedback.
-10. If repeated preferences emerge, save a learning with `pmw-memory add-learning`.
+5. Read `../pmworkspace-shared/references/pm-review-army.md`.
+6. Read `../pmworkspace-shared/references/prototype-shotgun-board.md`.
+7. Read `../pmworkspace-shared/references/evidence-dashboard.md`.
+8. If `pmw-project show` contains a Zoon URL, run `pmw-zoon drift` when available. If drift exists, read the latest Zoon snapshot before judging the image.
+9. For every image, check the bound output unit: 方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本。
+10. Score each screen on five dimensions: 产品一致性、任务完成、信任与反指标、设计系统、可交付性.
+11. Use PM Review Army lenses for strategy, trust/risk, design system, and data feasibility; merge into `可通过`、`需要重出`、or `需要 PM 拍板`.
+12. If a screen has material failure, mark `需要重出` and produce a concise repair brief for `$pm-prototype-shotgun`; do not accept a pretty but misleading image.
+13. Log approved/rejected preferences with `pmw-log taste` when the user gives feedback; log scheme scores with `pmw-prototype-board score` when applicable.
+14. If repeated preferences emerge, save a learning with `pmw-memory add-learning`.
+15. 复审结束时用 `pmw-run event --type review` 记录结论，并运行 `pmw-dashboard status`。
 
 ## 复审标准
 
@@ -51,7 +57,9 @@ done
 ```text
 原型复审结果：
 - 产品简报 / Zoon 来源：
+- run_id：
 - Zoon 漂移检查：
+- PM Review Army：
 - 已检查图片：
 - 逐屏结论：
 - 需要重出的屏幕：

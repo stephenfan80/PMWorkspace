@@ -114,6 +114,16 @@ PMWorkspace 的完整体验包含移动端优先的 image-2 原型图输出，�
 
 其他支持 Codex skill 的环境也可以使用 PMWorkspace 的产品追问、产品简报、PRD 和交付稿能力；如果宿主没有 image-2 / 图像生成能力，原型图输出会受限，不能用 HTML 或 Markdown 线框替代 image-2 原型图，除非用户明确要求 HTML / 可交互网页 / 前端实现。
 
+## 产品运行层
+
+PMWorkspace v0.2 把技能套件升级成本地产品运行系统：
+
+- **Runtime Kernel：** `pmw-run` 为每次工作生成 `run_id`，记录模式、门槛、决策、证据、产物、复审和下一步。
+- **Evidence Dashboard：** `pmw-dashboard status` 输出中文证据状态页，汇总产品简报版本、Zoon 状态、线上参考、假设、不可虚构项、原型清单、复审结论和问题偏好。
+- **Prototype Shotgun Board：** `pmw-prototype-board` 登记每个独立 image-2 图片单元，并用表格比较方案；不把多张图合成一张图。
+- **PM Review Army：** 原型复审使用策略、信任 / 风险、设计系统和数据可行性四个视角，最终合并为可通过、需要重出或需要 PM 拍板。
+- **Question Tuning：** `pmw-question-tuning` 记录用户对 Q/D 的偏好，例如永远问、高风险才问、默认采用推荐或除非阻塞否则少问。
+
 ## 安装
 
 ```bash
@@ -148,6 +158,9 @@ PMWorkspace 默认把资产保存在本地：
   projects/<slug>/decisions.jsonl
   projects/<slug>/questions.jsonl
   projects/<slug>/project.json
+  projects/<slug>/runs/
+  projects/<slug>/prototype-board.jsonl
+  projects/<slug>/question-tuning.jsonl
   projects/<slug>/prototypes/
   projects/<slug>/taste-profile.jsonl
   projects/<slug>/learnings.jsonl
@@ -159,8 +172,11 @@ PMWorkspace 默认把资产保存在本地：
 - 中文项目名和 Zoon 在线简报链接。
 - 用户确认过的产品/设计决策。
 - 选择题拍板记录。
+- 每次运行的本地审计轨迹。
 - 产品简报 Markdown。
 - 原型批次清单。
+- 方案比较板。
+- Q/D 问题偏好。
 - 用户批准或拒绝的设计偏好。
 - 脱敏后的产品学习和复用判断。
 
@@ -184,6 +200,19 @@ bin/pmw-config list
 bin/pmw-project get-name
 bin/pmw-project set-name "通用券站外召回方案"
 bin/pmw-project show
+```
+
+运行层工具：
+
+```bash
+bin/pmw-run start --skill pm-autoplan --mode quick --goal "10 分钟轻量包"
+bin/pmw-run event --type gate --status "待确认" --title "假设确认" --summary "等待 PM 确认"
+bin/pmw-run finish --status "基于假设，可讨论" --next "进入 image-2 原型"
+bin/pmw-dashboard status
+bin/pmw-prototype-board add --scheme "方案 A" --screen "首页" --brief-version "v1"
+bin/pmw-prototype-board list
+bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --reason "低风险轻量包默认采用推荐"
+bin/pmw-question-tuning summary
 ```
 
 Zoon 在线简报：

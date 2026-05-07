@@ -1,0 +1,41 @@
+{
+  "id": "brief-depth-not-length",
+  "title": "简报深度代表证据深度而不是内容长度",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "用户要求深度版产品简报，但不希望变成堆章节。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "深度不等于长度",
+    "required_behaviors": [
+      "快速版、标准版、深度版使用同一套核心信息",
+      "深度版只在支持信息里补证据和边界",
+      "核心信息保持精简"
+    ],
+    "forbidden_behaviors": [
+      "把深度版写成长章节堆叠",
+      "扩写核心信息压过判断",
+      "用深度替代门槛确认"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "简报深度不等于内容长度"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "快速版、标准版、深度版都使用同一套核心信息"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "简报深度只代表证据和风险处理深度，不代表内容越写越长"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "产品简报：简报深度不等于内容长度"
+    }
+  ]
+}

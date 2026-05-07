@@ -1,0 +1,45 @@
+{
+  "id": "brief-best-practice-compressed",
+  "title": "互联网最佳实践只能压缩成原型启发",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "生成产品简报时参考互联网最佳实践。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "最佳实践压缩",
+    "required_behaviors": [
+      "只保留可借鉴原则、不可照搬和对原型影响",
+      "参考来源放在支持信息",
+      "最佳实践不覆盖当前约束"
+    ],
+    "forbidden_behaviors": [
+      "写成长研究报告",
+      "把公开案例当成本产品事实",
+      "用最佳实践覆盖反指标或不可虚构项"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/internet-best-practice-research.md",
+      "contains": "互联网案例启发只保留可借鉴原则、不可照搬、对原型影响"
+    },
+    {
+      "path": "pmworkspace-shared/references/internet-best-practice-research.md",
+      "contains": "参考来源放在支持信息；最佳实践不能覆盖当前 brief、Zoon、线上截图、反指标或不可虚构项"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "- 互联网案例启发："
+    },
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "互联网案例启发"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "产品简报：互联网案例启发只能压缩为可借鉴原则、不可照搬和对原型影响"
+    }
+  ]
+}

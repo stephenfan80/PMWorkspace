@@ -58,7 +58,7 @@ Every handoff between skills should preserve the current mode/status, current or
 | `$pm-autoplan` | Run the automatic product review pipeline through brief readiness and Zoon sync. |
 | `$pm-jobs` | Clarify product value before solution design: painful user, trigger, substitute, loss, and narrow wedge. |
 | `$pm-strategy-review` | Judge strategic tradeoffs: expand, hold, shrink, or pivot, then turn the core contradiction into a PM decision. |
-| `$pm-brief` | Create a reusable Quick, Standard, or Deep product brief. |
+| `$pm-brief` | Create a compact product core contract that turns aligned facts, strategy choices, and reference gates into decisions for prototype, review, and handoff. |
 | `$pm-prototype-shotgun` | Generate mobile-first image-2 prototype schemes from an Aligned brief. |
 | `$pm-prototype-review` | Review generated prototype screens against the brief, Zoon, and non-fiction boundaries. |
 | `$pm-handoff` | Create PRD-ready, design-ready, experiment-ready, or engineering-ready handoff. |
@@ -97,7 +97,7 @@ For prototype work, PMWorkspace defaults to mobile-first iPhone 17 portrait `402
 
 Prototype work is locked to image-2 / image generation unless the user explicitly asks for HTML, an interactive web prototype, or frontend implementation. In deep delivery mode, if the product brief is not `Aligned`, PMWorkspace should ask the next diagnostic or decision question instead of producing images, HTML, or a long plan. In quick shaping mode, PMWorkspace may generate the light package after the user approves clearly marked assumptions; the package must be labeled as discussion-ready, not final PRD truth.
 
-Briefs saved through `pmw-log brief` automatically sync to Zoon when enabled: existing Zoon URLs are appended, and new documents are created when `zoon_auto_create` is true. Before prototype or handoff work, PMWorkspace checks for Zoon drift so edits made in the conversation or in Zoon do not fall out of sync.
+Briefs start with compact product core information, then gate status and supporting evidence. Briefs saved through `pmw-log brief` automatically sync to Zoon when enabled: existing Zoon URLs are appended, and new documents are created when `zoon_auto_create` is true. Before prototype or handoff work, PMWorkspace checks for Zoon drift so edits made in the conversation or in Zoon do not fall out of sync.
 
 ## Runtime
 

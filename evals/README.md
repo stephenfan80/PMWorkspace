@@ -21,7 +21,7 @@ eval 分类必须能映射回 `pmworkspace-shared/references/pm-workbench-map.md
 | `autoplan`、`quick-shaping`、`deep-delivery` | 自动产品评审 |
 | `pm-jobs` | 产品价值澄清 |
 | `pm-strategy-review` | 策略审查 |
-| `pm-brief` | 产品简报 |
+| `pm-brief` | 产品简报 / 核心信息契约 |
 | `pm-prototype-shotgun`、`prototype-shotgun`、`prototype-output-contract`、`multi-scheme`、`production-reference`、`screenshot-feedback` | 原型方案 |
 | `prototype-review` | 原型复审 |
 | `pm-handoff` | 产品交付 |

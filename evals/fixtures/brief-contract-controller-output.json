@@ -1,6 +1,6 @@
 {
   "id": "brief-contract-controller-output",
-  "title": "产品简报必须先建立契约控制器并输出状态字段",
+  "title": "产品简报必须核心信息先行并保留契约控制器",
   "category": "pm-brief",
   "primary_skill": "pm-brief",
   "prompt": "把上游已经完成追问和策略审查的结果整理成产品简报。",
@@ -11,12 +11,15 @@
     "gate": "产品简报契约控制器",
     "required_behaviors": [
       "建立产品简报契约控制器",
+      "先输出产品核心信息",
+      "输出产品简报门槛和支持信息",
       "输出来源门槛、简报深度、缺失门槛和事实/假设边界",
       "输出下一技能和证据状态"
     ],
     "forbidden_behaviors": [
       "只输出普通简报状态",
       "省略证据状态",
+      "先给长状态表再给产品判断",
       "不说明下一技能"
     ]
   },
@@ -26,8 +29,24 @@
       "contains": "## 产品简报契约控制器"
     },
     {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "用户可见输出默认先输出 `产品核心信息`"
+    },
+    {
       "path": "pm-brief/SKILL.md",
       "contains": "先建立产品简报契约控制器，记录 `来源门槛`"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "产品核心信息："
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "产品简报门槛："
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "支持信息："
     },
     {
       "path": "pm-brief/SKILL.md",

@@ -19,7 +19,7 @@ eval 分类必须能映射回 `pmworkspace-shared/references/pm-workbench-map.md
 |---|---|
 | `pm-workspace-entry`、`pm-workspace-routing`、`pm-workspace-runtime` | 欢迎与 D0 路由 |
 | `autoplan`、`quick-shaping`、`deep-delivery` | 自动产品评审 |
-| `pm-jobs` | 产品追问 |
+| `pm-jobs` | 产品价值澄清 |
 | `pm-strategy-review` | 策略审查 |
 | `pm-brief` | 产品简报 |
 | `pm-prototype-shotgun`、`prototype-shotgun`、`prototype-output-contract`、`multi-scheme`、`production-reference`、`screenshot-feedback` | 原型方案 |

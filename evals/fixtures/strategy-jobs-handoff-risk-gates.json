@@ -3,7 +3,7 @@
   "title": "策略审查接住产品追问交出的风险范围价值交换门槛",
   "category": "pm-strategy-review",
   "primary_skill": "pm-strategy-review",
-  "prompt": "$pm-jobs 已经确认用户、问题、目标和反指标，但当前最大缺口是价值交换和范围取舍。",
+  "prompt": "$pm-jobs 已经确认用户、问题、目标和反指标，但当前价值缺口是价值交换和范围取舍。",
   "expected": {
     "mode": "deep",
     "status": "待确认",
@@ -24,7 +24,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "如果事实已经足够，但当前最大缺口是范围、价值交换、信任/风险、反指标、可行性、定位或业务冲突，把下一技能标为 `$pm-strategy-review`"
+      "contains": "如果事实已经足够，但当前价值缺口是范围、价值交换、信任/风险、反指标、可行性、定位或业务冲突，把下一技能标为 `$pm-strategy-review`"
     },
     {
       "path": "pmworkspace-shared/references/adversarial-review.md",

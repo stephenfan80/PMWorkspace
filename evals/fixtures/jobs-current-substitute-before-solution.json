@@ -1,0 +1,38 @@
+{
+  "id": "jobs-current-substitute-before-solution",
+  "title": "进入方案前必须识别现状替代方案",
+  "category": "pm-jobs",
+  "primary_skill": "pm-jobs",
+  "prompt": "我们想做一个工具提升用户效率，你直接给我方案方向。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要补充",
+    "must_stop": true,
+    "gate": "现状替代方案",
+    "required_behaviors": [
+      "识别当前替代方案缺失",
+      "追问今天怎么解决",
+      "不直接进入方案方向",
+      "不直接写产品简报"
+    ],
+    "forbidden_behaviors": [
+      "跳过现状替代",
+      "虚构当前损失",
+      "把效率提升写成已验证价值"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "进入方案方向、前提确认或产品简报前，必须识别现状替代方案"
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "进入方案方向、前提确认或产品简报前，必须识别当前替代方案"
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "- 当前替代方案："
+    }
+  ]
+}

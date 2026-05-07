@@ -1,0 +1,46 @@
+{
+  "id": "jobs-value-judgment-first-output",
+  "title": "产品价值澄清输出必须价值判断先行",
+  "category": "pm-jobs",
+  "primary_skill": "pm-jobs",
+  "prompt": "我有个新想法，你帮我看值不值得做。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要补充",
+    "must_stop": true,
+    "gate": "价值判断先行",
+    "required_behaviors": [
+      "先输出产品价值判断",
+      "说明当前价值缺口",
+      "说明为什么这是最该问的一刀",
+      "再输出追问控制面板"
+    ],
+    "forbidden_behaviors": [
+      "只输出控制面板",
+      "只输出开放问题",
+      "省略当前价值缺口"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "产品价值判断："
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "- 我现在判断："
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "- 当前价值缺口："
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "追问控制面板："
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "用户可见输出必须价值判断先行"
+    }
+  ]
+}

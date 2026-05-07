@@ -57,7 +57,10 @@
     },
     {
       "path": "pm-jobs/SKILL.md",
-      "contains": "use its 产品追问 stage fields"
+      "contains_any": [
+        "use its 产品价值澄清 stage fields",
+        "use its 产品追问 stage fields"
+      ]
     },
     {
       "path": "pm-strategy-review/SKILL.md",

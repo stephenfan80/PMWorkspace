@@ -1,6 +1,6 @@
 {
   "id": "jobs-diagnostic-controller-output-contract",
-  "title": "产品追问必须输出诊断控制器字段",
+  "title": "产品价值澄清必须价值判断先行并保留控制面板字段",
   "category": "pm-jobs",
   "primary_skill": "pm-jobs",
   "prompt": "使用 $pm-jobs 帮我判断这个产品想法是否值得做。",
@@ -8,8 +8,12 @@
     "mode": "deep",
     "status": "待确认",
     "must_stop": false,
-    "gate": "诊断控制器",
+    "gate": "产品价值澄清控制器",
     "required_behaviors": [
+      "输出产品价值判断",
+      "输出当前价值缺口",
+      "说明为什么这是最该问的一刀",
+      "说明这个答案会影响什么",
       "输出诊断阶段",
       "输出当前最大缺口",
       "输出 Q 预算",
@@ -26,11 +30,19 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "## 产品追问控制器"
+      "contains": "## 产品价值澄清控制器"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "每轮都输出 `诊断阶段`、`当前最大缺口`、`Q 预算`、`停止原因`、`下一技能` 和 `证据状态`。"
+      "contains": "用户可见输出先给 `产品价值判断`"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "每轮都输出 `诊断阶段`、`当前价值缺口`、`当前最大缺口`、`Q 预算`、`停止原因`、`下一技能` 和 `证据状态`。"
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "产品价值判断："
     },
     {
       "path": "pm-jobs/SKILL.md",

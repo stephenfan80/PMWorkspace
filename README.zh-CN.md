@@ -1,35 +1,169 @@
 # PMWorkspace
 
-PMWorkspace 是一个面向产品经理、设计师、研究员、运营和创业者的产品方案工作台：**快速成型，深度交付**。它把产品想法、PRD、截图、访谈洞察或 Zoon 文档，沉淀成可复用的产品资产：产品简介 / 产品简报、方案方向、移动端优先的 image-2 原型图、PRD、设计反馈和交付稿。
+**把模糊想法推进到可评审、可出图、可交付。**
 
-PMWorkspace 来自原来的 `product-prototype-designer` 技能。旧名称已废弃，后续请使用 `$pm-workspace` 和 PMWorkspace 技能套件。
+PMWorkspace 是一个产品方案工作台。它不是只帮你生成一张好看的原型图，而是把真实问题、产品简报（brief）、AI 协作文档（Zoon）、截图证据、方案差异、复审结论和交付稿串成一条连续的产品工作流。
 
-## 它解决什么问题
+你可以把一句想法、一段 PRD、一张线上截图、一份用户反馈或一个协作文档丢进来。PMWorkspace 会先帮你判断真正要解决的问题，再把它推进成能讨论、能评审、能出图、能交付的产品资产。
 
-很多产品方案失败不是因为图不好看，而是用户、场景、问题、目标、约束和解决方案没有被想清楚。PMWorkspace 先把拍脑袋的 idea 变成可以讨论、评审和交付的产品资产，再进入原型或 PRD。
-
-PMWorkspace 有两个入口：
-
-- **快速成型模式：** 10 分钟内把一句 idea 推进成“产品简报 + 方案方向 + 原型图”的轻量包，适合拿去组内、领导或设计讨论。
-- **深度交付模式：** 用更完整的 Q 诊断、D 拍板、Zoon 对齐、原型复审和交付稿，把选定方向升级成 PRD、设计或研发交付资产。
-
-深度交付模式遵循完整状态机：
+核心定位很简单：
 
 ```text
-工作目标模式
--> 场景路由
--> Q 诊断
--> 前提确认
--> D 拍板
--> 产品简报
--> image-2 原型
--> 原型复审
--> 交付资产
+快速成型，深度交付。
 ```
 
-## 端到端工作台地图
+## 你是不是也遇到这些情况
 
-PMWorkspace 的全链路地图由 `pmworkspace-shared/references/pm-workbench-map.md` 维护，README、routing、eval 和各技能状态字段都以它为同一张地图：
+- 老板或业务方只给了一句话，但希望你明天就拿出方案。
+- 用户反馈、运营诉求、客服记录和截图都在，但产品判断还没站稳。
+- 设计需要马上出图，可你担心问题定义、目标人群和业务边界还没对齐。
+- PRD、协作文档、截图和对话记录散在不同地方，每次交付都要重新讲一遍上下文。
+- 原型越做越快，结果越容易变成“看起来完整，但不知道为什么这么做”。
+- 线上功能要优化，却没有当前流程截图、状态页、竞品参考或视觉基线。
+- 评审时只有一个 PM 视角，缺策略、风险、设计系统、数据可行性和研发交付视角。
+
+PMWorkspace 接住的就是这种混乱时刻：不是替你跳过思考，而是把思考压缩成一条能往前走的路径。
+
+## PMWorkspace 帮你推进成什么
+
+你给它原始材料，它帮你形成一组可继续流动的产品资产：
+
+- **产品简报：** 把目标用户、核心问题、当前损失、目标、反指标、约束和不可虚构项压缩成一份共识材料。
+- **方案方向：** 不只是换配色，而是在产品策略、信息架构、交互模型或信任模型上给出不同解法。
+- **移动端优先原型图：** 默认按 iPhone 17 竖屏 `402 x 874` 生成 image-2 原型图，一个方案、一个屏幕、单独一张图。
+- **线上证据记录：** 把线上流程截图、状态页、竞品参考和协作文档漂移证据纳入同一条产品链路。
+- **产品准备度判断：** 在出图或交付前统一检查产品简报、协作文档、线上参考、方案差异、不可虚构项和复审状态。
+- **多角色复审结论：** 从策略、信任 / 风险、设计系统、数据可行性等角度指出能不能通过、要不要重出、哪里需要拍板。
+- **交付稿：** 把通过复审的方向整理成精简 PRD、设计交付、实验验证或研发交付材料。
+
+## 两种工作方式
+
+### 快速成型
+
+适合新想法、拍脑袋方案、组内讨论、领导预览或创业验证。
+
+PMWorkspace 会用 2-3 个关键澄清补齐最大缺口，列出关键假设、反指标和不可虚构项。你确认“按这些假设继续”后，它会输出一套轻量包：
+
+- 产品简报。
+- 2-3 个方案方向。
+- 每个方向 1 张移动端 image-2 原型图。
+- 下一步建议：继续验证、进入复审，或升级为交付稿。
+
+这类产物会明确标注“基于假设，可讨论”，不会包装成已经验证过的最终结论。
+
+### 深度交付
+
+适合 PRD、设计评审、研发交付、生产流程优化、高风险业务或需要协作文档同步的项目。
+
+PMWorkspace 会先判断工作目标，再做关键澄清和拍板选择题。只有产品简报达到“已对齐”，才进入 image-2 原型或交付稿。这样做的目的不是拖慢速度，而是避免在错误问题上快速出图。
+
+深度交付更适合这些任务：
+
+- 把现有 PRD 或协作文档转成可出图的产品简报。
+- 基于生产截图优化线上页面。
+- 为设计评审准备多方案原型。
+- 为研发交付整理精简 PRD。
+- 在出图前确认线上参考、不可虚构项和复审状态。
+
+## 它如何工作
+
+PMWorkspace 的工作方式更像一支小型产品小队，而不是单个问答工具：
+
+1. **先判断真实问题。** 每一轮都会先说清楚“我对真实问题的判断”，避免直接把功能愿望当成解决方案。
+2. **再做关键澄清。** 它不会一次甩出长问卷，而是每次只问最影响方案结构的问题。
+3. **用拍板选择题减少反复。** 遇到会改变范围、承诺、实验口径或交付边界的地方，会给出推荐选项和取舍说明。
+4. **把产品简报同步到 AI 协作文档。** 产品简报阶段默认优先创建或追加到 AI 协作文档，后续出图和交付前会检查是否发生漂移。
+5. **用线上证据建立事实基础。** 线上流程截图、状态页、竞品参考和协作文档漂移证据会作为轻量产物进入同一条工作流。
+6. **出图或交付前做准备度检查。** 缺产品简报、缺线上参考、缺复审或方案差异不够时，会先指出阻断点。
+7. **用多角色复审补齐盲区。** 策略、风险、设计系统、数据可行性等视角各自产出短结论，再合并成最终判断。
+
+## 核心优势
+
+- **快，但不莽。** 快速成型可以 10 分钟起步，但必须带着假设、反指标和不可虚构项。
+- **能把散乱材料收束成共识。** 想法、PRD、截图、协作文档和用户洞察会被压缩成一份能继续流动的产品简报。
+- **出图前有证据。** 线上参考、视觉基线、状态页和竞品流程不再只是口头描述。
+- **评审不只靠一个 PM 视角。** 原型复审默认有策略、信任 / 风险、设计系统、数据可行性四个视角，高风险场景还能追加更多角色。
+- **产物会往下游流动。** 产品简报、原型清单、复审结论和交付稿会被登记为下游可读产物，减少重复解释。
+- **有记忆，但不越界。** 它可以沉淀 taste、偏好和历史决策，但不会用偏好覆盖本轮事实、风险或用户确认。
+- **移动端原型更克制。** 默认一个方案、一个屏幕、一张图，避免把多个方向糊成一张无法判断的拼图。
+- **隐私边界清楚。** token、cookie、客户资料、内部录音、私密截图和未脱敏协作文档内容不写入公开材料。
+
+## 第一次怎么用
+
+安装：
+
+```bash
+git clone https://github.com/stephenfan80/PMWorkspace.git
+cd PMWorkspace
+./setup --host codex
+```
+
+已经在本目录里时：
+
+```bash
+./setup --host codex
+```
+
+重启 Codex 后，从 `$pm-workspace` 开始：
+
+```text
+使用 $pm-workspace 显示欢迎引导，并帮我选择合适的产品工作流。
+```
+
+也可以直接说清楚你要哪种结果：
+
+```text
+使用 $pm-workspace 快速成型这个产品想法，输出产品简报、2-3 个方案方向和每个方向 1 张移动端原型图。
+
+产品想法：<一句话描述>
+已知背景：<用户 / 场景 / 约束 / 参考>
+要求：可以先基于明确标注的假设推进；出图前请先让我确认这些假设。
+```
+
+```text
+使用 $pm-workspace 帮我把这份 PRD / AI 协作文档 / 截图反馈整理成可出图的产品简报。
+
+目标人群：<谁在什么场景最需要>
+核心问题：<他们现在卡在哪里>
+目标：<希望提升的行为或指标>
+约束：<数据 / 业务 / 法务 / 设计系统 / 上线范围>
+输出：<只要产品简报 / 1 个屏幕 / 3 个方案 / 交付稿>
+```
+
+## 常见场景
+
+- **新想法验证：** 从一句 idea 生成轻量产品简报、方案方向和讨论用原型图。
+- **现有页面优化：** 先读取当前截图或线上参考，再判断哪些信息、状态和承诺不能乱改。
+- **协作文档转原型：** 先同步最新产品简报，再检查是否和对话中的方向发生漂移。
+- **多方案设计讨论：** 每个方案独立成图，并进入方案比较板，方便做取舍。
+- **原型复审：** 检查原型是否符合产品简报、线上参考、反指标和不可虚构项。
+- **交付 PRD：** 把已通过复审的方向压缩成精简 PRD，保留接口、数据、埋点、实验标准和待补充项。
+
+更多示例见 `examples/`。
+
+## 原型输出规则
+
+- 默认移动端优先：iPhone 17 竖屏 `402 x 874`。
+- 只有用户明确要求桌面端，或看板 / 内部工具确实需要大屏密度，才使用桌面端。
+- 深度交付中，产品简报没有“已对齐”前，不写图片提示词，不生成图片，不生成 HTML，不输出交付稿。
+- 快速成型中，出图前必须列出关键假设和不可虚构项，并获得用户确认“按这些假设继续”。
+- HTML 只在用户明确要求“HTML / 可交互网页 / 前端实现 / 本地网页原型”时允许；不能作为 image-2 不可用时的替代品。
+- 新页面如果承接线上流程、结果页、状态页或生产样式，必须先提供截图 / 录屏 / 相似页面，或明确确认“没有线上参考，按新页面概念稿推进”。
+- 用户提供截图或线上参考时，只更新视觉基线和参考状态，不自动产出完整 md 方案、HTML 或原型图。
+- 多方案必须在产品策略、信息架构、交互模型或信任模型上不同，不能只是换颜色。
+- 一个方案 + 一个屏幕 = 一张图。
+- `3 个方案 x 2 个屏幕` = 6 张独立图片。
+- 禁止把多个方案合成在一张比较图里，除非用户明确要展示板。
+
+## 高级能力与维护入口
+
+这一节给已经开始深用 PMWorkspace 的用户和维护者。第一次阅读时，可以先跳过。
+
+### 端到端工作台地图
+
+PMWorkspace 的端到端工作台地图由 `pmworkspace-shared/references/pm-workbench-map.md` 维护。README 只讲产品体验和入口，不维护第二套路由表。
+
+核心链路是：
 
 ```text
 $pm-workspace
@@ -42,138 +176,67 @@ $pm-workspace
 -> $pm-handoff
 ```
 
-每一环都必须说明：当前模式 / 状态、当前门槛或最早门槛、下一技能、run_id、证据状态、当前 Q / D、产物清单和建议下一步。这样用户不会在“已经出图了吗”“能交付了吗”“缺什么证据”之间来回猜。
+### 技能套件
 
-## 技能套件
-
-| 技能 | 什么时候用 |
+| 技能 | 用户能获得什么 |
 |---|---|
-| `$pm-workspace` | 主入口，负责路由、首次引导、更新检查和状态记录。 |
-| `$pm-autoplan` | 自动串联产品追问、策略审查、产品简报、Zoon 同步和原型准备度检查。 |
-| `$pm-jobs` | 产品价值澄清器：强痛用户是谁、何时触发、现在怎么替代、损失是什么、先赢哪一小块。 |
-| `$pm-strategy-review` | 策略取舍裁判：用扩大、保持、收缩、转向四种范围模式判断方向，并把最大策略矛盾转成 PM 拍板。 |
-| `$pm-brief` | 产品核心信息契约：把已对齐事实、策略取舍和参考门槛压缩成可出图、复审和交付的核心判断。 |
+| `$pm-workspace` | 选择工作方式，进入欢迎引导，记录本轮状态。 |
+| `$pm-autoplan` | 自动串联问题澄清、策略审查、产品简报、协作文档同步和准备度检查。 |
+| `$pm-jobs` | 把功能愿望重新定义成用户问题、当前损失和最小可赢切口。 |
+| `$pm-strategy-review` | 用扩大、保持、收缩、转向四种范围模式判断策略取舍。 |
+| `$pm-brief` | 生成产品简报，让原型、复审和交付有同一份事实来源。 |
 | `$pm-prototype-shotgun` | 基于已对齐的产品简报生成多方案 image-2 原型图。 |
-| `$pm-prototype-review` | 复审已生成原型图，判断是否需要重出并沉淀偏好。 |
-| `$pm-handoff` | 输出精简 PRD / 交付稿，并把接口、数据、埋点、实验标准沉淀为本地交付资产。 |
+| `$pm-prototype-review` | 复审原型是否符合产品简报、线上参考、反指标和不可虚构项。 |
+| `$pm-handoff` | 输出精简 PRD / 交付稿，并沉淀接口、数据、埋点和实验事实。 |
 
-## 快速开始
+### 产品运行层
 
-### 10 分钟轻量包
-
-```text
-使用 $pm-workspace 快速成型这个产品想法，输出一套轻量包：产品简报、2-3 个方案方向、每个方向 1 张移动端原型图。
-产品想法：<一句话描述>
-已知背景：<可选，用户 / 场景 / 约束 / 参考>
-要求：可以先基于明确标注的假设推进；出图前请先让我确认这些假设。
-```
-
-轻量包默认包含：
-
-- 标注假设的产品简报。
-- 2-3 个在产品策略、信息架构、交互模型或信任模型上不同的方案方向。
-- 每个方案按“一个方案 + 一个屏幕 = 一张图”生成独立 image-2 原型图。
-- 下一步升级建议：继续补齐 PRD、进入原型复审，或整理成研发交付稿。
-
-### 深度交付
-
-```text
-使用 $pm-workspace 帮我梳理这个产品想法，并在确认后生成原型方案。
-产品想法：<一句话描述>
-目标人群：<谁在什么场景最需要>
-核心问题：<他们现在卡在哪里>
-目标：<希望提升的行为或指标>
-约束：<数据 / 业务 / 法务 / 设计系统 / 上线范围>
-输出：<只要产品简报 / 1 个屏幕 / 2 个屏幕 / 3 个方案 / 交付稿>
-要求：每个方案和屏幕单独生成一张图，不要合成在同一张图里。
-```
-
-## 默认工作流
-
-1. `$pm-workspace` 先判断入口：快速成型模式，还是深度交付模式。
-2. 快速成型模式只问 2-3 个最影响方案结构的问题，列出关键假设，并请用户确认“按这些假设继续”。
-3. 用户确认后，输出轻量包：产品简报、方案方向、独立 image-2 原型图和下一步升级建议。
-4. 深度交付模式先确认工作目标模式：验证价值、优化线上指标、业务评审、设计评审或研发交付。
-5. `$pm-jobs` 先判断问题定义模式：创业验证、内部业务优化或设计讨论；每轮先给一句“我对真实问题的判断”，把功能愿望重新定义成用户问题、当前损失或决策任务。
-6. `$pm-jobs` 再用 `Q` 一次一个问题澄清强痛人群、触发时刻、现状替代、当前损失和最小可赢切口；问题根据用户输入和当前价值缺口动态生成，通常 2-3 个，必要时最多 5 个。
-7. 输出 2-4 条关键前提让 PM 确认；不同意就回到对应追问。
-8. `$pm-strategy-review` 用范围模式审查方向：扩大、保持、收缩或转向；范围变化、承诺变化和实验口径变化必须交给 PM 拍板。
-9. 关键 PM 决策用 `D` 选择题拍板，一次只展开一个完整问题；多个待拍板只提示后续标题队列。
-10. 新页面如果承接线上流程或生产样式，先完成线上参考检查。
-11. `$pm-brief` 按主场景做轻量互联网最佳实践检索，但不增加 Q 数量，只保留可借鉴原则、不可照搬和对原型影响。
-12. `$pm-brief` 先输出产品核心信息，再固化门槛和支持信息；`pmw-log brief` 默认先创建或追加 Zoon 在线文档，再保存同一份本地审计副本。
-13. 用户在对话或 Zoon 中调整 brief 后，重新保存并同步 Zoon；原型前运行 Zoon 漂移检查。
-14. 产品简报达到“已对齐”后，`$pm-prototype-shotgun` 先读取 Zoon 最新内容，再生成 image-2 原型图。
-15. `$pm-prototype-review` 复审原型是否符合 brief、线上参考、反指标和不可虚构项。
-16. `$pm-handoff` 把选定方向转成 PRD、设计、实验验证或研发交付文档。
-
-## 原型输出规则
-
-- 默认移动端优先：iPhone 17 竖屏 `402 x 874`。
-- 只有用户明确要求桌面端，或看板 / 内部工具确实需要大屏密度，才使用桌面端。
-- 深度交付模式中，产品简报没有“已对齐”前，不写图片提示词，不生成图片，不生成 HTML，不输出交付稿。
-- 快速成型模式中，出图前必须列出关键假设和不可虚构项，并获得用户确认“按这些假设继续”；轻量包要标注“基于假设，可讨论，不等于最终 PRD”。
-- HTML 只在用户明确要求“HTML / 可交互网页 / 前端实现 / 本地网页原型”时允许；不能作为 image-2 不可用时的替代品。
-- 新页面也要先判断是否需要线上参考；如果它承接线上流程、结果页、状态页或生产样式，必须先提供截图/录屏/相似页面，或明确确认“没有线上参考，按新页面概念稿推进”。
-- 用户提供截图或线上参考时，只更新视觉基线和参考状态，不自动产出完整 md 方案、HTML 或原型图。
-- 多方案必须在产品策略、信息架构、交互模型或信任模型上不同，不能只是换颜色。
-- 一个方案 + 一个屏幕 = 一张图。
-- 每张图必须绑定方案名、屏幕任务、主目标、反指标、不可虚构项和产品简报版本。
-- `3 个方案 x 2 个屏幕` = 6 张独立图片。
-- 禁止把多个方案合成在一张比较图里，除非用户明确要展示板。
-
-## 使用环境
-
-最佳体验是 **Codex**。
-
-PMWorkspace 的完整体验包含移动端优先的 image-2 原型图输出，依赖宿主环境提供图像生成能力。Codex 环境可以同时完成产品追问、产品简报、方案方向、image-2 原型图和交付稿，因此推荐使用：
-
-```bash
-./setup --host codex
-```
-
-其他支持 Codex skill 的环境也可以使用 PMWorkspace 的产品追问、产品简报、PRD 和交付稿能力；如果宿主没有 image-2 / 图像生成能力，原型图输出会受限，不能用 HTML 或 Markdown 线框替代 image-2 原型图，除非用户明确要求 HTML / 可交互网页 / 前端实现。
-
-## 产品运行层
-
-PMWorkspace v0.2 把技能套件升级成本地产品运行系统：
-
-- **Runtime Kernel：** `pmw-run` 为每次工作生成 `run_id`，记录模式、门槛、决策、证据、产物、复审和下一步。
-- **Workbench Map：** `pm-workbench-map.md` 统一 README、路由、eval 分类和技能间状态字段。
-- **Evidence Dashboard：** `pmw-dashboard status` 输出中文证据状态页，汇总产品简报版本、Zoon 状态、线上参考、假设、不可虚构项、原型清单、复审结论和问题偏好。
-- **Browser Evidence Lite：** 线上流程截图、状态页、竞品参考和 Zoon 漂移证据统一登记为 `browser_evidence` 产物，复用 `pmw-artifact`，不新增浏览器证据子系统。
-- **Product Readiness Dashboard：** `pmw-dashboard readiness --target prototype|handoff` 在出图 / 交付前统一给出准备度 verdict，覆盖产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态。
+- **Product Readiness Dashboard：** `pmw-dashboard readiness --target prototype|handoff` 在出图 / 交付前统一给出准备度判断，覆盖产品简报、AI 协作文档、线上参考、方案差异、不可虚构项和复审状态。
 - **Product Artifact Flow：** `pmw-artifact` 记录下游可读产物，让产品简报、原型清单、复审结论和交付稿能流向下一个技能，而不是靠对话记忆重新推断。
-- **Prototype Shotgun Board：** `pmw-prototype-board` 登记每个独立 image-2 图片单元，并用表格比较方案；不把多张图合成一张图。
-- **PM Review Army / Product Review Squad：** 原型复审先运行策略、信任 / 风险、设计系统、数据可行性四个可插拔专家；每个专家独立输出短结论，再由 `$pm-prototype-review` 合并，必要时追加 CEO、Eng、Design、DX、安全、QA、发布工程师短结论。
-- **Question Tuning：** `pmw-question-tuning` 记录用户对 Q/D 的偏好，例如永远问、高风险才问、默认采用推荐或除非阻塞否则少问。
-- **PM Eval：** `pmw-eval` 用无依赖 fixture 检查核心门槛和输出契约，防止 skill 规则退化。
+- **Browser Evidence Lite：** 线上流程截图、状态页、竞品参考和协作文档漂移证据统一登记为 `browser_evidence` 产物，复用 `pmw-artifact`，不新增浏览器证据子系统。
+- **Evidence Dashboard：** `pmw-dashboard status` 输出中文证据状态页，汇总产品简报版本、协作文档状态、线上参考、假设、不可虚构项、原型清单、复审结论和问题偏好。
+- **Prototype Shotgun Board：** `pmw-prototype-board` 登记每个独立 image-2 图片单元，并用表格比较方案。
+- **PM Review Army / Product Review Squad：** 原型复审先运行策略、信任 / 风险、设计系统、数据可行性四个可插拔专家独立检查；高风险或深度交付时，可追加 CEO、Eng、Design、DX、安全、QA、发布工程师短结论。
 - **Skill Doc Generator：** `pmw-gen-skill-docs` 从 manifest 生成并检查 SKILL.md 共享契约区块，统一 preamble、共享门槛、必读协议和输出字段。
-- **自动决策原则：** 统一事实优先级和停止门槛，明确低风险默认项可以自动采用，用户承诺、数据真实性、范围、实验口径、线索 / 交易 / 隐私边界必须 PM 拍板。
 
-## 安装
-
-```bash
-git clone https://github.com/stephenfan80/PMWorkspace.git
-cd PMWorkspace
-./setup --host codex
-```
-
-如果已经在本仓库目录里：
+### 常用命令
 
 ```bash
-./setup --host codex
+bin/pmw-run start --skill pm-autoplan --mode quick --goal "10 分钟轻量包"
+bin/pmw-run event --type gate --status "待确认" --title "假设确认" --summary "等待 PM 确认"
+bin/pmw-run finish --status "基于假设，可讨论" --next "进入 image-2 原型"
+bin/pmw-dashboard status
+bin/pmw-dashboard readiness --target prototype
+bin/pmw-dashboard readiness --target handoff
+bin/pmw-artifact add --kind browser_evidence --title "线上参考：结果页" --status "已采集" --source-skill pm-brief --path "<截图路径>" --url "<URL>" --summary "页面任务、视觉基线、交互模式、必须保留、可以挑战"
+bin/pmw-artifact flow
+bin/pmw-artifact latest --kind product_brief
+bin/pmw-review-specialist list
+bin/pmw-review-specialist summary
+bin/pmw-prototype-board add --scheme "方案 A" --screen "首页" --brief-version "v1"
+bin/pmw-prototype-board list
+bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --reason "低风险轻量包默认采用推荐"
+bin/pmw-question-tuning summary
+bin/pmw-eval list
+bin/pmw-eval run
+bin/pmw-gen-skill-docs write
+bin/pmw-gen-skill-docs check
 ```
 
-然后使用：
+协作文档命令：
 
-```text
-使用 $pm-workspace 显示欢迎引导，并帮我选择合适的产品工作流。
+```bash
+bin/pmw-zoon protocol --host "https://zoon.up.railway.app"
+cat brief.md | bin/pmw-zoon create --title "产品设计简报：通用券站外召回方案"
+cat brief.md | bin/pmw-zoon append --url "<协作文档 URL>"
+cat brief.md | bin/pmw-zoon sync --title "产品设计简报：通用券站外召回方案"
+bin/pmw-zoon drift --url "<协作文档 URL>"
+bin/pmw-zoon read --url "<协作文档 URL>"
 ```
 
-安装后不要让用户自己猜命令。重启 Codex 后先用 `$pm-workspace`，它会像第一次打开应用一样说明 PMWorkspace 能做什么，并给出新想法、PRD/Zoon、原型方向、截图优化、交付稿这几条入口。
+`protocol` 会动态读取协作服务的 `/skill` 和 `/agent-docs`，并缓存协议摘要，默认 TTL 为 300 秒；服务升级时优先跟随远端协议说明。
 
-## 本地状态资产
+### 本地状态资产
 
 PMWorkspace 默认把资产保存在本地：
 
@@ -202,112 +265,13 @@ PMWorkspace 默认把资产保存在本地：
   projects/<slug>/learnings.jsonl
 ```
 
-会保存：
+会保存项目名、产品简报、用户确认过的决策、协作文档链接、产物流动记录、复审专家短结论、原型清单、交付稿、脱敏交付事实、偏好反馈和本地使用日志。
 
-- 技能使用记录。
-- 中文项目名和 Zoon 在线简报链接。
-- 用户确认过的产品/设计决策。
-- 选择题拍板记录。
-- 每次运行的本地审计轨迹。
-- Product Artifact Flow 产物流动元数据。
-- 可插拔复审专家短结论。
-- 产品简报 Markdown。
-- 原型批次清单。
-- PRD / 设计 / 实验 / 研发交付稿。
-- 接口、数据来源、埋点和实验标准等脱敏交付事实。
-- 方案比较板。
-- Q/D 问题偏好。
-- 用户批准或拒绝的设计偏好。
-- 脱敏后的产品学习和复用判断。
-- 单个用户独有的全局偏好。
-- 脱敏后的产品认知。
-- PMWorkspace 进化候选和本地 GitHub 回流待审稿。
+不会保存 token、owner secret、API key、cookie、原始客户资料、内部录音、敏感截图、未脱敏协作文档内容或 API 原始响应。
 
-不会保存：
+### 更新
 
-- token、owner secret、API key、cookie。
-- 原始客户资料、内部录音、敏感截图。
-- 未脱敏 Zoon 内容。
-- Zoon ownerSecret 或 API 原始响应。
-- 用户没有明确要求保存的私密 PRD 原文。
-- 未经用户确认，不会把 GitHub 回流待审稿提交到远端。
-
-查看配置：
-
-```bash
-bin/pmw-config list
-```
-
-项目记录：
-
-```bash
-bin/pmw-project get-name
-bin/pmw-project set-name "通用券站外召回方案"
-bin/pmw-project show
-```
-
-运行层工具：
-
-```bash
-bin/pmw-run start --skill pm-autoplan --mode quick --goal "10 分钟轻量包"
-bin/pmw-run event --type gate --status "待确认" --title "假设确认" --summary "等待 PM 确认"
-bin/pmw-run finish --status "基于假设，可讨论" --next "进入 image-2 原型"
-bin/pmw-dashboard status
-bin/pmw-dashboard readiness --target prototype
-bin/pmw-dashboard readiness --target handoff
-bin/pmw-artifact add --kind browser_evidence --title "线上参考：结果页" --status "已采集" --source-skill pm-brief --path "<截图路径>" --url "<URL>" --summary "页面任务、视觉基线、交互模式、必须保留、可以挑战"
-bin/pmw-artifact flow
-bin/pmw-artifact latest --kind product_brief
-bin/pmw-review-specialist list
-bin/pmw-review-specialist summary
-bin/pmw-prototype-board add --scheme "方案 A" --screen "首页" --brief-version "v1"
-bin/pmw-prototype-board list
-bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --reason "低风险轻量包默认采用推荐"
-bin/pmw-question-tuning summary
-bin/pmw-eval list
-bin/pmw-eval run
-bin/pmw-gen-skill-docs write
-bin/pmw-gen-skill-docs check
-```
-
-Eval fixture 保存在仓库的 `evals/fixtures/`，安装时会复制到 shared skill bundle，供维护检查使用。
-Skill 文档契约由 `pmworkspace-shared/skill-docs/skill-docs.manifest.json` 生成；更新共享门槛、输出字段或前置检查时，先改 manifest，再运行 `bin/pmw-gen-skill-docs write` 和 `bin/pmw-gen-skill-docs check`。
-
-Zoon 在线简报：
-
-```bash
-bin/pmw-zoon protocol --host "https://zoon.up.railway.app"
-cat brief.md | bin/pmw-zoon create --title "产品设计简报：通用券站外召回方案"
-cat brief.md | bin/pmw-zoon append --url "<Zoon URL>"
-cat brief.md | bin/pmw-zoon sync --title "产品设计简报：通用券站外召回方案"
-bin/pmw-zoon drift --url "<Zoon URL>"
-bin/pmw-zoon read --url "<Zoon URL>"
-```
-
-`protocol` 会动态读取 Zoon 的 `/skill` 和 `/agent-docs`，并缓存协议摘要，默认 TTL 为 300 秒；Zoon 升级时优先跟随远端协议说明。
-
-## 选择题拍板
-
-PMWorkspace 不应只输出“还需要你拍板 5 个问题”，也不应一次展开多个完整选择题。凡是会改变产品方向、原型范围、实验口径、用户承诺或交付稿的关键点，都要变成 `D` 选择题，并且每轮只展开一个：
-
-```text
-D1 - “全品牌可用”的对外口径
-为什么重要：口径过大容易形成无条件承诺，用户发现部分品牌不可领时会损害信任。
-推荐选择：A，因为它既能表达覆盖面，又保留真实业务边界。
-
-选项 A：参与品牌可领取
-选项 B：全品牌可参与查询
-选项 C：全品牌都有机会领
-
-取舍：增长吸引力 vs 承诺真实性。
-默认假设：如果你不改，我会按 A 继续。
-
-后续待拍板：D2 至高金额展示方式、D3 多车提交后的线索生成。
-```
-
-## 更新提醒
-
-每个 skill 使用前都会检查 GitHub：同时比较 `VERSION` 和 `main` 分支最新提交。因此即使没有正式升版本号，只要 GitHub 上的技能规则或文档有新提交，也会提示：
+每个 skill 使用前都会检查 GitHub：同时比较 `VERSION` 和 `main` 分支最新提交。因此即使没有正式升版本号，只要技能规则或文档有新提交，也会提示：
 
 ```text
 UPGRADE_AVAILABLE <local> <remote>
@@ -331,7 +295,7 @@ bin/pmw-snooze-update <remote-version-or-commit>
 bin/pmw-config set update_check false
 ```
 
-## 迁移旧名称
+### 迁移旧名称
 
 如果之前安装过旧的 `product-prototype-designer`：
 
@@ -344,7 +308,7 @@ rm -rf ~/.codex/skills/product-prototype-designer
 
 ## 隐私
 
-默认遥测是本地优先，只写入 `~/.pmworkspace/analytics/usage.jsonl`。远程匿名汇总必须由用户明确开启。PMWorkspace 不应上报项目名、文件路径、提示词内容、截图、产品简报正文或客户数据。
+默认遥测是本地优先，只写入 `~/.pmworkspace/analytics/usage.jsonl`。远程匿名汇总必须由用户明确开启。PMWorkspace 不上报项目名、文件路径、提示词内容、截图、产品简报正文或客户数据。
 
 ## 许可证
 

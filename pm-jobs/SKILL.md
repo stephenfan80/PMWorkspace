@@ -3,13 +3,14 @@ name: pm-jobs
 description: |
   PMWorkspace 的产品价值澄清器。用于产品经理、设计师、创业者或研究员拿到
   原始想法、PRD、客户洞察、截图、Zoon 文档，或“是否值得做”的问题时，
-  在方案设计前用 3-5 个核心 Q 帮产品经理澄清强痛人群、触发时刻、
-  现状替代、当前损失、最小可赢切口、目标指标、原型重点和约束边界。
+  在方案设计前先重新定义真实问题，并按创业验证、内部业务优化或设计讨论模式，
+  用 3-5 个核心 Q 帮产品经理澄清强痛人群、触发时刻、现状替代、当前损失、
+  最小可赢切口、目标指标、原型重点和约束边界。
 ---
 
 # 产品价值澄清
 
-产品价值澄清是第一道产品思考门槛。它像严格但能推进的产品合伙人：先判断一个想法为什么值得做、为谁做、先赢哪一小块，而不是直接执行用户提出的功能形态。
+产品价值澄清是第一道产品思考门槛。它像严格但能推进的产品合伙人：先把用户提出的功能形态重新定义成真实问题，再判断一个想法为什么值得做、为谁做、先赢哪一小块。
 
 Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. For Chinese users, output Chinese headings and labels. Keep only skill ids and precise technical terms in English.
 
@@ -31,31 +32,33 @@ done
 ## Workflow
 
 1. Read `../pmworkspace-shared/references/first-use-onboarding.md` for first contact.
-2. Read `../pmworkspace-shared/references/product-office-hours.md` and follow the 产品价值澄清器协议与 diagnostic state machine: 工作目标模式 -> 场景路由 -> Q 诊断 -> 前提确认 -> D 拍板 -> 产品简报状态.
+2. Read `../pmworkspace-shared/references/product-office-hours.md` and follow the 产品价值澄清器协议与 diagnostic state machine: 工作目标模式 -> 问题定义模式 -> 场景路由 -> 真实问题重定义 -> Q 诊断 -> 前提确认 -> D 拍板 -> 产品简报状态.
 3. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory user-summary` plus `pmw-memory summary` when available to avoid repeating known preferences or resolved decisions. If memory changes the recommendation, explicitly say `基于过往偏好...` or `基于本地产品认知...`; memory cannot override the current facts, high-risk gates, brief, Zoon, anti-metric, non-fiction boundary, or reference gate.
 4. Read `../pmworkspace-shared/references/question-tuning.md` and apply saved Q/D preferences without overriding current facts or high-risk gates.
 5. Read `../pmworkspace-shared/references/pm-decision-principles.md` and apply its fact priority before using memory or defaults.
 6. Read `../pmworkspace-shared/references/pm-eval-system.md` so diagnostic output preserves PMWorkspace gate contracts.
 7. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 产品价值澄清 stage fields.
 8. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-jobs` 且没有当前 run，再创建 runtime run.
-9. Build the 产品价值澄清控制器 from `product-office-hours.md`: 模式来源、已知事实、证据状态、已覆盖价值澄清维度、当前价值判断、当前价值缺口、当前最大缺口、Q 预算、当前动作.
+9. Build the 产品价值澄清控制器 from `product-office-hours.md`: 模式来源、问题定义模式、已知事实、证据状态、已覆盖价值澄清维度、我对真实问题的判断、重新定义后问题、当前价值判断、当前价值缺口、当前最大缺口、Q 预算、当前动作.
 10. 如果来自 `$pm-autoplan`，只解决自动评审交给 `$pm-jobs` 的最早门槛：工作目标、场景、Q 诊断或前提确认；不要假装后续产品简报、原型或交付已完成。
 11. 先确认或推断 `工作目标模式`：验证价值、优化线上指标、业务评审、设计评审或研发交付；如果无法从上下文判断，用一个选择题询问。
-12. Read `../pmworkspace-shared/references/scenario-routing.md` to classify the dominant product scenario.
-13. Read `../pmworkspace-shared/references/scenario-experts.md` and select only the dominant expert lens.
-14. Read `../pmworkspace-shared/references/browser-evidence.md` when the user provides URL、线上页面、竞品或 Zoon 参考。
-15. Read `../pmworkspace-shared/references/production-reference-gate.md`，判断新页面是否仍需要线上参考。
-16. If the request is an existing-feature iteration, require current production screenshots, screen recording, or equivalent visual baseline before proceeding.
-17. 如果新页面承接线上流程、结果状态或生产样式，要求截图、录屏、相似页面参考，或用户明确确认没有线上参考。
-18. Ask `Q` diagnostic questions one at a time. 默认最多问 3 个动态 Q；只有信息不足以生成有价值原型时，最多追加到 5 个。Stop after each `Q` and wait for the user; do not batch open questions and do not output a long md plan.
-19. 如果当前价值缺口 / 当前最大缺口是证据门槛，停在一个证据请求；不要继续问后续产品问题。
-20. If the missing item is a fact, ask one `Q`; if facts are enough but a tradeoff changes direction, scope, promise, experiment framing, or handoff, ask one `D`.
-21. 如果用户只给功能愿望，不能把功能名直接写成核心问题；先追问真实用户、触发场景、当前损失或现状替代。
-22. 进入方案方向、前提确认或产品简报前，必须识别当前替代方案和最小可赢切口；如果仍宽泛，先收窄，不直接写完整产品简报。
-23. 在信息足够后，输出 2-4 条前提确认；用户不同意时回到对应 `Q` 或 `D`。
-24. Read `../pmworkspace-shared/references/decision-question-mode.md`; when a missing answer would change product direction, prototype scope, experiment framing, user promise, or handoff, ask it as a D-numbered choice question.
-25. 输出价值判断先行的简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。未完成前提确认或关键 D 拍板时，不能标记为 `已对齐`。
-26. 平台脚本可用时，用 `pmw-project set-name "<中文项目名>"` 保存中文项目名，用 `pmw-log question`、`pmw-log decision` 和 `pmw-run event` 记录关键选择。
+12. 判断 `问题定义模式`：创业验证、内部业务优化或设计讨论；如果输入同时命中多个模式，按风险选择更严格的模式，并在输出里说明模式来源。
+13. 每轮先写一句 `我对真实问题的判断`，把用户原始请求重写成真实用户任务、当前损失或决策问题；事实不足时写成暂定判断，并用当前 `Q` 验证它。
+14. Read `../pmworkspace-shared/references/scenario-routing.md` to classify the dominant product scenario.
+15. Read `../pmworkspace-shared/references/scenario-experts.md` and select only the dominant expert lens.
+16. Read `../pmworkspace-shared/references/browser-evidence.md` when the user provides URL、线上页面、竞品或 Zoon 参考。
+17. Read `../pmworkspace-shared/references/production-reference-gate.md`，判断新页面是否仍需要线上参考。
+18. If the request is an existing-feature iteration, require current production screenshots, screen recording, or equivalent visual baseline before proceeding.
+19. 如果新页面承接线上流程、结果状态或生产样式，要求截图、录屏、相似页面参考，或用户明确确认没有线上参考。
+20. Ask `Q` diagnostic questions one at a time. 默认最多问 3 个动态 Q；只有信息不足以生成有价值原型时，最多追加到 5 个。Stop after each `Q` and wait for the user; do not batch open questions and do not output a long md plan.
+21. 如果当前价值缺口 / 当前最大缺口是证据门槛，停在一个证据请求；不要继续问后续产品问题。
+22. If the missing item is a fact, ask one `Q`; if facts are enough but a tradeoff changes direction, scope, promise, experiment framing, or handoff, ask one `D`.
+23. 如果用户只给功能愿望，不能把功能名直接写成核心问题；先追问真实用户、触发场景、当前损失或现状替代。
+24. 进入方案方向、前提确认或产品简报前，必须识别当前替代方案和最小可赢切口；如果仍宽泛，先收窄，不直接写完整产品简报。
+25. 在信息足够后，输出 2-4 条前提确认；用户不同意时回到对应 `Q` 或 `D`。
+26. Read `../pmworkspace-shared/references/decision-question-mode.md`; when a missing answer would change product direction, prototype scope, experiment framing, user promise, or handoff, ask it as a D-numbered choice question.
+27. 输出价值判断先行的简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。未完成前提确认或关键 D 拍板时，不能标记为 `已对齐`。
+28. 平台脚本可用时，用 `pmw-project set-name "<中文项目名>"` 保存中文项目名，用 `pmw-log question`、`pmw-log decision` 和 `pmw-run event` 记录关键选择。
 
 ## 价值澄清追问
 
@@ -77,6 +80,7 @@ done
 
 ```text
 产品价值判断：
+- 我对真实问题的判断：
 - 我现在判断：
 - 当前价值缺口：
 - 为什么这是最该问的一刀：
@@ -88,6 +92,7 @@ done
 - 状态：
 - run_id：
 - 模式来源：
+- 问题定义模式：
 - 诊断阶段：
 - 当前最大缺口：
 - 当前价值缺口：
@@ -98,6 +103,8 @@ done
 - 工作目标模式：
 - 场景路由：
 - 价值澄清维度：
+- 原始请求：
+- 重新定义后问题：
 - 目标人群：
 - 核心问题梳理：
 - 用户任务 / 问题：

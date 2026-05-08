@@ -18,7 +18,9 @@ Deep delivery follows a product runtime workbench model:
 ```text
 Update check + state logging
 -> Work goal mode
+-> Problem-definition mode: startup validation, internal business optimization, or design discussion
 -> Scenario routing
+-> Real problem reframe, stated as one sentence before each Q/D
 -> Dynamic Q diagnostics, one question at a time, usually 2-3 and at most 5
 -> Premise confirmation
 -> D decision questions for PM tradeoffs, one at a time
@@ -31,7 +33,7 @@ Update check + state logging
 -> PRD/design/experiment handoff
 ```
 
-The core rule is simple: define the product problem, goals, counter-metrics, constraints, and premises before generating prototype images.
+The core rule is simple: reframe the user's feature request into the real product problem, then define goals, counter-metrics, constraints, and premises before generating prototype images.
 
 ## End-to-End Workbench Map
 

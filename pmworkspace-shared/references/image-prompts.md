@@ -15,7 +15,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 `$pm-prototype-shotgun` 写图片提示词或调用 image-2 前，先建立原型方案控制器。控制器至少记录：
 
 - `产品简报来源`：已对齐产品简报版本、Zoon URL / 快照状态、最新漂移检查结论。
-- `Product Readiness Dashboard`：用 `pmw-dashboard readiness --target prototype` 统一展示产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态；verdict 不是 `可出图` 时停止。
+- `Product Readiness Dashboard`：用 `pmw-dashboard readiness --target prototype` 统一检查产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态；verdict 不是 `可出图` 时停止。默认只展示短 verdict 和第一阻断原因，完整表格只在审计 / 调试时展开。
 - `图片生成前门槛`：产品简报已对齐、Zoon 无实质漂移、线上参考门槛通过、设计系统已载入、image-2 可用。
 - `方案差异质量`：每个方案差异来自页面结构、信息架构、交互路径、信任表达或关键任务；如果只是配色、圆角、插画、卡片皮肤不同，停止并重拟方向。
 - `方案方向确认`：用户已确认方向，或明确批准使用默认方向；未确认时只输出方向和取舍，不写图片提示词。
@@ -52,10 +52,10 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - 输出计划已经把每个方案/屏幕映射为一张独立图片，不把多个方案合成一张比较图。
 - 每张图片已经绑定方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统和 image-2 状态。
 - 每个输出单元已经登记到 Prototype Shotgun Board，或已说明脚本不可用的原因。
-- 画布决策遵循移动端优先：iPhone 17 竖屏 `402 x 874`；除非用户明确要求桌面端，或看板/内部工具确实需要大屏密度。
+- 画布决策遵循移动端优先：标准首屏使用 iPhone 17 `W402 x H874`；结果页、报告页、详情页等长内容屏幕可以使用移动长板 `W402 x H自适应（最低 H874）`；除非用户明确要求桌面端，或看板/内部工具确实需要大屏密度。
 - 已通过 `design-system-workflow.md` 载入 AutoDesign 生产基线。
 - 对抗审查中的实质改动已写回产品简报。
-- 已展示 Product Readiness Dashboard，且出图前 required 行的 verdict 是 `可出图`。
+- 已运行 Product Readiness Dashboard，且出图前 required 行的 verdict 是 `可出图`。
 
 ## 媒介锁
 
@@ -88,7 +88,7 @@ For every image generation request, declare the output unit before prompting:
 图片输出单元：
 - 方案：<A/B/C 或方案名>
 - 屏幕任务：<屏幕名 + 这个屏幕要帮用户完成什么>
-- 画布：<设备和尺寸>
+- 画布：<标准首屏：iPhone 17 W402 x H874 / 移动长板：iPhone 17 W402 x H自适应（最低 H874）>
 - 主目标：<这个屏幕服务的指标或行为>
 - 反指标：<这个屏幕不能伤害的信任、质量或体验指标>
 - 不可虚构项：<不能画进屏幕的未支持数据、能力、承诺或动作>
@@ -101,7 +101,9 @@ For every image generation request, declare the output unit before prompting:
 Rules:
 
 - 一个输出单元等于一张图片；一次 image-2 调用只服务当前一个输出单元。
-- 默认输出单元画布是 iPhone 17 竖屏 `402 x 874`。
+- 默认短内容输出单元画布是 `标准首屏：iPhone 17 W402 x H874`。
+- 结果页、报告页、详情页等长内容输出单元允许写 `移动长板：iPhone 17 W402 x H自适应（最低 H874）`；宽度必须固定为 `402`，高度可以超过 `874` 且不得低于 `874`。
+- 移动长板必须是一张连续移动端界面；不要为了塞进 `H874` 缩小字体、压缩间距、裁切内容、遮挡底部操作区，或拆成多图 / 拼图 / 多屏故事板。
 - 桌面端输出单元必须说明为什么移动端不合适。
 - 除非用户明确要展示板，否则不要创建拼贴图、三联图、并排比较图、一图多屏、一图多方案或多屏故事板。
 - 如果用户要 `3 个方向`，确认方向后生成三张独立图片。
@@ -114,7 +116,7 @@ Rules:
 ```text
 用途：UI 原型
 资产类型：移动端优先的应用原型屏幕
-主要请求：为 <产品/功能> 生成 <屏幕名>。尺寸严格为 <设备宽度 x 高度>。字体、间距、颜色和组件密度匹配提供的参考截图。
+主要请求：为 <产品/功能> 生成 <屏幕名>。宽度严格固定为 <设备宽度>；短内容使用固定高度 <设备高度>，长结果页 / 报告页 / 详情页使用内容自适应高度且最低不低于 <设备高度>。字体、间距、颜色和组件密度匹配提供的参考截图。
 单图约束：只生成一张独立产品界面；禁止拼图、三联图、并排比较、一图多屏、一图多方案和故事板。
 
 上下文：
@@ -157,7 +159,7 @@ Rules:
 - 信任说明：<隐私、跟进、不确定性、资格判断>
 
 视觉要求：
-- 平台/设备：<默认 iPhone 17 W402 x H874；只有明确要求或确有必要时用桌面端>
+- 平台/设备：<默认标准首屏 iPhone 17 W402 x H874；长内容使用移动长板 iPhone 17 W402 x H自适应（最低 H874）；只有明确要求或确有必要时用桌面端>
 - 字体：<品牌字体或参考风格>
 - 色彩：<品牌/参考色>
 - 布局密度：<紧凑 / 标准 / 宽松>
@@ -173,7 +175,7 @@ Use this block by default as the production-quality visual baseline. If the prod
 ```text
 AutoDesign production constraints:
 - Make it look like a real Autohome mobile app screen, not a marketing poster or abstract concept.
-- Canvas: iPhone 17 portrait W402 x H874 unless the user specifies otherwise; preserve AutoDesign's 375px mobile canvas logic.
+- Canvas: iPhone 17 mobile width W402. Use H874 for standard first-screen prototypes; for long result/report/detail pages, use adaptive height with minimum H874 while keeping W402 fixed. Preserve AutoDesign's 375px mobile canvas logic.
 - Colors: primary blue #0088FF, blue gradient #0099FF -> #0088FF, commercial orange #FF6600 only for price/deal/subsidy emphasis, cyan #25C9FF only for IM-like emphasis, primary text #111E36, secondary text #464E64, weak text #828CA0, divider #E6E9F0, page background #F8F9FC, white cards.
 - Typography: system Chinese font; prominent numbers can use HarmonyOS Sans SC; use production-like sizes from 12/14/16/18/20/24/28/32px with clear hierarchy.
 - Layout: 8-point grid for structure and 4-point grid for details; use spacing 4/8/12/16/24/32px; align cards, fields, and CTAs to consistent margins.

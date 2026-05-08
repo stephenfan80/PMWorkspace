@@ -10,7 +10,7 @@ PMWorkspace
 
 把一句 idea、PRD、Zoon、截图或客户洞察，推进成可复用的产品简报、方案方向、移动端 image-2 原型图和交付稿。
 
-我会先判断本轮适合快速成型还是深度交付，并在每次路由后说明当前模式、当前门槛、下一技能、为什么、run_id 和证据状态。
+我会先判断本轮适合快速成型还是深度交付。默认只给业务判断、当前需要确认和下一步；完整路由、run 和证据状态会写入后台审计。
 
 推荐第一步：发一句产品想法，或贴一份 PRD / Zoon / 截图。
 ```
@@ -51,13 +51,12 @@ Recommend A when the user gives no context. If the user already supplied PRD/Zoo
 When welcoming a user, also set expectation that future routed outputs will show:
 
 ```text
-当前模式：
-当前门槛：
-下一技能：
-为什么：
-run_id：
-证据状态：
+业务判断：
+当前需要确认：
+下一步：
 ```
+
+完整的当前模式、当前门槛、下一技能、为什么、run_id 和证据状态只在用户要求看状态、审计或调试时展开。
 
 ## Starter Prompts
 

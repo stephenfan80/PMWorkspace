@@ -62,11 +62,16 @@ def write_project(path: pathlib.Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     data["updated_at"] = now()
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    current = STATE_DIR / "current-project"
+    try:
+        current.write_text(str(data.get("slug") or path.parent.name).strip() + "\n", encoding="utf-8")
+    except Exception:
+        pass
 
 
 def usage() -> int:
     print(
-        "Usage: pmw-project {get-name|set-name|link-zoon|set-latest-brief|set-zoon-sync|set-zoon-sync-failed|set-zoon-sync-disabled|set-zoon-join|show} ...",
+        "Usage: pmw-project {get-name|set-name|bind|link-zoon|set-latest-brief|set-zoon-sync|set-zoon-sync-failed|set-zoon-sync-disabled|set-zoon-join|show} ...",
         file=sys.stderr,
     )
     return 1
@@ -78,6 +83,16 @@ def redact_sensitive(value: str) -> str:
     value = re.sub(r"(x-share-token: )[A-Za-z0-9._~+/=-]+", r"\1[redacted]", value)
     value = re.sub(r"(ownerSecret[=: ]*)[^&\s]+", r"\1[redacted]", value)
     return value[:500]
+
+
+def redact_value(value):
+    if isinstance(value, str):
+        return redact_sensitive(value)
+    if isinstance(value, list):
+        return [redact_value(item) for item in value]
+    if isinstance(value, dict):
+        return {key: redact_value(item) for key, item in value.items()}
+    return value
 
 
 def main() -> int:
@@ -99,6 +114,20 @@ def main() -> int:
         print(name)
         return 0
 
+    if command == "bind":
+        target_slug = sys.argv[2].strip() if len(sys.argv) > 2 else slug
+        if not target_slug:
+            print("Usage: pmw-project bind [project slug]", file=sys.stderr)
+            return 1
+        try:
+            root = subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True, stderr=subprocess.DEVNULL).strip()
+            bind_path = pathlib.Path(root) / ".pmworkspace-project"
+        except Exception:
+            bind_path = pathlib.Path.cwd() / ".pmworkspace-project"
+        bind_path.write_text(target_slug + "\n", encoding="utf-8")
+        print(target_slug)
+        return 0
+
     if command == "link-zoon":
         url = sys.argv[2].strip() if len(sys.argv) > 2 else ""
         if not url:
@@ -107,15 +136,18 @@ def main() -> int:
         data["zoon_url"] = url
         data.setdefault("display_name", fallback_name())
         write_project(path, data)
-        print(url)
+        print(redact_sensitive(url))
         return 0
 
     if command == "set-latest-brief":
         latest = sys.argv[2].strip() if len(sys.argv) > 2 else ""
+        version = sys.argv[3].strip() if len(sys.argv) > 3 else ""
         if not latest:
-            print("Usage: pmw-project set-latest-brief <path>", file=sys.stderr)
+            print("Usage: pmw-project set-latest-brief <path> [version]", file=sys.stderr)
             return 1
         data["latest_brief"] = latest
+        if version:
+            data["latest_brief_version"] = version
         data.setdefault("display_name", fallback_name())
         write_project(path, data)
         print(latest)
@@ -124,8 +156,9 @@ def main() -> int:
     if command == "set-zoon-sync":
         url = sys.argv[2].strip() if len(sys.argv) > 2 else ""
         latest = sys.argv[3].strip() if len(sys.argv) > 3 else ""
+        version = sys.argv[4].strip() if len(sys.argv) > 4 else ""
         if not url:
-            print("Usage: pmw-project set-zoon-sync <Zoon URL> [brief path]", file=sys.stderr)
+            print("Usage: pmw-project set-zoon-sync <Zoon URL> [brief path] [version]", file=sys.stderr)
             return 1
         data["zoon_url"] = url
         data["last_zoon_sync_at"] = now()
@@ -133,19 +166,24 @@ def main() -> int:
         data.pop("last_zoon_sync_error", None)
         if latest:
             data["last_zoon_sync_brief"] = latest
+        if version:
+            data["last_zoon_sync_brief_version"] = version
         data.setdefault("display_name", fallback_name())
         write_project(path, data)
-        print(url)
+        print(redact_sensitive(url))
         return 0
 
     if command == "set-zoon-sync-failed":
         reason = sys.argv[2].strip() if len(sys.argv) > 2 else "unknown"
         latest = sys.argv[3].strip() if len(sys.argv) > 3 else ""
+        version = sys.argv[4].strip() if len(sys.argv) > 4 else ""
         data["last_zoon_sync_at"] = now()
         data["last_zoon_sync_status"] = "failed"
         data["last_zoon_sync_error"] = redact_sensitive(reason or "unknown")
         if latest:
             data["last_zoon_sync_brief"] = latest
+        if version:
+            data["last_zoon_sync_brief_version"] = version
         data.setdefault("display_name", fallback_name())
         write_project(path, data)
         print(data["last_zoon_sync_error"])
@@ -153,11 +191,14 @@ def main() -> int:
 
     if command == "set-zoon-sync-disabled":
         latest = sys.argv[2].strip() if len(sys.argv) > 2 else ""
+        version = sys.argv[3].strip() if len(sys.argv) > 3 else ""
         data["last_zoon_sync_at"] = now()
         data["last_zoon_sync_status"] = "disabled"
         data.pop("last_zoon_sync_error", None)
         if latest:
             data["last_zoon_sync_brief"] = latest
+        if version:
+            data["last_zoon_sync_brief_version"] = version
         data.setdefault("display_name", fallback_name())
         write_project(path, data)
         print("disabled")
@@ -185,7 +226,9 @@ def main() -> int:
     if command == "show":
         data.setdefault("display_name", fallback_name())
         data.setdefault("slug", slug)
-        print(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True))
+        raw = "--raw" in sys.argv[2:]
+        output = data if raw else redact_value(data)
+        print(json.dumps(output, ensure_ascii=False, indent=2, sort_keys=True))
         return 0
 
     return usage()

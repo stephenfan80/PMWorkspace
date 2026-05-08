@@ -7,7 +7,7 @@ SLUG="${PMW_PROJECT_SLUG:-$("$SCRIPT_DIR/pmw-slug")}"
 PROJECT_DIR="$STATE_DIR/projects/$SLUG"
 EVENT="${1:-}"
 
-mkdir -p "$PROJECT_DIR/briefs" "$PROJECT_DIR/prototypes" "$PROJECT_DIR/handoffs" "$STATE_DIR/analytics"
+mkdir -p "$PROJECT_DIR/briefs" "$PROJECT_DIR/briefs/audit" "$PROJECT_DIR/prototypes" "$PROJECT_DIR/handoffs" "$STATE_DIR/analytics"
 
 json_escape() {
   sed 's/\\/\\\\/g; s/"/\\"/g'
@@ -27,6 +27,34 @@ safe_fragment() {
   printf '%s' "${value:-asset}"
 }
 
+version_number_from_file() {
+  local file="$1"
+  [ -f "$file" ] || return 0
+  sed -nE 's/.*(产品简报版本|版本)[：:][[:space:]]*v?([0-9]+).*/\2/p' "$file" | head -n 1
+}
+
+latest_project_brief_version_number() {
+  local project_json="$PROJECT_DIR/project.json"
+  [ -f "$project_json" ] || return 0
+  sed -nE 's/.*"latest_brief_version"[[:space:]]*:[[:space:]]*"v?([0-9]+)".*/\1/p' "$project_json" | head -n 1
+}
+
+normalize_existing_version_line() {
+  local file="$1"
+  local version="$2"
+  local tmp
+  tmp="$(mktemp "${TMPDIR:-/tmp}/pmw-brief-version.XXXXXX")"
+  awk -v version="$version" '
+    BEGIN { done=0 }
+    !done && $0 ~ /(产品简报版本|版本)[：:][[:space:]]*v?[0-9]+/ {
+      sub(/v?[0-9]+/, version)
+      done=1
+    }
+    { print }
+  ' "$file" > "$tmp"
+  mv "$tmp" "$file"
+}
+
 ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 case "$EVENT" in
@@ -42,11 +70,30 @@ case "$EVENT" in
   brief)
     name="${2:-brief}"
     file="$PROJECT_DIR/briefs/$(date -u +%Y%m%dT%H%M%SZ)-$(safe_fragment "$name").md"
+    audit_file="$PROJECT_DIR/briefs/audit/$(date -u +%Y%m%dT%H%M%SZ)-$(safe_fragment "$name")-audit.md"
     input_file="$(mktemp "${TMPDIR:-/tmp}/pmw-brief-input.XXXXXX")"
-    trap 'rm -f "$input_file" 2>/dev/null || true' EXIT
+    business_file="$(mktemp "${TMPDIR:-/tmp}/pmw-brief-business.XXXXXX")"
+    trap 'rm -f "$input_file" "$business_file" 2>/dev/null || true' EXIT
     cat > "$input_file"
+    previous_version_number="$(latest_project_brief_version_number || true)"
+    input_version_number="$(version_number_from_file "$input_file" || true)"
+    if [ -n "$previous_version_number" ]; then
+      brief_version="v$((previous_version_number + 1))"
+    elif [ -n "$input_version_number" ]; then
+      brief_version="v$input_version_number"
+    else
+      brief_version="v1"
+    fi
+    normalize_existing_version_line "$input_file" "$brief_version"
+    awk '
+      /^##[[:space:]]+(产品简报门槛|支持信息|审计|审计附录|PMWorkspace|请 PM 补充或拍板)/ { skip=1 }
+      /^##[[:space:]]+产品核心信息/ { skip=0 }
+      !skip { print }
+    ' "$input_file" > "$business_file"
+    normalize_existing_version_line "$business_file" "$brief_version"
 
-    # Zoon-first, local-backed: publish online before recording the local audit copy.
+    # Zoon-first, local-backed: publish the business brief online, then keep both
+    # the business brief and the full audit copy locally.
     sync_on_brief="${PMW_ZOON_SYNC_ON_BRIEF:-$("$SCRIPT_DIR/pmw-config" get zoon_sync_on_brief 2>/dev/null || echo true)}"
     sync_status=""
     sync_detail=""
@@ -55,7 +102,7 @@ case "$EVENT" in
     join_detail=""
     if [ "$sync_on_brief" != "false" ] && [ -x "$SCRIPT_DIR/pmw-zoon" ]; then
       sync_err="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-sync.XXXXXX")"
-      if zoon_url="$(PMW_ZOON_DEFER_PROJECT_UPDATE=1 "$SCRIPT_DIR/pmw-zoon" sync --title "产品设计简报：$name" --brief "$input_file" 2>"$sync_err")"; then
+      if zoon_url="$(PMW_ZOON_DEFER_PROJECT_UPDATE=1 "$SCRIPT_DIR/pmw-zoon" sync --title "产品设计简报：$name" --brief "$business_file" 2>"$sync_err")"; then
         sync_status="synced"
         join_status="$(sed -n 's/^ZOON_JOIN_STATUS=//p' "$sync_err" | tail -n 1)"
         join_detail="$(sed -n 's/^ZOON_JOIN_DETAIL=//p' "$sync_err" | tail -n 1)"
@@ -80,19 +127,20 @@ case "$EVENT" in
       sync_detail="pmw-zoon unavailable"
       printf 'ZOON_SYNC_FAILED=%s\n' "$sync_detail" >&2
     fi
-    cp "$input_file" "$file"
-    "$SCRIPT_DIR/pmw-project" set-latest-brief "$file" >/dev/null 2>&1 || true
+    cp "$business_file" "$file"
+    cp "$input_file" "$audit_file"
+    "$SCRIPT_DIR/pmw-project" set-latest-brief "$file" "$brief_version" >/dev/null 2>&1 || true
     case "$sync_status" in
       synced)
-        "$SCRIPT_DIR/pmw-project" set-zoon-sync "$zoon_url" "$file" >/dev/null 2>&1 || true
+        "$SCRIPT_DIR/pmw-project" set-zoon-sync "$zoon_url" "$file" "$brief_version" >/dev/null 2>&1 || true
         [ -n "$join_status" ] && "$SCRIPT_DIR/pmw-project" set-zoon-join "$join_status" "$join_detail" >/dev/null 2>&1 || true
         ;;
       failed)
-        "$SCRIPT_DIR/pmw-project" set-zoon-sync-failed "${sync_detail:-unknown}" "$file" >/dev/null 2>&1 || true
+        "$SCRIPT_DIR/pmw-project" set-zoon-sync-failed "${sync_detail:-unknown}" "$file" "$brief_version" >/dev/null 2>&1 || true
         [ -n "$join_status" ] && "$SCRIPT_DIR/pmw-project" set-zoon-join "$join_status" "$join_detail" >/dev/null 2>&1 || true
         ;;
       disabled)
-        "$SCRIPT_DIR/pmw-project" set-zoon-sync-disabled "$file" >/dev/null 2>&1 || true
+        "$SCRIPT_DIR/pmw-project" set-zoon-sync-disabled "$file" "$brief_version" >/dev/null 2>&1 || true
         ;;
     esac
     if [ -x "$SCRIPT_DIR/pmw-artifact" ]; then
@@ -103,11 +151,11 @@ case "$EVENT" in
         --source-skill pm-brief \
         --path "$file" \
         --url "$zoon_url" \
-        --summary "产品简报已保存，Zoon 同步状态：$sync_status" \
+        --summary "业务简报版本：${brief_version}；业务简报已保存，审计副本已保存，Zoon 同步状态：${sync_status}" \
         --upstream "decision,question,strategy_review" \
         --next-skill "pm-prototype-shotgun,pm-handoff" >/dev/null 2>&1 || true
     fi
-    rm -f "$input_file" 2>/dev/null || true
+    rm -f "$input_file" "$business_file" 2>/dev/null || true
     trap - EXIT
     echo "$file"
     ;;

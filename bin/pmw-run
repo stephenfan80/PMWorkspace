@@ -55,6 +55,10 @@ def write_project(data: dict) -> None:
     data["slug"] = current_slug()
     data["updated_at"] = now()
     project_path().write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    try:
+        (STATE_DIR / "current-project").write_text(data["slug"] + "\n", encoding="utf-8")
+    except Exception:
+        pass
 
 
 def append_jsonl(path: pathlib.Path, row: dict) -> None:

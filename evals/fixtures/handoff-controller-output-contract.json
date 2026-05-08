@@ -1,6 +1,6 @@
 {
   "id": "handoff-controller-output-contract",
-  "title": "产品交付必须输出交付控制器字段",
+  "title": "产品交付必须建立交付控制器并默认输出精简交付稿",
   "category": "pm-handoff",
   "primary_skill": "pm-handoff",
   "prompt": "把已确认方向整理成 PRD / 设计 / 研发交付稿。",
@@ -11,14 +11,16 @@
     "gate": "交付控制器",
     "required_behaviors": [
       "建立交付控制器",
-      "输出交付目标、事实来源和交付前门槛",
-      "输出原型复审状态、未决拍板和验收写入边界",
-      "输出下一技能和证据状态"
+      "用户可见输出交付结论、精简 PRD、待补充项和下一步",
+      "把交付目标、事实来源和交付前门槛写入审计",
+      "把原型复审状态、未决拍板和验收写入边界写入审计",
+      "把下一技能和证据状态写入审计"
     ],
     "forbidden_behaviors": [
       "直接输出交付稿",
-      "省略原型复审状态",
-      "省略未决拍板"
+      "默认展开交付控制器",
+      "省略内部原型复审状态",
+      "省略内部未决拍板"
     ]
   },
   "contract_checks": [
@@ -32,7 +34,7 @@
     },
     {
       "path": "pm-handoff/SKILL.md",
-      "contains": "- 交付前门槛："
+      "contains": "这些默认写入审计，用户可见输出只保留交付结论、精简 PRD、待补充项和下一步"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",

@@ -58,16 +58,21 @@ description: |
 - 等待 Q、D、证据或用户确认时必须停住；不能假装已对齐、可出图或可交付。
 - 不得把真实 token、ownerSecret、私密客户资料、内部录音、未脱敏截图或未脱敏 Zoon 内容写进公开仓库。
 
-### 用户可见输出字段
+### 默认用户可见输出字段
 
 - `原型出图判断`
+- `方案方向`
+- `输出单元清单`
+- `image-2 状态`
+- `生成后复审`
+- `下一步`
+
+### 内部审计字段（默认不展示）
+
 - `产品准备度仪表盘`
 - `图片生成前门槛`
 - `方案差异质量`
-- `输出单元清单`
 - `方案比较板`
-- `image-2 状态`
-- `生成后复审`
 - `证据状态`
 <!-- PMW-GENERATED-CONTRACT:END -->
 
@@ -109,14 +114,15 @@ done
 - Read `../pmworkspace-shared/references/prototype-quality-review.md`.
 - Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-prototype-shotgun` 且没有当前 run，再创建 runtime run.
 - 原型出图前必须先输出 `原型出图判断`，说明我建议出哪些图、暂时不出哪些图、为什么，以及图片生成前门槛；不能直接写 image-2 prompt。
-- 原型出图前必须展示 Product Readiness Dashboard；`产品简报`、`Zoon`、`线上参考`、`方案差异`、`不可虚构项` 未通过时，停止在第一条阻断门槛，不写 image-2 prompt。`复审状态` 出图前展示但不阻断，出图后再进入复审。
+- 原型出图前必须运行 Product Readiness Dashboard；`产品简报`、`Zoon`、`线上参考`、`方案差异`、`不可虚构项` 未通过时，停止在第一条阻断门槛，不写 image-2 prompt。默认只向用户展示短 verdict 和第一条阻断原因，完整表格只在审计 / 调试输出中展示。`复审状态` 出图前展示但不阻断，出图后再进入复审。
 - 产品简报未“已对齐”时，不写提示词，不生成图片，不生成 HTML，不输出交付稿。
 - 现有功能迭代必须有当前截图或等价视觉基线。
 - 新页面如果承接线上流程、结果页、状态页或生产样式，必须先拿到线上参考，或得到用户明确确认“没有线上参考，按新页面概念稿推进”。
 - 多方案生成前先确认概念方向，除非用户明确批准使用默认方向。
 - 设计原型默认只能使用 image-2 / 图像生成输出方案图片；HTML 只在用户明确要求“HTML”“可交互网页”“前端实现”或“本地网页原型”时允许。
 - 如果当前环境无法生成 image-2 图片，停止并说明无法出图；不要用 HTML、Markdown 线框或拼图替代设计原型。
-- 默认移动端优先：iPhone 17 竖屏 `402 x 874`。
+- 默认移动端优先：标准首屏使用 iPhone 17 `W402 x H874`；结果页、报告页、详情页等长内容屏幕允许使用移动长板 `W402 x H自适应（最低 H874）`。
+- 移动长板必须保持宽度 `402` 不变，高度按内容自然增长且不得低于 `874`；不能为了塞进 `874` 高度而缩小字体、压缩间距、裁切内容或遮挡底部操作区。
 - 只有用户明确要求，或看板/内部工具密度确实需要时，才使用桌面端。
 
 ## Multi-Scheme Rules
@@ -144,15 +150,17 @@ done
 9. 如果用户、brief、Zoon、截图或参考材料命中汽车之家、AutoDesign、之家或 Autohome，默认载入 AutoDesign 约束。产品 UI 优先使用 AutoDesign token；品牌 VI 和字体包只作为品牌露出、活动视觉或特殊场景参考，字体授权必须保留边界，不能写成生产可用承诺。
 10. 多方案生成前确认方案方向；如果用户已经明确批准默认方向，记录 `方案方向确认：默认方向已批准`，否则停在方向确认，不写 image-2 提示词。
 11. For each image output unit, declare scheme, screen task, canvas, main goal, anti-metric, non-fiction boundary, 线上参考状态, design system, image-2 status, and brief dependency. 一个输出单元等于一张图片，不能把多个方案或多个屏幕合成拼图。
+    - `画布` 字段只能使用明确设备尺寸：短内容写 `标准首屏：iPhone 17 W402 x H874`；长内容写 `移动长板：iPhone 17 W402 x H自适应（最低 H874）`。
+    - 移动长板仍是一张连续移动端界面，不得拆成多张图、拼图、多屏故事板或桌面端。
 12. 把批量请求拆成顺序单图队列：`3 个方案` -> 3 个输出单元，`3 个方案 x 2 个屏幕` -> 6 个输出单元。每个输出单元单独调用一次 image-2；不要把多个单元合成一个 prompt。
 13. 平台脚本可用时，先用 `pmw-prototype-board add` 登记每个方案/屏幕单元；如果写入失败，输出 `方案比较板：未写入（原因）`，不能假装已记录。
-14. 平台脚本可用时运行 `pmw-dashboard readiness --target prototype`；用户可见输出必须包含 `产品准备度仪表盘`。如果 verdict 是 `不可出图`，根据第一条阻断行退回 `$pm-brief`、线上参考门槛、方案差异确认或不可虚构项补齐，不写 image-2 prompt。
+14. 平台脚本可用时运行 `pmw-dashboard readiness --target prototype`；用户可见输出只包含短 verdict / 第一阻断原因。如果 verdict 是 `不可出图`，根据第一条阻断行退回 `$pm-brief`、线上参考门槛、方案差异确认或不可虚构项补齐，不写 image-2 prompt。只有用户要求看审计时才展示 `pmw-dashboard readiness --details`。
 15. 在每个输出单元的图片生成前门槛通过后，逐个 Generate with image-2 / image generation。每次生成只服务当前一个输出单元，并在 prompt 中写明禁止拼图、并排比较、一图多屏、一图多方案。 如果当前环境无法生成 image-2，停止并说明，不用 HTML、Markdown 线框或方案比较板替代。
 16. 每张图出图后用 `pmw-prototype-board image` 补充图片路径或 URL；单张失败时记录 `生成失败` 或 `待重试`，不能把批次写成全成功。用户反馈后用 `pmw-prototype-board score` 记录评分。
 17. Run `prototype-quality-review.md`, then route substantial post-image review to `$pm-prototype-review`.
 18. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单，它会登记 `prototype_manifest` 到 Product Artifact Flow；再用 `pmw-run event --type artifact` 记录产物。
 19. Record approved/rejected design feedback with `pmw-log taste`, including scenario, feedback target, source, scope, and confidence when available.
-20. 批量输出后运行 `pmw-dashboard status`，在最终说明中给出每张图的单独状态和方案比较板状态。
+20. 批量输出后运行 `pmw-dashboard status`，最终说明只给每张图的业务状态和下一步；方案比较板、产物流动和证据状态默认留在审计中。
 
 ## 输出
 
@@ -162,10 +170,8 @@ done
 - 这轮先出：
 - 暂时不出：
 - 为什么：
-- 图片生成前门槛：
-- 产品准备度仪表盘：
-  - Verdict：
-  - 第一阻断门槛：
+- 准备度：<可出图 / 不可出图>，<第一阻断原因或关键门槛已通过>
+- 下一步：
 
 方案方向：
 - 方案 A：
@@ -186,7 +192,7 @@ done
 - 设计系统：
 - image-2 状态：
 
-原型计划：
+内部原型计划（默认不展示，写入审计）：
 - 产品简报：
 - run_id：
 - Zoon 事实来源：

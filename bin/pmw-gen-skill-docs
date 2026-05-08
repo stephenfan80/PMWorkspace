@@ -50,6 +50,7 @@ def build_contract(skill: str, spec: dict, manifest: dict) -> str:
     preamble_checks = as_list(manifest.get("common_preamble_checks")) + as_list(spec.get("preamble_checks"))
     references = as_list(spec.get("required_references"))
     output_fields = as_list(spec.get("output_fields"))
+    audit_fields = as_list(spec.get("audit_fields"))
     lines = [
         START_MARKER,
         f"## {title}",
@@ -73,9 +74,13 @@ def build_contract(skill: str, spec: dict, manifest: dict) -> str:
         "",
         *bullet_list(shared_gates),
         "",
-        "### 用户可见输出字段",
+        "### 默认用户可见输出字段",
         "",
         *bullet_list(f"`{item}`" for item in output_fields),
+        "",
+        "### 内部审计字段（默认不展示）",
+        "",
+        *bullet_list(f"`{item}`" for item in audit_fields),
         END_MARKER,
     ]
     return "\n".join(lines) + "\n"
@@ -182,6 +187,9 @@ def check_skill(skill: str, manifest: dict) -> list[str]:
     for field in as_list(spec.get("output_fields")):
         if field not in text:
             errors.append(f"{skill}: 输出字段缺少 `{field}`")
+    for field in as_list(spec.get("audit_fields")):
+        if field not in text:
+            errors.append(f"{skill}: 审计字段缺少 `{field}`")
     return errors
 
 

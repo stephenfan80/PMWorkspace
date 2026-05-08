@@ -6,7 +6,7 @@ PMWorkspace 产物流动层让每一步产物都能被下游技能读取，而�
 
 - 把 `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` 的输出串成一条可追溯链路。
 - 让下游技能先读取最近的上游产物，再决定是否继续、退回门槛或补证据。
-- 让 `pmw-dashboard status` 同时展示准备度和产物流动，避免用户只看到零散文件路径。
+- 让 `pmw-dashboard status --details` 展示准备度和产物流动；默认状态摘要只给业务结论，避免用户被零散文件路径和内部链路打扰。
 
 ## 产物链路
 
@@ -35,15 +35,18 @@ pmw-artifact add \
 pmw-artifact latest --kind product_brief
 pmw-artifact latest --kind browser_evidence
 pmw-artifact flow
+pmw-artifact flow --details
 pmw-dashboard status
+pmw-dashboard status --details
 ```
 
 `pmw-log brief`、`pmw-log prototype` 和 `pmw-log handoff` 会自动写入 `artifact-flow.jsonl`；手动命令只用于额外产物、修复 brief、验收种子或文档同步种子。
 
 ## 技能要求
 
-- 每个下游技能开始时，优先读取 `pmw-artifact flow` 或 `pmw-artifact latest --kind <产物类型>`。
-- 用户可见输出必须包含 `上游产物`、`本轮产物`、`下游可读`、`产物流动` 和 `下一技能`。
+- 每个下游技能开始时，优先读取 `pmw-artifact flow --details` 或 `pmw-artifact latest --kind <产物类型>`。
+- `上游产物`、`本轮产物`、`下游可读`、`产物流动` 和 `下一技能` 是内部审计 / 交接字段，必须写入本地状态并供下游读取，但默认不输出给用户。
+- 用户可见输出只在需要时说明“已保存 / 已同步 / 可继续”，用户明确要求“看状态 / 看审计 / 展开产物流动”时才展示完整表格。
 - 当最新上游产物缺失、过期、未通过准备度或与 Zoon 漂移冲突时，不能假装可以继续下游交付；必须退回最早能修复的技能。
 - 产物流动只登记元数据、路径、Zoon URL、状态和摘要；不要把完整私密 brief、客户资料、token、ownerSecret、Authorization header、API key、cookie、未脱敏截图内容或内部 PRD 正文写进公开仓库。
 

@@ -13,6 +13,7 @@ from typing import Optional
 
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
+PROJECT_OVERRIDE = ""
 
 
 def now() -> str:
@@ -24,6 +25,8 @@ def now_fragment() -> str:
 
 
 def current_slug() -> str:
+    if PROJECT_OVERRIDE:
+        return PROJECT_OVERRIDE
     env_slug = os.environ.get("PMW_PROJECT_SLUG")
     if env_slug:
         return env_slug
@@ -35,6 +38,23 @@ def current_slug() -> str:
 
 def project_dir() -> pathlib.Path:
     return STATE_DIR / "projects" / current_slug()
+
+
+def projects_root() -> pathlib.Path:
+    return STATE_DIR / "projects"
+
+
+def resolve_project_identifier(value: str) -> str:
+    cleaned = (value or "").strip()
+    if not cleaned:
+        return ""
+    if (projects_root() / cleaned / "project.json").exists():
+        return cleaned
+    for path in sorted(projects_root().glob("*/project.json")):
+        data = read_json(path)
+        if cleaned in {str(data.get("slug") or path.parent.name), str(data.get("display_name") or "")}:
+            return str(data.get("slug") or path.parent.name)
+    return cleaned
 
 
 def artifact_log() -> pathlib.Path:
@@ -186,6 +206,17 @@ def command_flow(args: argparse.Namespace) -> int:
     print(f"- 记录文件：{artifact_log()}")
     print(f"- 记录数：{len(rows)}")
     print("")
+    if not args.details:
+        if not latest:
+            print("- 暂无产物流动记录")
+            return 0
+        last = latest[-1]
+        print(f"- 最近产物：{md_cell(last.get('kind'))} / {md_cell(last.get('title'))}")
+        print(f"- 状态：{md_cell(last.get('status'))}")
+        print(f"- 下游：{md_cell(last.get('next_skill'))}")
+        print("")
+        print("需要完整产物流动表时，运行 `pmw-artifact flow --details`。")
+        return 0
     if not latest:
         print("- 暂无产物流动记录")
         return 0
@@ -210,7 +241,9 @@ def command_flow(args: argparse.Namespace) -> int:
 
 
 def main() -> int:
+    global PROJECT_OVERRIDE
     parser = argparse.ArgumentParser(prog="pmw-artifact")
+    parser.add_argument("--project")
     sub = parser.add_subparsers(dest="command", required=True)
 
     add = sub.add_parser("add")
@@ -234,8 +267,11 @@ def main() -> int:
 
     flow = sub.add_parser("flow")
     flow.add_argument("--limit", type=int, default=12)
+    flow.add_argument("--details", action="store_true")
 
     args = parser.parse_args()
+    if args.project:
+        PROJECT_OVERRIDE = resolve_project_identifier(args.project)
     if args.command == "add":
         return command_add(args)
     if args.command == "latest":

@@ -11,7 +11,7 @@
     "gate": "最佳实践压缩",
     "required_behaviors": [
       "只保留可借鉴原则、不可照搬和对原型影响",
-      "参考来源放在支持信息",
+      "参考来源放在内部审计或支持信息",
       "最佳实践不覆盖当前约束"
     ],
     "forbidden_behaviors": [
@@ -27,11 +27,11 @@
     },
     {
       "path": "pmworkspace-shared/references/internet-best-practice-research.md",
-      "contains": "参考来源放在支持信息；最佳实践不能覆盖当前 brief、Zoon、线上截图、反指标或不可虚构项"
+      "contains": "参考来源进入内部审计 / 支持信息，不进入默认业务简报；最佳实践不能覆盖当前 brief、Zoon、线上截图、反指标或不可虚构项"
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "- 互联网案例启发："
+      "contains": "互联网案例启发只保留 `可借鉴原则`、`不可照搬` 和 `对原型影响`；参考来源放入内部审计"
     },
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",

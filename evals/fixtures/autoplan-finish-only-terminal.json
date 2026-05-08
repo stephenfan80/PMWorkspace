@@ -32,7 +32,7 @@
     },
     {
       "path": "pmworkspace-shared/references/autoplan-workflow.md",
-      "contains": "如果继续用当前 run，输出当前 `run_id`"
+      "contains": "如果继续用当前 run，在审计中记录当前 `run_id`"
     }
   ]
 }

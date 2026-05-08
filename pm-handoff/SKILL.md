@@ -50,10 +50,16 @@ description: |
 - 等待 Q、D、证据或用户确认时必须停住；不能假装已对齐、可出图或可交付。
 - 不得把真实 token、ownerSecret、私密客户资料、内部录音、未脱敏截图或未脱敏 Zoon 内容写进公开仓库。
 
-### 用户可见输出字段
+### 默认用户可见输出字段
 
-- `PRD 生成判断`
+- `交付结论`
 - `交付目标`
+- `精简 PRD`
+- `待补充项`
+- `下一步`
+
+### 内部审计字段（默认不展示）
+
 - `事实来源`
 - `产品准备度仪表盘`
 - `交付前门槛`
@@ -93,8 +99,8 @@ done
 5. Read `../pmworkspace-shared/references/pm-decision-principles.md`; unresolved user promise, data truth, scope, experiment, lead, transaction, privacy, compliance, or acceptance boundary issues must become `需要 PM 拍板`.
 6. Read `../pmworkspace-shared/references/decision-question-mode.md`; 每轮只展开一个当前 `D`，不要批量写多个验收相关决策。
 7. Read `../pmworkspace-shared/references/runtime-kernel.md`.
-8. Read `../pmworkspace-shared/references/evidence-dashboard.md` and run `pmw-dashboard status` when available.
-9. Read `../pmworkspace-shared/references/product-readiness-dashboard.md` and run `pmw-dashboard readiness --target handoff` when available.
+8. Read `../pmworkspace-shared/references/evidence-dashboard.md` and run `pmw-dashboard status` when available for a short summary; use `--details` only for audit/debug output.
+9. Read `../pmworkspace-shared/references/product-readiness-dashboard.md` and run `pmw-dashboard readiness --target handoff` when available for the verdict.
 10. Read `../pmworkspace-shared/references/prototype-shotgun-board.md`; if a selected prototype direction exists, include the board result instead of relying on memory.
 11. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
 12. Read `../pmworkspace-shared/references/product-memory.md`; use `pmw-memory user-summary` and `pmw-memory delivery-summary` when available. If delivery assets affect wording, explicitly say `基于本地交付资产...`; memory cannot override the current brief, Zoon, 反指标, 不可虚构项, 线上参考门槛 or 本轮输入。
@@ -103,10 +109,10 @@ done
 15. Read `../pmworkspace-shared/references/pm-eval-system.md` and preserve delivery contracts.
 16. Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-handoff` 且没有当前 run，再创建 runtime run.
 17. 如果用户要 PRD、研发交付、实验标准、埋点或接口梳理，先提示：`如果你有现成 PRD、接口文档、埋点方案、实验方案、Zoon 或截图，可以上传给我参考；没有的话，我会基于当前已对齐 brief 生成精简 PRD，并把缺失项留空待补充。`
-18. 建立交付控制器，记录 `交付目标`、`事实来源`、`Product Readiness Dashboard`、`交付前门槛`、`原型复审状态`、`未决拍板`、`交付类型`、`PRD 缺口处理`、`验收写入边界`、`交付资产沉淀`、`上游产物`、`本轮产物`、`下游可读`、`产物流动`、`下一技能` 和 `证据状态`。
+18. 建立交付控制器，记录 `交付目标`、`事实来源`、`Product Readiness Dashboard`、`交付前门槛`、`原型复审状态`、`未决拍板`、`交付类型`、`PRD 缺口处理`、`验收写入边界`、`交付资产沉淀`、`上游产物`、`本轮产物`、`下游可读`、`产物流动`、`下一技能` 和 `证据状态`；这些默认写入审计，用户可见输出只保留交付结论、精简 PRD、待补充项和下一步。
 18. 如果 `pmw-project show` 中有 Zoon URL，先运行 `pmw-zoon drift`；若存在实质漂移，读取最新文档，作为交付事实来源，并退回 `$pm-brief` 或 `$pm-strategy-review`，不要沿用旧交付口径。
 19. 如果产品简报不是 `已对齐`，退回 `$pm-brief`；如果交付依赖原型但复审不是 `可通过`，退回 `$pm-prototype-review`、`$pm-prototype-shotgun` 或当前 `D`。
-20. 交付稿输出前必须展示 Product Readiness Dashboard；如果 verdict 是 `不可交付`，根据第一条阻断行退回 `$pm-brief`、线上参考门槛、`$pm-prototype-shotgun`、`$pm-prototype-review` 或当前 `D`，不写 PRD、实验口径或验收标准。
+20. 交付稿输出前必须运行 Product Readiness Dashboard；如果 verdict 是 `不可交付`，根据第一条阻断行退回 `$pm-brief`、线上参考门槛、`$pm-prototype-shotgun`、`$pm-prototype-review` 或当前 `D`，不写 PRD、实验口径或验收标准。默认只展示短 verdict 和第一阻断原因。
 21. 如果仍有会改变范围、用户承诺、实验口径、数据真实性、线索/交易/隐私/合规边界或验收标准的未决 D，停止在 `需要 PM 拍板`，只输出一个当前 `D`，不写研发验收标准、实验口径或对外承诺。
 22. 默认选择 `精简 PRD`；只有用户明确要求设计交付、实验验证或研发交付时，才追加对应补充，不把所有模板硬塞进一份文档。
 23. 精简 PRD 核心只保留：需求背景、需求价值、需求方案、需求功能及描述、接口以及数据来源、埋点信息、实验标准。测试计划、开发周期、排期、人力、会议纪要和长风险清单默认不写。
@@ -120,27 +126,13 @@ done
 ```markdown
 # PRD：<需求名>
 
-## PRD 生成判断
+## 交付结论
 
-- run_id：
+- 结论：
 - 交付目标：
-- 事实来源：
-- 现成文档参考：
-- 产品准备度仪表盘：
-- 交付前门槛：
-- 原型复审状态：
-- 未决拍板：
-- 交付类型：
-- PRD 缺口处理：
-- 验收写入边界：
-- 交付资产沉淀：
-- 上游产物：
-- 本轮产物：
-- 下游可读：
-- 产物流动：
-- 下一技能：
-- 证据状态：
-- 已保存资产：
+- 准备度：
+- 待补充项：
+- 下一步：
 
 ## 需求背景
 
@@ -172,5 +164,6 @@ done
 
 ## 不可虚构
 
-## 已保存资产
 ```
+
+内部交付审计继续记录交付前门槛、原型复审状态、未决拍板、产物流动和已保存资产；默认不展示给用户。

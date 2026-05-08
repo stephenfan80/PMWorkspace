@@ -10,9 +10,9 @@
     "must_stop": true,
     "gate": "策略决策写入产品契约",
     "required_behaviors": [
-      "写入范围模式和对抗审查后的设计取舍",
-      "写入方案方向和范围外",
-      "写入决策记录和对原型的影响"
+      "把范围模式和策略取舍写入内部审计",
+      "把方案方向和范围外影响写入业务简报或审计",
+      "把决策记录和对原型的影响写入审计"
     ],
     "forbidden_behaviors": [
       "把策略结论只放在摘要里",
@@ -31,7 +31,7 @@
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "- 策略决策写入："
+      "contains": "先建立产品简报契约控制器，记录 `来源门槛`、`已完成门槛`、`缺失门槛`、`事实/假设边界`、`策略决策写入`"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",

@@ -50,9 +50,16 @@ description: |
 - 等待 Q、D、证据或用户确认时必须停住；不能假装已对齐、可出图或可交付。
 - 不得把真实 token、ownerSecret、私密客户资料、内部录音、未脱敏截图或未脱敏 Zoon 内容写进公开仓库。
 
-### 用户可见输出字段
+### 默认用户可见输出字段
 
 - `自动评审结论`
+- `我建议`
+- `理由`
+- `当前需要确认`
+- `下一步`
+
+### 内部审计字段（默认不展示）
+
 - `模式来源`
 - `推进阶段`
 - `最早门槛`
@@ -111,10 +118,10 @@ done
 25. Every item in `已自动采用` must include source and why no PM decision is needed, for example `默认移动端优先。来源：PMWorkspace 默认规则。原因：不改变产品方向或用户承诺。`
 26. When enough information exists, create the smallest useful product brief and save it with `pmw-log brief <name>`. Because `pmw-log brief` auto-syncs, this should create or append to Zoon when enabled and register `product_brief` in Product Artifact Flow.
 27. If a Zoon URL exists before prototype preparation, run `pmw-zoon drift --url <url>` when available. If it returns `DRIFT`, read the latest Zoon snapshot and update the product brief version before continuing.
-28. Before routing to `$pm-prototype-shotgun` or `$pm-handoff`, run `pmw-dashboard readiness --target prototype` or `pmw-dashboard readiness --target handoff` when available and include `产品准备度仪表盘` in the control panel. If the verdict is `不可出图` or `不可交付`, route to the first blocking gate instead of continuing.
+28. Before routing to `$pm-prototype-shotgun` or `$pm-handoff`, run `pmw-dashboard readiness --target prototype` or `pmw-dashboard readiness --target handoff` when available and use the short verdict in the user-facing conclusion. If the verdict is `不可出图` or `不可交付`, route to the first blocking gate instead of continuing. Only show `--details` when the user asks for audit/debug output.
 29. Map the earliest blocking gate to one next skill: `$pm-jobs`, `$pm-strategy-review`, `$pm-brief`, `$pm-prototype-shotgun`, `$pm-prototype-review`, or `$pm-handoff`. Do not pretend all downstream skills have completed when only the next gate is ready.
-30. `下一技能` cannot be only a skill id; include `交接上下文` with 来源门槛、已确认事实、未决 Q/D、证据状态 and 交给它的原因. 交接上下文还必须追加上游产物、本轮产物、下游可读和产物流动。
-31. At each gate, record evidence, decisions, artifacts, or reviews with `pmw-run event`; before final output, run `pmw-dashboard status` when available.
+30. `下一技能` cannot be only a skill id in audit; record `交接上下文` with 来源门槛、已确认事实、未决 Q/D、证据状态 and 交给它的原因. 交接上下文还必须追加上游产物、本轮产物、下游可读和产物流动，但默认不展示给用户。
+31. At each gate, record evidence, decisions, artifacts, or reviews with `pmw-run event`; before final output, run `pmw-dashboard status` when available and only surface its short business summary.
 32. End with a readiness state: `需要补充`、`待确认`、`基于假设，可讨论`、`已对齐`、`可进入原型复审`、or `可交付`. Call `pmw-run finish` only when the current run reaches a terminal readiness state; if waiting for Q/D/证据 or handing off to a child skill, keep the current run open for reuse.
 
 ## Auto-Decide Rules
@@ -148,12 +155,10 @@ done
 自动评审结论：
 - 我建议：
 - 理由：
-- 当前最早门槛：
-- 门槛等级：<阻断 / 高风险 / 可自动采用 / 可延后>
-- 下一技能：
-- 交接上下文：
+- 当前需要确认：
+- 下一步：
 
-评审控制面板：
+内部评审控制面板（默认不展示，写入审计）：
 - 状态：
 - run_id：
 - 模式：<快速成型 / 深度交付>
@@ -165,6 +170,7 @@ done
 - 门槛来源：
 - 停止原因：
 - 下一技能：
+- 交接上下文：
 - 已自动采用：
 - 需要 PM 拍板：
 - 证据状态：

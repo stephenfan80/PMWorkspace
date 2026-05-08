@@ -1,0 +1,46 @@
+{
+  "id": "brief-business-audit-split-compact",
+  "title": "产品简报必须拆成业务简报和本地审计副本",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "深度交付后保存产品简报，同时保留完整审计。",
+  "expected": {
+    "mode": "deep",
+    "status": "已保存",
+    "must_stop": false,
+    "gate": "业务简报与审计拆层",
+    "required_behaviors": [
+      "业务简报约 12-18 行",
+      "Zoon 默认同步业务简报版",
+      "本地保存完整审计副本",
+      "审计副本保留 Q/D、来源、准备度、产物流动和路径"
+    ],
+    "forbidden_behaviors": [
+      "把审计附录默认同步到 Zoon",
+      "把产品简报正文写成状态日志",
+      "丢失本地审计副本"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "业务简报结构控制在约 12-18 行"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "Zoon 默认同步业务简报版；完整 Q/D、来源、准备度、产物流动、复审专家和资产路径另存为本地审计副本"
+    },
+    {
+      "path": "bin/pmw-log",
+      "contains": "mkdir -p \"$PROJECT_DIR/briefs\" \"$PROJECT_DIR/briefs/audit\""
+    },
+    {
+      "path": "bin/pmw-log",
+      "contains": "--brief \"$business_file\""
+    },
+    {
+      "path": "bin/pmw-log",
+      "contains": "cp \"$input_file\" \"$audit_file\""
+    }
+  ]
+}

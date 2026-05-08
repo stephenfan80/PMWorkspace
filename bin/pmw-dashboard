@@ -11,9 +11,12 @@ from typing import Optional
 
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
+PROJECT_OVERRIDE = ""
 
 
 def current_slug() -> str:
+    if PROJECT_OVERRIDE:
+        return PROJECT_OVERRIDE
     env_slug = os.environ.get("PMW_PROJECT_SLUG")
     if env_slug:
         return env_slug
@@ -25,6 +28,32 @@ def current_slug() -> str:
 
 def project_dir() -> pathlib.Path:
     return STATE_DIR / "projects" / current_slug()
+
+
+def projects_root() -> pathlib.Path:
+    return STATE_DIR / "projects"
+
+
+def resolve_project_identifier(value: str) -> str:
+    cleaned = (value or "").strip()
+    if not cleaned:
+        return ""
+    direct = projects_root() / cleaned / "project.json"
+    if direct.exists():
+        return cleaned
+    for path in sorted(projects_root().glob("*/project.json")):
+        data = read_json(path)
+        if cleaned in {str(data.get("slug") or path.parent.name), str(data.get("display_name") or "")}:
+            return str(data.get("slug") or path.parent.name)
+    return cleaned
+
+
+def project_for_run(run_id: str) -> str:
+    if not run_id:
+        return ""
+    for path in sorted(projects_root().glob(f"*/runs/{run_id}.jsonl")):
+        return path.parent.parent.name
+    return ""
 
 
 def user_dir() -> pathlib.Path:
@@ -428,6 +457,39 @@ def render_readiness_section(run_id: Optional[str], target: str = "auto", headin
     return "\n".join(lines)
 
 
+def readiness_verdict(project: dict, events: list[dict], target: str) -> tuple[str, str, str, str, list[dict]]:
+    effective_target = auto_readiness_target(project, events) if target == "auto" else target
+    rows = product_readiness_rows(project, events, effective_target)
+    blockers = [row for row in rows if row["required"] and not row["passed"]]
+    if blockers:
+        verdict_cn = "不可出图" if effective_target == "prototype" else "不可交付"
+        next_action = blockers[0]["action"]
+        reason = f"{blockers[0]['name']}：{blockers[0]['status']}"
+    else:
+        verdict_cn = "可出图" if effective_target == "prototype" else "可交付"
+        next_action = "继续进入下一步"
+        reason = "关键门槛已通过"
+    return effective_target, verdict_cn, reason, next_action, rows
+
+
+def render_readiness_summary(run_id: Optional[str], target: str = "auto") -> str:
+    project = read_json(project_dir() / "project.json")
+    chosen_run, events = read_run(run_id)
+    effective_target, verdict_cn, reason, next_action, _rows = readiness_verdict(project, events, target)
+    lines = [
+        "# 产品准备度",
+        "",
+        f"- 目标：{readiness_target_label(effective_target)}",
+        f"- 结论：{verdict_cn}",
+        f"- 原因：{reason}",
+        f"- 下一步：{next_action}",
+    ]
+    if os.environ.get("PMW_DEBUG_OUTPUT") == "true":
+        lines.append(f"- 调试：run={chosen_run or '暂无'}，project={current_slug()}")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def render_status(run_id: Optional[str]) -> str:
     root = project_dir()
     project = read_json(root / "project.json")
@@ -515,20 +577,58 @@ def render_status(run_id: Optional[str]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def render_status_summary(run_id: Optional[str]) -> str:
+    root = project_dir()
+    project = read_json(root / "project.json")
+    chosen_run, events = read_run(run_id)
+    latest_status = project.get("latest_run_status") or (events[-1].get("status") if events else "暂无")
+    brief_name, brief_meta = latest_brief_summary(str(project.get("latest_brief", "")))
+    target, verdict_cn, reason, next_action, _rows = readiness_verdict(project, events, "auto")
+    artifact_count = len(read_jsonl(root / "artifact-flow.jsonl"))
+    board_count = len([r for r in read_jsonl(root / "prototype-board.jsonl") if r.get("record_type", "item") == "item"])
+    review = latest_review(events)
+    lines = [
+        "# PMWorkspace 状态摘要",
+        "",
+        f"- 项目：{project.get('display_name') or pathlib.Path.cwd().name}",
+        f"- 当前状态：{latest_status}",
+        f"- 产品简报：{brief_name}（{brief_meta}）",
+        f"- Zoon：{'已同步' if project.get('last_zoon_sync_status') == 'synced' else project.get('last_zoon_sync_status') or '未记录'}",
+        f"- 准备度：{readiness_target_label(target)}，{verdict_cn}，{reason}",
+        f"- 下一步：{next_action}",
+        f"- 产物记录：{artifact_count} 条；方案单元：{board_count} 个；复审：{review.get('status') or '未记录'}",
+    ]
+    if os.environ.get("PMW_DEBUG_OUTPUT") == "true":
+        lines.append(f"- 调试：run={chosen_run or '暂无'}，project={current_slug()}")
+    lines.append("")
+    lines.append("需要完整审计表时，运行 `pmw-dashboard status --details`。")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def main() -> int:
+    global PROJECT_OVERRIDE
     parser = argparse.ArgumentParser(prog="pmw-dashboard")
     sub = parser.add_subparsers(dest="command", required=True)
     status = sub.add_parser("status")
+    status.add_argument("--project")
     status.add_argument("--run")
+    status.add_argument("--details", action="store_true")
     readiness = sub.add_parser("readiness")
+    readiness.add_argument("--project")
     readiness.add_argument("--run")
     readiness.add_argument("--target", choices=["auto", "prototype", "handoff"], default="auto")
+    readiness.add_argument("--details", action="store_true")
     args = parser.parse_args()
+    if getattr(args, "project", None):
+        PROJECT_OVERRIDE = resolve_project_identifier(args.project)
+    elif getattr(args, "run", None):
+        PROJECT_OVERRIDE = project_for_run(args.run)
     if args.command == "status":
-        print(render_status(args.run), end="")
+        print(render_status(args.run) if args.details else render_status_summary(args.run), end="")
         return 0
     if args.command == "readiness":
-        print(render_readiness_section(args.run, args.target), end="")
+        print(render_readiness_section(args.run, args.target) if args.details else render_readiness_summary(args.run, args.target), end="")
         return 0
     return 1
 

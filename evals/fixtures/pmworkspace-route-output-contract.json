@@ -1,6 +1,6 @@
 {
   "id": "pmworkspace-route-output-contract",
-  "title": "主入口路由后必须输出固定字段",
+  "title": "主入口路由后默认只输出业务摘要并把完整路由写入审计",
   "category": "pm-workspace-routing",
   "primary_skill": "pm-workspace",
   "prompt": "使用 $pm-workspace 帮我快速成型一个新想法。",
@@ -10,17 +10,17 @@
     "must_stop": false,
     "gate": "路由输出契约",
     "required_behaviors": [
-      "输出当前模式",
-      "输出当前门槛",
-      "输出下一技能",
-      "输出为什么",
-      "输出 run_id",
-      "输出证据状态"
+      "输出业务判断",
+      "输出当前需要确认",
+      "输出下一步",
+      "把当前模式、当前门槛和下一技能写入审计",
+      "把为什么、run_id 和证据状态写入审计"
     ],
     "forbidden_behaviors": [
       "只给下一技能",
-      "省略 run_id",
-      "省略证据状态"
+      "默认输出 run_id",
+      "默认展开证据状态",
+      "省略内部路由审计"
     ]
   },
   "contract_checks": [
@@ -38,7 +38,7 @@
     },
     {
       "path": "pm-workspace/SKILL.md",
-      "contains": "After routing, always output the routing contract from `routing.md`"
+      "contains": "Default user-facing output should only show `业务判断`、`当前需要确认` and `下一步`"
     }
   ]
 }

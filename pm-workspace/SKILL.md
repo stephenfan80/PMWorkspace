@@ -49,7 +49,13 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 - 等待 Q、D、证据或用户确认时必须停住；不能假装已对齐、可出图或可交付。
 - 不得把真实 token、ownerSecret、私密客户资料、内部录音、未脱敏截图或未脱敏 Zoon 内容写进公开仓库。
 
-### 用户可见输出字段
+### 默认用户可见输出字段
+
+- `业务判断`
+- `当前需要确认`
+- `下一步`
+
+### 内部审计字段（默认不展示）
 
 - `当前模式`
 - `当前门槛`
@@ -117,9 +123,9 @@ Use `pmw-run event` for the D0 result, current gate, evidence state, and next sk
 
 Read `../pmworkspace-shared/references/routing.md`; it is the only route table and D0 source of truth.
 
-After routing, always output the routing contract from `routing.md`: `当前模式`、`当前门槛`、`下一技能`、`为什么`、`run_id`、`证据状态`.
+After routing, record the full routing contract from `routing.md` in local audit: `当前模式`、`当前门槛`、`下一技能`、`为什么`、`run_id`、`证据状态`. Default user-facing output should only show `业务判断`、`当前需要确认` and `下一步`.
 
-If platform scripts are available, include the current `产物流动` summary from `pmw-artifact flow` in the routing context. A routed child skill should know the latest `上游产物`, expected `本轮产物`, and `下游可读` target instead of relying only on conversation memory.
+If platform scripts are available, read `pmw-artifact flow --details` for routing context, but do not include the flow table in default user output. A routed child skill should know the latest `上游产物`, expected `本轮产物`, and `下游可读` target from local audit instead of relying only on conversation memory.
 
 ## Welcome And First Run
 
@@ -150,8 +156,8 @@ If the user provides a product task in the same message, skip the welcome menu a
 - 一个方案 + 一个屏幕 = 一张图片。除非用户要求展示板，否则不要创建比较拼图。
 - 每张图片必须绑定方案名、屏幕任务、主目标、反指标、不可虚构项和产品简报版本。
 - 平台脚本可用时，保存可沉淀资产：使用日志、决策、产品简报 Markdown、原型清单和偏好反馈。
-- 平台脚本可用时，使用 `pmw-dashboard status` 汇总当前证据状态；出图或交付前使用 `pmw-dashboard readiness --target prototype|handoff` 展示 Product Readiness Dashboard。不要让 brief、Zoon、线上参考、方案差异、不可虚构项、复审状态和待决策项散落在对话里。
-- 平台脚本可用时，使用 `pmw-artifact flow` 汇总产物流动；路由到下游技能时必须说明 `上游产物`、`本轮产物`、`下游可读` 和 `产物流动`。
+- 平台脚本可用时，使用 `pmw-dashboard status` / `pmw-dashboard readiness --target prototype|handoff` 获取简洁 verdict；需要完整审计时才运行或展示 `--details` 表格。
+- 平台脚本可用时，使用 `pmw-artifact flow --details` 汇总产物流动给下游技能；默认用户输出不说明 `上游产物`、`本轮产物`、`下游可读` 和 `产物流动`。
 - 不要把真实 token、私密客户数据、内部录音、敏感截图或未脱敏 Zoon 内容保存到本地资产。
 
 ## Shared References

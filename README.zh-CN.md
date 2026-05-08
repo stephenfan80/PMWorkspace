@@ -28,11 +28,11 @@ PMWorkspace 接住的就是这种混乱时刻：不是替你跳过思考，而�
 
 你给它原始材料，它帮你形成一组可继续流动的产品资产：
 
-- **产品简报：** 把目标用户、核心问题、当前损失、目标、反指标、约束和不可虚构项压缩成一份共识材料。
+- **产品简报：** 默认输出 12-18 行左右的业务简报，只保留产品判断、范围、反指标、不可虚构项和下一步；完整 Q/D、来源、准备度、产物流动和路径进入本地审计。
 - **方案方向：** 不只是换配色，而是在产品策略、信息架构、交互模型或信任模型上给出不同解法。
 - **移动端优先原型图：** 默认按 iPhone 17 竖屏 `402 x 874` 生成 image-2 原型图，一个方案、一个屏幕、单独一张图。
 - **线上证据记录：** 把线上流程截图、状态页、竞品参考和协作文档漂移证据纳入同一条产品链路。
-- **产品准备度判断：** 在出图或交付前统一检查产品简报、协作文档、线上参考、方案差异、不可虚构项和复审状态。
+- **产品准备度判断：** 在出图或交付前统一检查产品简报、协作文档、线上参考、方案差异、不可虚构项和复审状态；默认只给结论和第一条阻断原因，完整表格用 `--details` 展开。
 - **多角色复审结论：** 从策略、信任 / 风险、设计系统、数据可行性等角度指出能不能通过、要不要重出、哪里需要拍板。
 - **交付稿：** 把通过复审的方向整理成精简 PRD、设计交付、实验验证或研发交付材料。
 
@@ -191,10 +191,10 @@ $pm-workspace
 
 ### 产品运行层
 
-- **Product Readiness Dashboard：** `pmw-dashboard readiness --target prototype|handoff` 在出图 / 交付前统一给出准备度判断，覆盖产品简报、AI 协作文档、线上参考、方案差异、不可虚构项和复审状态。
-- **Product Artifact Flow：** `pmw-artifact` 记录下游可读产物，让产品简报、原型清单、复审结论和交付稿能流向下一个技能，而不是靠对话记忆重新推断。
+- **Product Readiness Dashboard：** `pmw-dashboard readiness --target prototype|handoff` 在出图 / 交付前统一给出准备度判断，覆盖产品简报、AI 协作文档、线上参考、方案差异、不可虚构项和复审状态；默认是简洁 verdict，完整门槛表用 `--details`。
+- **Product Artifact Flow：** `pmw-artifact` 记录下游可读产物，让产品简报、原型清单、复审结论和交付稿能流向下一个技能，而不是靠对话记忆重新推断；默认只给摘要，完整链路用 `pmw-artifact flow --details`。
 - **Browser Evidence Lite：** 线上流程截图、状态页、竞品参考和协作文档漂移证据统一登记为 `browser_evidence` 产物，复用 `pmw-artifact`，不新增浏览器证据子系统。
-- **Evidence Dashboard：** `pmw-dashboard status` 输出中文证据状态页，汇总产品简报版本、协作文档状态、线上参考、假设、不可虚构项、原型清单、复审结论和问题偏好。
+- **Evidence Dashboard：** `pmw-dashboard status` 默认输出中文状态摘要；`pmw-dashboard status --details` 才展开产品简报版本、协作文档状态、线上参考、假设、不可虚构项、原型清单、复审结论和问题偏好。
 - **Prototype Shotgun Board：** `pmw-prototype-board` 登记每个独立 image-2 图片单元，并用表格比较方案。
 - **PM Review Army / Product Review Squad：** 原型复审先运行策略、信任 / 风险、设计系统、数据可行性四个可插拔专家独立检查；高风险或深度交付时，可追加 CEO、Eng、Design、DX、安全、QA、发布工程师短结论。
 - **Skill Doc Generator：** `pmw-gen-skill-docs` 从 manifest 生成并检查 SKILL.md 共享契约区块，统一 preamble、共享门槛、必读协议和输出字段。
@@ -206,10 +206,13 @@ bin/pmw-run start --skill pm-autoplan --mode quick --goal "10 分钟轻量包"
 bin/pmw-run event --type gate --status "待确认" --title "假设确认" --summary "等待 PM 确认"
 bin/pmw-run finish --status "基于假设，可讨论" --next "进入 image-2 原型"
 bin/pmw-dashboard status
+bin/pmw-dashboard status --details
 bin/pmw-dashboard readiness --target prototype
 bin/pmw-dashboard readiness --target handoff
+bin/pmw-dashboard readiness --target prototype --details
 bin/pmw-artifact add --kind browser_evidence --title "线上参考：结果页" --status "已采集" --source-skill pm-brief --path "<截图路径>" --url "<URL>" --summary "页面任务、视觉基线、交互模式、必须保留、可以挑战"
 bin/pmw-artifact flow
+bin/pmw-artifact flow --details
 bin/pmw-artifact latest --kind product_brief
 bin/pmw-review-specialist list
 bin/pmw-review-specialist summary
@@ -251,6 +254,7 @@ PMWorkspace 默认把资产保存在本地：
   user/pmworkspace-improvements.jsonl
   user/pmworkspace-feedback-drafts/
   projects/<slug>/briefs/
+  projects/<slug>/briefs/audit/
   projects/<slug>/decisions.jsonl
   projects/<slug>/questions.jsonl
   projects/<slug>/project.json
@@ -266,7 +270,7 @@ PMWorkspace 默认把资产保存在本地：
   projects/<slug>/learnings.jsonl
 ```
 
-会保存项目名、产品简报、用户确认过的决策、协作文档链接、产物流动记录、复审专家短结论、原型清单、交付稿、脱敏交付事实、偏好反馈和本地使用日志。
+会保存项目名、业务简报、完整本地审计副本、用户确认过的决策、协作文档链接、产物流动记录、复审专家短结论、原型清单、交付稿、脱敏交付事实、偏好反馈和本地使用日志。默认用户输出和 `pmw-project show`、dashboard、artifact-flow 都会脱敏 token、ownerSecret、Authorization 等敏感字段；本机调试确需原始项目 JSON 时使用 `pmw-project show --raw`。
 
 不会保存 token、owner secret、API key、cookie、原始客户资料、内部录音、敏感截图、未脱敏协作文档内容或 API 原始响应。
 

@@ -1,8 +1,91 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env python3
+import json
+import os
+import pathlib
+import re
+import subprocess
+import sys
 
-root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-base="$(basename "$root")"
-slug="$(printf '%s' "$root" | shasum 2>/dev/null | awk '{print $1}' | cut -c1-10 || date +%s)"
-safe_base="$(printf '%s' "$base" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9._-]+/-/g; s/-+/-/g; s/^-+//; s/-+$//')"
-printf '%s-%s\n' "${safe_base:-project}" "$slug"
+
+STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
+
+
+def git_root() -> pathlib.Path:
+    try:
+        root = subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True, stderr=subprocess.DEVNULL).strip()
+        if root:
+            return pathlib.Path(root)
+    except Exception:
+        pass
+    return pathlib.Path.cwd()
+
+
+def cwd_slug(root: pathlib.Path) -> str:
+    base = root.name
+    try:
+        digest = subprocess.check_output(["shasum"], input=str(root), text=True).split()[0][:10]
+    except Exception:
+        digest = "local"
+    safe_base = re.sub(r"[^a-z0-9._-]+", "-", base.lower()).strip("-") or "project"
+    safe_base = re.sub(r"-+", "-", safe_base)
+    return f"{safe_base}-{digest}"
+
+
+def bound_slug(root: pathlib.Path) -> str:
+    for path in [pathlib.Path.cwd() / ".pmworkspace-project", root / ".pmworkspace-project"]:
+        if path.exists():
+            value = path.read_text(encoding="utf-8", errors="ignore").strip()
+            if value:
+                return value
+    return ""
+
+
+def has_project_state(slug: str) -> bool:
+    path = STATE_DIR / "projects" / slug / "project.json"
+    if not path.exists():
+        return False
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return False
+    return any(data.get(key) for key in ["current_run_id", "latest_run_id", "latest_brief", "zoon_url"])
+
+
+def global_active_slug() -> str:
+    path = STATE_DIR / "current-project"
+    if not path.exists():
+        return ""
+    slug = path.read_text(encoding="utf-8", errors="ignore").strip()
+    if slug and has_project_state(slug):
+        return slug
+    return ""
+
+
+def main() -> int:
+    env_slug = os.environ.get("PMW_PROJECT_SLUG", "").strip()
+    if env_slug:
+        print(env_slug)
+        return 0
+
+    root = git_root()
+    bound = bound_slug(root)
+    if bound:
+        print(bound)
+        return 0
+
+    derived = cwd_slug(root)
+    if os.environ.get("PMW_STRICT_CWD_PROJECT") == "true":
+        print(derived)
+        return 0
+
+    active = global_active_slug()
+    if active and active != derived and not has_project_state(derived):
+        print(active)
+        return 0
+
+    print(derived)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

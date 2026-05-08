@@ -31,11 +31,11 @@ Shape fast. Deliver deep.
 
 ## What PMWorkspace Produces
 
-- **Product summary:** target user, core problem, current loss, goal, counter-metric, constraints, and non-fiction boundaries.
+- **Product summary:** a concise business-facing brief by default; full Q/D history, sources, readiness, artifact flow, and local paths stay in local audit.
 - **Solution directions:** options that differ by product strategy, information architecture, interaction model, or trust model.
 - **Mobile-first prototype images:** one direction plus one screen equals one image-2 output, defaulting to iPhone 17 portrait `402 x 874`.
 - **Evidence records:** online screenshots, status pages, competitor references, and collaboration-doc drift evidence.
-- **Readiness verdicts:** a pre-image or pre-handoff check across summary, collaboration doc, online reference, scheme difference, boundaries, and review status.
+- **Readiness verdicts:** a pre-image or pre-handoff check across summary, collaboration doc, online reference, scheme difference, boundaries, and review status; defaults to a concise verdict, with full tables behind `--details`.
 - **Review conclusions:** strategy, trust/risk, design-system, and data-feasibility perspectives before final prototype review.
 - **Delivery assets:** compact PRD, design handoff, experiment seed, or engineering handoff.
 
@@ -98,8 +98,8 @@ Output: <summary only / one screen / three directions / handoff>
 The Chinese README is the primary user guide. This section keeps the runtime anchors for deeper usage and maintenance.
 
 - **End-to-end workbench map:** the canonical map lives in `pmworkspace-shared/references/pm-workbench-map.md`; README should not maintain a second route table.
-- **Product Readiness Dashboard:** `pmw-dashboard readiness --target prototype|handoff` gives a verdict before image generation or handoff.
-- **Product Artifact Flow:** `pmw-artifact` makes product summaries, prototype manifests, review results, handoff docs, and browser evidence readable by downstream skills.
+- **Product Readiness Dashboard:** `pmw-dashboard readiness --target prototype|handoff` gives a concise verdict before image generation or handoff; use `--details` for the full audit table.
+- **Product Artifact Flow:** `pmw-artifact` makes product summaries, prototype manifests, review results, handoff docs, and browser evidence readable by downstream skills; `pmw-artifact flow --details` shows the full chain.
 - **Browser Evidence Lite:** online screenshots, status pages, competitor references, and collaboration-doc drift evidence are recorded as `browser_evidence` artifacts through `pmw-artifact`.
 - **PM Review Army / Product Review Squad:** strategy, trust/risk, design-system, and data-feasibility specialists review first; high-risk delivery can add CEO, Eng, Design, DX, security, QA, and release-engineering roles.
 - **Skill Doc Generator:** `pmw-gen-skill-docs` generates and checks shared SKILL.md contract blocks.
@@ -108,10 +108,13 @@ Useful commands:
 
 ```bash
 bin/pmw-dashboard status
+bin/pmw-dashboard status --details
 bin/pmw-dashboard readiness --target prototype
 bin/pmw-dashboard readiness --target handoff
+bin/pmw-dashboard readiness --target prototype --details
 bin/pmw-artifact add --kind browser_evidence --title "线上参考：结果页" --status "已采集" --source-skill pm-brief --path "<screenshot>" --url "<URL>" --summary "页面任务、视觉基线、交互模式、必须保留、可以挑战"
 bin/pmw-artifact flow
+bin/pmw-artifact flow --details
 bin/pmw-review-specialist summary
 bin/pmw-prototype-board list
 bin/pmw-eval run
@@ -143,7 +146,7 @@ bin/pmw-zoon read --url "<document URL>"
 
 ## Privacy
 
-PMWorkspace keeps telemetry local by default. It should not report project names, file paths, prompt contents, screenshots, product-summary text, or customer data. Do not store raw private customer data, tokens, internal recordings, or sensitive screenshots in shared materials.
+PMWorkspace keeps telemetry local by default. It should not report project names, file paths, prompt contents, screenshots, product-summary text, or customer data. Default project, dashboard, and artifact-flow output redacts tokens, owner secrets, and authorization headers; `pmw-project show --raw` is only for explicit local debugging. Do not store raw private customer data, tokens, internal recordings, or sensitive screenshots in shared materials.
 
 ## License
 

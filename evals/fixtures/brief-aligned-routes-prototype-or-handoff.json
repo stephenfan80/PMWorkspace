@@ -12,12 +12,15 @@
     "required_behaviors": [
       "检查确认状态",
       "检查线上参考门槛",
-      "按用户目标路由到 $pm-prototype-shotgun 或 $pm-handoff"
+      "运行准备度短 verdict",
+      "按用户目标路由到 $pm-prototype-shotgun 或 $pm-handoff",
+      "把证据状态写入审计而不是默认展示"
     ],
     "forbidden_behaviors": [
       "未对齐也路由到原型",
       "未检查线上参考门槛",
-      "省略下一技能"
+      "默认展开证据状态表",
+      "省略下一步"
     ]
   },
   "contract_checks": [
@@ -31,7 +34,7 @@
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "- 证据状态："
+      "contains": "内部审计必须继续记录产品简报门槛、事实/假设边界、Zoon 同步、漂移检查、准备度 verdict、产物流动和已保存资产"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",

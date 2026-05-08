@@ -13,10 +13,12 @@
       "先输出策略审查结论",
       "输出我建议",
       "输出建议姿态",
-      "再输出策略取舍控制面板"
+      "输出当前必须拍板和下一步",
+      "策略取舍控制面板写入审计但不默认展示"
     ],
     "forbidden_behaviors": [
       "只输出控制面板",
+      "默认展开策略取舍控制面板",
       "只输出风险清单",
       "省略策略建议"
     ]
@@ -32,7 +34,7 @@
     },
     {
       "path": "pm-strategy-review/SKILL.md",
-      "contains": "策略取舍控制面板："
+      "contains": "内部策略取舍控制面板（默认不展示，写入审计）："
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",

@@ -12,7 +12,7 @@
 
 - `交付目标`：PRD、设计交付、实验验证、研发交付，或它们的组合。
 - `事实来源`：已对齐产品简报版本、最新 Zoon 快照、策略决策、prototype-board 选定方向、原型复审结论。
-- `Product Readiness Dashboard`：用 `pmw-dashboard readiness --target handoff` 在交付前统一展示产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态；verdict 不是 `可交付` 时不能继续写 PRD 或验收。
+- `Product Readiness Dashboard`：用 `pmw-dashboard readiness --target handoff` 在交付前统一检查产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态；verdict 不是 `可交付` 时不能继续写 PRD 或验收。默认只展示短 verdict 和第一阻断原因，完整表格只在审计 / 调试时展开。
 - `交付前门槛`：产品简报已对齐、Zoon 无实质漂移、线上参考门槛通过、原型复审通过、关键 D 已拍板、不可虚构项完整。
 - `原型复审状态`：可通过、需要重出、需要 PM 拍板、需要补充参考，或不适用（无原型交付）。
 - `未决拍板`：仍会改变范围、用户承诺、实验口径、数据真实性、线索/交易/隐私/合规边界或验收标准的 D。

@@ -1,6 +1,6 @@
 {
   "id": "strategy-controller-output-contract",
-  "title": "策略审查必须结论先行并输出策略取舍控制器字段",
+  "title": "策略审查必须结论先行并把策略取舍控制器写入审计",
   "category": "pm-strategy-review",
   "primary_skill": "pm-strategy-review",
   "prompt": "使用 $pm-strategy-review 审查这个产品方向，重点看范围、价值交换和风险。",
@@ -15,19 +15,16 @@
       "输出最大策略矛盾",
       "输出范围模式",
       "输出进入产品简报的写法",
-      "输出来源门槛",
-      "输出策略风险类型",
-      "输出使用视角",
-      "输出产品动作",
-      "输出策略取舍",
+      "内部记录来源门槛、策略风险类型和使用视角",
+      "内部记录产品动作和策略取舍",
       "输出当前 D",
-      "输出下一技能",
-      "输出证据状态"
+      "内部记录下一技能和证据状态"
     ],
     "forbidden_behaviors": [
       "只输出审美建议",
-      "省略来源门槛",
-      "省略下一技能"
+      "默认展开策略取舍控制面板",
+      "省略内部来源门槛",
+      "省略内部下一技能"
     ]
   },
   "contract_checks": [
@@ -37,7 +34,7 @@
     },
     {
       "path": "pmworkspace-shared/references/adversarial-review.md",
-      "contains": "每次输出必须先给 `策略审查结论`，再给 `策略取舍控制面板`"
+      "contains": "每次默认用户输出必须先给 `策略审查结论`、推荐姿态、当前必须拍板和下一步；`策略取舍控制面板` 写入审计"
     },
     {
       "path": "pm-strategy-review/SKILL.md",
@@ -57,7 +54,7 @@
     },
     {
       "path": "pm-strategy-review/SKILL.md",
-      "contains": "- 来源门槛："
+      "contains": "内部策略取舍控制面板（默认不展示，写入审计）："
     },
     {
       "path": "pm-strategy-review/SKILL.md",

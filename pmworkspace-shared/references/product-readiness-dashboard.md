@@ -17,7 +17,7 @@ pmw-dashboard readiness --target handoff
 pmw-dashboard status
 ```
 
-`pmw-dashboard status` 必须内嵌 `PMWorkspace 产品准备度仪表盘`，避免用户只看到零散证据状态。
+`pmw-dashboard status` 默认输出简洁状态摘要，`pmw-dashboard status --details` 才内嵌完整 `PMWorkspace 产品准备度仪表盘`，避免用户只看到后台证据表。
 
 ## 固定门槛
 
@@ -40,9 +40,23 @@ pmw-dashboard status
 - `READY_FOR_HANDOFF / 可交付`：出图前门槛全部通过，且原型复审为 `可通过`，关键 D 已拍板，交付缺口不会改变承诺或验收。
 - `NOT_READY / 不可出图 / 不可交付`：任一 required 行未通过。输出必须给出第一条阻断行的行动建议，并路由到能补齐它的最早技能。
 
-## 输出契约
+## 默认输出契约
 
-用户可见输出使用中文字段：
+默认用户可见输出只给结论和下一步，不展示完整门槛表：
+
+```text
+产品准备度：
+- 目标：<出图前 / 交付前>
+- 结论：<可出图 / 不可出图 / 可交付 / 不可交付>
+- 原因：<关键门槛已通过 / 第一条阻断门槛的人话原因>
+- 下一步：<继续 / 补截图 / 回到产品简报 / 先复审>
+```
+
+完整门槛表属于内部审计输出。用户明确要求“看状态 / 看审计 / 调试 / 展开证据”时，或开发者运行 `pmw-dashboard readiness --details` 时才展示。
+
+## 详细输出契约
+
+详细输出使用中文字段：
 
 ```text
 PMWorkspace 产品准备度仪表盘：
@@ -61,7 +75,7 @@ PMWorkspace 产品准备度仪表盘：
 | 复审状态 | YES/no | ... | ... | ... |
 ```
 
-如果仪表盘显示缺口，不要用图片、PRD 或“后续补充”绕过。把缺口转成一个 `Q`、一个 `D`，或退回 `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` 中最早能修复的技能。
+如果仪表盘显示缺口，不要用图片、PRD 或“后续补充”绕过。默认输出只说第一条阻断原因和下一步；内部审计记录完整表格。把缺口转成一个 `Q`、一个 `D`，或退回 `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` 中最早能修复的技能。
 
 仪表盘可以展示 Zoon URL 的存在和同步状态，但不得暴露 `token`、`ownerSecret`、Authorization header 或 API 原始响应内部信息。
 

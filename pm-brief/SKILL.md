@@ -40,7 +40,7 @@ done
 10. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
 11. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory user-summary` plus `pmw-memory summary` when available. If memory changes phrasing or recommendation, explicitly say `基于过往偏好...` or `基于本地产品认知...`; memory cannot override the current brief, Zoon, anti-metric, non-fiction boundary, online reference gate, or missing gate.
 12. 先建立产品简报契约控制器，记录 `来源门槛`、`已完成门槛`、`缺失门槛`、`事实/假设边界`、`策略决策写入`、`简报深度`、`下一技能` 和 `证据状态`；再压缩产品核心信息，避免把材料堆成大文档。
-13. 如果来自 `$pm-jobs` 或 `$pm-strategy-review`，先接收上游输出的风险、范围、价值交换、信任/风险、反指标、可行性、定位、业务冲突和待决策队列。
+13. 如果来自 `$pm-jobs` 或 `$pm-strategy-review`，先接收上游输出的范围模式、风险、范围、价值交换、信任/风险、反指标、可行性、定位、业务冲突和待决策队列。
 14. 如果基础事实仍缺失，退回 `$pm-jobs`，只展开一个当前 Q，不写完整产品简报；如果策略取舍仍未拍板，退回 `$pm-strategy-review`，只展开一个当前 D。
 15. 确认已完成工作目标模式、Q 诊断、前提确认和必要 D 拍板；如果缺失，只输出短对齐摘要、缺失门槛和下一技能，不写完整产品简报。
 16. 如果已有 Zoon URL，先运行 `pmw-zoon drift` 或读取最新 Zoon 快照；Zoon 漂移如果改变目标、反指标、不可虚构项、范围、用户承诺或方案方向，确认状态退回 `待确认`，并回到 `$pm-jobs` 或 `$pm-strategy-review`。
@@ -48,7 +48,7 @@ done
 18. 用户可见输出必须先给 `产品核心信息`，再给 `产品简报门槛`，最后给 `支持信息`。核心信息只保留会改变原型结构、复审判断、交付范围或用户承诺的内容；支持信息只承载来源、Zoon、线上参考、检索状态、已保存资产和证据边界，不能压过核心判断。
 19. 产品核心信息必须包含一句话判断、目标用户 / 场景、核心问题 / 当前损失、当前替代方案、本次目标、反指标、策略选择、原型重点和不可虚构项。
 20. 互联网案例启发只保留 `可借鉴原则`、`不可照搬` 和 `对原型影响`；参考来源放入支持信息。最佳实践不能覆盖当前 brief、Zoon、线上截图、反指标或不可虚构项。
-21. 把已拍板的策略取舍写入对抗审查后的设计取舍、方案方向、范围外、决策记录和对原型的影响；未拍板的策略取舍只能放进当前 D 或后续 D 队列。
+21. 把已拍板的范围模式和策略取舍写入对抗审查后的设计取舍、方案方向、范围外、决策记录和对原型的影响；未拍板的范围变化或策略取舍只能放进当前 D 或后续 D 队列。
 22. 已对齐且用户要原型时，下一技能是 `$pm-prototype-shotgun`；已对齐且用户要交付时，下一技能是 `$pm-handoff`；未对齐时停在 `$pm-brief` 或回到上游缺失门槛。
 23. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
 24. Save the brief with `pmw-log brief <name>` when platform scripts are available. This automatically creates or appends the brief to Zoon when `zoon_sync_on_brief` is enabled.

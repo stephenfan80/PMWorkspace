@@ -13,6 +13,7 @@
       "先输出策略审查结论",
       "输出我建议",
       "输出最大策略矛盾",
+      "输出范围模式",
       "输出进入产品简报的写法",
       "输出来源门槛",
       "输出策略风险类型",
@@ -45,6 +46,10 @@
     {
       "path": "pm-strategy-review/SKILL.md",
       "contains": "- 最大策略矛盾："
+    },
+    {
+      "path": "pm-strategy-review/SKILL.md",
+      "contains": "- 范围模式：扩大模式 / 保持模式 / 收缩模式 / 转向模式"
     },
     {
       "path": "pm-strategy-review/SKILL.md",

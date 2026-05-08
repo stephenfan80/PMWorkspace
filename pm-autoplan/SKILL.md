@@ -28,6 +28,7 @@ done
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-autoplan >/dev/null 2>&1 || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-question-tuning" ] && "$_PMW_BIN/pmw-question-tuning" summary 2>/dev/null || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" flow 2>/dev/null || true
 ```
 
 ## Workflow
@@ -37,32 +38,33 @@ done
 3. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 自动产品评审 stage fields.
 4. Read `../pmworkspace-shared/references/evidence-dashboard.md`.
 5. Read `../pmworkspace-shared/references/product-readiness-dashboard.md`.
-6. Read `../pmworkspace-shared/references/pm-decision-principles.md`.
-7. Read `../pmworkspace-shared/references/pm-eval-system.md` and treat its contracts as maintenance guardrails for PMWorkspace behavior.
-8. Read `../pmworkspace-shared/references/routing.md`; if `$pm-autoplan` was entered from `$pm-workspace`, inherit its mode and run. If called directly, use routing D0 to choose mode.
-9. Read `../pmworkspace-shared/references/question-tuning.md`.
-10. Read `../pmworkspace-shared/references/product-office-hours.md`.
-11. Read `../pmworkspace-shared/references/adversarial-review.md`.
-12. Read `../pmworkspace-shared/references/product-plan-handoff.md`.
-13. Read `../pmworkspace-shared/references/zoon-workflow.md` and `../pmworkspace-shared/references/zoon-drift-check.md`.
-14. Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run，不要重新 `pmw-run start`；如果用户直接调用 `$pm-autoplan` 且没有当前 run，再 start `pmw-run start --skill pm-autoplan --mode <quick|deep> --goal "<本轮目标>"`.
-15. Build the automatic review control panel from `autoplan-workflow.md`: 靠谱产品负责人姿态、模式来源、事实来源优先级、当前阶段、最早阻塞门槛、门槛等级、门槛来源、可自动采用项、必须 PM 拍板项、下一技能和交接上下文.
-16. 快速成型模式：先做生产/高风险升级检查；如果出现生产流程、高风险承诺、真实数据、线索/交易/隐私或研发交付信号，升级到深度交付门槛，不要继续轻量包。
-17. 快速成型模式：按最早门槛顺序只检测会影响轻量包结构的缺口：核心用户/场景、核心问题、主目标/反指标、不可虚构项、原型屏幕范围、方案差异、假设确认。默认最多问 2-3 个 `Q`。
-18. 快速成型模式：列出关键假设、方案方向和每张图的不可虚构项，请用户确认“按这些假设继续”。确认前不生成图片，并用 `pmw-run event --type gate` 记录当前门槛。
-19. 快速成型模式：确认后输出轻量包：标注假设的产品简报、2-3 个方案方向、每个方案 1 张移动端 image-2 原型图计划，并把状态写成 `基于假设，可讨论`。
-20. 深度交付模式：按最早门槛顺序推进：工作目标模式、场景路由、Q 诊断、前提确认、必要 D、策略审查、产品简报、Zoon 同步、Zoon 漂移检查、线上参考和设计系统基线、Product Readiness Dashboard 的原型准备度或交付准备度。
-21. 深度交付模式：Use `pm-decision-principles.md` to auto-decide only low-risk defaults that do not change product direction; surface any direction-changing item as a single `D` choice question and stop.
-22. Give the user a conclusion-first review: first output `自动评审结论` with `我建议` and `理由`, then output `评审控制面板`.
-23. For the earliest gate, always declare `门槛等级` as `阻断`、`高风险`、`可自动采用` or `可延后`, and declare `门槛来源`.
-24. Every item in `已自动采用` must include source and why no PM decision is needed, for example `默认移动端优先。来源：PMWorkspace 默认规则。原因：不改变产品方向或用户承诺。`
-25. When enough information exists, create the smallest useful product brief and save it with `pmw-log brief <name>`. Because `pmw-log brief` auto-syncs, this should create or append to Zoon when enabled.
-26. If a Zoon URL exists before prototype preparation, run `pmw-zoon drift --url <url>` when available. If it returns `DRIFT`, read the latest Zoon snapshot and update the product brief version before continuing.
-27. Before routing to `$pm-prototype-shotgun` or `$pm-handoff`, run `pmw-dashboard readiness --target prototype` or `pmw-dashboard readiness --target handoff` when available and include `产品准备度仪表盘` in the control panel. If the verdict is `不可出图` or `不可交付`, route to the first blocking gate instead of continuing.
-28. Map the earliest blocking gate to one next skill: `$pm-jobs`, `$pm-strategy-review`, `$pm-brief`, `$pm-prototype-shotgun`, `$pm-prototype-review`, or `$pm-handoff`. Do not pretend all downstream skills have completed when only the next gate is ready.
-29. `下一技能` cannot be only a skill id; include `交接上下文` with 来源门槛、已确认事实、未决 Q/D、证据状态 and 交给它的原因.
-30. At each gate, record evidence, decisions, artifacts, or reviews with `pmw-run event`; before final output, run `pmw-dashboard status` when available.
-31. End with a readiness state: `需要补充`、`待确认`、`基于假设，可讨论`、`已对齐`、`可进入原型复审`、or `可交付`. Call `pmw-run finish` only when the current run reaches a terminal readiness state; if waiting for Q/D/证据 or handing off to a child skill, keep the current run open for reuse.
+6. Read `../pmworkspace-shared/references/artifact-flow.md` and include Product Artifact Flow in the control panel when routing between skills.
+7. Read `../pmworkspace-shared/references/pm-decision-principles.md`.
+8. Read `../pmworkspace-shared/references/pm-eval-system.md` and treat its contracts as maintenance guardrails for PMWorkspace behavior.
+9. Read `../pmworkspace-shared/references/routing.md`; if `$pm-autoplan` was entered from `$pm-workspace`, inherit its mode and run. If called directly, use routing D0 to choose mode.
+10. Read `../pmworkspace-shared/references/question-tuning.md`.
+11. Read `../pmworkspace-shared/references/product-office-hours.md`.
+12. Read `../pmworkspace-shared/references/adversarial-review.md`.
+13. Read `../pmworkspace-shared/references/product-plan-handoff.md`.
+14. Read `../pmworkspace-shared/references/zoon-workflow.md` and `../pmworkspace-shared/references/zoon-drift-check.md`.
+15. Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run，不要重新 `pmw-run start`；如果用户直接调用 `$pm-autoplan` 且没有当前 run，再 start `pmw-run start --skill pm-autoplan --mode <quick|deep> --goal "<本轮目标>"`.
+16. Build the automatic review control panel from `autoplan-workflow.md`: 靠谱产品负责人姿态、模式来源、事实来源优先级、当前阶段、最早阻塞门槛、门槛等级、门槛来源、可自动采用项、必须 PM 拍板项、下一技能和交接上下文.
+17. 快速成型模式：先做生产/高风险升级检查；如果出现生产流程、高风险承诺、真实数据、线索/交易/隐私或研发交付信号，升级到深度交付门槛，不要继续轻量包。
+18. 快速成型模式：按最早门槛顺序只检测会影响轻量包结构的缺口：核心用户/场景、核心问题、主目标/反指标、不可虚构项、原型屏幕范围、方案差异、假设确认。默认最多问 2-3 个 `Q`。
+19. 快速成型模式：列出关键假设、方案方向和每张图的不可虚构项，请用户确认“按这些假设继续”。确认前不生成图片，并用 `pmw-run event --type gate` 记录当前门槛。
+20. 快速成型模式：确认后输出轻量包：标注假设的产品简报、2-3 个方案方向、每个方案 1 张移动端 image-2 原型图计划，并把状态写成 `基于假设，可讨论`。
+21. 深度交付模式：按最早门槛顺序推进：工作目标模式、场景路由、Q 诊断、前提确认、必要 D、策略审查、产品简报、Zoon 同步、Zoon 漂移检查、线上参考和设计系统基线、Product Readiness Dashboard 的原型准备度或交付准备度。
+22. 深度交付模式：Use `pm-decision-principles.md` to auto-decide only low-risk defaults that do not change product direction; surface any direction-changing item as a single `D` choice question and stop.
+23. Give the user a conclusion-first review: first output `自动评审结论` with `我建议` and `理由`, then output `评审控制面板`.
+24. For the earliest gate, always declare `门槛等级` as `阻断`、`高风险`、`可自动采用` or `可延后`, and declare `门槛来源`.
+25. Every item in `已自动采用` must include source and why no PM decision is needed, for example `默认移动端优先。来源：PMWorkspace 默认规则。原因：不改变产品方向或用户承诺。`
+26. When enough information exists, create the smallest useful product brief and save it with `pmw-log brief <name>`. Because `pmw-log brief` auto-syncs, this should create or append to Zoon when enabled and register `product_brief` in Product Artifact Flow.
+27. If a Zoon URL exists before prototype preparation, run `pmw-zoon drift --url <url>` when available. If it returns `DRIFT`, read the latest Zoon snapshot and update the product brief version before continuing.
+28. Before routing to `$pm-prototype-shotgun` or `$pm-handoff`, run `pmw-dashboard readiness --target prototype` or `pmw-dashboard readiness --target handoff` when available and include `产品准备度仪表盘` in the control panel. If the verdict is `不可出图` or `不可交付`, route to the first blocking gate instead of continuing.
+29. Map the earliest blocking gate to one next skill: `$pm-jobs`, `$pm-strategy-review`, `$pm-brief`, `$pm-prototype-shotgun`, `$pm-prototype-review`, or `$pm-handoff`. Do not pretend all downstream skills have completed when only the next gate is ready.
+30. `下一技能` cannot be only a skill id; include `交接上下文` with 来源门槛、已确认事实、未决 Q/D、证据状态 and 交给它的原因. 交接上下文还必须追加上游产物、本轮产物、下游可读和产物流动。
+31. At each gate, record evidence, decisions, artifacts, or reviews with `pmw-run event`; before final output, run `pmw-dashboard status` when available.
+32. End with a readiness state: `需要补充`、`待确认`、`基于假设，可讨论`、`已对齐`、`可进入原型复审`、or `可交付`. Call `pmw-run finish` only when the current run reaches a terminal readiness state; if waiting for Q/D/证据 or handing off to a child skill, keep the current run open for reuse.
 
 ## Auto-Decide Rules
 
@@ -117,6 +119,10 @@ done
 - 证据状态：
 - 证据状态页：
 - 产品准备度仪表盘：
+- 产物流动：
+- 上游产物：
+- 本轮产物：
+- 下游可读：
 - 产品简报：
 - 方案方向：
 - 轻量包图片计划：

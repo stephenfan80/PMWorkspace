@@ -26,6 +26,7 @@ eval 分类必须能映射回 `pmworkspace-shared/references/pm-workbench-map.md
 | `prototype-review` | 原型复审 |
 | `pm-handoff` | 产品交付：精简 PRD、现成文档入口、未复审不交付、未拍板不写验收、交付资产沉淀 |
 | `readiness-dashboard` | 出图 / 交付前 Product Readiness Dashboard 和 verdict |
+| `artifact-flow` | Product Artifact Flow：产品简报、原型清单、复审结论和交付稿必须成为下游可读产物 |
 | `memory`、`decision-principles`、`eval-system` | 运行与记忆：偏好边界、个人全局记忆、GitHub 待审稿、自动决策、eval runner |
 
 新增分类时，必须同时更新 `pm-workbench-map.md` 和 `pm-eval-system.md`。

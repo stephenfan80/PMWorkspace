@@ -24,6 +24,7 @@ done
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-update-check" 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-brief >/dev/null 2>&1 || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" user-summary 2>/dev/null || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" flow 2>/dev/null || true
 ```
 
 ## Workflow
@@ -33,14 +34,15 @@ done
 3. Read `../pmworkspace-shared/references/pm-decision-principles.md` before deciding whether to write a brief, ask a D, or apply memory.
 4. Read `../pmworkspace-shared/references/pm-eval-system.md` and preserve the brief gate contracts it lists.
 5. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 产品简报 stage fields.
-6. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-brief` 且没有当前 run，再创建 runtime run.
-7. Read `../pmworkspace-shared/references/decision-question-mode.md` and turn PM decision items into choice questions.
-8. Read `../pmworkspace-shared/references/internet-best-practice-research.md` and run lightweight internet best-practice research for the dominant scenario when tools are available.
-9. Read `../pmworkspace-shared/references/zoon-workflow.md`.
-10. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
-11. Read `../pmworkspace-shared/references/product-readiness-dashboard.md`; if the next skill will be `$pm-prototype-shotgun` or `$pm-handoff`, run `pmw-dashboard readiness --target prototype|handoff` when available and include the readiness verdict in 支持信息。
-12. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory user-summary` plus `pmw-memory summary` when available. If memory changes phrasing or recommendation, explicitly say `基于过往偏好...` or `基于本地产品认知...`; memory cannot override the current brief, Zoon, anti-metric, non-fiction boundary, online reference gate, or missing gate.
-13. 先建立产品简报契约控制器，记录 `来源门槛`、`已完成门槛`、`缺失门槛`、`事实/假设边界`、`策略决策写入`、`简报深度`、`下一技能` 和 `证据状态`；再压缩产品核心信息，避免把材料堆成大文档。
+6. Read `../pmworkspace-shared/references/artifact-flow.md`; `$pm-brief` must turn upstream Q/D and strategy decisions into a downstream-readable `product_brief`.
+7. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-brief` 且没有当前 run，再创建 runtime run.
+8. Read `../pmworkspace-shared/references/decision-question-mode.md` and turn PM decision items into choice questions.
+9. Read `../pmworkspace-shared/references/internet-best-practice-research.md` and run lightweight internet best-practice research for the dominant scenario when tools are available.
+10. Read `../pmworkspace-shared/references/zoon-workflow.md`.
+11. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
+12. Read `../pmworkspace-shared/references/product-readiness-dashboard.md`; if the next skill will be `$pm-prototype-shotgun` or `$pm-handoff`, run `pmw-dashboard readiness --target prototype|handoff` when available and include the readiness verdict in 支持信息。
+13. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory user-summary` plus `pmw-memory summary` when available. If memory changes phrasing or recommendation, explicitly say `基于过往偏好...` or `基于本地产品认知...`; memory cannot override the current brief, Zoon, anti-metric, non-fiction boundary, online reference gate, or missing gate.
+14. 先建立产品简报契约控制器，记录 `来源门槛`、`已完成门槛`、`缺失门槛`、`事实/假设边界`、`策略决策写入`、`简报深度`、`上游产物`、`本轮产物`、`下游可读`、`产物流动`、`下一技能` 和 `证据状态`；再压缩产品核心信息，避免把材料堆成大文档。
 14. 如果来自 `$pm-jobs` 或 `$pm-strategy-review`，先接收上游输出的范围模式、风险、范围、价值交换、信任/风险、反指标、可行性、定位、业务冲突和待决策队列。
 15. 如果基础事实仍缺失，退回 `$pm-jobs`，只展开一个当前 Q，不写完整产品简报；如果策略取舍仍未拍板，退回 `$pm-strategy-review`，只展开一个当前 D。
 16. 确认已完成工作目标模式、Q 诊断、前提确认和必要 D 拍板；如果缺失，只输出短对齐摘要、缺失门槛和下一技能，不写完整产品简报。
@@ -52,7 +54,7 @@ done
 22. 把已拍板的范围模式和策略取舍写入对抗审查后的设计取舍、方案方向、范围外、决策记录和对原型的影响；未拍板的范围变化或策略取舍只能放进当前 D 或后续 D 队列。
 23. 已对齐且用户要原型时，下一技能是 `$pm-prototype-shotgun`；已对齐且用户要交付时，下一技能是 `$pm-handoff`；未对齐时停在 `$pm-brief` 或回到上游缺失门槛。
 24. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
-25. Save the brief with `pmw-log brief <name>` when platform scripts are available. It uses Zoon-first, local-backed publishing: first publish to Zoon with `pmw-zoon sync`, then record the same Markdown as the local audit copy and latest brief.
+25. Save the brief with `pmw-log brief <name>` when platform scripts are available. It uses Zoon-first, local-backed publishing: first publish to Zoon with `pmw-zoon sync`, then record the same Markdown as the local audit copy and latest brief, and automatically register `product_brief` in Product Artifact Flow.
 26. Create or update the Zoon online brief by default:
     - If a Zoon URL is already available, append the brief first with `pmw-zoon sync` / `pmw-zoon append --url <url>`, then keep the local brief path and Zoon URL in project state.
     - If no Zoon URL exists and `zoon_auto_create` is not explicitly disabled, create one first with `pmw-zoon sync --title "产品设计简报：<功能名>"` or `pmw-zoon create --title "产品设计简报：<功能名>"`, then store the local audit copy.
@@ -97,6 +99,10 @@ Return the smallest useful brief. 用户可见第一屏必须是核心信息先�
 - 当前 D：
 - 后续 D 队列：
 - 下一技能：
+- 上游产物：
+- 本轮产物：
+- 下游可读：
+- 产物流动：
 - 证据状态：
 - 建议下一步：
 

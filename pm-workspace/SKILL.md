@@ -23,10 +23,11 @@ Before user-facing output, read `../pmworkspace-shared/references/language-and-l
 
 1. Read `../pmworkspace-shared/references/runtime-kernel.md`.
 2. Read `../pmworkspace-shared/references/pm-workbench-map.md` for the end-to-end stage map, shared state fields, and eval category alignment.
-3. Read `../pmworkspace-shared/references/pm-decision-principles.md`.
-4. Read `../pmworkspace-shared/references/pm-eval-system.md` and keep its contracts as maintenance guardrails.
-5. Read `../pmworkspace-shared/references/routing.md` as the only source for D0 工作方式判定、路由表、run 衔接和路由输出契约。
-6. Read `../pmworkspace-shared/references/welcome-guide.md` only when the user has no concrete product task, asks what PMWorkspace can do, or needs first-run onboarding.
+3. Read `../pmworkspace-shared/references/artifact-flow.md` so routed skills preserve upstream artifacts and downstream-readable handoffs.
+4. Read `../pmworkspace-shared/references/pm-decision-principles.md`.
+5. Read `../pmworkspace-shared/references/pm-eval-system.md` and keep its contracts as maintenance guardrails.
+6. Read `../pmworkspace-shared/references/routing.md` as the only source for D0 工作方式判定、路由表、run 衔接和路由输出契约。
+7. Read `../pmworkspace-shared/references/welcome-guide.md` only when the user has no concrete product task, asks what PMWorkspace can do, or needs first-run onboarding.
 
 ## Product Workbench State Machine
 
@@ -53,6 +54,7 @@ if [ -n "$_PMW_BIN" ]; then
   _UPD=$("$_PMW_BIN/pmw-update-check" 2>/dev/null || true)
   [ -n "$_UPD" ] && echo "$_UPD"
   "$_PMW_BIN/pmw-log" usage pm-workspace >/dev/null 2>&1 || true
+  [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" flow 2>/dev/null || true
 fi
 ```
 
@@ -71,6 +73,8 @@ Use `pmw-run event` for the D0 result, current gate, evidence state, and next sk
 Read `../pmworkspace-shared/references/routing.md`; it is the only route table and D0 source of truth.
 
 After routing, always output the routing contract from `routing.md`: `当前模式`、`当前门槛`、`下一技能`、`为什么`、`run_id`、`证据状态`.
+
+If platform scripts are available, include the current `产物流动` summary from `pmw-artifact flow` in the routing context. A routed child skill should know the latest `上游产物`, expected `本轮产物`, and `下游可读` target instead of relying only on conversation memory.
 
 ## Welcome And First Run
 
@@ -102,6 +106,7 @@ If the user provides a product task in the same message, skip the welcome menu a
 - 每张图片必须绑定方案名、屏幕任务、主目标、反指标、不可虚构项和产品简报版本。
 - 平台脚本可用时，保存可沉淀资产：使用日志、决策、产品简报 Markdown、原型清单和偏好反馈。
 - 平台脚本可用时，使用 `pmw-dashboard status` 汇总当前证据状态；出图或交付前使用 `pmw-dashboard readiness --target prototype|handoff` 展示 Product Readiness Dashboard。不要让 brief、Zoon、线上参考、方案差异、不可虚构项、复审状态和待决策项散落在对话里。
+- 平台脚本可用时，使用 `pmw-artifact flow` 汇总产物流动；路由到下游技能时必须说明 `上游产物`、`本轮产物`、`下游可读` 和 `产物流动`。
 - 不要把真实 token、私密客户数据、内部录音、敏感截图或未脱敏 Zoon 内容保存到本地资产。
 
 ## Shared References
@@ -111,6 +116,7 @@ Use `../pmworkspace-shared/references/` for:
 - `language-and-localization.md` for output language and Chinese terminology.
 - `runtime-kernel.md` for run ids, shared statuses, audit events, and final run state.
 - `pm-workbench-map.md` for the end-to-end PMWorkspace map, shared state fields, and eval category alignment.
+- `artifact-flow.md` for Product Artifact Flow, upstream artifacts, downstream-readable outputs, and `pmw-artifact`.
 - `pm-decision-principles.md` for automatic decision priorities, stop gates, and memory boundaries.
 - `pm-eval-system.md` for maintenance eval fixtures and PMWorkspace behavior contracts.
 - `evidence-dashboard.md` for evidence status pages.

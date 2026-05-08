@@ -147,6 +147,15 @@ def artifact_rows(root: pathlib.Path, kind: Optional[str] = None, limit: Optiona
     return rows
 
 
+def same_path(left: str, right: str) -> bool:
+    if not left or not right:
+        return False
+    try:
+        return pathlib.Path(left).expanduser().resolve() == pathlib.Path(right).expanduser().resolve()
+    except Exception:
+        return left == right
+
+
 def artifact_location(row: dict) -> str:
     return str(row.get("url") or row.get("path") or "")
 
@@ -256,6 +265,73 @@ def has_non_fiction_boundary(text: str) -> bool:
     return False
 
 
+def extract_brief_status(text: str) -> str:
+    for line in text.splitlines()[:120]:
+        stripped = line.strip().lstrip("-# ").strip()
+        if stripped.startswith("确认状态"):
+            return stripped
+    return ""
+
+
+def status_is_aligned(text: str) -> bool:
+    return "已对齐" in text and not contains_any(text, ["待确认", "草稿", "缺失门槛", "有漂移", "实质漂移"])
+
+
+def event_is_confirmed(event: dict) -> bool:
+    text = f"{event.get('status', '')} {event.get('summary', '')}"
+    return contains_any(text, ["已对齐", "已确认", "已同意", "批准", "用户确认", "用户同意"]) and not contains_any(
+        text,
+        ["待确认", "需要确认", "准备确认", "需要补充", "需要 PM 拍板", "不同意", "未确认"],
+    )
+
+
+def current_brief_artifact(root: pathlib.Path, brief_path: str, run_id: str) -> dict:
+    rows = artifact_rows(root, "product_brief")
+    for row in reversed(rows):
+        if run_id and row.get("run_id") and row.get("run_id") != run_id:
+            continue
+        row_path = str(row.get("path") or "")
+        if brief_path and row_path and same_path(row_path, brief_path):
+            return row
+    for row in reversed(rows):
+        row_path = str(row.get("path") or "")
+        if brief_path and row_path and same_path(row_path, brief_path):
+            return row
+    return {}
+
+
+def current_artifact(root: pathlib.Path, kind: str, run_id: str) -> dict:
+    rows = artifact_rows(root, kind)
+    for row in reversed(rows):
+        if run_id and row.get("run_id") == run_id:
+            return row
+    return {}
+
+
+def current_board_items(root: pathlib.Path, brief_path: str, brief_version: str, run_id: str) -> list[dict]:
+    rows = [r for r in read_jsonl(root / "prototype-board.jsonl") if r.get("record_type", "item") == "item"]
+    scoped = []
+    for row in rows:
+        row_run = str(row.get("run_id") or "")
+        row_path = str(row.get("brief_path") or "")
+        row_version = str(row.get("brief_version") or "")
+        if run_id and row_run:
+            if row_run == run_id:
+                scoped.append(row)
+            continue
+        if brief_path and row_path:
+            if same_path(row_path, brief_path):
+                scoped.append(row)
+            continue
+        if run_id:
+            continue
+        if brief_version and row_version:
+            if brief_version in row_version:
+                scoped.append(row)
+            continue
+    return scoped
+
+
 def readiness_target_label(target: str) -> str:
     if target == "prototype":
         return "出图前"
@@ -274,24 +350,46 @@ def auto_readiness_target(project: dict, events: list[dict]) -> str:
 
 def product_readiness_rows(project: dict, events: list[dict], target: str) -> list[dict]:
     effective_target = auto_readiness_target(project, events) if target == "auto" else target
+    root = project_dir()
+    run_id = str(events[-1].get("run_id") if events else "")
     brief_path = str(project.get("latest_brief", ""))
     brief_text = read_text(brief_path)
     brief_name, brief_meta = latest_brief_summary(brief_path)
-    brief_status_text = f"{brief_meta} {brief_text[:400]}"
-    brief_ready = bool(brief_path) and "已对齐" in brief_status_text and not contains_any(
-        brief_status_text,
-        ["待确认", "草稿", "缺失门槛", "有漂移", "实质漂移"],
-    )
+    brief_version = str(project.get("latest_brief_version") or "")
+    brief_status = extract_brief_status(brief_text)
+    product_brief = current_brief_artifact(root, brief_path, run_id)
+    brief_status_text = f"{brief_meta} {brief_status}"
+    brief_ready = bool(brief_path) and bool(brief_text) and status_is_aligned(brief_status_text)
     rows = [
         gate_result(
             "产品简报",
             True,
             "已对齐" if brief_ready else ("未记录" if not brief_path else "未达已对齐"),
-            brief_name if brief_path else "project.json 未记录 latest_brief",
+            "；".join(
+                item
+                for item in [
+                    brief_name if brief_path else "project.json 未记录 latest_brief",
+                    f"artifact：{product_brief.get('status')}" if product_brief else "artifact 未记录当前 brief",
+                ]
+                if item
+            ),
             "继续" if brief_ready else "退回 $pm-brief 完成已对齐产品核心信息契约",
             brief_ready,
         )
     ]
+
+    brief_confirm = latest_event(events, ["产品简报确认", "前提确认"], {"gate", "decision"})
+    brief_confirm_ready = bool(brief_confirm) and event_is_confirmed(brief_confirm)
+    rows.append(
+        gate_result(
+            "产品简报确认",
+            True,
+            "已确认" if brief_confirm_ready else ("未记录" if not brief_confirm else brief_confirm.get("status", "待确认")),
+            brief_confirm.get("summary") or "当前 run 未记录用户确认产品简报 / 前提确认",
+            "继续" if brief_confirm_ready else "先把产品简报 / 关键前提展示给用户确认；确认前不能进入 image-2",
+            brief_confirm_ready,
+        )
+    )
 
     zoon_url = str(project.get("zoon_url") or "")
     zoon_sync = str(project.get("last_zoon_sync_status") or "")
@@ -340,7 +438,7 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         )
     )
 
-    browser_evidence = latest_browser_evidence(project_dir())
+    browser_evidence = latest_browser_evidence(root)
     if browser_evidence:
         reference_text = (
             f"{browser_evidence.get('status', '')} "
@@ -370,8 +468,8 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         )
     )
 
-    board = [r for r in read_jsonl(project_dir() / "prototype-board.jsonl") if r.get("record_type", "item") == "item"]
-    scheme_event = latest_event(events, ["方案差异", "方案方向", "方案比较板"], {"evidence", "gate", "artifact"})
+    board = current_board_items(root, brief_path, brief_version, run_id)
+    scheme_event = latest_event(events, ["方案差异", "方案方向", "方案比较板"], {"evidence", "gate", "artifact", "decision"})
     scheme_text = f"{scheme_event.get('status', '')} {scheme_event.get('summary', '')}"
     scheme_ready = bool(board or scheme_event) and not contains_any(scheme_text, ["只换皮", "未通过", "缺失", "待确认"])
     rows.append(
@@ -385,6 +483,23 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         )
     )
 
+    scheme_confirm = latest_event(events, ["方案方向确认", "方案方向", "原型出图判断"], {"gate", "decision"})
+    scheme_confirm_text = f"{scheme_confirm.get('status', '')} {scheme_confirm.get('summary', '')}"
+    scheme_confirm_ready = bool(scheme_confirm) and contains_any(scheme_confirm_text, ["已确认", "已批准", "默认方向已批准", "可出图", "已对齐"]) and not contains_any(
+        scheme_confirm_text,
+        ["待确认", "需要补充", "不可出图", "缺失", "未批准"],
+    )
+    rows.append(
+        gate_result(
+            "方案方向确认",
+            True,
+            "已确认" if scheme_confirm_ready else ("未记录" if not scheme_confirm else scheme_confirm.get("status", "待确认")),
+            scheme_confirm.get("summary") or "当前 run 未记录方案方向确认",
+            "继续" if scheme_confirm_ready else "先确认方案方向；未确认前不写 image-2 prompt",
+            scheme_confirm_ready,
+        )
+    )
+
     board_non_fiction = [str(row.get("non_fiction") or "").strip() for row in board if str(row.get("non_fiction") or "").strip()]
     non_fiction_ready = bool(board_non_fiction or has_non_fiction_boundary(brief_text))
     rows.append(
@@ -395,6 +510,32 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
             "prototype-board / 产品简报" if non_fiction_ready else "未找到明确不可虚构边界",
             "继续" if non_fiction_ready else "回到 $pm-brief 补齐不能展示的能力、数据、承诺和动作",
             non_fiction_ready,
+        )
+    )
+
+    data_evidence = current_artifact(root, "data_evidence", run_id)
+    data_text = f"{data_evidence.get('status', '')} {data_evidence.get('title', '')} {data_evidence.get('summary', '')}"
+    data_ready = bool(data_evidence) and not contains_any(data_text, ["缺失", "待补充", "失败", "不可用"])
+    if data_ready:
+        data_status = "已佐证"
+        data_evidence_text = f"data_evidence：{data_evidence.get('title') or '数据佐证'}｜{data_evidence.get('summary') or artifact_location(data_evidence) or '已记录'}"
+        data_action = "继续"
+    elif contains_any(brief_text, ["数据不适用", "无需数据佐证", "数据佐证：不适用"]):
+        data_status = "不适用"
+        data_evidence_text = "产品简报标注数据佐证不适用"
+        data_action = "继续"
+    else:
+        data_status = "未提供，存在未验证风险"
+        data_evidence_text = "未登记 data_evidence；原型必须标注假设 / 示例 / 区间，不能展示确定性承诺"
+        data_action = "告知用户方案有未验证风险，并写入 brief 风险 / 待验证与原型不可虚构项"
+    rows.append(
+        gate_result(
+            "数据佐证",
+            False,
+            data_status,
+            redact_sensitive(data_evidence_text),
+            data_action,
+            True,
         )
     )
 
@@ -501,7 +642,7 @@ def render_status(run_id: Optional[str]) -> str:
     brief_name, brief_meta = latest_brief_summary(str(project.get("latest_brief", "")))
     decisions = read_jsonl(root / "decisions.jsonl")[-5:]
     questions = read_jsonl(root / "questions.jsonl")[-5:]
-    board = [r for r in read_jsonl(root / "prototype-board.jsonl") if r.get("record_type", "item") == "item"]
+    board = current_board_items(root, str(project.get("latest_brief", "")), str(project.get("latest_brief_version") or ""), chosen_run)
     board_scores = {}
     for row in read_jsonl(root / "prototype-board.jsonl"):
         if row.get("record_type") == "score":
@@ -588,7 +729,7 @@ def render_status_summary(run_id: Optional[str]) -> str:
     brief_name, brief_meta = latest_brief_summary(str(project.get("latest_brief", "")))
     target, verdict_cn, reason, next_action, _rows = readiness_verdict(project, events, "auto")
     artifact_count = len(read_jsonl(root / "artifact-flow.jsonl"))
-    board_count = len([r for r in read_jsonl(root / "prototype-board.jsonl") if r.get("record_type", "item") == "item"])
+    board_count = len(current_board_items(root, str(project.get("latest_brief", "")), str(project.get("latest_brief_version") or ""), chosen_run))
     review = latest_review(events)
     zoon_sync_status = str(project.get("last_zoon_sync_status") or "")
     if zoon_sync_status == "synced":

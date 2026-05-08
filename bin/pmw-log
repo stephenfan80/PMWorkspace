@@ -55,6 +55,54 @@ normalize_existing_version_line() {
   mv "$tmp" "$file"
 }
 
+current_run_id() {
+  local project_json="$PROJECT_DIR/project.json"
+  [ -f "$project_json" ] || return 0
+  python3 - "$project_json" <<'PY'
+import json, sys
+try:
+    data = json.load(open(sys.argv[1], encoding="utf-8"))
+except Exception:
+    data = {}
+print(data.get("current_run_id") or data.get("latest_run_id") or "")
+PY
+}
+
+brief_declares_aligned() {
+  local file="$1"
+  grep -Eq '确认状态[：:][[:space:]]*已对齐' "$file"
+}
+
+run_has_brief_confirmation() {
+  local run_id="$1"
+  local run_file="$PROJECT_DIR/runs/$run_id.jsonl"
+  [ -n "$run_id" ] && [ -f "$run_file" ] || return 1
+  python3 - "$run_file" <<'PY'
+import json, sys
+
+def confirmed(row):
+    text = f"{row.get('status', '')} {row.get('summary', '')}"
+    positive = any(token in text for token in ["已对齐", "已确认", "已同意", "批准", "用户确认", "用户同意"])
+    negative = any(token in text for token in ["待确认", "需要确认", "准备确认", "需要补充", "需要 PM 拍板", "不同意", "未确认"])
+    return positive and not negative
+
+ok = False
+with open(sys.argv[1], encoding="utf-8") as handle:
+    for line in handle:
+        try:
+            row = json.loads(line)
+        except Exception:
+            continue
+        title = str(row.get("title", ""))
+        if row.get("event") not in {"gate", "decision"}:
+            continue
+        if ("产品简报确认" in title or "前提确认" in title) and confirmed(row):
+            ok = True
+print("yes" if ok else "no")
+sys.exit(0 if ok else 1)
+PY
+}
+
 ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 case "$EVENT" in
@@ -75,6 +123,13 @@ case "$EVENT" in
     business_file="$(mktemp "${TMPDIR:-/tmp}/pmw-brief-business.XXXXXX")"
     trap 'rm -f "$input_file" "$business_file" 2>/dev/null || true' EXIT
     cat > "$input_file"
+    if brief_declares_aligned "$input_file"; then
+      run_id="$(current_run_id || true)"
+      if ! run_has_brief_confirmation "$run_id"; then
+        echo "BRIEF_NOT_CONFIRMED: 当前产品简报声明为已对齐，但当前 run 未记录「产品简报确认 / 前提确认：已对齐」。请先让用户确认产品简报或关键前提。" >&2
+        exit 2
+      fi
+    fi
     previous_version_number="$(latest_project_brief_version_number || true)"
     input_version_number="$(version_number_from_file "$input_file" || true)"
     if [ -n "$previous_version_number" ]; then

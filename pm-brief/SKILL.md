@@ -114,8 +114,9 @@ done
 22. 把已拍板的范围模式和策略取舍写入对抗审查后的设计取舍、方案方向、范围外、决策记录和对原型的影响；未拍板的范围变化或策略取舍只能放进当前 D 或后续 D 队列。
 23. 已对齐且用户要原型时，下一技能是 `$pm-prototype-shotgun`；已对齐且用户要交付时，下一技能是 `$pm-handoff`；未对齐时停在 `$pm-brief` 或回到上游缺失门槛。
 24. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
-25. Save the brief with `pmw-log brief <name>` when platform scripts are available. It uses local-first, Zoon-optional publishing: save the business brief as latest brief, save the full input as a local audit copy, and automatically register `product_brief` in Product Artifact Flow. 完整审计副本保存在本地. It syncs to Zoon only when `PMW_ZOON_SYNC_ON_BRIEF=true` / `zoon_sync_on_brief: true` or the user explicitly chose online collaboration.
-26. Ask before creating or updating a Zoon online brief:
+25. 产品简报生成后必须先停在 `产品简报确认`：把 2-4 条关键前提、方案方向、反指标、不可虚构项和 `风险 / 待验证` 展示给用户。只有用户明确确认产品简报或关键前提后，当前 run 才能记录 `产品简报确认：已对齐`，并且产品简报确认状态才能写成 `已对齐`；未确认时保存为 `待确认`，不能把下一技能指向 `$pm-prototype-shotgun`。
+26. Save the brief with `pmw-log brief <name>` when platform scripts are available. It uses local-first, Zoon-optional publishing: save the business brief as latest brief, save the full input as a local audit copy, and automatically register `product_brief` in Product Artifact Flow. 完整审计副本保存在本地. It syncs to Zoon only when `PMW_ZOON_SYNC_ON_BRIEF=true` / `zoon_sync_on_brief: true` or the user explicitly chose online collaboration. 如果输入简报声明 `确认状态：已对齐`，但当前 run 没有 `产品简报确认 / 前提确认：已对齐` 记录，平台脚本会拒绝保存为已对齐。
+27. Ask before creating or updating a Zoon online brief:
     - If a Zoon URL is already available, ask whether to append this brief to that document before calling `pmw-zoon sync` / `pmw-zoon append --url <url>`.
     - If no Zoon URL exists, do not auto-create one. Ask `是否同步到在线协作文档（Zoon）？A. 先不需要，使用本地 Markdown 继续；B. 需要，同步到 Zoon 供团队在线修改。`
     - If the user chooses B, use `PMW_ZOON_SYNC_ON_BRIEF=true PMW_ZOON_AUTO_CREATE=true pmw-log brief <name>` or `pmw-zoon create --title "产品设计简报：<功能名>"`, then store the local audit copy and Zoon URL.
@@ -131,6 +132,8 @@ done
 如果产品简报契约控制器显示 `缺失门槛`、`策略决策写入：未完成`、`Zoon 漂移检查：有实质变化` 或 `事实/假设边界` 不清，确认状态不能写成“已对齐”，也不能进入 `$pm-prototype-shotgun` 或 `$pm-handoff`。
 
 产品简报不是“已对齐”时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
+
+数据佐证不是绝对阻断，但必须检查并写入边界。有数据时登记 `data_evidence`；没有数据时产品简报要写 `数据佐证：未提供，本方案存在未验证风险`，并在 `风险 / 待验证` 与不可虚构项中禁止确定性承诺、真实验证过的数值或无法兑现的数据能力。
 
 用户在沟通过程中调整产品简报后，必须重新运行 `pmw-log brief <name>` 更新本地业务简报和完整审计副本；只有已启用 Zoon 或用户再次选择同步时，才把业务简报版同步到 Zoon。不能只在对话中更新口径。
 

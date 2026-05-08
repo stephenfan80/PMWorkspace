@@ -31,6 +31,29 @@ def project_dir() -> pathlib.Path:
     return path
 
 
+def read_json(path: pathlib.Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+        return value if isinstance(value, dict) else {}
+    except Exception:
+        return {}
+
+
+def project_meta() -> dict:
+    return read_json(project_dir() / "project.json")
+
+
+def current_run_id() -> str:
+    data = project_meta()
+    return str(data.get("current_run_id") or data.get("latest_run_id") or "")
+
+
+def current_brief_path() -> str:
+    return str(project_meta().get("latest_brief") or "")
+
+
 def board_path() -> pathlib.Path:
     return project_dir() / "prototype-board.jsonl"
 
@@ -58,9 +81,13 @@ def read_rows() -> list[dict]:
 
 
 def command_add(args: argparse.Namespace) -> int:
+    run_id = args.run or current_run_id()
+    brief_path = args.brief_path or current_brief_path()
     row = {
         "ts": now(),
         "record_type": "item",
+        "run_id": run_id,
+        "brief_path": brief_path,
         "scheme": args.scheme,
         "screen": args.screen,
         "brief_version": args.brief_version,
@@ -82,6 +109,7 @@ def command_score(args: argparse.Namespace) -> int:
     row = {
         "ts": now(),
         "record_type": "score",
+        "run_id": args.run or current_run_id(),
         "scheme": args.scheme,
         "screen": args.screen,
         "score": args.score,
@@ -97,6 +125,7 @@ def command_image(args: argparse.Namespace) -> int:
     row = {
         "ts": now(),
         "record_type": "image",
+        "run_id": args.run or current_run_id(),
         "scheme": args.scheme,
         "screen": args.screen,
         "image": args.image,
@@ -164,6 +193,8 @@ def build_parser() -> argparse.ArgumentParser:
     add.add_argument("--non-fiction", default="")
     add.add_argument("--image", default="")
     add.add_argument("--status", default="计划生成")
+    add.add_argument("--run")
+    add.add_argument("--brief-path")
     add.set_defaults(func=command_add)
 
     score = sub.add_parser("score")
@@ -172,6 +203,7 @@ def build_parser() -> argparse.ArgumentParser:
     score.add_argument("--score", required=True, type=int)
     score.add_argument("--note", required=True)
     score.add_argument("--status", default="待选择")
+    score.add_argument("--run")
     score.set_defaults(func=command_score)
 
     image = sub.add_parser("image")
@@ -180,6 +212,7 @@ def build_parser() -> argparse.ArgumentParser:
     image.add_argument("--image", required=True)
     image.add_argument("--status", default="已生成")
     image.add_argument("--note", default="")
+    image.add_argument("--run")
     image.set_defaults(func=command_image)
 
     listing = sub.add_parser("list")

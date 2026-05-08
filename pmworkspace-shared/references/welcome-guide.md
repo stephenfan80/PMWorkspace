@@ -2,49 +2,62 @@
 
 PMWorkspace 刚安装、用户只输入 `$pm-workspace`，或用户问“下一步能做什么”时使用本文件。
 
-## Welcome Message
+## 产品首页式欢迎
 
 ```text
-欢迎来到 PMWorkspace。
+PMWorkspace
+快速成型，深度交付。
 
-它不是一个直接出图的按钮，而是一个产品方案工作台：快速成型，深度交付。
+把一句 idea、PRD、Zoon、截图或客户洞察，推进成可复用的产品简报、方案方向、移动端 image-2 原型图和交付稿。
 
-你可以先用快速成型模式，在 10 分钟内把一句 idea 变成“产品简报 + 方案方向 + 原型图”的轻量包；也可以进入深度交付模式，用完整 Q 诊断、D 拍板、Zoon 对齐、原型复审和 PRD / 交付稿推进到下一团队。
+我会先判断本轮适合快速成型还是深度交付，并在每次路由后说明当前模式、当前门槛、下一技能、为什么、run_id 和证据状态。
 
-关键产品取舍会变成选择题让你拍板，不会只丢一串开放问题。
-如果你要做线上流程里的新页面，我也会先判断是否需要参考线上截图；结果页、状态页和生产样式不会直接凭空出图。
+推荐第一步：发一句产品想法，或贴一份 PRD / Zoon / 截图。
 ```
 
 ## First Choice Menu
 
-Offer exactly these practical starts:
+Offer exactly these practical starts. The menu should feel like product home-page entry cards, not a command list:
 
 ```text
 你可以这样开始：
 
-A. 我有一个新想法
-   发一句话想法，我会推荐快速成型模式：先问 2-3 个关键问题，确认假设后输出产品简报、方案方向和原型图。
+A. 我要快速成型
+   发一句话 idea。我会先问 2-3 个关键问题，确认假设后输出“产品简报 + 方案方向 + 原型图”轻量包。
 
-B. 我有 PRD / Zoon / 访谈材料
-   发文档或链接，我会提炼产品简报，自动创建/更新 Zoon 在线文档，打开到 Codex 内置浏览器，并把关键拍板点做成选择题。
+B. 我要深度交付
+   发 PRD、Zoon、访谈、支持洞察或业务背景。我会补齐产品事实、D 拍板、Zoon 对齐和原型准备度。
 
-C. 我想看 2-4 个原型方向
-   如果是快速探索，我会先做轻量包；如果要交付评审，我会先对齐产品简报，再用 $pm-prototype-shotgun 每个方案单独出移动端图。
+C. 我要生成产品简报
+   发材料或链接。我会整理事实、假设、反指标、不可虚构项和确认状态，并同步到 Zoon。
 
-D. 我已经有截图想优化
-   发当前线上截图或标注截图，我会只改相关区域并保留生产样式。
+D. 我要看原型方向
+   发已对齐产品简报或说明当前缺口。我会确认门槛后，用 image-2 每个方案、每个屏幕单独出图。
 
-E. 我要做线上流程里的新页面
-   发上一步页面或相似结果页截图；如果没有线上参考，也可以明确告诉我按新页面概念稿推进。
+E. 我要优化现有页面
+   发当前线上截图、录屏或标注截图。我会先更新视觉基线和线上参考状态，再判断能否进入方案。
 
-F. 我需要交付给设计/研发
-   我会把已确认方案整理成适合 PRD、设计或研发使用的交付稿。
+F. 我要复审原型
+   发已生成图片和对应产品简报。我会检查 brief、Zoon、线上参考、反指标、不可虚构项和设计系统。
 
-G. 我想自动跑完整评审
-   我会用 $pm-autoplan 深度交付模式自动串联追问、策略审查、产品简报、Zoon 同步和原型准备度，只把关键取舍交给你拍板。
+G. 我要转 PRD / 研发交付
+   发已确认方向或原型结果。我会整理目标、范围、不做什么、验收标准、风险和待决策项。
 ```
 
-Recommend A when the user gives no context.
+Recommend A when the user gives no context. If the user already supplied PRD/Zoon/截图/生产流程/交付目标, recommend B.
+
+## Route Status Preview
+
+When welcoming a user, also set expectation that future routed outputs will show:
+
+```text
+当前模式：
+当前门槛：
+下一技能：
+为什么：
+run_id：
+证据状态：
+```
 
 ## Starter Prompts
 

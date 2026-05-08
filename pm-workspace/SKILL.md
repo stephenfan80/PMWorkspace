@@ -17,25 +17,16 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 
 Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. For Chinese users, use Chinese headings, labels, status values, and recommendations; keep English only for skill ids, commands, file paths, and precise technical terms such as `token`, `API`, `PRD`, `Zoon`, `image-2`, and `URL`.
 
-## Entry Modes
+## Frontloaded Protocol
 
-Before routing deeply, decide which mode serves the user's current job:
+`$pm-workspace` 是入口协议，不是第二份业务规则表。用户有具体产品任务时，跳过欢迎菜单，先读取这些共享协议再路由：
 
-- **快速成型模式**：用户有一句 idea、拍脑袋方案、还没想清楚但想尽快拿出可讨论材料，或明确要求“10 分钟”“先给几个方案”“轻量包”“简报 + 方案方向 + 原型图”。目标是在最少追问后产出可讨论轻量包。
-- **深度交付模式**：用户要 PRD、设计评审、研发交付、复杂线上流程、已有 Zoon/PRD/截图需要严格对齐，或涉及业务/数据/合规/生产样式风险。目标是让产品事实、决策和交付资产可靠。
-
-快速成型模式的默认输出是：
-
-```text
-产品简报（标注假设）
--> 2-3 个方案方向
--> 每个方向 1 张移动端 image-2 原型图
--> 下一步升级建议：PRD / 原型复审 / 交付稿
-```
-
-快速成型模式必须先问 2-3 个最影响方案结构的 `Q`，然后列出关键假设、反指标和不可虚构项，请用户确认“按这些假设继续”。用户确认后，可以把轻量包标记为 `基于假设，可讨论` 并生成图片；不能把它写成最终 PRD 或已验证事实。
-
-深度交付模式使用完整状态机。
+1. Read `../pmworkspace-shared/references/runtime-kernel.md`.
+2. Read `../pmworkspace-shared/references/pm-workbench-map.md` for the end-to-end stage map, shared state fields, and eval category alignment.
+3. Read `../pmworkspace-shared/references/pm-decision-principles.md`.
+4. Read `../pmworkspace-shared/references/pm-eval-system.md` and keep its contracts as maintenance guardrails.
+5. Read `../pmworkspace-shared/references/routing.md` as the only source for D0 工作方式判定、路由表、run 衔接和路由输出契约。
+6. Read `../pmworkspace-shared/references/welcome-guide.md` only when the user has no concrete product task, asks what PMWorkspace can do, or needs first-run onboarding.
 
 ## Product Workbench State Machine
 
@@ -44,7 +35,7 @@ PMWorkspace is not a prototype shortcut. In deep delivery mode, it must first cl
 Use this state machine for prototype-related work:
 
 ```text
-工作目标模式 -> 场景路由 -> Q 诊断 -> 前提确认 -> D 拍板 -> 产品简报 -> image-2 原型
+工作目标模式 -> 场景路由 -> Q 诊断 -> 前提确认 -> D 拍板 -> 产品简报 -> image-2 原型 -> 原型复审 -> 产品交付
 ```
 
 If any required step is incomplete in deep delivery mode, route to `$pm-jobs` or `$pm-brief` instead of generating prototypes.
@@ -67,28 +58,19 @@ fi
 
 If output contains `UPGRADE_AVAILABLE old new`, tell the user PMWorkspace has an update and offer to run `pmw-upgrade`. If `auto_upgrade` is `true`, upgrade automatically and say what changed only after upgrade succeeds.
 
-After deciding 快速成型模式 or 深度交付模式, start a runtime run when scripts are available:
+After D0 and routing choose 快速成型模式 or 深度交付模式, `$pm-workspace` creates the runtime run for routed sessions when scripts are available:
 
 ```bash
 "$_PMW_BIN/pmw-run" start --skill pm-workspace --mode <quick|deep> --goal "<本轮产品目标>"
 ```
 
-Use `pmw-run event` for gates, decisions, evidence, artifacts, and reviews; use `pmw-run finish` before the final response. If scripts are unavailable, mark `运行审计：未启用`.
+Use `pmw-run event` for the D0 result, current gate, evidence state, and next skill. If a child skill continues the workflow, do not finish the run in `$pm-workspace`; the child skill must reuse `current_run_id` and finish only at a terminal readiness state. If scripts are unavailable, mark `运行审计：未启用`.
 
-## Workbench Routing
+## Routing Source
 
-Route by the user's actual job:
+Read `../pmworkspace-shared/references/routing.md`; it is the only route table and D0 source of truth.
 
-- 用户要“快速成型”“先给几个方案”“简报 + 方案方向 + 原型图”“10 分钟轻量包” -> 使用 `$pm-autoplan` 的快速成型模式。
-- 原始想法、模糊产品请求、“帮我想想”、问题定义 -> 使用 `$pm-jobs`。
-- 范围、野心、策略取舍、“想大一点”、“是否值得做” -> 使用 `$pm-strategy-review`。
-- 需要“一次自动跑完整产品评审”“按推荐推进但关键点拍板”“深度交付” -> 使用 `$pm-autoplan`。
-- 需要可编辑的产品简报、Zoon 对齐或决策记录 -> 使用 `$pm-brief`。
-- 需要原型方向、image-2 设计图、多方案、截图修改 -> 使用 `$pm-prototype-shotgun`。
-- 需要复审已生成原型图、判断是否重出、沉淀偏好 -> 使用 `$pm-prototype-review`。
-- 需要适合 PRD、设计、实验验证或研发使用的交付稿 -> 使用 `$pm-handoff`。
-
-When unsure, ask whether the user wants 快速成型模式 or 深度交付模式. If they do not choose, default to 快速成型 for new ideas and 深度交付 for PRD, Zoon, screenshots, existing production flows, or handoff.
+After routing, always output the routing contract from `routing.md`: `当前模式`、`当前门槛`、`下一技能`、`为什么`、`run_id`、`证据状态`.
 
 ## Welcome And First Run
 
@@ -122,28 +104,15 @@ If the user provides a product task in the same message, skip the welcome menu a
 - 平台脚本可用时，使用 `pmw-dashboard status` 汇总当前证据状态；不要让 Zoon、线上参考、原型清单和待决策项散落在对话里。
 - 不要把真实 token、私密客户数据、内部录音、敏感截图或未脱敏 Zoon 内容保存到本地资产。
 
-## First-Use Message
-
-For a new user or new project, briefly explain:
-
-```text
-PMWorkspace 像一个产品团队：先用 $pm-jobs 问清楚真实问题，再用 $pm-strategy-review 挑战方向，用 $pm-brief 固化并同步 Zoon 产品简报，用 $pm-prototype-shotgun 生成移动端优先的 image-2 原型方案，用 $pm-prototype-review 复审原型，最后用 $pm-handoff 整理交付稿。
-```
-
-If the user is new and has only an idea, recommend:
-
-```text
-快速成型模式：我先问 2-3 个关键问题，确认假设后，在 10 分钟内帮你产出“产品简报 + 方案方向 + 原型图”的轻量包。之后可以继续升级成 PRD 或交付稿。
-```
-
-Then route to the smallest useful next skill.
-
 ## Shared References
 
 Use `../pmworkspace-shared/references/` for:
 
 - `language-and-localization.md` for output language and Chinese terminology.
 - `runtime-kernel.md` for run ids, shared statuses, audit events, and final run state.
+- `pm-workbench-map.md` for the end-to-end PMWorkspace map, shared state fields, and eval category alignment.
+- `pm-decision-principles.md` for automatic decision priorities, stop gates, and memory boundaries.
+- `pm-eval-system.md` for maintenance eval fixtures and PMWorkspace behavior contracts.
 - `evidence-dashboard.md` for evidence status pages.
 - `decision-question-mode.md` for PM decision questions.
 - `autoplan-workflow.md` for automatic product review sequencing.

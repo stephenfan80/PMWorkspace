@@ -36,11 +36,12 @@ pmw-zoon drift --url "<Zoon URL>"
 pmw-log brief "<功能名>"
 ```
 
-`pmw-log brief` 会保存本地 Markdown，并在 `zoon_sync_on_brief` 未关闭时自动调用 `pmw-zoon sync`：
+`pmw-log brief` 使用 Zoon-first，local-backed 同步：先把 Markdown 推送到在线 Zoon，再保存同一份内容为本地审计副本，并在项目状态中记录最终本地副本路径：
 
 - 已有 Zoon URL：追加最新 brief。
 - 没有 Zoon URL 且 `zoon_auto_create: true`：创建新 Zoon 文档。
-- 同步失败：本地 brief 仍然有效，但输出必须标记 `Zoon 同步失败`。
+- 同步成功：记录 `last_zoon_sync_status: synced`、Zoon URL 和最终本地 brief 路径。
+- 同步失败：本地 brief 仍然有效，但输出必须标记 `Zoon 同步失败`，并记录 `last_zoon_sync_status: failed` 和脱敏失败原因。
 
 同步前会按 `zoon_protocol_mode` 做协议发现：
 
@@ -48,10 +49,10 @@ pmw-log brief "<功能名>"
 - `cached`：只用缓存。
 - `builtin`：只用内置 `/documents/*` 契约。
 
-如果用户在对话中调整 brief，必须重新保存并同步；不能只在对话中改口径而不更新 Zoon。
+如果用户在对话中调整 brief，必须重新发布并同步；不能只在对话中改口径而不更新 Zoon。
 
 ## 版本规则
 
 - 每次实质调整 brief，递增版本或写明“基于 Zoon 最新快照”。
-- 如果 Zoon 中的人工修改改变目标、反指标、不可虚构项、屏幕范围或方案方向，回到对应 `Q` 或 `D`。
+- 如果 Zoon 中的人工修改改变目标、反指标、不可虚构项、范围、用户承诺或方案方向，回到对应 `Q` 或 `D`。
 - 图片提示词必须引用最新已对齐版本；不能引用过期 brief。

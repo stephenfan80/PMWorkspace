@@ -1,0 +1,59 @@
+{
+  "id": "autoplan-control-panel-output-contract",
+  "title": "自动产品评审必须输出控制面板字段",
+  "category": "autoplan",
+  "primary_skill": "pm-autoplan",
+  "prompt": "使用 $pm-autoplan 自动推进这个产品想法，按推荐走，但关键点让我拍板。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": false,
+    "gate": "自动评审控制面板",
+    "required_behaviors": [
+      "先输出自动评审结论",
+      "输出模式来源",
+      "输出推进阶段",
+      "输出最早门槛",
+      "输出门槛等级和门槛来源",
+      "输出停止原因",
+      "输出下一技能",
+      "输出交接上下文",
+      "输出证据状态"
+    ],
+    "forbidden_behaviors": [
+      "只输出最终建议",
+      "省略最早门槛",
+      "省略下一技能"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "## 自动评审控制器"
+    },
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "每次输出必须包含 `自动评审结论`、`我建议`、`理由`、`推进阶段`、`模式来源`、`最早门槛`、`门槛等级`、`门槛来源`、`自动采用项`、`停止原因`、`下一技能`、`交接上下文` 和 `证据状态`。"
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "自动评审结论："
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "- 模式来源："
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "- 门槛等级："
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "- 交接上下文："
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "- 下一技能："
+    }
+  ]
+}

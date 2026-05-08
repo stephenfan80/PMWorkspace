@@ -1,0 +1,38 @@
+{
+  "id": "jobs-autoplan-handoff-earliest-gate",
+  "title": "来自自动评审时只解决交给 pm-jobs 的最早门槛",
+  "category": "pm-jobs",
+  "primary_skill": "pm-jobs",
+  "prompt": "$pm-autoplan 判断最早门槛是工作目标和 Q 诊断，于是路由到 $pm-jobs。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "自动评审最早门槛",
+    "required_behaviors": [
+      "继承当前 run",
+      "只解决工作目标或 Q 诊断",
+      "输出下一技能",
+      "不假装后续已完成"
+    ],
+    "forbidden_behaviors": [
+      "直接生成已对齐产品简报",
+      "直接进入原型",
+      "直接输出交付稿"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "如果来自 `$pm-autoplan` 的最早门槛是工作目标、场景、Q 诊断或前提确认，只解决这个最早门槛"
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "如果来自 `$pm-autoplan`，只解决自动评审交给 `$pm-jobs` 的最早门槛"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "来自 `$pm-autoplan` 时，只解决自动评审交给 `$pm-jobs` 的最早门槛"
+    }
+  ]
+}

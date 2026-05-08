@@ -1,0 +1,41 @@
+{
+  "id": "prototype-scheme-difference-quality-gate",
+  "title": "多方案必须先通过方案差异质量检查",
+  "category": "pm-prototype-shotgun",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "给我三个方案：蓝色版、橙色版、卡片圆角版。",
+  "expected": {
+    "mode": "quick",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "方案差异质量不足",
+    "required_behaviors": [
+      "指出视觉皮肤不构成方案差异",
+      "要求差异来自页面结构、信息架构、交互路径、信任表达或关键任务",
+      "重拟方案方向"
+    ],
+    "forbidden_behaviors": [
+      "把配色当作方案",
+      "直接生成三张图",
+      "只调整圆角或插画"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "方案差异必须通过 `方案差异质量`"
+    },
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "contains": "方案差异质量不通过时，不要降级成“先出几张看看”。"
+    },
+    {
+      "path": "pmworkspace-shared/references/prototype-shotgun-board.md",
+      "contains": "不把配色、插画、圆角、卡片样式或风格皮肤包装成多方案。"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "原型方案：多方案差异必须先通过页面结构、信息架构、交互路径、信任表达或关键任务检查"
+    }
+  ]
+}

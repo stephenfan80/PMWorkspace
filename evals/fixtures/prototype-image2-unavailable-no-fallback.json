@@ -1,0 +1,41 @@
+{
+  "id": "prototype-image2-unavailable-no-fallback",
+  "title": "image-2 不可用时不能用 HTML 或线框替代",
+  "category": "pm-prototype-shotgun",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "当前环境不能生成 image-2，请先用 HTML 或 Markdown 线框替我交付原型。",
+  "expected": {
+    "mode": "deep",
+    "status": "阻断",
+    "must_stop": true,
+    "gate": "image-2 不可用",
+    "required_behaviors": [
+      "说明当前无法出图",
+      "停止在媒介门槛",
+      "不使用 HTML、Markdown 线框或比较板替代"
+    ],
+    "forbidden_behaviors": [
+      "生成 HTML 冒充设计原型",
+      "输出 Markdown 线框",
+      "用方案比较板替代图片"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "如果当前环境无法生成 image-2，停止并说明，不用 HTML、Markdown 线框或方案比较板替代。"
+    },
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "contains": "如果当前环境不能生成 image-2 图片，停止并说明无法出图；不要改用 HTML 来制造交付感。"
+    },
+    {
+      "path": "pmworkspace-shared/references/prototype-shotgun-board.md",
+      "contains": "方案比较板是审计和比较记录，不是 image-2 图片的替代物。"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "原型方案：image-2 不可用时必须停止说明"
+    }
+  ]
+}

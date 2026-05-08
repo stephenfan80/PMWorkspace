@@ -1,0 +1,38 @@
+{
+  "id": "strategy-missing-facts-route-back-jobs",
+  "title": "策略审查缺基础事实时必须退回 pm-jobs",
+  "category": "pm-strategy-review",
+  "primary_skill": "pm-strategy-review",
+  "prompt": "帮我审查这个方向，但目标用户、主目标、反指标和不可虚构项都还不清楚。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要补充",
+    "must_stop": true,
+    "gate": "基础事实缺失",
+    "required_behaviors": [
+      "识别基础事实缺失",
+      "退回 $pm-jobs",
+      "只问一个 Q",
+      "不虚构产品事实"
+    ],
+    "forbidden_behaviors": [
+      "用策略审查替代事实诊断",
+      "虚构目标用户或反指标",
+      "直接给策略 D 选项"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/adversarial-review.md",
+      "contains": "如果缺少用户、问题、主目标、反指标或不可虚构项等基础事实，退回 `$pm-jobs` 问一个 `Q`"
+    },
+    {
+      "path": "pm-strategy-review/SKILL.md",
+      "contains": "If basic facts such as user, problem, main goal, anti-metric, or non-fiction boundary are missing, route back to `$pm-jobs` with one focused `Q`"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "缺少用户、问题、主目标、反指标或不可虚构项等基础事实时，必须退回 `$pm-jobs` 问一个 `Q`"
+    }
+  ]
+}

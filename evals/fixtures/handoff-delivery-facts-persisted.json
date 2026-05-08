@@ -1,0 +1,50 @@
+{
+  "id": "handoff-delivery-facts-persisted",
+  "title": "产品交付必须沉淀接口、数据、埋点和实验资产",
+  "category": "pm-handoff",
+  "primary_skill": "pm-handoff",
+  "prompt": "用户补充了接口来源、字段口径、埋点事件和实验标准，请写 PRD 并保存这些信息。",
+  "expected": {
+    "mode": "deep",
+    "status": "可交付",
+    "must_stop": false,
+    "gate": "交付资产沉淀",
+    "required_behaviors": [
+      "识别接口、数据、埋点、实验和指标口径",
+      "写入本地脱敏交付资产",
+      "应用时明示基于本地交付资产",
+      "交付资产不覆盖当前事实"
+    ],
+    "forbidden_behaviors": [
+      "只写在 PRD 里不沉淀",
+      "保存原始私密文档",
+      "用历史交付资产覆盖当前 brief"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "用 `pmw-memory add-delivery-fact` 写入本地脱敏资产"
+    },
+    {
+      "path": "bin/pmw-memory",
+      "contains": "add-delivery-fact"
+    },
+    {
+      "path": "bin/pmw-memory",
+      "contains": "delivery-summary"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-memory.md",
+      "contains": "`pmw-memory add-delivery-fact` 用于保存用户在 PRD、接口、埋点、实验或数据沟通中补充的可复用交付事实。"
+    },
+    {
+      "path": "pmworkspace-shared/references/state-and-telemetry.md",
+      "contains": "user/delivery-facts.jsonl"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "每条交付资产必须包含 `fact-type`、`scenario`、`target`、`scope`、`source` 和 `confidence`。"
+    }
+  ]
+}

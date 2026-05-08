@@ -1,0 +1,37 @@
+{
+  "id": "review-hard-violation-regenerate-affected-only",
+  "title": "硬违规必须重出且只重出受影响屏幕",
+  "category": "prototype-review",
+  "primary_skill": "pm-prototype-review",
+  "prompt": "三张图里只有结果页展示了不可支持的真实最低价，另外两张图符合 brief。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要重出",
+    "must_stop": false,
+    "gate": "不可虚构项违规",
+    "required_behaviors": [
+      "标记结果页需要重出",
+      "只为受影响屏幕输出修复 brief",
+      "不要求整批重出"
+    ],
+    "forbidden_behaviors": [
+      "整批全部重出",
+      "因为其他图好看而通过结果页",
+      "把真实最低价当成文案微调"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-prototype-review/SKILL.md",
+      "contains": "mark `需要重出` and produce a concise repair brief for `$pm-prototype-shotgun`"
+    },
+    {
+      "path": "pmworkspace-shared/references/prototype-quality-review.md",
+      "contains": "只重出受影响的屏幕"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "并只为受影响屏幕输出修复 brief"
+    }
+  ]
+}

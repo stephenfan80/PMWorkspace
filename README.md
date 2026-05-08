@@ -18,7 +18,9 @@ Deep delivery follows a product runtime workbench model:
 ```text
 Update check + state logging
 -> Work goal mode
+-> Problem-definition mode: startup validation, internal business optimization, or design discussion
 -> Scenario routing
+-> Real problem reframe, stated as one sentence before each Q/D
 -> Dynamic Q diagnostics, one question at a time, usually 2-3 and at most 5
 -> Premise confirmation
 -> D decision questions for PM tradeoffs, one at a time
@@ -31,7 +33,24 @@ Update check + state logging
 -> PRD/design/experiment handoff
 ```
 
-The core rule is simple: define the product problem, goals, counter-metrics, constraints, and premises before generating prototype images.
+The core rule is simple: reframe the user's feature request into the real product problem, then define goals, counter-metrics, constraints, and premises before generating prototype images.
+
+## End-to-End Workbench Map
+
+The canonical end-to-end map lives in `pmworkspace-shared/references/pm-workbench-map.md`. README, routing, eval categories, and skill-to-skill state fields should all point back to that single map:
+
+```text
+$pm-workspace
+-> $pm-autoplan
+-> $pm-jobs
+-> $pm-strategy-review
+-> $pm-brief
+-> $pm-prototype-shotgun
+-> $pm-prototype-review
+-> $pm-handoff
+```
+
+Every handoff between skills should preserve the current mode/status, current or earliest gate, next skill, run_id, evidence state, current Q/D, artifact list, and recommended next step.
 
 ## Skill Suite
 
@@ -39,12 +58,12 @@ The core rule is simple: define the product problem, goals, counter-metrics, con
 |---|---|
 | `$pm-workspace` | Start here; route product work and run PMWorkspace platform checks. |
 | `$pm-autoplan` | Run the automatic product review pipeline through brief readiness and Zoon sync. |
-| `$pm-jobs` | Interrogate a raw idea like a demanding product partner before solution design. |
-| `$pm-strategy-review` | Challenge scope, value exchange, ambition, risks, and tradeoffs. |
-| `$pm-brief` | Create a reusable Quick, Standard, or Deep product brief. |
+| `$pm-jobs` | Clarify product value before solution design: painful user, trigger, substitute, loss, and narrow wedge. |
+| `$pm-strategy-review` | Judge strategic tradeoffs through four scope modes: expand, hold, shrink, or pivot, then turn the core contradiction into a PM decision. |
+| `$pm-brief` | Create a compact product core contract that turns aligned facts, strategy choices, and reference gates into decisions for prototype, review, and handoff. |
 | `$pm-prototype-shotgun` | Generate mobile-first image-2 prototype schemes from an Aligned brief. |
 | `$pm-prototype-review` | Review generated prototype screens against the brief, Zoon, and non-fiction boundaries. |
-| `$pm-handoff` | Create PRD-ready, design-ready, experiment-ready, or engineering-ready handoff. |
+| `$pm-handoff` | Create compact PRDs and handoff assets, preserving API, data, tracking, and experiment facts locally. |
 
 ## Quick Start
 
@@ -80,7 +99,7 @@ For prototype work, PMWorkspace defaults to mobile-first iPhone 17 portrait `402
 
 Prototype work is locked to image-2 / image generation unless the user explicitly asks for HTML, an interactive web prototype, or frontend implementation. In deep delivery mode, if the product brief is not `Aligned`, PMWorkspace should ask the next diagnostic or decision question instead of producing images, HTML, or a long plan. In quick shaping mode, PMWorkspace may generate the light package after the user approves clearly marked assumptions; the package must be labeled as discussion-ready, not final PRD truth.
 
-Briefs saved through `pmw-log brief` automatically sync to Zoon when enabled: existing Zoon URLs are appended, and new documents are created when `zoon_auto_create` is true. Before prototype or handoff work, PMWorkspace checks for Zoon drift so edits made in the conversation or in Zoon do not fall out of sync.
+Briefs start with compact product core information, then gate status and supporting evidence. Briefs published through `pmw-log brief` use Zoon-first, local-backed sync: PMWorkspace first appends or creates the Zoon online brief, then stores the same Markdown as the local audit copy. Before prototype or handoff work, PMWorkspace checks for Zoon drift so edits made in the conversation or in Zoon do not fall out of sync.
 
 ## Runtime
 
@@ -99,10 +118,13 @@ Other Codex skill-compatible hosts can still use PMWorkspace for product questio
 PMWorkspace v0.2 turns the skill suite into a local product runtime:
 
 - **Runtime Kernel:** `pmw-run` gives each workflow a `run_id`, mode, gate events, decisions, evidence, artifacts, reviews, and next step.
+- **Workbench Map:** `pm-workbench-map.md` aligns README, routing, eval categories, and shared state fields across skills.
 - **Evidence Dashboard:** `pmw-dashboard status` renders a Chinese Markdown status page with brief version, Zoon state, references, assumptions, non-fiction boundaries, prototype list, reviews, and question preferences.
 - **Prototype Shotgun Board:** `pmw-prototype-board` registers each independent image-2 unit and compares schemes without merging multiple screens into one image.
 - **PM Review Army:** prototype review uses strategy, trust/risk, design system, and data feasibility lenses, then merges findings into pass, regenerate, or PM decision.
 - **Question Tuning:** `pmw-question-tuning` records whether a Q/D dimension should always be asked, asked only at high risk, defaulted to the recommendation, or avoided unless blocking.
+- **PM Eval:** `pmw-eval` uses dependency-free fixtures to check core gates and output contracts, so skill rules do not silently regress.
+- **Auto-Decision Principles:** shared fact priority and stop gates clarify which low-risk defaults can be auto-accepted and which user promises, data-truth, scope, experiment, lead, transaction, or privacy choices require PM decision.
 
 ## Install
 
@@ -134,6 +156,11 @@ PMWorkspace stores durable assets locally by default:
 ~/.pmworkspace/
   config.yaml
   analytics/usage.jsonl
+  user/taste-profile.jsonl
+  user/product-cognition.jsonl
+  user/delivery-facts.jsonl
+  user/pmworkspace-improvements.jsonl
+  user/pmworkspace-feedback-drafts/
   projects/<slug>/briefs/
   projects/<slug>/decisions.jsonl
   projects/<slug>/questions.jsonl
@@ -142,6 +169,8 @@ PMWorkspace stores durable assets locally by default:
   projects/<slug>/prototype-board.jsonl
   projects/<slug>/question-tuning.jsonl
   projects/<slug>/prototypes/
+  projects/<slug>/handoffs/
+  projects/<slug>/delivery-facts.jsonl
   projects/<slug>/taste-profile.jsonl
   projects/<slug>/learnings.jsonl
 ```
@@ -150,9 +179,11 @@ Defaults:
 
 - Telemetry is local-first: usage logs stay on your machine.
 - Remote anonymous telemetry requires explicit opt-in.
-- Stored assets should include project display names, briefs, decision questions, decisions, Zoon URLs, prototype manifests, taste feedback, and sanitized product learnings.
+- Stored assets should include project display names, briefs, decision questions, decisions, Zoon URLs, prototype manifests, project taste feedback, user-level preferences, sanitized product cognition, delivery facts, local GitHub feedback drafts, and product learnings.
 - Runtime assets include local run audit trails, evidence dashboard inputs, prototype board entries, and question tuning preferences.
+- Handoff assets include compact PRD-ready, design-ready, experiment-ready, and engineering-ready documents under `handoffs/`; reusable API, data, tracking, and experiment facts are stored in `delivery-facts.jsonl`.
 - Do not store raw private customer data, tokens, internal recordings, or sensitive screenshots.
+- GitHub feedback drafts stay local and sanitized until the user explicitly asks to submit them.
 
 Project helpers:
 
@@ -173,7 +204,11 @@ bin/pmw-prototype-board add --scheme "方案 A" --screen "首页" --brief-versio
 bin/pmw-prototype-board list
 bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --reason "低风险轻量包默认采用推荐"
 bin/pmw-question-tuning summary
+bin/pmw-eval list
+bin/pmw-eval run
 ```
+
+Eval fixtures live in the repository at `evals/fixtures/`, and are copied into the installed shared skill bundle for maintenance checks.
 
 Zoon helpers:
 
@@ -247,10 +282,12 @@ pm-jobs/
 pm-strategy-review/
 pm-brief/
 pm-prototype-shotgun/
+pm-prototype-review/
 pm-handoff/
 pmworkspace-shared/
   references/
 bin/
+evals/
 examples/
 ```
 

@@ -1,0 +1,42 @@
+{
+  "id": "autoplan-conclusion-first-output",
+  "title": "自动产品评审输出必须结论先行",
+  "category": "autoplan",
+  "primary_skill": "pm-autoplan",
+  "prompt": "用户要求按推荐自动评审一个产品方向，希望先知道为什么这么走。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": false,
+    "gate": "结论先行输出",
+    "required_behaviors": [
+      "先输出自动评审结论",
+      "输出我建议",
+      "输出理由",
+      "再输出评审控制面板"
+    ],
+    "forbidden_behaviors": [
+      "只输出字段表",
+      "只输出维护日志",
+      "省略推荐理由"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "用户可见输出先给 `自动评审结论`"
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "Give the user a conclusion-first review"
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "自动评审结论："
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "评审控制面板："
+    }
+  ]
+}

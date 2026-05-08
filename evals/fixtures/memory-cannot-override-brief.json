@@ -1,0 +1,33 @@
+{
+  "id": "memory-cannot-override-brief",
+  "title": "历史偏好不能覆盖当前产品事实",
+  "category": "memory",
+  "primary_skill": "pm-jobs",
+  "prompt": "用户历史偏好少问反指标，但当前是涉及隐私授权的高风险流程。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "高风险反指标必须确认",
+    "required_behaviors": [
+      "应用问题偏好但不覆盖高风险门槛",
+      "确认反指标和隐私边界",
+      "在简报中标注默认假设"
+    ],
+    "forbidden_behaviors": [
+      "因为偏好少问而跳过反指标",
+      "把历史偏好当成事实来源",
+      "忽略不可虚构项"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-memory.md",
+      "contains": "偏好只能影响方案方向和表达方式，不能覆盖主目标、反指标或不可虚构项。"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-decision-principles.md",
+      "contains": "历史偏好只能影响推荐方式，不能覆盖当前 brief、Zoon、反指标、不可虚构项或线上参考门槛。"
+    }
+  ]
+}

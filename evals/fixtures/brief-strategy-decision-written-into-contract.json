@@ -1,0 +1,41 @@
+{
+  "id": "brief-strategy-decision-written-into-contract",
+  "title": "策略取舍完成后必须写入产品简报契约",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "$pm-strategy-review 已经拍板：先收缩范围，只承诺免费可验证价值，不做真实最低价承诺。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "策略决策写入产品契约",
+    "required_behaviors": [
+      "写入范围模式和对抗审查后的设计取舍",
+      "写入方案方向和范围外",
+      "写入决策记录和对原型的影响"
+    ],
+    "forbidden_behaviors": [
+      "把策略结论只放在摘要里",
+      "省略范围外",
+      "不说明对原型内容重点的影响"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "策略审查完成后，必须把范围模式和策略取舍写入 `对抗审查后的设计取舍`、`方案方向`、`范围外` 和 `决策记录`"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "把已拍板的范围模式和策略取舍写入对抗审查后的设计取舍、方案方向、范围外、决策记录和对原型的影响"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "- 策略决策写入："
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "产品简报：策略审查完成后，必须把范围模式和策略取舍写入对抗审查后的设计取舍、方案方向、范围外、决策记录和对原型的影响。"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "pmworkspace-d0-work-mode-scoring",
+  "title": "D0 工作方式判定覆盖五个核心维度",
+  "category": "pm-workspace-routing",
+  "primary_skill": "pm-workspace",
+  "prompt": "用户目标模糊，只说想把一个功能想清楚，可能要出原型也可能要交付。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "D0 工作方式",
+    "required_behaviors": [
+      "先内部评分",
+      "覆盖输出目标",
+      "覆盖输入材料",
+      "覆盖风险等级",
+      "覆盖是否生产流程",
+      "覆盖是否要交付"
+    ],
+    "forbidden_behaviors": [
+      "跳过模式判断",
+      "一次问多个 D",
+      "只靠历史偏好决定模式"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "## D0 工作方式判定"
+    },
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "| 输出目标 | 想先拿出去讨论"
+    },
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "| 是否要交付 | 只需要讨论材料或方向探索"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "D0 工作方式必须覆盖输出目标、输入材料、风险等级、是否生产流程、是否要交付。"
+    }
+  ]
+}

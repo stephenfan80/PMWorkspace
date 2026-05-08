@@ -1,0 +1,44 @@
+{
+  "id": "pmworkspace-route-output-contract",
+  "title": "主入口路由后必须输出固定字段",
+  "category": "pm-workspace-routing",
+  "primary_skill": "pm-workspace",
+  "prompt": "使用 $pm-workspace 帮我快速成型一个新想法。",
+  "expected": {
+    "mode": "quick",
+    "status": "待确认",
+    "must_stop": false,
+    "gate": "路由输出契约",
+    "required_behaviors": [
+      "输出当前模式",
+      "输出当前门槛",
+      "输出下一技能",
+      "输出为什么",
+      "输出 run_id",
+      "输出证据状态"
+    ],
+    "forbidden_behaviors": [
+      "只给下一技能",
+      "省略 run_id",
+      "省略证据状态"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "## 路由输出契约"
+    },
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "当前模式："
+    },
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "下一技能："
+    },
+    {
+      "path": "pm-workspace/SKILL.md",
+      "contains": "After routing, always output the routing contract from `routing.md`"
+    }
+  ]
+}

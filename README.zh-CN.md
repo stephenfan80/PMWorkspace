@@ -23,8 +23,26 @@ PMWorkspace 有两个入口：
 -> D 拍板
 -> 产品简报
 -> image-2 原型
+-> 原型复审
 -> 交付资产
 ```
+
+## 端到端工作台地图
+
+PMWorkspace 的全链路地图由 `pmworkspace-shared/references/pm-workbench-map.md` 维护，README、routing、eval 和各技能状态字段都以它为同一张地图：
+
+```text
+$pm-workspace
+-> $pm-autoplan
+-> $pm-jobs
+-> $pm-strategy-review
+-> $pm-brief
+-> $pm-prototype-shotgun
+-> $pm-prototype-review
+-> $pm-handoff
+```
+
+每一环都必须说明：当前模式 / 状态、当前门槛或最早门槛、下一技能、run_id、证据状态、当前 Q / D、产物清单和建议下一步。这样用户不会在“已经出图了吗”“能交付了吗”“缺什么证据”之间来回猜。
 
 ## 技能套件
 
@@ -32,12 +50,12 @@ PMWorkspace 有两个入口：
 |---|---|
 | `$pm-workspace` | 主入口，负责路由、首次引导、更新检查和状态记录。 |
 | `$pm-autoplan` | 自动串联产品追问、策略审查、产品简报、Zoon 同步和原型准备度检查。 |
-| `$pm-jobs` | 乔布斯式产品追问：用户是谁、痛点是什么、现在怎么解决、为什么值得做。 |
-| `$pm-strategy-review` | 挑战策略、范围、价值交换、风险、反指标和取舍。 |
-| `$pm-brief` | 生成快速版、标准版或深度版产品简报。 |
+| `$pm-jobs` | 产品价值澄清器：强痛用户是谁、何时触发、现在怎么替代、损失是什么、先赢哪一小块。 |
+| `$pm-strategy-review` | 策略取舍裁判：用扩大、保持、收缩、转向四种范围模式判断方向，并把最大策略矛盾转成 PM 拍板。 |
+| `$pm-brief` | 产品核心信息契约：把已对齐事实、策略取舍和参考门槛压缩成可出图、复审和交付的核心判断。 |
 | `$pm-prototype-shotgun` | 基于已对齐的产品简报生成多方案 image-2 原型图。 |
 | `$pm-prototype-review` | 复审已生成原型图，判断是否需要重出并沉淀偏好。 |
-| `$pm-handoff` | 输出适合 PRD、设计、实验验证或研发使用的交付稿。 |
+| `$pm-handoff` | 输出精简 PRD / 交付稿，并把接口、数据、埋点、实验标准沉淀为本地交付资产。 |
 
 ## 快速开始
 
@@ -76,16 +94,18 @@ PMWorkspace 有两个入口：
 2. 快速成型模式只问 2-3 个最影响方案结构的问题，列出关键假设，并请用户确认“按这些假设继续”。
 3. 用户确认后，输出轻量包：产品简报、方案方向、独立 image-2 原型图和下一步升级建议。
 4. 深度交付模式先确认工作目标模式：验证价值、优化线上指标、业务评审、设计评审或研发交付。
-5. `$pm-jobs` 用 `Q` 一次一个问题梳理关键诊断维度；问题根据用户输入和当前缺口动态生成，通常 2-3 个，必要时最多 5 个。
-6. 输出 2-4 条关键前提让 PM 确认；不同意就回到对应追问。
-7. 关键 PM 决策用 `D` 选择题拍板，一次只展开一个完整问题；多个待拍板只提示后续标题队列。
-8. 新页面如果承接线上流程或生产样式，先完成线上参考检查。
-9. `$pm-brief` 按主场景做轻量互联网最佳实践检索，但不增加 Q 数量。
-10. `$pm-brief` 写出可确认、可复用的产品简报；`pmw-log brief` 会自动创建或追加 Zoon 在线文档。
-11. 用户在对话或 Zoon 中调整 brief 后，重新保存并同步 Zoon；原型前运行 Zoon 漂移检查。
-12. 产品简报达到“已对齐”后，`$pm-prototype-shotgun` 先读取 Zoon 最新内容，再生成 image-2 原型图。
-13. `$pm-prototype-review` 复审原型是否符合 brief、线上参考、反指标和不可虚构项。
-14. `$pm-handoff` 把选定方向转成 PRD、设计、实验验证或研发交付文档。
+5. `$pm-jobs` 先判断问题定义模式：创业验证、内部业务优化或设计讨论；每轮先给一句“我对真实问题的判断”，把功能愿望重新定义成用户问题、当前损失或决策任务。
+6. `$pm-jobs` 再用 `Q` 一次一个问题澄清强痛人群、触发时刻、现状替代、当前损失和最小可赢切口；问题根据用户输入和当前价值缺口动态生成，通常 2-3 个，必要时最多 5 个。
+7. 输出 2-4 条关键前提让 PM 确认；不同意就回到对应追问。
+8. `$pm-strategy-review` 用范围模式审查方向：扩大、保持、收缩或转向；范围变化、承诺变化和实验口径变化必须交给 PM 拍板。
+9. 关键 PM 决策用 `D` 选择题拍板，一次只展开一个完整问题；多个待拍板只提示后续标题队列。
+10. 新页面如果承接线上流程或生产样式，先完成线上参考检查。
+11. `$pm-brief` 按主场景做轻量互联网最佳实践检索，但不增加 Q 数量，只保留可借鉴原则、不可照搬和对原型影响。
+12. `$pm-brief` 先输出产品核心信息，再固化门槛和支持信息；`pmw-log brief` 默认先创建或追加 Zoon 在线文档，再保存同一份本地审计副本。
+13. 用户在对话或 Zoon 中调整 brief 后，重新保存并同步 Zoon；原型前运行 Zoon 漂移检查。
+14. 产品简报达到“已对齐”后，`$pm-prototype-shotgun` 先读取 Zoon 最新内容，再生成 image-2 原型图。
+15. `$pm-prototype-review` 复审原型是否符合 brief、线上参考、反指标和不可虚构项。
+16. `$pm-handoff` 把选定方向转成 PRD、设计、实验验证或研发交付文档。
 
 ## 原型输出规则
 
@@ -119,10 +139,13 @@ PMWorkspace 的完整体验包含移动端优先的 image-2 原型图输出，�
 PMWorkspace v0.2 把技能套件升级成本地产品运行系统：
 
 - **Runtime Kernel：** `pmw-run` 为每次工作生成 `run_id`，记录模式、门槛、决策、证据、产物、复审和下一步。
+- **Workbench Map：** `pm-workbench-map.md` 统一 README、路由、eval 分类和技能间状态字段。
 - **Evidence Dashboard：** `pmw-dashboard status` 输出中文证据状态页，汇总产品简报版本、Zoon 状态、线上参考、假设、不可虚构项、原型清单、复审结论和问题偏好。
 - **Prototype Shotgun Board：** `pmw-prototype-board` 登记每个独立 image-2 图片单元，并用表格比较方案；不把多张图合成一张图。
 - **PM Review Army：** 原型复审使用策略、信任 / 风险、设计系统和数据可行性四个视角，最终合并为可通过、需要重出或需要 PM 拍板。
 - **Question Tuning：** `pmw-question-tuning` 记录用户对 Q/D 的偏好，例如永远问、高风险才问、默认采用推荐或除非阻塞否则少问。
+- **PM Eval：** `pmw-eval` 用无依赖 fixture 检查核心门槛和输出契约，防止 skill 规则退化。
+- **自动决策原则：** 统一事实优先级和停止门槛，明确低风险默认项可以自动采用，用户承诺、数据真实性、范围、实验口径、线索 / 交易 / 隐私边界必须 PM 拍板。
 
 ## 安装
 
@@ -154,6 +177,11 @@ PMWorkspace 默认把资产保存在本地：
 ~/.pmworkspace/
   config.yaml
   analytics/usage.jsonl
+  user/taste-profile.jsonl
+  user/product-cognition.jsonl
+  user/delivery-facts.jsonl
+  user/pmworkspace-improvements.jsonl
+  user/pmworkspace-feedback-drafts/
   projects/<slug>/briefs/
   projects/<slug>/decisions.jsonl
   projects/<slug>/questions.jsonl
@@ -162,6 +190,8 @@ PMWorkspace 默认把资产保存在本地：
   projects/<slug>/prototype-board.jsonl
   projects/<slug>/question-tuning.jsonl
   projects/<slug>/prototypes/
+  projects/<slug>/handoffs/
+  projects/<slug>/delivery-facts.jsonl
   projects/<slug>/taste-profile.jsonl
   projects/<slug>/learnings.jsonl
 ```
@@ -175,10 +205,15 @@ PMWorkspace 默认把资产保存在本地：
 - 每次运行的本地审计轨迹。
 - 产品简报 Markdown。
 - 原型批次清单。
+- PRD / 设计 / 实验 / 研发交付稿。
+- 接口、数据来源、埋点和实验标准等脱敏交付事实。
 - 方案比较板。
 - Q/D 问题偏好。
 - 用户批准或拒绝的设计偏好。
 - 脱敏后的产品学习和复用判断。
+- 单个用户独有的全局偏好。
+- 脱敏后的产品认知。
+- PMWorkspace 进化候选和本地 GitHub 回流待审稿。
 
 不会保存：
 
@@ -187,6 +222,7 @@ PMWorkspace 默认把资产保存在本地：
 - 未脱敏 Zoon 内容。
 - Zoon ownerSecret 或 API 原始响应。
 - 用户没有明确要求保存的私密 PRD 原文。
+- 未经用户确认，不会把 GitHub 回流待审稿提交到远端。
 
 查看配置：
 
@@ -213,7 +249,11 @@ bin/pmw-prototype-board add --scheme "方案 A" --screen "首页" --brief-versio
 bin/pmw-prototype-board list
 bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --reason "低风险轻量包默认采用推荐"
 bin/pmw-question-tuning summary
+bin/pmw-eval list
+bin/pmw-eval run
 ```
+
+Eval fixture 保存在仓库的 `evals/fixtures/`，安装时会复制到 shared skill bundle，供维护检查使用。
 
 Zoon 在线简报：
 

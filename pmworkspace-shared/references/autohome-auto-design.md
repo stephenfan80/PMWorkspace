@@ -9,6 +9,7 @@ This file is a reusable summary, not a copy of the internal design site. If the 
 - AutoDesign is a shared design and component system maintained by Autohome technical and UED teams.
 - The goal is consistent product experience, reusable components, and production-friendly design-to-development handoff.
 - Prototypes should feel like realistic Autohome app screens, not marketing posters or decorative concept art.
+- Product UI uses AutoDesign as the primary source of visual truth. Brand VI material is secondary and should not override product UI tokens unless the task is explicitly a brand/marketing visual.
 
 ## Color Tokens
 
@@ -54,6 +55,14 @@ Usage:
 - Prominent numbers can use Medium/Bold.
 - Maintain clear hierarchy with few type levels.
 - Ensure primary text contrast is production-readable; do not use faint text for important values.
+- Local or brand font packages require authorization confirmation. Do not present custom fonts as production-ready defaults in generated product UI.
+
+## Brand VI And Font Boundary
+
+- Brand VI colors such as `#0055ff` and `#ff8800` are brand/marketing references, not default product UI replacements.
+- For product screens, use AutoDesign product tokens such as `Blue_1 #0088FF` and `Orange_1 #FF6600` unless the latest design-system source explicitly says otherwise.
+- Brand logos, slogans, auxiliary graphics, and decorative VI assets should only appear when the brief requires brand exposure; do not turn functional product screens into posters.
+- Font packages can inform special brand or campaign visuals only after authorization is confirmed; otherwise use system Chinese font and HarmonyOS Sans SC for prominent numbers.
 
 ## Layout
 
@@ -138,6 +147,7 @@ AutoDesign production constraints:
 - Radius: small buttons/tags 2px, cards/images 3px, dialogs/toasts/bottom sheets 6px, large bottom sheets 8px.
 - Buttons: one primary action per screen; bottom primary button height 48px, blue gradient, concise verb-object text.
 - Forms: short labels, phone number visible and editable on the first screen for lead forms, required agreement near submit.
+- Brand VI boundary: do not replace AutoDesign product UI tokens with VI colors #0055ff or #ff8800 unless this is explicitly a brand/marketing visual; custom font packages require authorization confirmation.
 - Avoid decorative gradients/orbs, oversized hero marketing layout, excessive shadows, over-rounded cards, stacked CTAs, and overlapping text.
 ```
 
@@ -146,6 +156,8 @@ AutoDesign production constraints:
 Before generating or finalizing an Autohome prototype, check:
 
 - Does the screen use AutoDesign colors instead of arbitrary blues/oranges?
+- Does the screen avoid replacing AutoDesign product tokens with brand VI colors unless the task is explicitly brand/marketing?
+- If custom font packages are requested, is authorization marked as confirmed or still pending?
 - Is the main CTA singular and action-oriented?
 - Is the form short enough for the conversion goal?
 - Is the phone number visible and editable on lead forms?

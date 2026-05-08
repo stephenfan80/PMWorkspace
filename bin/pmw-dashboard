@@ -26,6 +26,10 @@ def project_dir() -> pathlib.Path:
     return STATE_DIR / "projects" / current_slug()
 
 
+def user_dir() -> pathlib.Path:
+    return STATE_DIR / "user"
+
+
 def read_json(path: pathlib.Path) -> dict:
     if not path.exists():
         return {}
@@ -109,6 +113,7 @@ def render_status(run_id: Optional[str]) -> str:
     artifacts = [e for e in events if e.get("event") == "artifact"]
     run_decisions = [e for e in events if e.get("event") == "decision"]
     tuning = read_jsonl(root / "question-tuning.jsonl")[-5:]
+    delivery_facts = (read_jsonl(user_dir() / "delivery-facts.jsonl") + read_jsonl(root / "delivery-facts.jsonl"))[-8:]
 
     lines = [
         "# PMWorkspace 证据状态页",
@@ -124,7 +129,10 @@ def render_status(run_id: Optional[str]) -> str:
         f"- 最新简报：{brief_name}",
         f"- 简报状态：{brief_meta}",
         f"- Zoon URL：{project.get('zoon_url') or '未记录'}",
+        f"- Zoon 同步状态：{project.get('last_zoon_sync_status') or '未记录'}",
         f"- 最近 Zoon 同步：{project.get('last_zoon_sync_at') or '未记录'}",
+        f"- Zoon 同步本地副本：{project.get('last_zoon_sync_brief') or '未记录'}",
+        f"- Zoon 同步失败原因：{project.get('last_zoon_sync_error') or '无'}",
         "",
         "## 证据与门槛",
         "",
@@ -145,6 +153,15 @@ def render_status(run_id: Optional[str]) -> str:
     lines.extend(bullet_or_empty([f"{r.get('status', '')}｜{r.get('title', '')}：{r.get('summary', '')}" for r in reviews]))
     lines.extend(["", "## 产物清单", ""])
     lines.extend(bullet_or_empty([f"{r.get('status', '')}｜{r.get('title', '')}：{r.get('summary', '')}" for r in artifacts]))
+    lines.extend(["", "## 交付资产", ""])
+    lines.extend(
+        bullet_or_empty(
+            [
+                f"{r.get('fact_type', '交付事实')}｜{r.get('target', '')}｜{r.get('scope', '')}｜{r.get('note', '')}"
+                for r in delivery_facts
+            ]
+        )
+    )
     lines.extend(["", "## 问题偏好", ""])
     lines.extend(bullet_or_empty([f"{r.get('dimension', '')}：{r.get('policy', '')}｜{r.get('reason', '')}" for r in tuning]))
     return "\n".join(lines) + "\n"

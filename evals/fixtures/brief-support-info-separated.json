@@ -1,0 +1,49 @@
+{
+  "id": "brief-support-info-separated",
+  "title": "Zoon、线上参考和保存资产必须放入支持信息或门槛区",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "用户提供了 Zoon、线上截图和多条来源，要求输出产品简报。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "支持信息分层",
+    "required_behaviors": [
+      "核心信息只放产品判断",
+      "Zoon 放入支持信息",
+      "线上参考、检索来源和已保存资产放入支持信息或门槛区"
+    ],
+    "forbidden_behaviors": [
+      "让来源信息挤占核心判断",
+      "把 Zoon 当成核心信息字段",
+      "用支持信息覆盖当前 brief"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "支持信息可以保留信息来源、事实/假设边界、线上参考、互联网案例启发、Zoon、已保存资产，但不能压过核心判断"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "支持信息："
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "- 线上参考："
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "- Zoon："
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "- 已保存资产："
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "产品简报：Zoon、线上参考、检索来源和已保存资产必须放入"
+    }
+  ]
+}

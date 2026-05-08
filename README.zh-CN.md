@@ -142,7 +142,7 @@ PMWorkspace v0.2 把技能套件升级成本地产品运行系统：
 - **Workbench Map：** `pm-workbench-map.md` 统一 README、路由、eval 分类和技能间状态字段。
 - **Evidence Dashboard：** `pmw-dashboard status` 输出中文证据状态页，汇总产品简报版本、Zoon 状态、线上参考、假设、不可虚构项、原型清单、复审结论和问题偏好。
 - **Prototype Shotgun Board：** `pmw-prototype-board` 登记每个独立 image-2 图片单元，并用表格比较方案；不把多张图合成一张图。
-- **PM Review Army：** 原型复审使用策略、信任 / 风险、设计系统和数据可行性四个视角，最终合并为可通过、需要重出或需要 PM 拍板。
+- **PM Review Army / Product Review Squad：** 原型复审保留策略、信任 / 风险、设计系统和数据可行性四个底盘视角，并追加 CEO、Eng、Design、DX、安全、QA、发布工程师短结论，最终合并为可通过、需要重出、需要 PM 拍板或需要补充参考。
 - **Question Tuning：** `pmw-question-tuning` 记录用户对 Q/D 的偏好，例如永远问、高风险才问、默认采用推荐或除非阻塞否则少问。
 - **PM Eval：** `pmw-eval` 用无依赖 fixture 检查核心门槛和输出契约，防止 skill 规则退化。
 - **自动决策原则：** 统一事实优先级和停止门槛，明确低风险默认项可以自动采用，用户承诺、数据真实性、范围、实验口径、线索 / 交易 / 隐私边界必须 PM 拍板。

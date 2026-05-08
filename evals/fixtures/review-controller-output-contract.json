@@ -13,6 +13,7 @@
       "建立原型复审控制器",
       "输出复审输入和输出单元绑定",
       "输出复审视角、判定原因和行动结论",
+      "输出 Product Review Squad 角色短结论",
       "输出证据状态"
     ],
     "forbidden_behaviors": [
@@ -33,6 +34,10 @@
     {
       "path": "pm-prototype-review/SKILL.md",
       "contains": "- 输出单元绑定："
+    },
+    {
+      "path": "pm-prototype-review/SKILL.md",
+      "contains": "- Product Review Squad："
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",

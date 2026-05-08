@@ -18,6 +18,7 @@ PMWorkspace eval 第一版用于维护技能规则和输出契约，不运行真
 - 防止产品交付退化成大而全 PRD：默认只输出精简 PRD 核心字段，接口、数据、埋点和实验缺口可留空但不能虚构，并沉淀为本地交付资产。
 - 防止出图 / 交付前缺少统一准备度判断：Product Readiness Dashboard 必须展示 brief、Zoon、线上参考、方案差异、不可虚构项和复审状态，并给出 verdict。
 - 防止下游技能重新猜上游事实：Product Artifact Flow 必须把产品简报、原型清单、复审结论和交付稿登记为下游可读产物。
+- 防止线上证据采集变重或断流：浏览器证据必须以 `browser_evidence` 产物流入 Product Artifact Flow，并被 Product Readiness Dashboard 的线上参考行优先读取。
 - 防止 SKILL.md 手写漂移：`pmw-gen-skill-docs` 必须从 manifest 生成并检查共享 preamble、必读协议、输出字段和共享门槛。
 
 ## 分层
@@ -25,7 +26,7 @@ PMWorkspace eval 第一版用于维护技能规则和输出契约，不运行真
 - **协议静态检查：** 检查 fixture 指向的 skill 和 reference 是否仍包含关键规则。
 - **场景契约检查：** 检查每个 fixture 是否声明输入、预期状态、停止门槛、禁止行为和必须行为。
 - **运行时契约检查：** 检查 `pmw-run`、`pmw-dashboard`、`pmw-prototype-board`、`pmw-memory` 等脚本是否仍提供需要的记录入口。
-- **产物流动契约检查：** 检查 `pmw-artifact`、`artifact-flow.jsonl`、技能读取协议和 dashboard 展示仍能支持下游接力。
+- **产物流动契约检查：** 检查 `pmw-artifact`、`artifact-flow.jsonl`、`browser_evidence`、技能读取协议和 dashboard 展示仍能支持下游接力。
 - **复审专家契约检查：** 检查 `pmw-review-specialist`、四个默认专家、专家短结论结构和 `$pm-prototype-review` 合并协议。
 - **Skill 文档生成检查：** 检查 `pmw-gen-skill-docs`、manifest、生成契约区块和共享字段防漂移规则。
 - **端到端地图检查：** 检查 README、`routing.md`、skill 状态字段和 eval 分类仍能映射到 `pm-workbench-map.md`。
@@ -48,7 +49,7 @@ fixture 的 `category` 必须能映射回 `pm-workbench-map.md` 的链路阶段�
 | `review-specialists` | 原型复审 | 可插拔专家、短结论、最高严重度合并、dashboard 专家汇总 |
 | `pm-handoff` | 产品交付 | 精简 PRD、现成文档入口、未复审不交付、未拍板不写验收、交付资产沉淀 |
 | `readiness-dashboard` | 原型方案 / 产品交付 / 运行与记忆 | 出图 / 交付前 Product Readiness Dashboard 和 verdict |
-| `artifact-flow` | 产品简报 / 原型方案 / 原型复审 / 产品交付 / 运行与记忆 | Product Artifact Flow、`pmw-artifact`、上游产物下游可读 |
+| `artifact-flow` | 产品简报 / 原型方案 / 原型复审 / 产品交付 / 运行与记忆 | Product Artifact Flow、`pmw-artifact`、`browser_evidence`、上游产物下游可读 |
 | `skill-doc-generator` | 运行与记忆 | `pmw-gen-skill-docs`、manifest、生成契约区块、共享字段防漂移 |
 | `memory`、`decision-principles`、`eval-system` | 运行与记忆 | 偏好边界、个人全局记忆、GitHub 待审稿、自动决策、eval runner |
 
@@ -153,6 +154,7 @@ fixture 使用 JSON，保存在 `evals/fixtures/`：
 - 产品简报：只有确认状态已对齐、线上参考门槛通过且无未解决缺失门槛时，才能把下一技能指向 `$pm-prototype-shotgun` 或 `$pm-handoff`。
 - 产品准备度仪表盘：出图 / 交付前必须输出 Product Readiness Dashboard，至少覆盖产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态，并给出 `可出图`、`不可出图`、`可交付` 或 `不可交付` verdict。
 - 产物流动：下游技能必须读取 Product Artifact Flow；`pmw-log brief`、`pmw-log prototype`、`pmw-log handoff` 必须把 product_brief、prototype_manifest 和 handoff 登记为下游可读产物。
+- 浏览器证据：线上截图、状态页、竞品参考或 Zoon 漂移证据必须登记为 `browser_evidence` 产物；`pmw-dashboard readiness` 的线上参考行优先读取它，没有时才回退 run evidence / gate 事件。
 - 原型方案：必须定义 `$pm-prototype-shotgun` 是 image-2 原型出图导演；它不重新做 `$pm-jobs`、`$pm-strategy-review` 或 `$pm-brief` 的职责。
 - 原型方案：必须先输出 `原型出图判断`，再进入方案方向、图片输出单元和 prompt；不能直接写 image-2 prompt。
 - 原型方案：必须先建立原型方案控制器，并输出产品简报来源、图片生成前门槛、方案差异质量、方案方向确认、输出单元清单、方案比较板写入和证据状态。

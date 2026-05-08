@@ -141,6 +141,7 @@ PMWorkspace v0.2 把技能套件升级成本地产品运行系统：
 - **Runtime Kernel：** `pmw-run` 为每次工作生成 `run_id`，记录模式、门槛、决策、证据、产物、复审和下一步。
 - **Workbench Map：** `pm-workbench-map.md` 统一 README、路由、eval 分类和技能间状态字段。
 - **Evidence Dashboard：** `pmw-dashboard status` 输出中文证据状态页，汇总产品简报版本、Zoon 状态、线上参考、假设、不可虚构项、原型清单、复审结论和问题偏好。
+- **Browser Evidence Lite：** 线上流程截图、状态页、竞品参考和 Zoon 漂移证据统一登记为 `browser_evidence` 产物，复用 `pmw-artifact`，不新增浏览器证据子系统。
 - **Product Readiness Dashboard：** `pmw-dashboard readiness --target prototype|handoff` 在出图 / 交付前统一给出准备度 verdict，覆盖产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态。
 - **Product Artifact Flow：** `pmw-artifact` 记录下游可读产物，让产品简报、原型清单、复审结论和交付稿能流向下一个技能，而不是靠对话记忆重新推断。
 - **Prototype Shotgun Board：** `pmw-prototype-board` 登记每个独立 image-2 图片单元，并用表格比较方案；不把多张图合成一张图。
@@ -254,6 +255,7 @@ bin/pmw-run finish --status "基于假设，可讨论" --next "进入 image-2 �
 bin/pmw-dashboard status
 bin/pmw-dashboard readiness --target prototype
 bin/pmw-dashboard readiness --target handoff
+bin/pmw-artifact add --kind browser_evidence --title "线上参考：结果页" --status "已采集" --source-skill pm-brief --path "<截图路径>" --url "<URL>" --summary "页面任务、视觉基线、交互模式、必须保留、可以挑战"
 bin/pmw-artifact flow
 bin/pmw-artifact latest --kind product_brief
 bin/pmw-review-specialist list

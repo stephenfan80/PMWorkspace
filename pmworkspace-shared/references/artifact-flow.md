@@ -1,6 +1,6 @@
 # Product Artifact Flow
 
-PMWorkspace 产物流动层让每一步产物都能被下游技能读取，而不是只存在于对话里。产品简报、原型清单、复审结论和交付稿必须登记为下游可读产物。
+PMWorkspace 产物流动层让每一步产物都能被下游技能读取，而不是只存在于对话里。产品简报、原型清单、复审结论和交付稿必须登记为下游可读产物。浏览器证据也以 `browser_evidence` 产物进入同一条 Product Artifact Flow。
 
 ## 目标
 
@@ -14,6 +14,7 @@ PMWorkspace 产物流动层让每一步产物都能被下游技能读取，而�
 |---|---|---|---|
 | `$pm-jobs` / `$pm-strategy-review` | `decision`、`strategy_review` | `$pm-brief` | 把事实、范围、策略取舍写进产品契约。 |
 | `$pm-brief` | `product_brief` | `$pm-prototype-shotgun`、`$pm-handoff` | 作为原型、复审和交付的产品真源。 |
+| 浏览器 / 截图 / Zoon 检查 | `browser_evidence` | `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` | 记录线上流程截图、状态页、竞品参考或 Zoon 漂移证据，支撑线上参考门槛。 |
 | `$pm-prototype-shotgun` | `prototype_manifest` | `$pm-prototype-review` | 绑定方案、屏幕、主目标、反指标、不可虚构项和 brief 版本。 |
 | `$pm-prototype-review` | `prototype_review`、`repair_brief` | `$pm-prototype-shotgun`、`$pm-handoff` | 决定可通过、需要重出、需要 PM 拍板或补参考。 |
 | `$pm-handoff` | `handoff`、`acceptance_seed`、`release_doc_seed` | `document-release`、`ship`、`qa` | 让文档同步、发布准备和 QA 不重新猜验收口径。 |
@@ -32,6 +33,7 @@ pmw-artifact add \
   --next-skill "pm-prototype-shotgun,pm-handoff"
 
 pmw-artifact latest --kind product_brief
+pmw-artifact latest --kind browser_evidence
 pmw-artifact flow
 pmw-dashboard status
 ```

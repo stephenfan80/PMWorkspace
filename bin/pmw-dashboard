@@ -109,6 +109,24 @@ def latest_event(events: list[dict], needles: list[str], event_types: Optional[s
     return {}
 
 
+def artifact_rows(root: pathlib.Path, kind: Optional[str] = None, limit: Optional[int] = None) -> list[dict]:
+    rows = read_jsonl(root / "artifact-flow.jsonl")
+    if kind:
+        rows = [row for row in rows if row.get("kind") == kind]
+    if limit is not None:
+        rows = rows[-limit:]
+    return rows
+
+
+def artifact_location(row: dict) -> str:
+    return str(row.get("url") or row.get("path") or "")
+
+
+def latest_browser_evidence(root: pathlib.Path) -> dict:
+    rows = artifact_rows(root, "browser_evidence")
+    return rows[-1] if rows else {}
+
+
 def read_text(path_value: str) -> str:
     if not path_value:
         return ""
@@ -144,7 +162,7 @@ def latest_review(events: list[dict]) -> dict:
 
 
 def artifact_flow_rows(root: pathlib.Path, limit: int = 10) -> list[str]:
-    rows = read_jsonl(root / "artifact-flow.jsonl")[-limit:]
+    rows = artifact_rows(root, limit=limit)
     rendered = []
     for row in rows:
         downstream = row.get("next_skill") or []
@@ -152,13 +170,26 @@ def artifact_flow_rows(root: pathlib.Path, limit: int = 10) -> list[str]:
             downstream_text = ", ".join(str(item) for item in downstream if str(item).strip())
         else:
             downstream_text = str(downstream)
-        location = row.get("url") or row.get("path") or ""
+        location = artifact_location(row)
         rendered.append(
             f"{redact_sensitive(str(row.get('kind', '产物')))}｜"
             f"{redact_sensitive(str(row.get('status', '')))}｜"
             f"{redact_sensitive(str(row.get('title', '')))}｜"
             f"{redact_sensitive(str(row.get('source_skill', '')))} -> "
             f"{redact_sensitive(downstream_text or '待指定')}｜{redact_sensitive(str(location or '未记录'))}"
+        )
+    return rendered
+
+
+def browser_evidence_rows(root: pathlib.Path, limit: int = 5) -> list[str]:
+    rendered = []
+    for row in artifact_rows(root, "browser_evidence", limit):
+        location = artifact_location(row) or "未记录位置"
+        rendered.append(
+            f"{redact_sensitive(str(row.get('status') or '未记录'))}｜"
+            f"{redact_sensitive(str(row.get('title') or '浏览器证据'))}｜"
+            f"{redact_sensitive(location)}｜"
+            f"{redact_sensitive(str(row.get('summary') or '未记录摘要'))}"
         )
     return rendered
 
@@ -251,15 +282,31 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         )
     )
 
-    reference_event = latest_event(events, ["线上参考", "生产基线", "当前截图", "截图", "录屏"], {"evidence", "gate"})
-    reference_text = f"{reference_event.get('status', '')} {reference_event.get('summary', '')}"
-    reference_ready = bool(reference_event) and not contains_any(reference_text, ["缺失", "待补充", "未判断", "失败"])
+    browser_evidence = latest_browser_evidence(project_dir())
+    if browser_evidence:
+        reference_text = (
+            f"{browser_evidence.get('status', '')} "
+            f"{browser_evidence.get('title', '')} "
+            f"{browser_evidence.get('summary', '')}"
+        )
+        reference_ready = not contains_any(reference_text, ["缺失", "待补充", "未判断", "失败", "不可访问", "未采集"])
+        reference_status = browser_evidence.get("status") or "已记录"
+        reference_evidence = (
+            f"browser_evidence：{browser_evidence.get('title') or '浏览器证据'}｜"
+            f"{artifact_location(browser_evidence) or browser_evidence.get('summary') or '未记录位置'}"
+        )
+    else:
+        reference_event = latest_event(events, ["线上参考", "生产基线", "当前截图", "截图", "录屏"], {"evidence", "gate"})
+        reference_text = f"{reference_event.get('status', '')} {reference_event.get('summary', '')}"
+        reference_ready = bool(reference_event) and not contains_any(reference_text, ["缺失", "待补充", "未判断", "失败"])
+        reference_status = reference_event.get("status") or "未判断"
+        reference_evidence = reference_event.get("summary") or "尚未记录线上参考 / 生产基线判断"
     rows.append(
         gate_result(
             "线上参考",
             True,
-            reference_event.get("status") or "未判断",
-            reference_event.get("summary") or "尚未记录线上参考 / 生产基线判断",
+            redact_sensitive(str(reference_status)),
+            redact_sensitive(str(reference_evidence)),
             "继续" if reference_ready else "先判断是否承接线上流程；必要时补截图、录屏或相似状态页",
             reference_ready,
         )
@@ -373,6 +420,7 @@ def render_status(run_id: Optional[str]) -> str:
     evidence = [e for e in events if e.get("event") == "evidence"]
     artifacts = [e for e in events if e.get("event") == "artifact"]
     artifact_flow = artifact_flow_rows(root)
+    browser_evidence = browser_evidence_rows(root)
     review_specialists = review_specialist_rows(root)
     run_decisions = [e for e in events if e.get("event") == "decision"]
     tuning = read_jsonl(root / "question-tuning.jsonl")[-5:]
@@ -403,6 +451,8 @@ def render_status(run_id: Optional[str]) -> str:
         "",
     ]
     lines.extend(bullet_or_empty([f"{r.get('status', '')}｜{r.get('title', '')}：{r.get('summary', '')}" for r in evidence]))
+    lines.extend(["", "## 浏览器证据", ""])
+    lines.extend(bullet_or_empty(browser_evidence))
     lines.extend(["", "## 决策与问题", ""])
     decision_rows = [f"{r.get('status', '')}｜{r.get('title', '')}：{r.get('summary', '')}" for r in run_decisions]
     decision_rows.extend([f"{r.get('title', r.get('question_id', ''))}：{r.get('body') or r.get('summary') or r.get('user_choice') or ''}" for r in decisions + questions])

@@ -120,6 +120,7 @@ PMWorkspace v0.2 turns the skill suite into a local product runtime:
 - **Runtime Kernel:** `pmw-run` gives each workflow a `run_id`, mode, gate events, decisions, evidence, artifacts, reviews, and next step.
 - **Workbench Map:** `pm-workbench-map.md` aligns README, routing, eval categories, and shared state fields across skills.
 - **Evidence Dashboard:** `pmw-dashboard status` renders a Chinese Markdown status page with brief version, Zoon state, references, assumptions, non-fiction boundaries, prototype list, reviews, and question preferences.
+- **Browser Evidence Lite:** online screenshots, status pages, competitor references, and Zoon drift evidence are recorded as `browser_evidence` artifacts through `pmw-artifact`, without adding a separate browser evidence subsystem.
 - **Product Readiness Dashboard:** `pmw-dashboard readiness --target prototype|handoff` gives a pre-image / pre-handoff verdict across brief, Zoon, online reference, scheme difference, non-fiction boundaries, and review status.
 - **Product Artifact Flow:** `pmw-artifact` records downstream-readable artifacts so product briefs, prototype manifests, review results, and handoff documents can flow into the next skill without being re-inferred from conversation.
 - **Prototype Shotgun Board:** `pmw-prototype-board` registers each independent image-2 unit and compares schemes without merging multiple screens into one image.
@@ -207,6 +208,7 @@ bin/pmw-run finish --status "基于假设，可讨论" --next "进入 image-2 �
 bin/pmw-dashboard status
 bin/pmw-dashboard readiness --target prototype
 bin/pmw-dashboard readiness --target handoff
+bin/pmw-artifact add --kind browser_evidence --title "线上参考：结果页" --status "已采集" --source-skill pm-brief --path "<screenshot>" --url "<URL>" --summary "页面任务、视觉基线、交互模式、必须保留、可以挑战"
 bin/pmw-artifact flow
 bin/pmw-artifact latest --kind product_brief
 bin/pmw-review-specialist list

@@ -38,6 +38,14 @@
 - `缺失待补充`：判断需要参考，但用户还没提供，也没确认没有。
 - `不适用`：纯新概念，不承接线上流程，也不要求生产样式。
 
+平台脚本可用时，已提供的线上参考优先登记为 `browser_evidence` 产物，让 dashboard 和下游技能读取同一份轻量证据：
+
+```bash
+pmw-artifact add --kind browser_evidence --title "线上参考：<页面/流程>" --status "已采集" --source-skill pm-brief --path "<截图路径>" --url "<线上 URL>" --summary "<页面任务、视觉基线、交互模式、必须保留、可以挑战>"
+```
+
+如果参考缺失、读取失败或权限不足，不创建假证据；使用 `pmw-run event --type evidence` 记录 `线上参考状态：读取失败/待补充`。
+
 ## 缺失时的提问
 
 如果判断需要线上参考但材料缺失，用一句话停下来问：

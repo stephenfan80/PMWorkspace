@@ -27,7 +27,7 @@ pmw-dashboard status
 |---|---|---|---|
 | 产品简报 | Required | Required | 必须是 `已对齐`，且没有缺失门槛或实质漂移。 |
 | Zoon | Required | Required | 必须已同步，且出图 / 交付前无实质漂移。 |
-| 线上参考 | Required | Required | 已提供线上参考、已确认无线上参考，或明确不适用；未判断时不继续。 |
+| 线上参考 | Required | Required | 已提供线上参考、已确认无线上参考，或明确不适用；未判断时不继续。优先读取最新 `browser_evidence` 产物，没有时回退到 run evidence / gate 事件。 |
 | 方案差异 | Required | Required | 多方案必须在页面结构、信息架构、交互路径、信任表达或关键任务上不同；单方案也要标注不适用或已登记。 |
 | 不可虚构项 | Required | Required | 必须明确不能展示的能力、数据、承诺或动作。 |
 | 复审状态 | no | Required | 出图前展示但不阻断；交付前必须是 `可通过`，不能有需要重出、PM 拍板或补参考项。 |
@@ -68,3 +68,5 @@ PMWorkspace 产品准备度仪表盘：
 ## 与 Evidence Dashboard 的关系
 
 Evidence Dashboard 回答“现在有哪些证据”；Product Readiness Dashboard 回答“基于这些证据，现在能不能出图或交付”。前者是证据页，后者是 gate verdict。两者可以同屏展示，但 Product Readiness Dashboard 必须放在出图 / 交付判断之前。
+
+浏览器证据属于 Product Artifact Flow 的轻量产物：用 `pmw-artifact add --kind browser_evidence` 登记线上流程截图、状态页、竞品参考或 Zoon 漂移证据。仪表盘只读取它的状态、URL / 路径和摘要，不引入新的证据库或浏览器自动化命令。

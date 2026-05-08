@@ -10,7 +10,7 @@
     "must_stop": false,
     "gate": "业务简报与审计拆层",
     "required_behaviors": [
-      "业务简报约 12-18 行",
+      "业务简报约 8-12 行",
       "默认本地保存业务简报",
       "用户选择后才同步 Zoon 业务简报版",
       "本地保存完整审计副本",
@@ -25,7 +25,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",
-      "contains": "业务简报结构控制在约 12-18 行"
+      "contains": "业务简报结构控制在约 8-12 行"
     },
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",

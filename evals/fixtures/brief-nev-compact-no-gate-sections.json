@@ -1,0 +1,51 @@
+{
+  "id": "brief-nev-compact-no-gate-sections",
+  "title": "新能源汽车产品简报不得把门槛和支持信息输出成正文",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "基于新能源汽车权益与安心线索转化工具生成产品设计简报，用户只需要简洁核心内容，不要工作流状态。",
+  "expected": {
+    "mode": "deep",
+    "status": "已对齐",
+    "must_stop": false,
+    "gate": "业务简报正文精简",
+    "required_behaviors": [
+      "只输出产品核心信息、当前需要确认和下一步",
+      "把产品简报门槛写入内部审计",
+      "把支持信息写入内部审计",
+      "深度版也保持业务简报精简"
+    ],
+    "forbidden_behaviors": [
+      "输出 ## 产品简报门槛",
+      "输出 ## 支持信息",
+      "输出 run_id、产物流动、准备度仪表盘或已保存资产路径",
+      "把产品简报正文写成状态日志"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "用户可见业务简报不得出现 `## 产品简报门槛` 或 `## 支持信息`"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "下面结构只允许进入本地审计副本或用户明确要求的调试输出，不能作为业务简报正文"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "深度版也不能把业务简报写成长状态日志"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "不得输出 `产品简报门槛`、`支持信息`、run_id、Zoon 状态、产物流动或已保存资产"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "用户可见业务简报不得出现 `## 产品简报门槛` 或 `## 支持信息`"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "- `支持信息`"
+    }
+  ]
+}

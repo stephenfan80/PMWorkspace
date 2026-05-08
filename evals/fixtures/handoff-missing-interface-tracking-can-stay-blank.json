@@ -12,6 +12,7 @@
     "required_behaviors": [
       "缺口不改变承诺时保留空值",
       "写入待补充项",
+      "用户可跳过普通待补充项",
       "不虚构接口、字段、事件名或实验阈值"
     ],
     "forbidden_behaviors": [
@@ -23,15 +24,15 @@
   "contract_checks": [
     {
       "path": "pm-handoff/SKILL.md",
-      "contains": "缺接口、数据字段、埋点属性或实验细节但不改变承诺时，保留空值并写入 `待补充项`"
+      "contains": "每项状态使用 `待补充`、`已跳过` 或 `已补充`"
     },
     {
       "path": "pmworkspace-shared/references/delivery-handoff.md",
-      "contains": "用户输入中没有接口、数据、埋点或实验信息时，不要虚构；在对应表格留下空行或 `待补充`"
+      "contains": "用户可以回复 `跳过某项` 或 `全部先跳过`"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "必须留空或写 `待补充`，不能虚构字段、口径、事件名、接口可用性或实验阈值。"
+      "contains": "普通缺口不阻断当前 PRD"
     }
   ]
 }

@@ -14,6 +14,7 @@
       "用户可见输出交付结论、精简 PRD、待补充项和下一步",
       "把交付目标、事实来源和交付前门槛写入审计",
       "把原型复审状态、未决拍板和验收写入边界写入审计",
+      "交付控制器不进入 PRD 正文",
       "把下一技能和证据状态写入审计"
     ],
     "forbidden_behaviors": [
@@ -34,11 +35,15 @@
     },
     {
       "path": "pm-handoff/SKILL.md",
-      "contains": "这些默认写入审计，用户可见输出只保留交付结论、精简 PRD、待补充项和下一步"
+      "contains": "这些默认写入审计，不能进入 PRD 正文。用户可见输出只保留交付结论、精简 PRD、待补充项和下一步"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "交付控制器只写入内部审计、本地状态或调试输出，不进入 PRD 正文"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "产品交付：必须先建立交付控制器"
+      "contains": "交付控制器默认内部审计，不进入 PRD 正文"
     }
   ]
 }

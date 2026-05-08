@@ -18,6 +18,7 @@
     "forbidden_behaviors": [
       "把 PRD 写成大而全交付稿",
       "默认展开测试计划或开发周期",
+      "输出 PRD 生成判断模块",
       "省略接口、数据、埋点或实验字段"
     ]
   },
@@ -33,6 +34,14 @@
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
       "contains": "默认 PRD 必须精简，只保留需求背景、需求价值、需求方案、需求功能及描述、接口以及数据来源、埋点信息、实验标准、待补充项和不可虚构"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "not_contains": "## PRD 生成判断"
+    },
+    {
+      "path": "pm-handoff/SKILL.md",
+      "not_contains": "## PRD 生成判断"
     }
   ]
 }

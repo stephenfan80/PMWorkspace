@@ -120,6 +120,7 @@ PMWorkspace v0.2 turns the skill suite into a local product runtime:
 - **Runtime Kernel:** `pmw-run` gives each workflow a `run_id`, mode, gate events, decisions, evidence, artifacts, reviews, and next step.
 - **Workbench Map:** `pm-workbench-map.md` aligns README, routing, eval categories, and shared state fields across skills.
 - **Evidence Dashboard:** `pmw-dashboard status` renders a Chinese Markdown status page with brief version, Zoon state, references, assumptions, non-fiction boundaries, prototype list, reviews, and question preferences.
+- **Product Readiness Dashboard:** `pmw-dashboard readiness --target prototype|handoff` gives a pre-image / pre-handoff verdict across brief, Zoon, online reference, scheme difference, non-fiction boundaries, and review status.
 - **Prototype Shotgun Board:** `pmw-prototype-board` registers each independent image-2 unit and compares schemes without merging multiple screens into one image.
 - **PM Review Army / Product Review Squad:** prototype review keeps the strategy, trust/risk, design system, and data feasibility lenses, then adds CEO, Eng, Design, DX, security, QA, and release-engineering short conclusions before merging findings into pass, regenerate, PM decision, or missing evidence.
 - **Question Tuning:** `pmw-question-tuning` records whether a Q/D dimension should always be asked, asked only at high risk, defaulted to the recommendation, or avoided unless blocking.
@@ -200,6 +201,8 @@ bin/pmw-run start --skill pm-autoplan --mode quick --goal "10 分钟轻量包"
 bin/pmw-run event --type gate --status "待确认" --title "假设确认" --summary "等待 PM 确认"
 bin/pmw-run finish --status "基于假设，可讨论" --next "进入 image-2 原型"
 bin/pmw-dashboard status
+bin/pmw-dashboard readiness --target prototype
+bin/pmw-dashboard readiness --target handoff
 bin/pmw-prototype-board add --scheme "方案 A" --screen "首页" --brief-version "v1"
 bin/pmw-prototype-board list
 bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --reason "低风险轻量包默认采用推荐"

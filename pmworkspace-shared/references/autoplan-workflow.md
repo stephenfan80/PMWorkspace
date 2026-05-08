@@ -127,7 +127,8 @@
 -> 产品简报
 -> Zoon 同步
 -> Zoon 漂移检查
--> 原型准备度
+-> Product Readiness Dashboard
+-> 原型准备度 / 交付准备度
 ```
 
 深度交付最早门槛顺序：
@@ -141,7 +142,8 @@
 7. 产品简报：必须达到 `已对齐` 才能进入图片提示词。
 8. Zoon 同步和漂移检查。
 9. 线上参考和设计系统基线。
-10. 原型准备度或交付准备度。
+10. 运行 Product Readiness Dashboard，统一展示 brief、Zoon、线上参考、方案差异、不可虚构项和复审状态。
+11. 原型准备度或交付准备度。
 
 深度交付不是每轮都把所有子流程跑完。每轮只推进到“最早仍不可靠的门槛”，并把下一步映射到一个技能：
 
@@ -153,6 +155,8 @@
 | 已对齐且需要原型方案 | `$pm-prototype-shotgun` |
 | 原型已生成且需要验收 | `$pm-prototype-review` |
 | 方向已选定且要交给下一团队 | `$pm-handoff` |
+
+进入 `$pm-prototype-shotgun` 前，`pmw-dashboard readiness --target prototype` 的 verdict 必须是 `可出图`；进入 `$pm-handoff` 前，`pmw-dashboard readiness --target handoff` 的 verdict 必须是 `可交付`。若不是，下一技能指向仪表盘第一条阻断门槛对应的技能。
 
 ## 自动推进边界
 

@@ -29,6 +29,7 @@
 - 产品简报阶段默认优先创建或更新 Zoon 在线文档，成功后再保存同一份本地审计副本，并自动打开到 Codex 内置浏览器；后续原型/交付前优先读取 Zoon 最新内容。
 - 用户在对话或 Zoon 中调整产品简报后，必须重新发布并同步到 Zoon，再更新本地审计副本；原型或交付前做 Zoon 漂移检查。
 - 平台脚本可用时，用 `pmw-run` 记录本轮 run、门槛、证据、决策、产物、复审和下一步；最终用 `pmw-dashboard status` 汇总证据状态。
+- 出图或交付前必须展示 Product Readiness Dashboard；用 `pmw-dashboard readiness --target prototype|handoff` 统一检查 brief、Zoon、线上参考、方案差异、不可虚构项和复审状态，verdict 不是 `可出图` / `可交付` 时退回第一条阻断门槛。
 - 多方案原型进入 `pmw-prototype-board`，用表格比较方案；不要为了比较把多张 image-2 图合成一张。
 - 原型复审默认使用 PM Review Army / Product Review Squad：先跑策略、信任 / 风险、设计系统、数据可行性四个底盘视角；深度交付、高风险、批量交付、研发交付或用户要求多角色 review 时，追加 CEO、Eng、Design、DX、安全、QA、发布工程师短结论。
 - 用户反馈某类 Q/D 追问方式时，用 `pmw-question-tuning` 沉淀问题偏好；偏好不能覆盖本轮事实、反指标或不可虚构项。

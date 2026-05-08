@@ -34,6 +34,7 @@ done
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-prototype-shotgun >/dev/null 2>&1 || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" user-summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" readiness --target prototype 2>/dev/null || true
 ```
 
 ## Hard Gates
@@ -48,11 +49,13 @@ done
 - Read `../pmworkspace-shared/references/runtime-kernel.md`.
 - Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 原型方案 stage fields.
 - Read `../pmworkspace-shared/references/evidence-dashboard.md`.
+- Read `../pmworkspace-shared/references/product-readiness-dashboard.md`.
 - Read `../pmworkspace-shared/references/prototype-shotgun-board.md`.
 - Read `../pmworkspace-shared/references/design-system-workflow.md`.
 - Read `../pmworkspace-shared/references/prototype-quality-review.md`.
 - Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-prototype-shotgun` 且没有当前 run，再创建 runtime run.
 - 原型出图前必须先输出 `原型出图判断`，说明我建议出哪些图、暂时不出哪些图、为什么，以及图片生成前门槛；不能直接写 image-2 prompt。
+- 原型出图前必须展示 Product Readiness Dashboard；`产品简报`、`Zoon`、`线上参考`、`方案差异`、`不可虚构项` 未通过时，停止在第一条阻断门槛，不写 image-2 prompt。`复审状态` 出图前展示但不阻断，出图后再进入复审。
 - 产品简报未“已对齐”时，不写提示词，不生成图片，不生成 HTML，不输出交付稿。
 - 现有功能迭代必须有当前截图或等价视觉基线。
 - 新页面如果承接线上流程、结果页、状态页或生产样式，必须先拿到线上参考，或得到用户明确确认“没有线上参考，按新页面概念稿推进”。
@@ -76,7 +79,7 @@ done
 
 ## Workflow
 
-1. 建立原型方案控制器，记录 `产品简报来源`、`图片生成前门槛`、`方案差异质量`、`方案方向确认`、`输出单元清单`、`方案比较板写入`、`生成后复审` 和 `证据状态`。
+1. 建立原型方案控制器，记录 `产品简报来源`、`Product Readiness Dashboard`、`图片生成前门槛`、`方案差异质量`、`方案方向确认`、`输出单元清单`、`方案比较板写入`、`生成后复审` 和 `证据状态`。
 2. Read aligned brief and scenario route. If the brief is missing, `待确认`, `草稿`, or has unresolved `缺失门槛`, route back to `$pm-brief` and stop before writing image-2 prompts.
 3. If `pmw-project show` contains a Zoon URL, run `pmw-zoon drift --url <url>` when available, then read the latest document with `pmw-zoon read --url <url>` and treat it as the product source of truth. If drift changes goal, anti-metric, non-fiction boundary, scope, user promise, or scheme direction, route back to `$pm-brief` / `$pm-strategy-review` and stop.
 4. 对每个请求的屏幕运行线上参考门槛；如果必要参考是 `缺失待补充`，先停下来问，不写图片提示词。
@@ -89,12 +92,13 @@ done
 11. For each image output unit, declare scheme, screen task, canvas, main goal, anti-metric, non-fiction boundary, 线上参考状态, design system, image-2 status, and brief dependency. 一个输出单元等于一张图片，不能把多个方案或多个屏幕合成拼图。
 12. 把批量请求拆成顺序单图队列：`3 个方案` -> 3 个输出单元，`3 个方案 x 2 个屏幕` -> 6 个输出单元。每个输出单元单独调用一次 image-2；不要把多个单元合成一个 prompt。
 13. 平台脚本可用时，先用 `pmw-prototype-board add` 登记每个方案/屏幕单元；如果写入失败，输出 `方案比较板：未写入（原因）`，不能假装已记录。
-14. 在每个输出单元的图片生成前门槛通过后，逐个 Generate with image-2 / image generation。每次生成只服务当前一个输出单元，并在 prompt 中写明禁止拼图、并排比较、一图多屏、一图多方案。 如果当前环境无法生成 image-2，停止并说明，不用 HTML、Markdown 线框或方案比较板替代。
-15. 每张图出图后用 `pmw-prototype-board image` 补充图片路径或 URL；单张失败时记录 `生成失败` 或 `待重试`，不能把批次写成全成功。用户反馈后用 `pmw-prototype-board score` 记录评分。
-16. Run `prototype-quality-review.md`, then route substantial post-image review to `$pm-prototype-review`.
-17. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单，并用 `pmw-run event --type artifact` 记录产物。
-18. Record approved/rejected design feedback with `pmw-log taste`, including scenario, feedback target, source, scope, and confidence when available.
-19. 批量输出后运行 `pmw-dashboard status`，在最终说明中给出每张图的单独状态和方案比较板状态。
+14. 平台脚本可用时运行 `pmw-dashboard readiness --target prototype`；用户可见输出必须包含 `产品准备度仪表盘`。如果 verdict 是 `不可出图`，根据第一条阻断行退回 `$pm-brief`、线上参考门槛、方案差异确认或不可虚构项补齐，不写 image-2 prompt。
+15. 在每个输出单元的图片生成前门槛通过后，逐个 Generate with image-2 / image generation。每次生成只服务当前一个输出单元，并在 prompt 中写明禁止拼图、并排比较、一图多屏、一图多方案。 如果当前环境无法生成 image-2，停止并说明，不用 HTML、Markdown 线框或方案比较板替代。
+16. 每张图出图后用 `pmw-prototype-board image` 补充图片路径或 URL；单张失败时记录 `生成失败` 或 `待重试`，不能把批次写成全成功。用户反馈后用 `pmw-prototype-board score` 记录评分。
+17. Run `prototype-quality-review.md`, then route substantial post-image review to `$pm-prototype-review`.
+18. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单，并用 `pmw-run event --type artifact` 记录产物。
+19. Record approved/rejected design feedback with `pmw-log taste`, including scenario, feedback target, source, scope, and confidence when available.
+20. 批量输出后运行 `pmw-dashboard status`，在最终说明中给出每张图的单独状态和方案比较板状态。
 
 ## 输出
 
@@ -105,6 +109,9 @@ done
 - 暂时不出：
 - 为什么：
 - 图片生成前门槛：
+- 产品准备度仪表盘：
+  - Verdict：
+  - 第一阻断门槛：
 
 方案方向：
 - 方案 A：
@@ -130,6 +137,7 @@ done
 - run_id：
 - Zoon 事实来源：
 - Zoon 漂移检查：
+- 产品准备度仪表盘：
 - 图片生成前门槛：
 - 场景：
 - 线上参考：

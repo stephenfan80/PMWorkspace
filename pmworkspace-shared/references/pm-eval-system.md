@@ -15,6 +15,7 @@ PMWorkspace eval 第一版用于维护技能规则和输出契约，不运行真
 - 防止用户反馈资产混淆：个人偏好、产品认知和 PMWorkspace 进化建议必须分开保存，GitHub 回流默认只生成脱敏本地待审稿。
 - 防止 PMWorkspace 主入口路由分散、run 重复创建或路由输出缺少证据状态。
 - 防止产品交付退化成大而全 PRD：默认只输出精简 PRD 核心字段，接口、数据、埋点和实验缺口可留空但不能虚构，并沉淀为本地交付资产。
+- 防止出图 / 交付前缺少统一准备度判断：Product Readiness Dashboard 必须展示 brief、Zoon、线上参考、方案差异、不可虚构项和复审状态，并给出 verdict。
 
 ## 分层
 
@@ -39,6 +40,7 @@ fixture 的 `category` 必须能映射回 `pm-workbench-map.md` 的链路阶段�
 | `pm-prototype-shotgun`、`prototype-shotgun`、`prototype-output-contract`、`multi-scheme`、`production-reference`、`screenshot-feedback` | 原型方案 | image-2 前门槛、单图协议、输出单元、线上参考、设计系统 |
 | `prototype-review` | 原型复审 | 复审控制器、重出、拍板、偏好边界 |
 | `pm-handoff` | 产品交付 | 精简 PRD、现成文档入口、未复审不交付、未拍板不写验收、交付资产沉淀 |
+| `readiness-dashboard` | 原型方案 / 产品交付 / 运行与记忆 | 出图 / 交付前 Product Readiness Dashboard 和 verdict |
 | `memory`、`decision-principles`、`eval-system` | 运行与记忆 | 偏好边界、个人全局记忆、GitHub 待审稿、自动决策、eval runner |
 
 ## Fixture 结构
@@ -139,6 +141,7 @@ fixture 使用 JSON，保存在 `evals/fixtures/`：
 - 产品简报：`pmw-log brief` 必须使用 Zoon-first，local-backed 同步；先推送或追加 Zoon，成功后再保存同一份本地审计副本，并记录 Zoon URL、同步状态和最终本地 brief 路径。
 - 产品简报：Zoon 漂移如果改变目标、反指标、不可虚构项、范围、用户承诺或方案方向，必须重新确认，不能继续沿用旧的已对齐状态。
 - 产品简报：只有确认状态已对齐、线上参考门槛通过且无未解决缺失门槛时，才能把下一技能指向 `$pm-prototype-shotgun` 或 `$pm-handoff`。
+- 产品准备度仪表盘：出图 / 交付前必须输出 Product Readiness Dashboard，至少覆盖产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态，并给出 `可出图`、`不可出图`、`可交付` 或 `不可交付` verdict。
 - 原型方案：必须定义 `$pm-prototype-shotgun` 是 image-2 原型出图导演；它不重新做 `$pm-jobs`、`$pm-strategy-review` 或 `$pm-brief` 的职责。
 - 原型方案：必须先输出 `原型出图判断`，再进入方案方向、图片输出单元和 prompt；不能直接写 image-2 prompt。
 - 原型方案：必须先建立原型方案控制器，并输出产品简报来源、图片生成前门槛、方案差异质量、方案方向确认、输出单元清单、方案比较板写入和证据状态。
@@ -161,6 +164,7 @@ fixture 使用 JSON，保存在 `evals/fixtures/`：
 - 原型复审：反馈资产化是复审后的增益步骤，不能替代 `需要重出`、`需要 PM 拍板` 或 `需要补充参考`。
 - 产品交付：必须先建立交付控制器，并输出交付目标、事实来源、交付前门槛、原型复审状态、未决拍板、交付类型、验收写入边界、下一技能和证据状态。
 - 产品交付：产品简报未已对齐、Zoon 有实质漂移、原型复审未通过或线上参考缺失时，必须退回对应门槛，不能输出 PRD、设计交付、实验方案或研发验收。
+- 产品交付：Product Readiness Dashboard verdict 不是 `可交付` 时，必须退回仪表盘第一条阻断门槛，不能输出 PRD、设计交付、实验方案或研发验收。
 - 产品交付：关键 D 未拍板时，必须停止在 `需要 PM 拍板`，只展开一个当前 `D`，不能写研发验收标准、实验口径或对外承诺。
 - 产品交付：验收标准只能来自已确认范围、已支持能力、已拍板承诺、已通过复审的原型或明确线上参考；不可虚构项、未验证数据和未来方案不能写成验收。
 - 产品交付：默认 PRD 必须精简，只保留需求背景、需求价值、需求方案、需求功能及描述、接口以及数据来源、埋点信息、实验标准、待补充项和不可虚构；测试计划、开发周期、排期和人力默认不写。

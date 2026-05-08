@@ -15,6 +15,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 `$pm-prototype-shotgun` 写图片提示词或调用 image-2 前，先建立原型方案控制器。控制器至少记录：
 
 - `产品简报来源`：已对齐产品简报版本、Zoon URL / 快照状态、最新漂移检查结论。
+- `Product Readiness Dashboard`：用 `pmw-dashboard readiness --target prototype` 统一展示产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态；verdict 不是 `可出图` 时停止。
 - `图片生成前门槛`：产品简报已对齐、Zoon 无实质漂移、线上参考门槛通过、设计系统已载入、image-2 可用。
 - `方案差异质量`：每个方案差异来自页面结构、信息架构、交互路径、信任表达或关键任务；如果只是配色、圆角、插画、卡片皮肤不同，停止并重拟方向。
 - `方案方向确认`：用户已确认方向，或明确批准使用默认方向；未确认时只输出方向和取舍，不写图片提示词。
@@ -54,6 +55,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - 画布决策遵循移动端优先：iPhone 17 竖屏 `402 x 874`；除非用户明确要求桌面端，或看板/内部工具确实需要大屏密度。
 - 已通过 `design-system-workflow.md` 载入 AutoDesign 生产基线。
 - 对抗审查中的实质改动已写回产品简报。
+- 已展示 Product Readiness Dashboard，且出图前 required 行的 verdict 是 `可出图`。
 
 ## 媒介锁
 

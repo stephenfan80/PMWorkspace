@@ -2,6 +2,8 @@
 
 Evidence Dashboard 是 PMWorkspace 的证据状态页，用来避免产品事实、Zoon 版本、线上参考、原型清单和复审结论散落在对话里。
 
+如果要判断能不能出图或交付，必须同时读取 `product-readiness-dashboard.md`。Evidence Dashboard 回答“证据在哪里”，Product Readiness Dashboard 回答“现在能不能继续”。
+
 ## 使用时机
 
 - `$pm-autoplan` 结束一个门槛判断后。
@@ -14,6 +16,8 @@ Evidence Dashboard 是 PMWorkspace 的证据状态页，用来避免产品事实
 ```bash
 pmw-dashboard status
 pmw-dashboard status --run <run_id>
+pmw-dashboard readiness --target prototype
+pmw-dashboard readiness --target handoff
 ```
 
 ## 状态页必须覆盖

@@ -101,7 +101,7 @@ If the user provides a product task in the same message, skip the welcome menu a
 - 一个方案 + 一个屏幕 = 一张图片。除非用户要求展示板，否则不要创建比较拼图。
 - 每张图片必须绑定方案名、屏幕任务、主目标、反指标、不可虚构项和产品简报版本。
 - 平台脚本可用时，保存可沉淀资产：使用日志、决策、产品简报 Markdown、原型清单和偏好反馈。
-- 平台脚本可用时，使用 `pmw-dashboard status` 汇总当前证据状态；不要让 Zoon、线上参考、原型清单和待决策项散落在对话里。
+- 平台脚本可用时，使用 `pmw-dashboard status` 汇总当前证据状态；出图或交付前使用 `pmw-dashboard readiness --target prototype|handoff` 展示 Product Readiness Dashboard。不要让 brief、Zoon、线上参考、方案差异、不可虚构项、复审状态和待决策项散落在对话里。
 - 不要把真实 token、私密客户数据、内部录音、敏感截图或未脱敏 Zoon 内容保存到本地资产。
 
 ## Shared References
@@ -114,6 +114,7 @@ Use `../pmworkspace-shared/references/` for:
 - `pm-decision-principles.md` for automatic decision priorities, stop gates, and memory boundaries.
 - `pm-eval-system.md` for maintenance eval fixtures and PMWorkspace behavior contracts.
 - `evidence-dashboard.md` for evidence status pages.
+- `product-readiness-dashboard.md` for the pre-image and pre-handoff readiness verdict.
 - `decision-question-mode.md` for PM decision questions.
 - `autoplan-workflow.md` for automatic product review sequencing.
 - `zoon-drift-check.md` for syncing adjusted briefs and detecting stale Zoon state.

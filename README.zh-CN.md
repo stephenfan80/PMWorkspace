@@ -141,6 +141,7 @@ PMWorkspace v0.2 把技能套件升级成本地产品运行系统：
 - **Runtime Kernel：** `pmw-run` 为每次工作生成 `run_id`，记录模式、门槛、决策、证据、产物、复审和下一步。
 - **Workbench Map：** `pm-workbench-map.md` 统一 README、路由、eval 分类和技能间状态字段。
 - **Evidence Dashboard：** `pmw-dashboard status` 输出中文证据状态页，汇总产品简报版本、Zoon 状态、线上参考、假设、不可虚构项、原型清单、复审结论和问题偏好。
+- **Product Readiness Dashboard：** `pmw-dashboard readiness --target prototype|handoff` 在出图 / 交付前统一给出准备度 verdict，覆盖产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态。
 - **Prototype Shotgun Board：** `pmw-prototype-board` 登记每个独立 image-2 图片单元，并用表格比较方案；不把多张图合成一张图。
 - **PM Review Army / Product Review Squad：** 原型复审保留策略、信任 / 风险、设计系统和数据可行性四个底盘视角，并追加 CEO、Eng、Design、DX、安全、QA、发布工程师短结论，最终合并为可通过、需要重出、需要 PM 拍板或需要补充参考。
 - **Question Tuning：** `pmw-question-tuning` 记录用户对 Q/D 的偏好，例如永远问、高风险才问、默认采用推荐或除非阻塞否则少问。
@@ -245,6 +246,8 @@ bin/pmw-run start --skill pm-autoplan --mode quick --goal "10 分钟轻量包"
 bin/pmw-run event --type gate --status "待确认" --title "假设确认" --summary "等待 PM 确认"
 bin/pmw-run finish --status "基于假设，可讨论" --next "进入 image-2 原型"
 bin/pmw-dashboard status
+bin/pmw-dashboard readiness --target prototype
+bin/pmw-dashboard readiness --target handoff
 bin/pmw-prototype-board add --scheme "方案 A" --screen "首页" --brief-version "v1"
 bin/pmw-prototype-board list
 bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --reason "低风险轻量包默认采用推荐"

@@ -3,6 +3,7 @@ import argparse
 import json
 import os
 import pathlib
+import re
 import subprocess
 from datetime import datetime, timezone
 from typing import Optional
@@ -94,6 +95,231 @@ def bullet_or_empty(rows: list[str], empty: str = "暂无") -> list[str]:
     return [f"- {row}" for row in rows] if rows else [f"- {empty}"]
 
 
+def contains_any(value: str, needles: list[str]) -> bool:
+    return any(needle in value for needle in needles)
+
+
+def latest_event(events: list[dict], needles: list[str], event_types: Optional[set[str]] = None) -> dict:
+    for row in reversed(events):
+        if event_types and row.get("event") not in event_types:
+            continue
+        text = f"{row.get('status', '')} {row.get('title', '')} {row.get('summary', '')}"
+        if contains_any(text, needles):
+            return row
+    return {}
+
+
+def read_text(path_value: str) -> str:
+    if not path_value:
+        return ""
+    path = pathlib.Path(path_value)
+    if not path.exists():
+        return ""
+    return path.read_text(encoding="utf-8", errors="ignore")
+
+
+def redact_sensitive(value: str) -> str:
+    value = re.sub(r"(token=)[^&\s]+", r"\1[redacted]", value)
+    value = re.sub(r"(ownerSecret[=: ]*)[^&\s]+", r"\1[redacted]", value)
+    value = re.sub(r"(Authorization: Bearer )[A-Za-z0-9._~+/=-]+", r"\1[redacted]", value)
+    return value
+
+
+def gate_result(name: str, required: bool, status: str, evidence: str, action: str, passed: bool) -> dict:
+    return {
+        "name": name,
+        "required": required,
+        "status": status,
+        "evidence": evidence,
+        "action": action,
+        "passed": passed,
+    }
+
+
+def latest_review(events: list[dict]) -> dict:
+    for row in reversed(events):
+        if row.get("event") == "review":
+            return row
+    return {}
+
+
+def has_non_fiction_boundary(text: str) -> bool:
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        if "不可虚构" not in line:
+            continue
+        window = "\n".join(lines[index : index + 5])
+        cleaned = (
+            window.replace("#", "")
+            .replace("不可虚构项", "")
+            .replace("不可虚构", "")
+            .strip(" ：:-\n")
+        )
+        if cleaned and not contains_any(cleaned, ["待补充", "未定义", "暂无", "TBD"]):
+            return True
+    return False
+
+
+def readiness_target_label(target: str) -> str:
+    if target == "prototype":
+        return "出图前"
+    if target == "handoff":
+        return "交付前"
+    return "自动判断"
+
+
+def auto_readiness_target(project: dict, events: list[dict]) -> str:
+    latest_status = str(project.get("latest_run_status") or (events[-1].get("status") if events else ""))
+    has_review = bool(latest_review(events))
+    if "交付" in latest_status or has_review:
+        return "handoff"
+    return "prototype"
+
+
+def product_readiness_rows(project: dict, events: list[dict], target: str) -> list[dict]:
+    effective_target = auto_readiness_target(project, events) if target == "auto" else target
+    brief_path = str(project.get("latest_brief", ""))
+    brief_text = read_text(brief_path)
+    brief_name, brief_meta = latest_brief_summary(brief_path)
+    brief_status_text = f"{brief_meta} {brief_text[:400]}"
+    brief_ready = bool(brief_path) and "已对齐" in brief_status_text and not contains_any(
+        brief_status_text,
+        ["待确认", "草稿", "缺失门槛", "有漂移", "实质漂移"],
+    )
+    rows = [
+        gate_result(
+            "产品简报",
+            True,
+            "已对齐" if brief_ready else ("未记录" if not brief_path else "未达已对齐"),
+            brief_name if brief_path else "project.json 未记录 latest_brief",
+            "继续" if brief_ready else "退回 $pm-brief 完成已对齐产品核心信息契约",
+            brief_ready,
+        )
+    ]
+
+    zoon_url = str(project.get("zoon_url") or "")
+    zoon_sync = str(project.get("last_zoon_sync_status") or "")
+    zoon_event = latest_event(events, ["Zoon", "zoon", "漂移"], {"evidence", "gate"})
+    zoon_text = f"{zoon_sync} {zoon_event.get('status', '')} {zoon_event.get('summary', '')}"
+    zoon_ready = bool(zoon_url) and zoon_sync == "synced" and not contains_any(
+        zoon_text,
+        ["DRIFT", "有漂移", "实质漂移", "读取失败", "同步失败", "failed"],
+    )
+    rows.append(
+        gate_result(
+            "Zoon",
+            True,
+            "已同步且无实质漂移" if zoon_ready else ("未记录 URL" if not zoon_url else "未通过"),
+            redact_sensitive(zoon_url or project.get("last_zoon_sync_error") or "未记录"),
+            "继续" if zoon_ready else "运行 pmw-log brief / pmw-zoon sync，并在出图或交付前做漂移检查",
+            zoon_ready,
+        )
+    )
+
+    reference_event = latest_event(events, ["线上参考", "生产基线", "当前截图", "截图", "录屏"], {"evidence", "gate"})
+    reference_text = f"{reference_event.get('status', '')} {reference_event.get('summary', '')}"
+    reference_ready = bool(reference_event) and not contains_any(reference_text, ["缺失", "待补充", "未判断", "失败"])
+    rows.append(
+        gate_result(
+            "线上参考",
+            True,
+            reference_event.get("status") or "未判断",
+            reference_event.get("summary") or "尚未记录线上参考 / 生产基线判断",
+            "继续" if reference_ready else "先判断是否承接线上流程；必要时补截图、录屏或相似状态页",
+            reference_ready,
+        )
+    )
+
+    board = [r for r in read_jsonl(project_dir() / "prototype-board.jsonl") if r.get("record_type", "item") == "item"]
+    scheme_event = latest_event(events, ["方案差异", "方案方向", "方案比较板"], {"evidence", "gate", "artifact"})
+    scheme_text = f"{scheme_event.get('status', '')} {scheme_event.get('summary', '')}"
+    scheme_ready = bool(board or scheme_event) and not contains_any(scheme_text, ["只换皮", "未通过", "缺失", "待确认"])
+    rows.append(
+        gate_result(
+            "方案差异",
+            True,
+            "已登记" if board else (scheme_event.get("status") or "未登记"),
+            f"{len(board)} 个输出单元" if board else (scheme_event.get("summary") or "prototype-board 暂无方案"),
+            "继续" if scheme_ready else "先说明方案在页面结构、信息架构、交互路径、信任表达或关键任务上的差异",
+            scheme_ready,
+        )
+    )
+
+    board_non_fiction = [str(row.get("non_fiction") or "").strip() for row in board if str(row.get("non_fiction") or "").strip()]
+    non_fiction_ready = bool(board_non_fiction or has_non_fiction_boundary(brief_text))
+    rows.append(
+        gate_result(
+            "不可虚构项",
+            True,
+            "已定义" if non_fiction_ready else "未定义",
+            "prototype-board / 产品简报" if non_fiction_ready else "未找到明确不可虚构边界",
+            "继续" if non_fiction_ready else "回到 $pm-brief 补齐不能展示的能力、数据、承诺和动作",
+            non_fiction_ready,
+        )
+    )
+
+    review = latest_review(events)
+    review_text = f"{review.get('status', '')} {review.get('summary', '')}"
+    review_required = effective_target == "handoff"
+    review_ready = bool(review) and contains_any(review_text, ["可通过", "可交付"]) and not contains_any(
+        review_text,
+        ["需要重出", "需要 PM 拍板", "需要补充参考"],
+    )
+    if not review_required:
+        review_status = review.get("status") or "出图前不阻断"
+        review_action = "出图后进入 $pm-prototype-review"
+        review_passed = True
+    else:
+        review_status = "可通过" if review_ready else (review.get("status") or "未复审")
+        review_action = "继续" if review_ready else "交付前先完成 $pm-prototype-review 并清掉重出 / 拍板 / 补参考项"
+        review_passed = review_ready
+    rows.append(
+        gate_result(
+            "复审状态",
+            review_required,
+            review_status,
+            review.get("summary") or "暂无复审记录",
+            review_action,
+            review_passed,
+        )
+    )
+    return rows
+
+
+def render_readiness_section(run_id: Optional[str], target: str = "auto", heading_level: str = "#") -> str:
+    project = read_json(project_dir() / "project.json")
+    chosen_run, events = read_run(run_id)
+    effective_target = auto_readiness_target(project, events) if target == "auto" else target
+    rows = product_readiness_rows(project, events, effective_target)
+    blockers = [row for row in rows if row["required"] and not row["passed"]]
+    if blockers:
+        verdict = "NOT_READY"
+        verdict_cn = "不可出图" if effective_target == "prototype" else "不可交付"
+        next_action = blockers[0]["action"]
+    else:
+        verdict = "READY_FOR_PROTOTYPE" if effective_target == "prototype" else "READY_FOR_HANDOFF"
+        verdict_cn = "可出图" if effective_target == "prototype" else "可交付"
+        next_action = "继续进入下一步"
+
+    lines = [
+        f"{heading_level} PMWorkspace 产品准备度仪表盘",
+        "",
+        f"- 目标：{readiness_target_label(effective_target)}",
+        f"- 当前 run：{chosen_run or '暂无'}",
+        f"- Verdict：{verdict_cn}（{verdict}）",
+        f"- 下一步：{next_action}",
+        "",
+        "| 门槛 | Required | 状态 | 证据 | 行动 |",
+        "|---|---|---|---|---|",
+    ]
+    for row in rows:
+        required = "YES" if row["required"] else "no"
+        values = [row["name"], required, row["status"], row["evidence"], row["action"]]
+        lines.append("| " + " | ".join(str(value).replace("|", "/") for value in values) + " |")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def render_status(run_id: Optional[str]) -> str:
     root = project_dir()
     project = read_json(root / "project.json")
@@ -124,11 +350,13 @@ def render_status(run_id: Optional[str]) -> str:
         f"- 当前状态：{latest_status}",
         f"- 生成时间：{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}",
         "",
+        render_readiness_section(run_id, "auto", "##").rstrip(),
+        "",
         "## 产品简报与 Zoon",
         "",
         f"- 最新简报：{brief_name}",
         f"- 简报状态：{brief_meta}",
-        f"- Zoon URL：{project.get('zoon_url') or '未记录'}",
+        f"- Zoon URL：{redact_sensitive(str(project.get('zoon_url') or '未记录'))}",
         f"- Zoon 同步状态：{project.get('last_zoon_sync_status') or '未记录'}",
         f"- 最近 Zoon 同步：{project.get('last_zoon_sync_at') or '未记录'}",
         f"- Zoon 同步本地副本：{project.get('last_zoon_sync_brief') or '未记录'}",
@@ -172,9 +400,15 @@ def main() -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     status = sub.add_parser("status")
     status.add_argument("--run")
+    readiness = sub.add_parser("readiness")
+    readiness.add_argument("--run")
+    readiness.add_argument("--target", choices=["auto", "prototype", "handoff"], default="auto")
     args = parser.parse_args()
     if args.command == "status":
         print(render_status(args.run), end="")
+        return 0
+    if args.command == "readiness":
+        print(render_readiness_section(args.run, args.target), end="")
         return 0
     return 1
 

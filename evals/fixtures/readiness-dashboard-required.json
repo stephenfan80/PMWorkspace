@@ -1,0 +1,91 @@
+{
+  "id": "readiness-dashboard-required",
+  "title": "出图和交付前必须输出产品准备度仪表盘",
+  "category": "readiness-dashboard",
+  "primary_skill": "pm-workspace",
+  "prompt": "用户要求在出图或交付前统一展示 brief、Zoon、线上参考、方案差异、不可虚构项和复审状态，并给出能否继续的准备度结论。",
+  "expected": {
+    "mode": "deep",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "Product Readiness Dashboard",
+    "required_behaviors": [
+      "出图前运行 prototype readiness verdict",
+      "交付前运行 handoff readiness verdict",
+      "仪表盘覆盖产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态",
+      "verdict 不是可出图或可交付时退回第一条阻断门槛"
+    ],
+    "forbidden_behaviors": [
+      "只输出零散证据状态",
+      "缺少 Zoon 或复审状态仍宣称可交付",
+      "出图前不展示方案差异和不可虚构项",
+      "把准备度缺口留到交付后再补"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "Product Readiness Dashboard 是 PMWorkspace 的出图 / 交付前总控面板"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "| 产品简报 | Required | Required |"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "| Zoon | Required | Required |"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "| 线上参考 | Required | Required |"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "| 方案差异 | Required | Required |"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "| 不可虚构项 | Required | Required |"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "| 复审状态 | no | Required |"
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "PMWorkspace 产品准备度仪表盘"
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "readiness.add_argument(\"--target\", choices=[\"auto\", \"prototype\", \"handoff\"], default=\"auto\")"
+    },
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "pmw-dashboard\" ] && \"$_PMW_BIN/pmw-dashboard\" readiness --target prototype"
+    },
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "产品准备度仪表盘"
+    },
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "pmw-dashboard\" ] && \"$_PMW_BIN/pmw-dashboard\" readiness --target handoff"
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "Product Readiness Dashboard"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "产品准备度仪表盘：未运行 / 不可出图 / 可出图 / 不可交付 / 可交付"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "`readiness-dashboard`"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "Product Readiness Dashboard"
+    }
+  ]
+}

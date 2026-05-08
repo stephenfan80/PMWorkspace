@@ -84,6 +84,18 @@ case "$EVENT" in
         "$SCRIPT_DIR/pmw-project" set-zoon-sync-disabled "$file" >/dev/null 2>&1 || true
         ;;
     esac
+    if [ -x "$SCRIPT_DIR/pmw-artifact" ]; then
+      "$SCRIPT_DIR/pmw-artifact" add \
+        --kind product_brief \
+        --title "$name" \
+        --status "$sync_status" \
+        --source-skill pm-brief \
+        --path "$file" \
+        --url "$zoon_url" \
+        --summary "产品简报已保存，Zoon 同步状态：$sync_status" \
+        --upstream "decision,question,strategy_review" \
+        --next-skill "pm-prototype-shotgun,pm-handoff" >/dev/null 2>&1 || true
+    fi
     rm -f "$input_file" 2>/dev/null || true
     trap - EXIT
     echo "$file"
@@ -107,12 +119,34 @@ case "$EVENT" in
     batch="${2:-batch}"
     manifest="$PROJECT_DIR/prototypes/$(date -u +%Y%m%dT%H%M%SZ)-$(safe_fragment "$batch").jsonl"
     cat >> "$manifest"
+    if [ -x "$SCRIPT_DIR/pmw-artifact" ]; then
+      "$SCRIPT_DIR/pmw-artifact" add \
+        --kind prototype_manifest \
+        --title "$batch" \
+        --status "已保存" \
+        --source-skill pm-prototype-shotgun \
+        --path "$manifest" \
+        --summary "原型清单已保存，可供原型复审读取" \
+        --upstream "product_brief,prototype_board" \
+        --next-skill "pm-prototype-review" >/dev/null 2>&1 || true
+    fi
     echo "$manifest"
     ;;
   handoff)
     name="${2:-handoff}"
     file="$PROJECT_DIR/handoffs/$(date -u +%Y%m%dT%H%M%SZ)-$(safe_fragment "$name").md"
     cat > "$file"
+    if [ -x "$SCRIPT_DIR/pmw-artifact" ]; then
+      "$SCRIPT_DIR/pmw-artifact" add \
+        --kind handoff \
+        --title "$name" \
+        --status "已保存" \
+        --source-skill pm-handoff \
+        --path "$file" \
+        --summary "交付稿已保存，可供文档同步、发布准备或研发协作读取" \
+        --upstream "product_brief,prototype_review,delivery_facts" \
+        --next-skill "document-release,ship,qa" >/dev/null 2>&1 || true
+    fi
     echo "$file"
     ;;
   taste)

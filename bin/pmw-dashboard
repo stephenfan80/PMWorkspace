@@ -143,6 +143,26 @@ def latest_review(events: list[dict]) -> dict:
     return {}
 
 
+def artifact_flow_rows(root: pathlib.Path, limit: int = 10) -> list[str]:
+    rows = read_jsonl(root / "artifact-flow.jsonl")[-limit:]
+    rendered = []
+    for row in rows:
+        downstream = row.get("next_skill") or []
+        if isinstance(downstream, list):
+            downstream_text = ", ".join(str(item) for item in downstream if str(item).strip())
+        else:
+            downstream_text = str(downstream)
+        location = row.get("url") or row.get("path") or ""
+        rendered.append(
+            f"{redact_sensitive(str(row.get('kind', '产物')))}｜"
+            f"{redact_sensitive(str(row.get('status', '')))}｜"
+            f"{redact_sensitive(str(row.get('title', '')))}｜"
+            f"{redact_sensitive(str(row.get('source_skill', '')))} -> "
+            f"{redact_sensitive(downstream_text or '待指定')}｜{redact_sensitive(str(location or '未记录'))}"
+        )
+    return rendered
+
+
 def has_non_fiction_boundary(text: str) -> bool:
     lines = text.splitlines()
     for index, line in enumerate(lines):
@@ -337,6 +357,7 @@ def render_status(run_id: Optional[str]) -> str:
     reviews = [e for e in events if e.get("event") == "review"]
     evidence = [e for e in events if e.get("event") == "evidence"]
     artifacts = [e for e in events if e.get("event") == "artifact"]
+    artifact_flow = artifact_flow_rows(root)
     run_decisions = [e for e in events if e.get("event") == "decision"]
     tuning = read_jsonl(root / "question-tuning.jsonl")[-5:]
     delivery_facts = (read_jsonl(user_dir() / "delivery-facts.jsonl") + read_jsonl(root / "delivery-facts.jsonl"))[-8:]
@@ -379,6 +400,8 @@ def render_status(run_id: Optional[str]) -> str:
     lines.extend(bullet_or_empty(board_rows + manifest_rows))
     lines.extend(["", "## 复审结论", ""])
     lines.extend(bullet_or_empty([f"{r.get('status', '')}｜{r.get('title', '')}：{r.get('summary', '')}" for r in reviews]))
+    lines.extend(["", "## 产物流动", ""])
+    lines.extend(bullet_or_empty(artifact_flow))
     lines.extend(["", "## 产物清单", ""])
     lines.extend(bullet_or_empty([f"{r.get('status', '')}｜{r.get('title', '')}：{r.get('summary', '')}" for r in artifacts]))
     lines.extend(["", "## 交付资产", ""])

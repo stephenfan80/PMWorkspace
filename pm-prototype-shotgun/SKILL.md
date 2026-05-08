@@ -35,6 +35,7 @@ done
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" user-summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" readiness --target prototype 2>/dev/null || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" latest --kind product_brief 2>/dev/null || true
 ```
 
 ## Hard Gates
@@ -48,6 +49,7 @@ done
 - Read `../pmworkspace-shared/references/pm-eval-system.md`.
 - Read `../pmworkspace-shared/references/runtime-kernel.md`.
 - Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 原型方案 stage fields.
+- Read `../pmworkspace-shared/references/artifact-flow.md` and read the latest `product_brief` artifact before planning images.
 - Read `../pmworkspace-shared/references/evidence-dashboard.md`.
 - Read `../pmworkspace-shared/references/product-readiness-dashboard.md`.
 - Read `../pmworkspace-shared/references/prototype-shotgun-board.md`.
@@ -79,8 +81,8 @@ done
 
 ## Workflow
 
-1. 建立原型方案控制器，记录 `产品简报来源`、`Product Readiness Dashboard`、`图片生成前门槛`、`方案差异质量`、`方案方向确认`、`输出单元清单`、`方案比较板写入`、`生成后复审` 和 `证据状态`。
-2. Read aligned brief and scenario route. If the brief is missing, `待确认`, `草稿`, or has unresolved `缺失门槛`, route back to `$pm-brief` and stop before writing image-2 prompts.
+1. 建立原型方案控制器，记录 `产品简报来源`、`Product Readiness Dashboard`、`图片生成前门槛`、`方案差异质量`、`方案方向确认`、`输出单元清单`、`方案比较板写入`、`上游产物`、`本轮产物`、`下游可读`、`产物流动`、`生成后复审` 和 `证据状态`。
+2. Read aligned brief and scenario route, then read `pmw-artifact latest --kind product_brief` when available. If the brief is missing, `待确认`, `草稿`, or has unresolved `缺失门槛`, route back to `$pm-brief` and stop before writing image-2 prompts. If the product brief artifact is missing or stale, also route back to `$pm-brief` instead of guessing from conversation memory.
 3. If `pmw-project show` contains a Zoon URL, run `pmw-zoon drift --url <url>` when available, then read the latest document with `pmw-zoon read --url <url>` and treat it as the product source of truth. If drift changes goal, anti-metric, non-fiction boundary, scope, user promise, or scheme direction, route back to `$pm-brief` / `$pm-strategy-review` and stop.
 4. 对每个请求的屏幕运行线上参考门槛；如果必要参考是 `缺失待补充`，先停下来问，不写图片提示词。
 5. Read `design-heuristics.md`, `scenario-experts.md`, and `adversarial-review.md` as needed, but do not change scope or promise without writing the decision back to the product brief.
@@ -96,7 +98,7 @@ done
 15. 在每个输出单元的图片生成前门槛通过后，逐个 Generate with image-2 / image generation。每次生成只服务当前一个输出单元，并在 prompt 中写明禁止拼图、并排比较、一图多屏、一图多方案。 如果当前环境无法生成 image-2，停止并说明，不用 HTML、Markdown 线框或方案比较板替代。
 16. 每张图出图后用 `pmw-prototype-board image` 补充图片路径或 URL；单张失败时记录 `生成失败` 或 `待重试`，不能把批次写成全成功。用户反馈后用 `pmw-prototype-board score` 记录评分。
 17. Run `prototype-quality-review.md`, then route substantial post-image review to `$pm-prototype-review`.
-18. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单，并用 `pmw-run event --type artifact` 记录产物。
+18. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单，它会登记 `prototype_manifest` 到 Product Artifact Flow；再用 `pmw-run event --type artifact` 记录产物。
 19. Record approved/rejected design feedback with `pmw-log taste`, including scenario, feedback target, source, scope, and confidence when available.
 20. 批量输出后运行 `pmw-dashboard status`，在最终说明中给出每张图的单独状态和方案比较板状态。
 
@@ -138,6 +140,10 @@ done
 - Zoon 事实来源：
 - Zoon 漂移检查：
 - 产品准备度仪表盘：
+- 上游产物：
+- 本轮产物：
+- 下游可读：
+- 产物流动：
 - 图片生成前门槛：
 - 场景：
 - 线上参考：

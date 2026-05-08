@@ -1,0 +1,251 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+import argparse
+import json
+import os
+import pathlib
+import re
+import subprocess
+import uuid
+from datetime import datetime, timezone
+from typing import Optional
+
+
+SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
+
+
+def now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def now_fragment() -> str:
+    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+
+def current_slug() -> str:
+    env_slug = os.environ.get("PMW_PROJECT_SLUG")
+    if env_slug:
+        return env_slug
+    try:
+        return subprocess.check_output([str(SCRIPT_DIR / "pmw-slug")], text=True).strip()
+    except Exception:
+        return "local-project"
+
+
+def project_dir() -> pathlib.Path:
+    return STATE_DIR / "projects" / current_slug()
+
+
+def artifact_log() -> pathlib.Path:
+    return project_dir() / "artifact-flow.jsonl"
+
+
+def read_json(path: pathlib.Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+        return value if isinstance(value, dict) else {}
+    except Exception:
+        return {}
+
+
+def read_jsonl(path: pathlib.Path) -> list[dict]:
+    rows: list[dict] = []
+    if not path.exists():
+        return rows
+    for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        try:
+            value = json.loads(line)
+        except Exception:
+            continue
+        if isinstance(value, dict):
+            rows.append(value)
+    return rows
+
+
+def redact_sensitive(value: Optional[str]) -> str:
+    if not value:
+        return ""
+    text = str(value)
+    text = re.sub(r"(token=)[^&\s]+", r"\1[redacted]", text)
+    text = re.sub(r"(ownerSecret[=: ]*)[^&\s]+", r"\1[redacted]", text)
+    text = re.sub(r"(Authorization: Bearer )[A-Za-z0-9._~+/=-]+", r"\1[redacted]", text)
+    text = re.sub(r"(api[_-]?key[=: ]*)[^&\s]+", r"\1[redacted]", text, flags=re.I)
+    return text
+
+
+def slugify(value: str) -> str:
+    text = re.sub(r"[^A-Za-z0-9._-]+", "-", value.strip().lower()).strip("-._")
+    return text or "artifact"
+
+
+def split_values(values: list[str]) -> list[str]:
+    result: list[str] = []
+    for value in values:
+        for item in str(value).split(","):
+            cleaned = item.strip()
+            if cleaned:
+                result.append(cleaned)
+    return result
+
+
+def current_run_id() -> str:
+    project = read_json(project_dir() / "project.json")
+    return str(project.get("current_run_id") or project.get("latest_run_id") or "")
+
+
+def append_row(row: dict) -> None:
+    path = artifact_log()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+
+
+def md_cell(value: object) -> str:
+    if isinstance(value, list):
+        text = ", ".join(str(item) for item in value if str(item).strip())
+    else:
+        text = str(value or "")
+    return redact_sensitive(text).replace("|", "/").replace("\n", " ").strip() or "未记录"
+
+
+def location(row: dict) -> str:
+    return str(row.get("url") or row.get("path") or "")
+
+
+def command_add(args: argparse.Namespace) -> int:
+    run_id = args.run or current_run_id()
+    row = {
+        "ts": now(),
+        "artifact_id": f"{now_fragment()}-{slugify(args.kind)}-{uuid.uuid4().hex[:6]}",
+        "kind": args.kind.strip(),
+        "title": redact_sensitive(args.title.strip()),
+        "status": redact_sensitive(args.status.strip()),
+        "source_skill": args.source_skill.strip(),
+        "path": redact_sensitive(args.path),
+        "url": redact_sensitive(args.url),
+        "summary": redact_sensitive(args.summary),
+        "upstream": split_values(args.upstream),
+        "next_skill": split_values(args.next_skill),
+        "run_id": run_id,
+    }
+    append_row(row)
+    print(row["artifact_id"])
+    return 0
+
+
+def command_latest(args: argparse.Namespace) -> int:
+    rows = read_jsonl(artifact_log())
+    if args.kind:
+        rows = [row for row in rows if row.get("kind") == args.kind]
+    if not rows:
+        return 1
+    print(json.dumps(rows[-1], ensure_ascii=False, indent=2, sort_keys=True))
+    return 0
+
+
+def command_list(args: argparse.Namespace) -> int:
+    rows = read_jsonl(artifact_log())
+    if args.kind:
+        rows = [row for row in rows if row.get("kind") == args.kind]
+    rows = rows[-args.limit :]
+    print("# PMWorkspace 产物流动清单")
+    print("")
+    if not rows:
+        print("- 暂无产物流动记录")
+        return 0
+    print("| 时间 | 产物类型 | 状态 | 标题 | 来源 | 下游 | 位置 |")
+    print("|---|---|---|---|---|---|---|")
+    for row in rows:
+        print(
+            "| "
+            + " | ".join(
+                [
+                    md_cell(row.get("ts")),
+                    md_cell(row.get("kind")),
+                    md_cell(row.get("status")),
+                    md_cell(row.get("title")),
+                    md_cell(row.get("source_skill")),
+                    md_cell(row.get("next_skill")),
+                    md_cell(location(row)),
+                ]
+            )
+            + " |"
+        )
+    return 0
+
+
+def command_flow(args: argparse.Namespace) -> int:
+    rows = read_jsonl(artifact_log())
+    latest = rows[-args.limit :]
+    print("# PMWorkspace 产物流动清单")
+    print("")
+    print(f"- 项目：{current_slug()}")
+    print(f"- 记录文件：{artifact_log()}")
+    print(f"- 记录数：{len(rows)}")
+    print("")
+    if not latest:
+        print("- 暂无产物流动记录")
+        return 0
+    print("| 时间 | 本轮产物 | 上游产物 | 下游可读 | 状态 | 位置 |")
+    print("|---|---|---|---|---|---|")
+    for row in latest:
+        print(
+            "| "
+            + " | ".join(
+                [
+                    md_cell(row.get("ts")),
+                    md_cell(f"{row.get('kind', '')} / {row.get('title', '')}"),
+                    md_cell(row.get("upstream")),
+                    md_cell(row.get("next_skill")),
+                    md_cell(row.get("status")),
+                    md_cell(location(row)),
+                ]
+            )
+            + " |"
+        )
+    return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(prog="pmw-artifact")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    add = sub.add_parser("add")
+    add.add_argument("--kind", required=True)
+    add.add_argument("--title", required=True)
+    add.add_argument("--status", required=True)
+    add.add_argument("--source-skill", required=True)
+    add.add_argument("--path", default="")
+    add.add_argument("--url", default="")
+    add.add_argument("--summary", default="")
+    add.add_argument("--upstream", action="append", default=[])
+    add.add_argument("--next-skill", action="append", default=[])
+    add.add_argument("--run", default="")
+
+    latest = sub.add_parser("latest")
+    latest.add_argument("--kind")
+
+    list_cmd = sub.add_parser("list")
+    list_cmd.add_argument("--kind")
+    list_cmd.add_argument("--limit", type=int, default=12)
+
+    flow = sub.add_parser("flow")
+    flow.add_argument("--limit", type=int, default=12)
+
+    args = parser.parse_args()
+    if args.command == "add":
+        return command_add(args)
+    if args.command == "latest":
+        return command_latest(args)
+    if args.command == "list":
+        return command_list(args)
+    if args.command == "flow":
+        return command_flow(args)
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

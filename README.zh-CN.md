@@ -142,6 +142,7 @@ PMWorkspace v0.2 把技能套件升级成本地产品运行系统：
 - **Workbench Map：** `pm-workbench-map.md` 统一 README、路由、eval 分类和技能间状态字段。
 - **Evidence Dashboard：** `pmw-dashboard status` 输出中文证据状态页，汇总产品简报版本、Zoon 状态、线上参考、假设、不可虚构项、原型清单、复审结论和问题偏好。
 - **Product Readiness Dashboard：** `pmw-dashboard readiness --target prototype|handoff` 在出图 / 交付前统一给出准备度 verdict，覆盖产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态。
+- **Product Artifact Flow：** `pmw-artifact` 记录下游可读产物，让产品简报、原型清单、复审结论和交付稿能流向下一个技能，而不是靠对话记忆重新推断。
 - **Prototype Shotgun Board：** `pmw-prototype-board` 登记每个独立 image-2 图片单元，并用表格比较方案；不把多张图合成一张图。
 - **PM Review Army / Product Review Squad：** 原型复审保留策略、信任 / 风险、设计系统和数据可行性四个底盘视角，并追加 CEO、Eng、Design、DX、安全、QA、发布工程师短结论，最终合并为可通过、需要重出、需要 PM 拍板或需要补充参考。
 - **Question Tuning：** `pmw-question-tuning` 记录用户对 Q/D 的偏好，例如永远问、高风险才问、默认采用推荐或除非阻塞否则少问。
@@ -188,6 +189,7 @@ PMWorkspace 默认把资产保存在本地：
   projects/<slug>/questions.jsonl
   projects/<slug>/project.json
   projects/<slug>/runs/
+  projects/<slug>/artifact-flow.jsonl
   projects/<slug>/prototype-board.jsonl
   projects/<slug>/question-tuning.jsonl
   projects/<slug>/prototypes/
@@ -204,6 +206,7 @@ PMWorkspace 默认把资产保存在本地：
 - 用户确认过的产品/设计决策。
 - 选择题拍板记录。
 - 每次运行的本地审计轨迹。
+- Product Artifact Flow 产物流动元数据。
 - 产品简报 Markdown。
 - 原型批次清单。
 - PRD / 设计 / 实验 / 研发交付稿。
@@ -248,6 +251,8 @@ bin/pmw-run finish --status "基于假设，可讨论" --next "进入 image-2 �
 bin/pmw-dashboard status
 bin/pmw-dashboard readiness --target prototype
 bin/pmw-dashboard readiness --target handoff
+bin/pmw-artifact flow
+bin/pmw-artifact latest --kind product_brief
 bin/pmw-prototype-board add --scheme "方案 A" --screen "首页" --brief-version "v1"
 bin/pmw-prototype-board list
 bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --reason "低风险轻量包默认采用推荐"

@@ -13,6 +13,7 @@ SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
 
 FEEDBACK_TYPES = {"preference", "product-cognition", "pmworkspace-improvement"}
+DELIVERY_FACT_TYPES = {"interface", "data-source", "tracking", "experiment", "metric-definition"}
 GLOBAL_SCOPES = {"同类场景可复用", "个人全局偏好", "PMWorkspace 进化候选"}
 PROJECT_SCOPES = {"本项目", "仅本项目"}
 
@@ -99,6 +100,11 @@ def feedback_path(feedback_type: str, scope: str) -> pathlib.Path:
     return root / "pmworkspace-improvements.jsonl"
 
 
+def delivery_fact_path(scope: str) -> pathlib.Path:
+    root = project_dir() if scope in PROJECT_SCOPES else user_dir()
+    return root / "delivery-facts.jsonl"
+
+
 def command_add_learning(args: argparse.Namespace) -> int:
     note = redact_text(" ".join(args.note).strip())
     if not note:
@@ -132,6 +138,34 @@ def command_add_feedback(args: argparse.Namespace) -> int:
         "confidence": str(args.confidence),
     }
     path = feedback_path(feedback_type, scope)
+    append_jsonl(path, row)
+    print(path)
+    return 0
+
+
+def command_add_delivery_fact(args: argparse.Namespace) -> int:
+    fact_type = args.fact_type
+    if fact_type not in DELIVERY_FACT_TYPES:
+        print(f"未知交付事实类型：{fact_type}", file=sys.stderr)
+        return 1
+    note = redact_text(args.note or " ".join(args.note_positional).strip())
+    if not note:
+        print("add-delivery-fact 需要 --note 或正文。", file=sys.stderr)
+        return 1
+    scope = args.scope
+    row = {
+        "ts": now(),
+        "type": "delivery-fact",
+        "fact_type": fact_type,
+        "note": note,
+        "scenario": redact_text(args.scenario),
+        "target": redact_text(args.target),
+        "scope": scope,
+        "source": args.source,
+        "confidence": str(args.confidence),
+        "status": args.status,
+    }
+    path = delivery_fact_path(scope)
     append_jsonl(path, row)
     print(path)
     return 0
@@ -202,8 +236,10 @@ def command_search(args: argparse.Namespace) -> int:
         read_jsonl(root / "learnings.jsonl")
         + read_jsonl(root / "taste-profile.jsonl")
         + read_jsonl(root / "product-cognition.jsonl")
+        + read_jsonl(root / "delivery-facts.jsonl")
         + read_jsonl(uroot / "taste-profile.jsonl")
         + read_jsonl(uroot / "product-cognition.jsonl")
+        + read_jsonl(uroot / "delivery-facts.jsonl")
         + read_jsonl(uroot / "pmworkspace-improvements.jsonl")
     )
     matches = []
@@ -240,14 +276,18 @@ def command_summary(_: argparse.Namespace) -> int:
     learnings = read_jsonl(root / "learnings.jsonl")
     tastes = read_jsonl(root / "taste-profile.jsonl")
     decisions = read_jsonl(root / "decisions.jsonl")
+    delivery = read_jsonl(root / "delivery-facts.jsonl")
     print("PMWorkspace 项目记忆：")
     print(f"- 产品学习：{len(learnings)} 条")
     print(f"- 偏好反馈：{len(tastes)} 条")
     print(f"- 已记录决策：{len(decisions)} 条")
+    print(f"- 交付事实：{len(delivery)} 条")
     if learnings:
         print("- 最近学习：" + "；".join(str(r.get("note", "")).strip() for r in learnings[-3:] if r.get("note")))
     if decisions:
         print("- 最近决策：" + "；".join(str(r.get("title", "")).strip() for r in decisions[-3:] if r.get("title")))
+    if delivery:
+        print("- 最近交付事实：" + "；".join(describe(r) for r in delivery[-3:] if describe(r)))
     return 0
 
 
@@ -258,19 +298,45 @@ def command_user_summary(_: argparse.Namespace) -> int:
     project_tastes = read_jsonl(root / "taste-profile.jsonl")
     cognition = read_jsonl(uroot / "product-cognition.jsonl")
     improvements = read_jsonl(uroot / "pmworkspace-improvements.jsonl")
+    global_delivery = read_jsonl(uroot / "delivery-facts.jsonl")
+    project_delivery = read_jsonl(root / "delivery-facts.jsonl")
     print("PMWorkspace 用户记忆：")
     print("- 说明：以下是个人全局记忆 + 当前项目记忆；只能作为推荐来源，不能覆盖当前 brief、Zoon、反指标、不可虚构项或线上参考门槛。")
     print(f"- 个人全局偏好：{len(global_tastes)} 条")
     print(f"- 当前项目偏好：{len(project_tastes)} 条")
     print(f"- 产品认知：{len(cognition)} 条")
+    print(f"- 交付事实：{len(global_delivery) + len(project_delivery)} 条")
     print(f"- PMWorkspace 进化候选：{len(improvements)} 条")
     if global_tastes or project_tastes:
         recent = (global_tastes + project_tastes)[-3:]
         print("- 基于过往偏好：" + "；".join(describe(r) for r in recent if describe(r)))
     if cognition:
         print("- 最近产品认知：" + "；".join(describe(r) for r in cognition[-3:] if describe(r)))
+    if global_delivery or project_delivery:
+        recent_delivery = (global_delivery + project_delivery)[-3:]
+        print("- 基于本地交付资产：" + "；".join(describe(r) for r in recent_delivery if describe(r)))
     if improvements:
         print("- 最近进化候选：" + "；".join(describe(r) for r in improvements[-3:] if describe(r)))
+    return 0
+
+
+def command_delivery_summary(_: argparse.Namespace) -> int:
+    project_rows = read_jsonl(project_dir() / "delivery-facts.jsonl")
+    user_rows = read_jsonl(user_dir() / "delivery-facts.jsonl")
+    rows = user_rows + project_rows
+    if not rows:
+        print("交付资产：暂无")
+        return 0
+    counts: dict[str, int] = {}
+    for row in rows:
+        fact_type = str(row.get("fact_type", "unknown") or "unknown")
+        counts[fact_type] = counts.get(fact_type, 0) + 1
+    print("交付资产：")
+    print(f"- 个人全局交付事实：{len(user_rows)} 条")
+    print(f"- 当前项目交付事实：{len(project_rows)} 条")
+    print("- 类型分布：" + "；".join(f"{key}={value}" for key, value in sorted(counts.items())))
+    print("- 最近交付事实：" + "；".join(describe(r) for r in rows[-5:] if describe(r)))
+    print("- 使用边界：只能作为接口、数据、埋点和实验口径的参考来源，不能覆盖当前 brief、Zoon、本轮输入、反指标或不可虚构项。")
     return 0
 
 
@@ -295,6 +361,9 @@ def build_parser() -> argparse.ArgumentParser:
     user_summary = sub.add_parser("user-summary")
     user_summary.set_defaults(func=command_user_summary)
 
+    delivery_summary = sub.add_parser("delivery-summary")
+    delivery_summary.set_defaults(func=command_delivery_summary)
+
     add_feedback = sub.add_parser("add-feedback")
     add_feedback.add_argument("--type", required=True, choices=sorted(FEEDBACK_TYPES))
     add_feedback.add_argument("--note", default="")
@@ -306,6 +375,18 @@ def build_parser() -> argparse.ArgumentParser:
     add_feedback.add_argument("--confidence", default="0.4")
     add_feedback.add_argument("note_positional", nargs="*")
     add_feedback.set_defaults(func=command_add_feedback)
+
+    add_delivery = sub.add_parser("add-delivery-fact")
+    add_delivery.add_argument("--fact-type", required=True, choices=sorted(DELIVERY_FACT_TYPES))
+    add_delivery.add_argument("--note", default="")
+    add_delivery.add_argument("--scenario", default="")
+    add_delivery.add_argument("--target", default="")
+    add_delivery.add_argument("--scope", default="本项目")
+    add_delivery.add_argument("--source", default="产品交付")
+    add_delivery.add_argument("--confidence", default="0.5")
+    add_delivery.add_argument("--status", default="待确认")
+    add_delivery.add_argument("note_positional", nargs="*")
+    add_delivery.set_defaults(func=command_add_delivery_fact)
 
     draft = sub.add_parser("draft-github-feedback")
     draft.add_argument("--title", default="PMWorkspace 反馈回流")

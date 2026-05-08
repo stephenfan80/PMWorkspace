@@ -17,6 +17,7 @@ config.yaml
 analytics/usage.jsonl
 user/taste-profile.jsonl
 user/product-cognition.jsonl
+user/delivery-facts.jsonl
 user/pmworkspace-improvements.jsonl
 user/pmworkspace-feedback-drafts/
 projects/<slug>/briefs/
@@ -28,6 +29,7 @@ projects/<slug>/prototype-board.jsonl
 projects/<slug>/question-tuning.jsonl
 projects/<slug>/prototypes/
 projects/<slug>/handoffs/
+projects/<slug>/delivery-facts.jsonl
 projects/<slug>/taste-profile.jsonl
 projects/<slug>/learnings.jsonl
 ```
@@ -48,6 +50,7 @@ projects/<slug>/learnings.jsonl
 - 产品学习：脱敏后的复用判断、常见边界和后续偏好。
 - 个人全局偏好：单个用户独有、跨项目可复用的偏好资产。
 - 产品认知：脱敏后的产品判断、反指标、不可虚构边界和场景机制经验。
+- 交付事实：接口、数据来源、字段口径、埋点事件、实验标准、指标定义和数据可用性判断的脱敏摘要。
 - PMWorkspace 进化候选：用户反馈中可产品化为技能规则、eval、输出结构或门槛判断的建议。
 - GitHub 回流待审稿：只保存在本地的脱敏 Markdown 草稿，用户确认后才提交。
 
@@ -72,6 +75,7 @@ projects/<slug>/learnings.jsonl
 `~/.pmworkspace/user/` 是单个用户独有的本地资产目录。它可以让 PMWorkspace 跨项目理解用户偏好，但它不是事实来源。
 
 - 使用时必须明示来源，例如“基于过往偏好，我建议……”。
+- 使用交付事实时必须明示来源，例如“基于本地交付资产，我建议……”。
 - 不得覆盖当前 brief、Zoon、反指标、不可虚构项或线上参考门槛。
 - 远程回流默认关闭；GitHub 回流只能从脱敏待审稿开始。
 

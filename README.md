@@ -61,7 +61,7 @@ Every handoff between skills should preserve the current mode/status, current or
 | `$pm-brief` | Create a compact product core contract that turns aligned facts, strategy choices, and reference gates into decisions for prototype, review, and handoff. |
 | `$pm-prototype-shotgun` | Generate mobile-first image-2 prototype schemes from an Aligned brief. |
 | `$pm-prototype-review` | Review generated prototype screens against the brief, Zoon, and non-fiction boundaries. |
-| `$pm-handoff` | Create PRD-ready, design-ready, experiment-ready, or engineering-ready handoff. |
+| `$pm-handoff` | Create compact PRDs and handoff assets, preserving API, data, tracking, and experiment facts locally. |
 
 ## Quick Start
 
@@ -156,6 +156,7 @@ PMWorkspace stores durable assets locally by default:
   analytics/usage.jsonl
   user/taste-profile.jsonl
   user/product-cognition.jsonl
+  user/delivery-facts.jsonl
   user/pmworkspace-improvements.jsonl
   user/pmworkspace-feedback-drafts/
   projects/<slug>/briefs/
@@ -167,6 +168,7 @@ PMWorkspace stores durable assets locally by default:
   projects/<slug>/question-tuning.jsonl
   projects/<slug>/prototypes/
   projects/<slug>/handoffs/
+  projects/<slug>/delivery-facts.jsonl
   projects/<slug>/taste-profile.jsonl
   projects/<slug>/learnings.jsonl
 ```
@@ -175,9 +177,9 @@ Defaults:
 
 - Telemetry is local-first: usage logs stay on your machine.
 - Remote anonymous telemetry requires explicit opt-in.
-- Stored assets should include project display names, briefs, decision questions, decisions, Zoon URLs, prototype manifests, project taste feedback, user-level preferences, sanitized product cognition, local GitHub feedback drafts, and product learnings.
+- Stored assets should include project display names, briefs, decision questions, decisions, Zoon URLs, prototype manifests, project taste feedback, user-level preferences, sanitized product cognition, delivery facts, local GitHub feedback drafts, and product learnings.
 - Runtime assets include local run audit trails, evidence dashboard inputs, prototype board entries, and question tuning preferences.
-- Handoff assets include PRD-ready, design-ready, experiment-ready, and engineering-ready documents under `handoffs/`.
+- Handoff assets include compact PRD-ready, design-ready, experiment-ready, and engineering-ready documents under `handoffs/`; reusable API, data, tracking, and experiment facts are stored in `delivery-facts.jsonl`.
 - Do not store raw private customer data, tokens, internal recordings, or sensitive screenshots.
 - GitHub feedback drafts stay local and sanitized until the user explicitly asks to submit them.
 

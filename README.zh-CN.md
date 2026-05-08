@@ -55,7 +55,7 @@ $pm-workspace
 | `$pm-brief` | 产品核心信息契约：把已对齐事实、策略取舍和参考门槛压缩成可出图、复审和交付的核心判断。 |
 | `$pm-prototype-shotgun` | 基于已对齐的产品简报生成多方案 image-2 原型图。 |
 | `$pm-prototype-review` | 复审已生成原型图，判断是否需要重出并沉淀偏好。 |
-| `$pm-handoff` | 输出适合 PRD、设计、实验验证或研发使用的交付稿。 |
+| `$pm-handoff` | 输出精简 PRD / 交付稿，并把接口、数据、埋点、实验标准沉淀为本地交付资产。 |
 
 ## 快速开始
 
@@ -177,6 +177,7 @@ PMWorkspace 默认把资产保存在本地：
   analytics/usage.jsonl
   user/taste-profile.jsonl
   user/product-cognition.jsonl
+  user/delivery-facts.jsonl
   user/pmworkspace-improvements.jsonl
   user/pmworkspace-feedback-drafts/
   projects/<slug>/briefs/
@@ -188,6 +189,7 @@ PMWorkspace 默认把资产保存在本地：
   projects/<slug>/question-tuning.jsonl
   projects/<slug>/prototypes/
   projects/<slug>/handoffs/
+  projects/<slug>/delivery-facts.jsonl
   projects/<slug>/taste-profile.jsonl
   projects/<slug>/learnings.jsonl
 ```
@@ -202,6 +204,7 @@ PMWorkspace 默认把资产保存在本地：
 - 产品简报 Markdown。
 - 原型批次清单。
 - PRD / 设计 / 实验 / 研发交付稿。
+- 接口、数据来源、埋点和实验标准等脱敏交付事实。
 - 方案比较板。
 - Q/D 问题偏好。
 - 用户批准或拒绝的设计偏好。

@@ -126,6 +126,7 @@ PMWorkspace v0.2 turns the skill suite into a local product runtime:
 - **PM Review Army / Product Review Squad:** prototype review runs pluggable specialists for strategy, trust/risk, design system, and data feasibility first; each specialist writes an independent short conclusion before `$pm-prototype-review` merges findings and optionally adds CEO, Eng, Design, DX, security, QA, and release-engineering roles.
 - **Question Tuning:** `pmw-question-tuning` records whether a Q/D dimension should always be asked, asked only at high risk, defaulted to the recommendation, or avoided unless blocking.
 - **PM Eval:** `pmw-eval` uses dependency-free fixtures to check core gates and output contracts, so skill rules do not silently regress.
+- **Skill Doc Generator:** `pmw-gen-skill-docs` generates and checks shared SKILL.md contract blocks for preambles, shared gates, required references, and output fields.
 - **Auto-Decision Principles:** shared fact priority and stop gates clarify which low-risk defaults can be auto-accepted and which user promises, data-truth, scope, experiment, lead, transaction, or privacy choices require PM decision.
 
 ## Install
@@ -216,9 +217,12 @@ bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --re
 bin/pmw-question-tuning summary
 bin/pmw-eval list
 bin/pmw-eval run
+bin/pmw-gen-skill-docs write
+bin/pmw-gen-skill-docs check
 ```
 
 Eval fixtures live in the repository at `evals/fixtures/`, and are copied into the installed shared skill bundle for maintenance checks.
+Skill document contracts are generated from `pmworkspace-shared/skill-docs/skill-docs.manifest.json`; update the manifest, run `bin/pmw-gen-skill-docs write`, then run `bin/pmw-gen-skill-docs check`.
 
 Zoon helpers:
 

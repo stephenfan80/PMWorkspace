@@ -1,0 +1,257 @@
+{
+  "version": 1,
+  "generated_section_title": "PMWorkspace 生成契约",
+  "shared_gates": [
+    "先读语言与本地化协议，中文用户默认使用中文字段、中文状态和中文建议。",
+    "复用 runtime run：子 skill 发现已有 current_run_id 时不得重新创建 run。",
+    "历史偏好、记忆和默认规则不能覆盖本轮事实、brief、Zoon、反指标、不可虚构项或证据门槛。",
+    "等待 Q、D、证据或用户确认时必须停住；不能假装已对齐、可出图或可交付。",
+    "不得把真实 token、ownerSecret、私密客户资料、内部录音、未脱敏截图或未脱敏 Zoon 内容写进公开仓库。"
+  ],
+  "common_preamble_checks": [
+    "_PMW_BIN",
+    "pmw-update-check",
+    "usage "
+  ],
+  "skills": {
+    "pm-workspace": {
+      "stage": "主入口路由",
+      "purpose": "判断快速成型 / 深度交付，创建或衔接 run，并把用户任务路由到最小可用的下一技能。",
+      "preamble_checks": [
+        "usage pm-workspace",
+        "pmw-artifact"
+      ],
+      "required_references": [
+        "runtime-kernel.md",
+        "pm-workbench-map.md",
+        "artifact-flow.md",
+        "pm-eval-system.md",
+        "routing.md"
+      ],
+      "output_fields": [
+        "当前模式",
+        "当前门槛",
+        "下一技能",
+        "为什么",
+        "run_id",
+        "证据状态",
+        "产物流动"
+      ]
+    },
+    "pm-autoplan": {
+      "stage": "自动产品评审",
+      "purpose": "作为靠谱产品负责人，总控快速成型或深度交付，只推进到当前最早门槛。",
+      "preamble_checks": [
+        "usage pm-autoplan",
+        "pmw-dashboard",
+        "pmw-artifact"
+      ],
+      "required_references": [
+        "autoplan-workflow.md",
+        "runtime-kernel.md",
+        "pm-workbench-map.md",
+        "product-readiness-dashboard.md",
+        "artifact-flow.md",
+        "pm-eval-system.md",
+        "routing.md"
+      ],
+      "output_fields": [
+        "自动评审结论",
+        "模式来源",
+        "推进阶段",
+        "最早门槛",
+        "门槛等级",
+        "停止原因",
+        "下一技能",
+        "交接上下文",
+        "产品准备度仪表盘",
+        "证据状态"
+      ]
+    },
+    "pm-jobs": {
+      "stage": "产品价值澄清",
+      "purpose": "重新定义真实问题，区分创业验证、内部业务优化或设计讨论模式，并只问当前最大缺口。",
+      "preamble_checks": [
+        "usage pm-jobs",
+        "pmw-memory",
+        "pmw-question-tuning"
+      ],
+      "required_references": [
+        "product-office-hours.md",
+        "product-memory.md",
+        "question-tuning.md",
+        "pm-decision-principles.md",
+        "pm-eval-system.md",
+        "pm-workbench-map.md",
+        "runtime-kernel.md"
+      ],
+      "output_fields": [
+        "产品价值判断",
+        "我对真实问题的判断",
+        "问题定义模式",
+        "当前价值缺口",
+        "当前最大缺口",
+        "Q 预算",
+        "当前 Q",
+        "当前 D",
+        "下一技能",
+        "证据状态"
+      ]
+    },
+    "pm-strategy-review": {
+      "stage": "策略审查",
+      "purpose": "识别最大策略矛盾，选择范围模式，并把策略取舍转成产品动作。",
+      "preamble_checks": [
+        "usage pm-strategy-review",
+        "pmw-dashboard",
+        "pmw-artifact"
+      ],
+      "required_references": [
+        "adversarial-review.md",
+        "pm-decision-principles.md",
+        "pm-eval-system.md",
+        "pm-workbench-map.md",
+        "runtime-kernel.md"
+      ],
+      "output_fields": [
+        "策略审查结论",
+        "最大策略矛盾",
+        "范围模式",
+        "建议姿态",
+        "产品动作",
+        "策略取舍",
+        "当前 D",
+        "下一技能",
+        "证据状态"
+      ]
+    },
+    "pm-brief": {
+      "stage": "产品简报",
+      "purpose": "把已完成的产品判断压缩成核心信息契约，并优先同步到 Zoon。",
+      "preamble_checks": [
+        "usage pm-brief",
+        "pmw-memory",
+        "pmw-artifact"
+      ],
+      "required_references": [
+        "product-plan-handoff.md",
+        "production-reference-gate.md",
+        "pm-decision-principles.md",
+        "pm-eval-system.md",
+        "pm-workbench-map.md",
+        "artifact-flow.md",
+        "runtime-kernel.md",
+        "zoon-workflow.md",
+        "zoon-drift-check.md",
+        "product-readiness-dashboard.md"
+      ],
+      "output_fields": [
+        "产品核心信息",
+        "产品简报门槛",
+        "确认状态",
+        "缺失门槛",
+        "事实/假设边界",
+        "Zoon 同步状态",
+        "Zoon 漂移检查",
+        "产品准备度仪表盘",
+        "下一技能",
+        "证据状态"
+      ]
+    },
+    "pm-prototype-shotgun": {
+      "stage": "原型方案",
+      "purpose": "基于已对齐 brief 逐张生成 image-2 原型图，并把每个方案 / 屏幕写入方案比较板。",
+      "preamble_checks": [
+        "usage pm-prototype-shotgun",
+        "pmw-dashboard",
+        "readiness --target prototype",
+        "pmw-prototype-board"
+      ],
+      "required_references": [
+        "pm-eval-system.md",
+        "runtime-kernel.md",
+        "pm-workbench-map.md",
+        "artifact-flow.md",
+        "product-plan-handoff.md",
+        "product-readiness-dashboard.md",
+        "image-prompts.md",
+        "prototype-shotgun-board.md"
+      ],
+      "output_fields": [
+        "原型出图判断",
+        "产品准备度仪表盘",
+        "图片生成前门槛",
+        "方案差异质量",
+        "输出单元清单",
+        "方案比较板",
+        "image-2 状态",
+        "生成后复审",
+        "证据状态"
+      ]
+    },
+    "pm-prototype-review": {
+      "stage": "原型复审",
+      "purpose": "用四个可插拔专家和必要的 Product Review Squad 合并判断原型是否可通过、重出或拍板。",
+      "preamble_checks": [
+        "usage pm-prototype-review",
+        "pmw-dashboard",
+        "pmw-artifact",
+        "pmw-review-specialist"
+      ],
+      "required_references": [
+        "prototype-quality-review.md",
+        "pm-review-army.md",
+        "pm-workbench-map.md",
+        "artifact-flow.md",
+        "runtime-kernel.md",
+        "pm-decision-principles.md",
+        "pm-eval-system.md"
+      ],
+      "output_fields": [
+        "复审输入",
+        "输出单元绑定",
+        "PM Review Army",
+        "可插拔专家",
+        "专家合并结论",
+        "逐屏结论",
+        "需要重出的屏幕",
+        "需要 PM 拍板",
+        "反馈资产化",
+        "证据状态"
+      ]
+    },
+    "pm-handoff": {
+      "stage": "产品交付",
+      "purpose": "把已对齐 brief 和已通过复审的原型压缩成精简 PRD / 交付稿，并沉淀脱敏交付资产。",
+      "preamble_checks": [
+        "usage pm-handoff",
+        "pmw-dashboard",
+        "readiness --target handoff",
+        "pmw-artifact"
+      ],
+      "required_references": [
+        "delivery-handoff.md",
+        "product-plan-handoff.md",
+        "prototype-quality-review.md",
+        "pm-review-army.md",
+        "runtime-kernel.md",
+        "product-readiness-dashboard.md",
+        "pm-workbench-map.md",
+        "artifact-flow.md",
+        "pm-eval-system.md"
+      ],
+      "output_fields": [
+        "PRD 生成判断",
+        "交付目标",
+        "事实来源",
+        "产品准备度仪表盘",
+        "交付前门槛",
+        "原型复审状态",
+        "验收写入边界",
+        "交付资产沉淀",
+        "下一技能",
+        "证据状态"
+      ]
+    }
+  }
+}

@@ -31,6 +31,7 @@
 - 平台脚本可用时，用 `pmw-run` 记录本轮 run、门槛、证据、决策、产物、复审和下一步；最终用 `pmw-dashboard status` 汇总证据状态。
 - 出图或交付前必须展示 Product Readiness Dashboard；用 `pmw-dashboard readiness --target prototype|handoff` 统一检查 brief、Zoon、线上参考、方案差异、不可虚构项和复审状态，verdict 不是 `可出图` / `可交付` 时退回第一条阻断门槛。
 - 平台脚本可用时，用 `pmw-artifact` 登记 Product Artifact Flow；下游技能先读取最新上游产物，再输出 `上游产物`、`本轮产物`、`下游可读` 和 `产物流动`。
+- 维护 `SKILL.md` 共享契约时，用 `pmw-gen-skill-docs` 从 manifest 生成和检查 preamble、必读协议、输出字段和共享门槛；不要手写修改生成区块。
 - 多方案原型进入 `pmw-prototype-board`，用表格比较方案；不要为了比较把多张 image-2 图合成一张。
 - 原型复审默认使用 PM Review Army / Product Review Squad：先跑策略、信任 / 风险、设计系统、数据可行性四个可插拔专家；每个专家必须独立输出短结论，再由 `$pm-prototype-review` 合并。深度交付、高风险、批量交付、研发交付或用户要求多角色 review 时，追加 CEO、Eng、Design、DX、安全、QA、发布工程师短结论。
 - 用户反馈某类 Q/D 追问方式时，用 `pmw-question-tuning` 沉淀问题偏好；偏好不能覆盖本轮事实、反指标或不可虚构项。

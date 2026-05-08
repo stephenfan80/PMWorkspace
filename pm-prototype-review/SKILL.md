@@ -13,6 +13,58 @@ description: |
 
 原型复审的目标不是评价“好不好看”，而是判断图片是否忠实表达已对齐的产品判断，是否值得进入评审、交付或下一轮 image-2。
 
+<!-- PMW-GENERATED-CONTRACT:START -->
+## PMWorkspace 生成契约
+
+> 本区块由 `bin/pmw-gen-skill-docs` 根据 `pmworkspace-shared/skill-docs/skill-docs.manifest.json` 生成；不要手写修改。更新共享门槛、前置检查或输出字段后，运行 `bin/pmw-gen-skill-docs write`，再运行 `bin/pmw-gen-skill-docs check`。
+
+- skill：`pm-prototype-review`
+- 契约版本：`1`
+- 阶段：原型复审
+- 定位：用四个可插拔专家和必要的 Product Review Squad 合并判断原型是否可通过、重出或拍板。
+
+### 统一前置检查
+
+- `_PMW_BIN`
+- `pmw-update-check`
+- `usage`
+- `usage pm-prototype-review`
+- `pmw-dashboard`
+- `pmw-artifact`
+- `pmw-review-specialist`
+
+### 必读共享协议
+
+- `../pmworkspace-shared/references/prototype-quality-review.md`
+- `../pmworkspace-shared/references/pm-review-army.md`
+- `../pmworkspace-shared/references/pm-workbench-map.md`
+- `../pmworkspace-shared/references/artifact-flow.md`
+- `../pmworkspace-shared/references/runtime-kernel.md`
+- `../pmworkspace-shared/references/pm-decision-principles.md`
+- `../pmworkspace-shared/references/pm-eval-system.md`
+
+### 共享门槛
+
+- 先读语言与本地化协议，中文用户默认使用中文字段、中文状态和中文建议。
+- 复用 runtime run：子 skill 发现已有 current_run_id 时不得重新创建 run。
+- 历史偏好、记忆和默认规则不能覆盖本轮事实、brief、Zoon、反指标、不可虚构项或证据门槛。
+- 等待 Q、D、证据或用户确认时必须停住；不能假装已对齐、可出图或可交付。
+- 不得把真实 token、ownerSecret、私密客户资料、内部录音、未脱敏截图或未脱敏 Zoon 内容写进公开仓库。
+
+### 用户可见输出字段
+
+- `复审输入`
+- `输出单元绑定`
+- `PM Review Army`
+- `可插拔专家`
+- `专家合并结论`
+- `逐屏结论`
+- `需要重出的屏幕`
+- `需要 PM 拍板`
+- `反馈资产化`
+- `证据状态`
+<!-- PMW-GENERATED-CONTRACT:END -->
+
 Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. 面向中文用户时使用中文字段和状态。
 
 ## Preamble

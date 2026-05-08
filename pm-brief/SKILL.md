@@ -10,6 +10,60 @@ description: |
 
 创建后续原型、复审、交付稿和实验步骤都必须读取的产品核心信息契约。产品简报不是 PRD、会议纪要或信息仓库；它只把会影响原型、复审或交付的判断压缩准确。
 
+<!-- PMW-GENERATED-CONTRACT:START -->
+## PMWorkspace 生成契约
+
+> 本区块由 `bin/pmw-gen-skill-docs` 根据 `pmworkspace-shared/skill-docs/skill-docs.manifest.json` 生成；不要手写修改。更新共享门槛、前置检查或输出字段后，运行 `bin/pmw-gen-skill-docs write`，再运行 `bin/pmw-gen-skill-docs check`。
+
+- skill：`pm-brief`
+- 契约版本：`1`
+- 阶段：产品简报
+- 定位：把已完成的产品判断压缩成核心信息契约，并优先同步到 Zoon。
+
+### 统一前置检查
+
+- `_PMW_BIN`
+- `pmw-update-check`
+- `usage`
+- `usage pm-brief`
+- `pmw-memory`
+- `pmw-artifact`
+
+### 必读共享协议
+
+- `../pmworkspace-shared/references/product-plan-handoff.md`
+- `../pmworkspace-shared/references/production-reference-gate.md`
+- `../pmworkspace-shared/references/pm-decision-principles.md`
+- `../pmworkspace-shared/references/pm-eval-system.md`
+- `../pmworkspace-shared/references/pm-workbench-map.md`
+- `../pmworkspace-shared/references/artifact-flow.md`
+- `../pmworkspace-shared/references/runtime-kernel.md`
+- `../pmworkspace-shared/references/zoon-workflow.md`
+- `../pmworkspace-shared/references/zoon-drift-check.md`
+- `../pmworkspace-shared/references/product-readiness-dashboard.md`
+
+### 共享门槛
+
+- 先读语言与本地化协议，中文用户默认使用中文字段、中文状态和中文建议。
+- 复用 runtime run：子 skill 发现已有 current_run_id 时不得重新创建 run。
+- 历史偏好、记忆和默认规则不能覆盖本轮事实、brief、Zoon、反指标、不可虚构项或证据门槛。
+- 等待 Q、D、证据或用户确认时必须停住；不能假装已对齐、可出图或可交付。
+- 不得把真实 token、ownerSecret、私密客户资料、内部录音、未脱敏截图或未脱敏 Zoon 内容写进公开仓库。
+
+### 用户可见输出字段
+
+- `产品核心信息`
+- `产品简报门槛`
+- `确认状态`
+- `缺失门槛`
+- `事实/假设边界`
+- `Zoon 同步状态`
+- `Zoon 漂移检查`
+- `产品准备度仪表盘`
+- `下一技能`
+- `证据状态`
+<!-- PMW-GENERATED-CONTRACT:END -->
+
 Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. For Chinese users, call the artifact `产品简报`; keep `brief` only when referring to a technical file or existing English source.
 
 ## Preamble

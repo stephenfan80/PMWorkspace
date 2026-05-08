@@ -13,6 +13,57 @@ description: |
 
 `$pm-autoplan` 是 PMWorkspace 的一键推进模式：把零散想法推进成可讨论轻量包，或推进到可确认的产品简报与交付资产。它不是跳过产品判断直接出图。
 
+<!-- PMW-GENERATED-CONTRACT:START -->
+## PMWorkspace 生成契约
+
+> 本区块由 `bin/pmw-gen-skill-docs` 根据 `pmworkspace-shared/skill-docs/skill-docs.manifest.json` 生成；不要手写修改。更新共享门槛、前置检查或输出字段后，运行 `bin/pmw-gen-skill-docs write`，再运行 `bin/pmw-gen-skill-docs check`。
+
+- skill：`pm-autoplan`
+- 契约版本：`1`
+- 阶段：自动产品评审
+- 定位：作为靠谱产品负责人，总控快速成型或深度交付，只推进到当前最早门槛。
+
+### 统一前置检查
+
+- `_PMW_BIN`
+- `pmw-update-check`
+- `usage`
+- `usage pm-autoplan`
+- `pmw-dashboard`
+- `pmw-artifact`
+
+### 必读共享协议
+
+- `../pmworkspace-shared/references/autoplan-workflow.md`
+- `../pmworkspace-shared/references/runtime-kernel.md`
+- `../pmworkspace-shared/references/pm-workbench-map.md`
+- `../pmworkspace-shared/references/product-readiness-dashboard.md`
+- `../pmworkspace-shared/references/artifact-flow.md`
+- `../pmworkspace-shared/references/pm-eval-system.md`
+- `../pmworkspace-shared/references/routing.md`
+
+### 共享门槛
+
+- 先读语言与本地化协议，中文用户默认使用中文字段、中文状态和中文建议。
+- 复用 runtime run：子 skill 发现已有 current_run_id 时不得重新创建 run。
+- 历史偏好、记忆和默认规则不能覆盖本轮事实、brief、Zoon、反指标、不可虚构项或证据门槛。
+- 等待 Q、D、证据或用户确认时必须停住；不能假装已对齐、可出图或可交付。
+- 不得把真实 token、ownerSecret、私密客户资料、内部录音、未脱敏截图或未脱敏 Zoon 内容写进公开仓库。
+
+### 用户可见输出字段
+
+- `自动评审结论`
+- `模式来源`
+- `推进阶段`
+- `最早门槛`
+- `门槛等级`
+- `停止原因`
+- `下一技能`
+- `交接上下文`
+- `产品准备度仪表盘`
+- `证据状态`
+<!-- PMW-GENERATED-CONTRACT:END -->
+
 Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. 面向中文用户时，输出中文标题、状态和建议；只保留 `$pm-*`、Zoon、PRD、image-2、URL 等必要术语。
 
 ## Preamble

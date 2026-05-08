@@ -123,7 +123,7 @@ PMWorkspace v0.2 turns the skill suite into a local product runtime:
 - **Product Readiness Dashboard:** `pmw-dashboard readiness --target prototype|handoff` gives a pre-image / pre-handoff verdict across brief, Zoon, online reference, scheme difference, non-fiction boundaries, and review status.
 - **Product Artifact Flow:** `pmw-artifact` records downstream-readable artifacts so product briefs, prototype manifests, review results, and handoff documents can flow into the next skill without being re-inferred from conversation.
 - **Prototype Shotgun Board:** `pmw-prototype-board` registers each independent image-2 unit and compares schemes without merging multiple screens into one image.
-- **PM Review Army / Product Review Squad:** prototype review keeps the strategy, trust/risk, design system, and data feasibility lenses, then adds CEO, Eng, Design, DX, security, QA, and release-engineering short conclusions before merging findings into pass, regenerate, PM decision, or missing evidence.
+- **PM Review Army / Product Review Squad:** prototype review runs pluggable specialists for strategy, trust/risk, design system, and data feasibility first; each specialist writes an independent short conclusion before `$pm-prototype-review` merges findings and optionally adds CEO, Eng, Design, DX, security, QA, and release-engineering roles.
 - **Question Tuning:** `pmw-question-tuning` records whether a Q/D dimension should always be asked, asked only at high risk, defaulted to the recommendation, or avoided unless blocking.
 - **PM Eval:** `pmw-eval` uses dependency-free fixtures to check core gates and output contracts, so skill rules do not silently regress.
 - **Auto-Decision Principles:** shared fact priority and stop gates clarify which low-risk defaults can be auto-accepted and which user promises, data-truth, scope, experiment, lead, transaction, or privacy choices require PM decision.
@@ -169,6 +169,7 @@ PMWorkspace stores durable assets locally by default:
   projects/<slug>/project.json
   projects/<slug>/runs/
   projects/<slug>/artifact-flow.jsonl
+  projects/<slug>/review-specialists.jsonl
   projects/<slug>/prototype-board.jsonl
   projects/<slug>/question-tuning.jsonl
   projects/<slug>/prototypes/
@@ -183,7 +184,7 @@ Defaults:
 - Telemetry is local-first: usage logs stay on your machine.
 - Remote anonymous telemetry requires explicit opt-in.
 - Stored assets should include project display names, briefs, decision questions, decisions, Zoon URLs, artifact flow metadata, prototype manifests, project taste feedback, user-level preferences, sanitized product cognition, delivery facts, local GitHub feedback drafts, and product learnings.
-- Runtime assets include local run audit trails, evidence dashboard inputs, artifact-flow entries, prototype board entries, and question tuning preferences.
+- Runtime assets include local run audit trails, evidence dashboard inputs, artifact-flow entries, review specialist summaries, prototype board entries, and question tuning preferences.
 - Handoff assets include compact PRD-ready, design-ready, experiment-ready, and engineering-ready documents under `handoffs/`; reusable API, data, tracking, and experiment facts are stored in `delivery-facts.jsonl`.
 - Do not store raw private customer data, tokens, internal recordings, or sensitive screenshots.
 - GitHub feedback drafts stay local and sanitized until the user explicitly asks to submit them.
@@ -207,6 +208,8 @@ bin/pmw-dashboard readiness --target prototype
 bin/pmw-dashboard readiness --target handoff
 bin/pmw-artifact flow
 bin/pmw-artifact latest --kind product_brief
+bin/pmw-review-specialist list
+bin/pmw-review-specialist summary
 bin/pmw-prototype-board add --scheme "方案 A" --screen "首页" --brief-version "v1"
 bin/pmw-prototype-board list
 bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --reason "低风险轻量包默认采用推荐"

@@ -144,7 +144,7 @@ PMWorkspace v0.2 把技能套件升级成本地产品运行系统：
 - **Product Readiness Dashboard：** `pmw-dashboard readiness --target prototype|handoff` 在出图 / 交付前统一给出准备度 verdict，覆盖产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态。
 - **Product Artifact Flow：** `pmw-artifact` 记录下游可读产物，让产品简报、原型清单、复审结论和交付稿能流向下一个技能，而不是靠对话记忆重新推断。
 - **Prototype Shotgun Board：** `pmw-prototype-board` 登记每个独立 image-2 图片单元，并用表格比较方案；不把多张图合成一张图。
-- **PM Review Army / Product Review Squad：** 原型复审保留策略、信任 / 风险、设计系统和数据可行性四个底盘视角，并追加 CEO、Eng、Design、DX、安全、QA、发布工程师短结论，最终合并为可通过、需要重出、需要 PM 拍板或需要补充参考。
+- **PM Review Army / Product Review Squad：** 原型复审先运行策略、信任 / 风险、设计系统、数据可行性四个可插拔专家；每个专家独立输出短结论，再由 `$pm-prototype-review` 合并，必要时追加 CEO、Eng、Design、DX、安全、QA、发布工程师短结论。
 - **Question Tuning：** `pmw-question-tuning` 记录用户对 Q/D 的偏好，例如永远问、高风险才问、默认采用推荐或除非阻塞否则少问。
 - **PM Eval：** `pmw-eval` 用无依赖 fixture 检查核心门槛和输出契约，防止 skill 规则退化。
 - **自动决策原则：** 统一事实优先级和停止门槛，明确低风险默认项可以自动采用，用户承诺、数据真实性、范围、实验口径、线索 / 交易 / 隐私边界必须 PM 拍板。
@@ -190,6 +190,7 @@ PMWorkspace 默认把资产保存在本地：
   projects/<slug>/project.json
   projects/<slug>/runs/
   projects/<slug>/artifact-flow.jsonl
+  projects/<slug>/review-specialists.jsonl
   projects/<slug>/prototype-board.jsonl
   projects/<slug>/question-tuning.jsonl
   projects/<slug>/prototypes/
@@ -207,6 +208,7 @@ PMWorkspace 默认把资产保存在本地：
 - 选择题拍板记录。
 - 每次运行的本地审计轨迹。
 - Product Artifact Flow 产物流动元数据。
+- 可插拔复审专家短结论。
 - 产品简报 Markdown。
 - 原型批次清单。
 - PRD / 设计 / 实验 / 研发交付稿。
@@ -253,6 +255,8 @@ bin/pmw-dashboard readiness --target prototype
 bin/pmw-dashboard readiness --target handoff
 bin/pmw-artifact flow
 bin/pmw-artifact latest --kind product_brief
+bin/pmw-review-specialist list
+bin/pmw-review-specialist summary
 bin/pmw-prototype-board add --scheme "方案 A" --screen "首页" --brief-version "v1"
 bin/pmw-prototype-board list
 bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --reason "低风险轻量包默认采用推荐"

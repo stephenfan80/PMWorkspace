@@ -22,7 +22,7 @@ eval 分类必须能映射回 `pmworkspace-shared/references/pm-workbench-map.md
 | `pm-jobs` | 产品价值澄清 |
 | `pm-strategy-review` | 策略审查 |
 | `pm-brief` | 产品简报 / 核心信息契约 |
-| `pm-prototype-shotgun`、`prototype-shotgun`、`prototype-output-contract`、`multi-scheme`、`production-reference`、`screenshot-feedback` | 原型方案 |
+| `pm-prototype-shotgun`、`prototype-shotgun`、`prototype-output-contract`、`multi-scheme`、`production-reference`、`screenshot-feedback` | 原型方案：image-2 前门槛、单图协议、方案差异质量、输出单元、线上参考、设计系统 |
 | `prototype-review` | 原型复审 |
 | `pm-handoff` | 产品交付 |
 | `memory`、`decision-principles`、`eval-system` | 运行与记忆 |

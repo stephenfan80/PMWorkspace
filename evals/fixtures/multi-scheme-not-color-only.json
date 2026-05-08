@@ -10,7 +10,7 @@
     "must_stop": true,
     "gate": "方案差异不足",
     "required_behaviors": [
-      "要求方案差异来自产品策略、信息架构、交互模型或信任模型",
+      "要求方案差异来自页面结构、信息架构、交互路径、信任表达或关键任务",
       "指出仅换配色不构成多方案",
       "重新提出概念方向"
     ],
@@ -23,7 +23,7 @@
   "contract_checks": [
     {
       "path": "pm-prototype-shotgun/SKILL.md",
-      "contains": "不要把配色、插画、圆角、风格皮肤包装成多方案。"
+      "contains": "不要把配色、插画、圆角、卡片样式或风格皮肤包装成多方案。"
     },
     {
       "path": "pmworkspace-shared/references/pm-decision-principles.md",

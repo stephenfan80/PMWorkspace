@@ -2,6 +2,8 @@
 
 生成原型图片前使用本参考。AutoDesign 是 PMWorkspace 默认的生产级视觉基线。用户提供的设计系统、Figma、截图或品牌规则可以覆盖具体视觉细节，但输出仍应保持生产可用感。
 
+当用户、brief、Zoon、截图或参考材料命中汽车之家、AutoDesign、之家或 Autohome 时，产品 UI 优先使用 AutoDesign token。品牌 VI 和字体包只作为品牌露出、活动视觉或特殊场景参考；字体授权必须保留边界，不能写成生产可用承诺。
+
 ## Detect The Design System
 
 Load a design-system profile when:
@@ -13,6 +15,8 @@ Load a design-system profile when:
 - 新页面仍需要匹配现有线上流程、结果状态或生产样式。
 
 Read `autohome-auto-design.md` by default for production baseline tokens, spacing, components, and anti-patterns. For non-Autohome products, use AutoDesign as a quality baseline, not as brand copy or domain content.
+
+If the user provides Autohome brand VI material or local font packages, treat them as secondary visual references. They do not replace AutoDesign product UI tokens unless the task is explicitly a brand/marketing visual rather than product UI.
 
 ## Acquire Context
 
@@ -54,6 +58,7 @@ Run this review before final image generation:
 - Does the design use the named system's tokens rather than invented colors?
 - If AutoDesign is only a quality baseline, does the screen avoid pretending to be an Autohome domain product unless the product is Autohome?
 - Are components named and shaped like the system's components?
+- For Autohome product UI, are AutoDesign tokens used instead of replacing them with brand VI colors or unverified font packages?
 - Are text sizes plausible for the target device?
 - Are labels, buttons, and warnings short enough for production UI?
 - Is there one dominant primary action?
@@ -64,13 +69,14 @@ Run this review before final image generation:
 
 ## Scheme Design
 
-When producing multiple schemes, vary the product strategy, not just visual styling:
+When producing multiple schemes, vary page structure, information architecture, interaction path, trust expression, or key task, not just visual styling:
 
 - Scheme A: preview-first value before input.
 - Scheme B: input-first but ultra-light conversion.
 - Scheme C: comparison/report/result-driven structure.
 
 Keep the same design-system tokens across schemes unless the user asks for visual exploration.
+This rule is business-agnostic: it applies equally to lead forms, community, live streaming, product libraries, transaction flows, content screens, tools, and dashboards.
 
 ## Iteration Rules
 

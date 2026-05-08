@@ -5,7 +5,7 @@ description: |
   产品方向梳理到可出原型前”“按推荐推进但关键点让我拍板”，或希望快速产出
   “产品简报 + 方案方向 + 原型图”轻量包时。支持快速成型模式和深度交付模式。
   快速成型模式用最少追问确认假设后产出可讨论轻量包；深度交付模式顺序串联
-  pm-jobs、pm-strategy-review、pm-brief、Zoon 同步、Zoon 漂移检查和原型
+  pm-jobs、pm-strategy-review、pm-brief、本地简报保存、可选 Zoon 同步、Zoon 漂移检查和原型
   准备度检查，只把会改变方向的 D 选择题交给用户确认。
 ---
 
@@ -52,6 +52,7 @@ description: |
 
 ### 默认用户可见输出字段
 
+- `工作方式`
 - `自动评审结论`
 - `我建议`
 - `理由`
@@ -111,12 +112,12 @@ done
 18. 快速成型模式：按最早门槛顺序只检测会影响轻量包结构的缺口：核心用户/场景、核心问题、主目标/反指标、不可虚构项、原型屏幕范围、方案差异、假设确认。默认最多问 2-3 个 `Q`。
 19. 快速成型模式：列出关键假设、方案方向和每张图的不可虚构项，请用户确认“按这些假设继续”。确认前不生成图片，并用 `pmw-run event --type gate` 记录当前门槛。
 20. 快速成型模式：确认后输出轻量包：标注假设的产品简报、2-3 个方案方向、每个方案 1 张移动端 image-2 原型图计划，并把状态写成 `基于假设，可讨论`。
-21. 深度交付模式：按最早门槛顺序推进：工作目标模式、场景路由、Q 诊断、前提确认、必要 D、策略审查、产品简报、Zoon 同步、Zoon 漂移检查、线上参考和设计系统基线、Product Readiness Dashboard 的原型准备度或交付准备度。
+21. 深度交付模式：按最早门槛顺序推进：工作目标模式、场景路由、Q 诊断、前提确认、必要 D、策略审查、产品简报、本地简报保存、可选 Zoon 同步、已启用 Zoon 的漂移检查、线上参考和设计系统基线、Product Readiness Dashboard 的原型准备度或交付准备度。
 22. 深度交付模式：Use `pm-decision-principles.md` to auto-decide only low-risk defaults that do not change product direction; surface any direction-changing item as a single `D` choice question and stop.
-23. Give the user a conclusion-first review: first output `自动评审结论` with `我建议` and `理由`, then output `评审控制面板`.
+23. Give the user a conclusion-first review: first output `自动评审结论` with `我建议` and `理由`, include a short `工作方式` / progress card, then write the full `评审控制面板` to audit.
 24. For the earliest gate, always declare `门槛等级` as `阻断`、`高风险`、`可自动采用` or `可延后`, and declare `门槛来源`.
 25. Every item in `已自动采用` must include source and why no PM decision is needed, for example `默认移动端优先。来源：PMWorkspace 默认规则。原因：不改变产品方向或用户承诺。`
-26. When enough information exists, create the smallest useful product brief and save it with `pmw-log brief <name>`. Because `pmw-log brief` auto-syncs, this should create or append to Zoon when enabled and register `product_brief` in Product Artifact Flow.
+26. When enough information exists, create the smallest useful product brief and save it with `pmw-log brief <name>`. This saves the local business brief and audit copy, registers `product_brief` in Product Artifact Flow, and syncs to Zoon only when `PMW_ZOON_SYNC_ON_BRIEF=true` / `zoon_sync_on_brief: true` or the user has explicitly chosen online collaboration.
 27. If a Zoon URL exists before prototype preparation, run `pmw-zoon drift --url <url>` when available. If it returns `DRIFT`, read the latest Zoon snapshot and update the product brief version before continuing.
 28. Before routing to `$pm-prototype-shotgun` or `$pm-handoff`, run `pmw-dashboard readiness --target prototype` or `pmw-dashboard readiness --target handoff` when available and use the short verdict in the user-facing conclusion. If the verdict is `不可出图` or `不可交付`, route to the first blocking gate instead of continuing. Only show `--details` when the user asks for audit/debug output.
 29. Map the earliest blocking gate to one next skill: `$pm-jobs`, `$pm-strategy-review`, `$pm-brief`, `$pm-prototype-shotgun`, `$pm-prototype-review`, or `$pm-handoff`. Do not pretend all downstream skills have completed when only the next gate is ready.
@@ -134,6 +135,7 @@ done
 - 默认移动端优先画布。输出时说明来源：PMWorkspace 默认规则；原因：不改变产品方向或用户承诺。
 - 不影响方向的格式、标题、状态字段。输出时说明来源：PMWorkspace 输出协议；原因：不改变范围、承诺或验收。
 - 已有 Zoon URL 时优先 append，不新建文档。输出时说明来源：Zoon 协议；原因：保持在线事实来源连续。
+- 未启用 Zoon 时使用本地已对齐产品简报。输出时说明来源：PMWorkspace 默认规则；原因：减少在线协作卡点，不改变产品事实。
 - 快速成型模式中，不影响方案结构的轻量包格式和默认输出数量。输出时说明来源：快速成型协议；原因：不改变产品事实。
 
 必须提问：
@@ -151,6 +153,13 @@ done
 
 ```text
 自动评审结果：
+
+工作方式：
+- 当前模式：
+- 当前一步：
+- 已完成：
+- 下一步：
+- 你只需要：
 
 自动评审结论：
 - 我建议：

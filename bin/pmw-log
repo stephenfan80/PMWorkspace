@@ -92,9 +92,9 @@ case "$EVENT" in
     ' "$input_file" > "$business_file"
     normalize_existing_version_line "$business_file" "$brief_version"
 
-    # Zoon-first, local-backed: publish the business brief online, then keep both
-    # the business brief and the full audit copy locally.
-    sync_on_brief="${PMW_ZOON_SYNC_ON_BRIEF:-$("$SCRIPT_DIR/pmw-config" get zoon_sync_on_brief 2>/dev/null || echo true)}"
+    # Local-first, Zoon-optional: always keep the business brief and full audit
+    # copy locally. Publish to Zoon only when the user or config explicitly opts in.
+    sync_on_brief="${PMW_ZOON_SYNC_ON_BRIEF:-$("$SCRIPT_DIR/pmw-config" get zoon_sync_on_brief 2>/dev/null || echo false)}"
     sync_status=""
     sync_detail=""
     zoon_url=""
@@ -107,7 +107,7 @@ case "$EVENT" in
         join_status="$(sed -n 's/^ZOON_JOIN_STATUS=//p' "$sync_err" | tail -n 1)"
         join_detail="$(sed -n 's/^ZOON_JOIN_DETAIL=//p' "$sync_err" | tail -n 1)"
         printf 'ZOON_URL=%s\n' "$zoon_url" >&2
-        printf 'ZOON_SYNC_ORDER=online-first\n' >&2
+        printf 'ZOON_SYNC_ORDER=explicit-online-sync\n' >&2
         [ -n "$join_status" ] && printf 'ZOON_JOIN_STATUS=%s\n' "$join_status" >&2
       else
         sync_status="failed"
@@ -120,7 +120,7 @@ case "$EVENT" in
       rm -f "$sync_err" 2>/dev/null || true
     elif [ "$sync_on_brief" = "false" ]; then
       sync_status="disabled"
-      sync_detail="Zoon sync disabled"
+      sync_detail="Zoon sync disabled; using local brief"
       printf 'ZOON_SYNC_DISABLED=true\n' >&2
     else
       sync_status="failed"

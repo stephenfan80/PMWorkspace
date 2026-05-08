@@ -11,7 +11,7 @@
     "gate": "支持信息分层",
     "required_behaviors": [
       "核心信息只放产品判断",
-      "Zoon 进入内部审计或只显示已同步",
+      "Zoon 进入内部审计或只显示未启用/已同步",
       "线上参考、检索来源和已保存资产进入内部审计",
       "业务简报不默认展示本地路径或长 URL"
     ],
@@ -25,7 +25,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",
-      "contains": "Zoon 默认同步业务简报版；完整 Q/D、来源、准备度、产物流动、复审专家和资产路径另存为本地审计副本"
+      "contains": "只有用户选择同步、提供 Zoon URL 或任务明确需要多人协作时，才把业务简报版同步到 Zoon"
     },
     {
       "path": "pm-brief/SKILL.md",
@@ -37,7 +37,7 @@
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "把业务简报版同步到 Zoon"
+      "contains": "只有已启用 Zoon 或用户再次选择同步时，才把业务简报版同步到 Zoon"
     },
     {
       "path": "pm-brief/SKILL.md",

@@ -18,7 +18,7 @@ description: |
 - skill：`pm-brief`
 - 契约版本：`1`
 - 阶段：产品简报
-- 定位：把已完成的产品判断压缩成核心信息契约，并优先同步到 Zoon。
+- 定位：把已完成的产品判断压缩成核心信息契约，默认本地保存，并按用户选择同步到 Zoon。
 
 ### 统一前置检查
 
@@ -97,7 +97,7 @@ done
 7. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-brief` 且没有当前 run，再创建 runtime run.
 8. Read `../pmworkspace-shared/references/decision-question-mode.md` and turn PM decision items into choice questions.
 9. Read `../pmworkspace-shared/references/internet-best-practice-research.md` and run lightweight internet best-practice research for the dominant scenario when tools are available.
-10. Read `../pmworkspace-shared/references/zoon-workflow.md`.
+10. Read `../pmworkspace-shared/references/zoon-workflow.md`; Zoon is optional by default. Save the local brief first, then ask whether to sync to Zoon unless the user already provided a Zoon URL or explicitly requested online collaboration.
 11. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
 12. Read `../pmworkspace-shared/references/product-readiness-dashboard.md`; if the next skill will be `$pm-prototype-shotgun` or `$pm-handoff`, run `pmw-dashboard readiness --target prototype|handoff` when available, use the verdict for gating, and only show the short verdict / first blocker by default.
 13. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory user-summary` plus `pmw-memory summary` when available. If memory changes phrasing or recommendation, explicitly say `基于过往偏好...` or `基于本地产品认知...`; memory cannot override the current brief, Zoon, anti-metric, non-fiction boundary, online reference gate, or missing gate.
@@ -113,10 +113,11 @@ done
 22. 把已拍板的范围模式和策略取舍写入对抗审查后的设计取舍、方案方向、范围外、决策记录和对原型的影响；未拍板的范围变化或策略取舍只能放进当前 D 或后续 D 队列。
 23. 已对齐且用户要原型时，下一技能是 `$pm-prototype-shotgun`；已对齐且用户要交付时，下一技能是 `$pm-handoff`；未对齐时停在 `$pm-brief` 或回到上游缺失门槛。
 24. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
-25. Save the brief with `pmw-log brief <name>` when platform scripts are available. It uses Zoon-first, local-backed publishing: first publish the business brief to Zoon with `pmw-zoon sync`, then record the business brief as latest brief, save the full input as a local audit copy, and automatically register `product_brief` in Product Artifact Flow.
-26. Create or update the Zoon online brief by default:
-    - If a Zoon URL is already available, append the brief first with `pmw-zoon sync` / `pmw-zoon append --url <url>`, then keep the local brief path and Zoon URL in project state.
-    - If no Zoon URL exists and `zoon_auto_create` is not explicitly disabled, create one first with `pmw-zoon sync --title "产品设计简报：<功能名>"` or `pmw-zoon create --title "产品设计简报：<功能名>"`, then store the local audit copy.
+25. Save the brief with `pmw-log brief <name>` when platform scripts are available. It uses local-first, Zoon-optional publishing: save the business brief as latest brief, save the full input as a local audit copy, and automatically register `product_brief` in Product Artifact Flow. 完整审计副本保存在本地. It syncs to Zoon only when `PMW_ZOON_SYNC_ON_BRIEF=true` / `zoon_sync_on_brief: true` or the user explicitly chose online collaboration.
+26. Ask before creating or updating a Zoon online brief:
+    - If a Zoon URL is already available, ask whether to append this brief to that document before calling `pmw-zoon sync` / `pmw-zoon append --url <url>`.
+    - If no Zoon URL exists, do not auto-create one. Ask `是否同步到在线协作文档（Zoon）？A. 先不需要，使用本地 Markdown 继续；B. 需要，同步到 Zoon 供团队在线修改。`
+    - If the user chooses B, use `PMW_ZOON_SYNC_ON_BRIEF=true PMW_ZOON_AUTO_CREATE=true pmw-log brief <name>` or `pmw-zoon create --title "产品设计简报：<功能名>"`, then store the local audit copy and Zoon URL.
     - After create or append succeeds, `pmw-zoon` must automatically join the Zoon document as `pmworkspace` via the agent presence API before opening the editable URL or marking the online source ready.
     - After a create or append succeeds, automatically open the editable Zoon URL in the Codex built-in browser when browser tools are available. Do not use HTML, local files, or a macOS default-browser fallback as a substitute for the Zoon online brief.
     - If browser opening fails, still return the editable URL and mark the open status as `打开失败，可手动打开`.
@@ -130,7 +131,7 @@ done
 
 产品简报不是“已对齐”时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
 
-用户在沟通过程中调整产品简报后，必须重新运行 `pmw-log brief <name>`。它会把业务简报版同步到 Zoon，并把完整审计副本保存在本地；不能只在对话中更新口径。
+用户在沟通过程中调整产品简报后，必须重新运行 `pmw-log brief <name>` 更新本地业务简报和完整审计副本；只有已启用 Zoon 或用户再次选择同步时，才把业务简报版同步到 Zoon。不能只在对话中更新口径。
 
 ## 输出
 

@@ -51,6 +51,7 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 
 ### 默认用户可见输出字段
 
+- `工作方式`
 - `业务判断`
 - `当前需要确认`
 - `下一步`
@@ -123,7 +124,7 @@ Use `pmw-run event` for the D0 result, current gate, evidence state, and next sk
 
 Read `../pmworkspace-shared/references/routing.md`; it is the only route table and D0 source of truth.
 
-After routing, record the full routing contract from `routing.md` in local audit: `当前模式`、`当前门槛`、`下一技能`、`为什么`、`run_id`、`证据状态`. Default user-facing output should only show `业务判断`、`当前需要确认` and `下一步`.
+After routing, record the full routing contract from `routing.md` in local audit: `当前模式`、`当前门槛`、`下一技能`、`为什么`、`run_id`、`证据状态`. Default user-facing output should show a short `工作方式` card plus `业务判断`、`当前需要确认` and `下一步`, so users can see whether they are in 10min 快速成型 or 深度交付 and what single action is expected now.
 
 If platform scripts are available, read `pmw-artifact flow --details` for routing context, but do not include the flow table in default user output. A routed child skill should know the latest `上游产物`, expected `本轮产物`, and `下游可读` target from local audit instead of relying only on conversation memory.
 
@@ -146,8 +147,10 @@ If the user provides a product task in the same message, skip the welcome menu a
 - 关键产品决策默认使用选择题拍板；读取 `decision-question-mode.md`。
 - 新页面也要判断线上参考需求；承接线上流程、结果页、状态页或生产样式时，缺截图/录屏/相似页面参考要先问。
 - 产品简报阶段可以按主场景做轻量互联网最佳实践检索；检索结果只用于案例启发和原型重点建议，不增加 Q 数量。
-- 产品简报阶段默认创建或更新 Zoon 在线文档，并在成功后自动打开到 Codex 内置浏览器；后续原型/交付前优先读取 Zoon 最新内容。
-- 用户在对话或 Zoon 中调整产品简报后，必须重新保存并同步到 Zoon；原型或交付前使用 Zoon 漂移检查。
+- 产品简报阶段默认先保存本地 Markdown 业务简报和本地审计副本；不要自动创建或更新 Zoon 在线文档。
+- 在产品简报保存后，用一个轻量选择询问是否同步到在线协作文档（Zoon）。只有用户选择同步、提供现有 Zoon URL 或任务明确需要多人在线协作时，才创建/更新 Zoon，并在成功后自动打开到 Codex 内置浏览器。
+- 用户在对话中调整产品简报后，必须重新保存本地简报；只有已启用 Zoon 时才重新同步到 Zoon，并在原型或交付前使用 Zoon 漂移检查。
+- 未启用 Zoon 时，后续原型/交付优先读取本地已对齐产品简报，Product Readiness Dashboard 不应把 Zoon 当作阻断门槛。
 - 原型图生成后，批量交付前默认使用 `$pm-prototype-review` 做产品一致性、设计系统、不可虚构项和反指标复审。
 - 面向用户展示中文项目名；技术 slug 只用于本地目录。
 - 默认原型画布移动端优先：iPhone 17 竖屏 `402 x 874`。

@@ -26,7 +26,7 @@ For Chinese users, make the first response feel like a Chinese product app onboa
 4. 这个原型要服务哪个用户问题和主产品目标？
 5. 你希望交付什么：产品简报、一个移动端屏幕、两个关联屏、多方案原型、交付稿，还是截图修改？
 
-如果用户提供 Zoon URL，遵循 `zoon-workflow.md`。如果用户没有提供，产品简报阶段默认自动创建 Zoon 在线文档；创建或更新成功后自动打开到 Codex 内置浏览器。
+如果用户提供 Zoon URL，遵循 `zoon-workflow.md`。如果用户没有提供，产品简报阶段默认先保存本地 Markdown；需要在线协作时再询问是否创建 Zoon 在线文档，创建或更新成功后自动打开到 Codex 内置浏览器。
 
 ## 开始前输出
 
@@ -51,7 +51,7 @@ For Chinese users, make the first response feel like a Chinese product app onboa
 ## 默认规则
 
 - 默认输出是已对齐的产品简报，然后再进入 image-2 原型图或交付稿。
-- 产品简报阶段默认创建 Zoon 在线文档，成功后自动打开到 Codex 内置浏览器，作为后续对齐和历史项目记录。
+- 产品简报阶段默认先生成本地 Markdown；需要团队在线修改时，可以选择同步到 Zoon，成功后自动打开到 Codex 内置浏览器。
 - 关键产品决策默认使用选择题拍板；每轮只展开一个完整 `D`，其余只提示后续标题队列。
 - 默认原型设备是移动端优先：iPhone 17 竖屏 `402 x 874`。
 - 只有用户明确要求桌面端，或场景是看板/内部工具且确实需要大屏密度时，才使用桌面端。

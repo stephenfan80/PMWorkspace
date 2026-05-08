@@ -299,11 +299,14 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
     zoon_join_error = str(project.get("last_zoon_join_error") or "")
     zoon_event = latest_event(events, ["Zoon", "zoon", "漂移"], {"evidence", "gate"})
     zoon_text = f"{zoon_sync} {zoon_join} {zoon_event.get('status', '')} {zoon_event.get('summary', '')}"
+    zoon_required = bool(zoon_url) or zoon_sync in {"synced", "failed"}
     zoon_ready = bool(zoon_url) and zoon_sync == "synced" and not contains_any(
         zoon_text,
         ["DRIFT", "有漂移", "实质漂移", "读取失败", "同步失败", "failed"],
     )
-    if zoon_ready and zoon_join == "joined":
+    if not zoon_required:
+        zoon_status = "未启用，使用本地简报"
+    elif zoon_ready and zoon_join == "joined":
         zoon_status = "已同步且已加入协作态"
     elif zoon_ready and zoon_join == "unsupported":
         zoon_status = "已同步，协作加入不支持"
@@ -319,7 +322,7 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         "；".join(
             item
             for item in [
-                zoon_url or str(project.get("last_zoon_sync_error") or "未记录"),
+                zoon_url or str(project.get("last_zoon_sync_error") or "未记录 Zoon URL；本地 latest_brief 生效"),
                 f"协作加入：{zoon_join}" if zoon_join else "",
                 f"加入失败：{zoon_join_error}" if zoon_join_error and zoon_join == "failed" else "",
             ]
@@ -329,11 +332,11 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
     rows.append(
         gate_result(
             "Zoon",
-            True,
+            zoon_required,
             zoon_status,
             zoon_evidence,
-            "继续" if zoon_ready else "运行 pmw-log brief / pmw-zoon sync，并在出图或交付前做漂移检查",
-            zoon_ready,
+            "继续" if (zoon_ready or not zoon_required) else "询问是否同步到 Zoon；若已选择协作，则运行 pmw-zoon sync 并在出图或交付前做漂移检查",
+            zoon_ready or not zoon_required,
         )
     )
 
@@ -587,13 +590,20 @@ def render_status_summary(run_id: Optional[str]) -> str:
     artifact_count = len(read_jsonl(root / "artifact-flow.jsonl"))
     board_count = len([r for r in read_jsonl(root / "prototype-board.jsonl") if r.get("record_type", "item") == "item"])
     review = latest_review(events)
+    zoon_sync_status = str(project.get("last_zoon_sync_status") or "")
+    if zoon_sync_status == "synced":
+        zoon_summary = "已同步"
+    elif zoon_sync_status == "disabled":
+        zoon_summary = "未启用，使用本地简报"
+    else:
+        zoon_summary = zoon_sync_status or "未记录"
     lines = [
         "# PMWorkspace 状态摘要",
         "",
         f"- 项目：{project.get('display_name') or pathlib.Path.cwd().name}",
         f"- 当前状态：{latest_status}",
         f"- 产品简报：{brief_name}（{brief_meta}）",
-        f"- Zoon：{'已同步' if project.get('last_zoon_sync_status') == 'synced' else project.get('last_zoon_sync_status') or '未记录'}",
+        f"- Zoon：{zoon_summary}",
         f"- 准备度：{readiness_target_label(target)}，{verdict_cn}，{reason}",
         f"- 下一步：{next_action}",
         f"- 产物记录：{artifact_count} 条；方案单元：{board_count} 个；复审：{review.get('status') or '未记录'}",

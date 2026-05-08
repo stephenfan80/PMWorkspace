@@ -11,7 +11,8 @@
     "gate": "业务简报与审计拆层",
     "required_behaviors": [
       "业务简报约 12-18 行",
-      "Zoon 默认同步业务简报版",
+      "默认本地保存业务简报",
+      "用户选择后才同步 Zoon 业务简报版",
       "本地保存完整审计副本",
       "审计副本保留 Q/D、来源、准备度、产物流动和路径"
     ],
@@ -28,7 +29,7 @@
     },
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",
-      "contains": "Zoon 默认同步业务简报版；完整 Q/D、来源、准备度、产物流动、复审专家和资产路径另存为本地审计副本"
+      "contains": "默认先保存本地 Markdown 业务简报和本地审计副本"
     },
     {
       "path": "bin/pmw-log",

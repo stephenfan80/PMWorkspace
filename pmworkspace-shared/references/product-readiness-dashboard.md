@@ -26,7 +26,7 @@ pmw-dashboard status
 | 门槛 | 出图前 | 交付前 | 判断 |
 |---|---|---|---|
 | 产品简报 | Required | Required | 必须是 `已对齐`，且没有缺失门槛或实质漂移。 |
-| Zoon | Required | Required | 必须已同步，且出图 / 交付前无实质漂移。 |
+| Zoon | Conditional | Conditional | 未启用时使用本地已对齐 Markdown，不阻断出图 / 交付；已启用、已有 URL 或用户选择在线协作时，必须已同步且无实质漂移。 |
 | 线上参考 | Required | Required | 已提供线上参考、已确认无线上参考，或明确不适用；未判断时不继续。优先读取最新 `browser_evidence` 产物，没有时回退到 run evidence / gate 事件。 |
 | 方案差异 | Required | Required | 多方案必须在页面结构、信息架构、交互路径、信任表达或关键任务上不同；单方案也要标注不适用或已登记。 |
 | 不可虚构项 | Required | Required | 必须明确不能展示的能力、数据、承诺或动作。 |
@@ -36,7 +36,7 @@ pmw-dashboard status
 
 ## Verdict 规则
 
-- `READY_FOR_PROTOTYPE / 可出图`：产品简报、Zoon、线上参考、方案差异和不可虚构项都通过；复审状态仅展示，不阻断出图。
+- `READY_FOR_PROTOTYPE / 可出图`：产品简报、线上参考、方案差异和不可虚构项都通过；Zoon 未启用时使用本地简报，已启用时必须同步且无漂移；复审状态仅展示，不阻断出图。
 - `READY_FOR_HANDOFF / 可交付`：出图前门槛全部通过，且原型复审为 `可通过`，关键 D 已拍板，交付缺口不会改变承诺或验收。
 - `NOT_READY / 不可出图 / 不可交付`：任一 required 行未通过。输出必须给出第一条阻断行的行动建议，并路由到能补齐它的最早技能。
 
@@ -68,7 +68,7 @@ PMWorkspace 产品准备度仪表盘：
 | 门槛 | Required | 状态 | 证据 | 行动 |
 |---|---|---|---|---|
 | 产品简报 | YES | ... | ... | ... |
-| Zoon | YES | ... | ... | ... |
+| Zoon | YES/no | ... | ... | ... |
 | 线上参考 | YES | ... | ... | ... |
 | 方案差异 | YES | ... | ... | ... |
 | 不可虚构项 | YES | ... | ... | ... |

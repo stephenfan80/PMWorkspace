@@ -1,6 +1,8 @@
 # Zoon 工作流
 
-产品简报阶段默认使用 **Zoon-first，local-backed**：先自动创建或更新 Zoon 在线文档，创建或追加成功后让 `pmworkspace` agent 自动加入协作态，再把同一份 Markdown 保存为本地审计副本，并在创建/更新成功后自动打开到 Codex 内置浏览器，方便用户继续编辑。用户提供 Zoon URL 时，直接把该文档作为事实来源；用户未提供时，使用 `zoon_host` 创建新文档。
+产品简报阶段默认使用 **local-first，Zoon-optional**：先保存本地 Markdown 业务简报和完整本地审计副本，让用户能快速继续原型或交付；只有用户明确选择同步到在线协作文档、提供现有 Zoon URL，或当前任务需要多人在线协作时，才创建或更新 Zoon。创建或追加成功后让 `pmworkspace` agent 自动加入协作态，并在成功后自动打开到 Codex 内置浏览器。
+
+这个规则的目标是减少真实执行时间卡点：Zoon 是协作增强，不是每次产品简报的默认阻断门槛。
 
 ## 原则
 
@@ -10,11 +12,11 @@
 - 只读取当前任务需要的内容。
 - 除非用户要求，不处理现有评论。
 - 原型任务的最终输出仍是图片，但必须先完成产品简报对齐。
-- 产品追问后创建的产品简报，默认先写入 Zoon，方便用户在图片生成前修改；本地 Markdown 是审计副本和失败兜底。
-- 用户在对话中调整产品简报后，也必须重新保存并同步到 Zoon；不能只更新对话里的口径。
+- 产品追问后创建的产品简报，默认先写入本地业务简报和本地审计副本；如果用户选择在线协作，再同步业务简报版到 Zoon。
+- 用户在对话中调整产品简报后，必须重新保存本地简报；只有已启用 Zoon 时才同步到 Zoon，不能只更新对话里的口径。
 - 创建或更新 Zoon 成功后，必须先自动加入协作态，再尝试自动打开可编辑 URL；不能只保存本地 Markdown 后结束。
-- `pmw-log brief` 必须优先执行 `pmw-zoon sync`，成功后再记录本地最新 brief，并把 `last_zoon_sync_status`、`last_zoon_sync_brief`、`last_zoon_join_status` 和 Zoon URL 写入项目状态。
-- 只有用户明确关闭 Zoon、平台脚本不可用或创建失败时，才能把 Zoon 状态标为未创建，并说明原因。
+- `pmw-log brief` 默认只记录本地 latest brief 和完整审计副本，并把 `last_zoon_sync_status` 标记为 `disabled`；当 `zoon_sync_on_brief` 或 `PMW_ZOON_SYNC_ON_BRIEF` 显式开启时，再执行 `pmw-zoon sync` 并记录 `last_zoon_sync_status`、`last_zoon_sync_brief`、`last_zoon_join_status` 和 Zoon URL。
+- 未启用 Zoon 时，出图 / 交付准备度中的 Zoon 行显示 `未启用，使用本地简报`，不作为阻断；已启用或已有 URL 时，才必须检查同步与漂移。
 
 ## 连接步骤
 
@@ -44,7 +46,16 @@
 
 ## 产品简报创建
 
-当产品追问已经产出产品简报时，默认创建或更新 Zoon 文档，让用户在线修改对齐。
+当产品追问已经产出产品简报时，默认先保存本地产品简报。随后用一个轻量选择询问是否同步到 Zoon：
+
+```text
+是否同步到在线协作文档（Zoon）？
+A. 先不需要，使用本地 Markdown 继续出图 / 交付。
+B. 需要，同步到 Zoon 供团队在线修改。
+```
+
+如果用户选择 A，不创建 Zoon，不打开浏览器，继续使用本地已对齐产品简报。
+如果用户选择 B 或提供现有 Zoon URL，按下列 Zoon 流程执行。
 
 ### 可升级协议发现
 
@@ -96,16 +107,16 @@ pmw-zoon protocol --host "https://zoon.up.railway.app"
 
 1. 如果用户提供 Zoon host，使用用户提供的 host。
 2. 如果没有 host，使用配置 `zoon_host`，默认 `https://zoon.up.railway.app`。
-3. 用平台脚本创建文档，或使用自动同步：
+3. 用平台脚本创建文档，或显式开启同步：
 
 ```bash
 pmw-zoon create --title "产品设计简报：<功能名>"
-pmw-zoon sync --title "产品设计简报：<功能名>"
+PMW_ZOON_SYNC_ON_BRIEF=true PMW_ZOON_AUTO_CREATE=true pmw-zoon sync --title "产品设计简报：<功能名>"
 ```
 
 4. 只向用户返回可编辑 URL，不展示 API 原始响应。
 5. 用 `pmw-project link-zoon <url>` 把链接保存到本地项目记录。
-6. 推荐使用 `pmw-log brief <功能名>` 发布产品简报；它会在 `zoon_sync_on_brief` 未关闭时先调用 `pmw-zoon sync`，成功后再保存本地审计副本，避免 Zoon 和本地 latest brief 指向不同版本。
+6. 推荐先使用 `pmw-log brief <功能名>` 保存本地产品简报；如果用户选择同步，再用 `PMW_ZOON_SYNC_ON_BRIEF=true PMW_ZOON_AUTO_CREATE=true pmw-log brief <功能名>` 或直接 `pmw-zoon create|sync` 发布业务简报版。
 7. 创建成功后自动加入协作态，再自动打开可编辑 URL。
 8. 如果创建失败，保留本地 Markdown，不阻塞下一步，并说明失败原因。
 

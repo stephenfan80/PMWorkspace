@@ -161,6 +161,7 @@ done
 18. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单，它会登记 `prototype_manifest` 到 Product Artifact Flow；再用 `pmw-run event --type artifact` 记录产物。
 19. Record approved/rejected design feedback with `pmw-log taste`, including scenario, feedback target, source, scope, and confidence when available.
 20. 批量输出后运行 `pmw-dashboard status`，最终说明只给每张图的业务状态和下一步；方案比较板、产物流动和证据状态默认留在审计中。
+21. 出图后必须给出反馈入口，不要停在“已生成图片”。至少提供：选定一个方案继续、指出要改的区域 / 字段、继续探索新方案、补充截图 / 数据参考、进入 `$pm-handoff` 生成精简 PRD / 交付稿。若用户反馈只影响单屏视觉或表单字段，可重出受影响单图；若反馈改变用户承诺、范围、数据真实性或交付责任，先回到 `$pm-brief` 更新产品简报并确认。
 
 ## 输出
 
@@ -226,4 +227,11 @@ done
   - 是否违反反指标：
   - 是否需要重出：
 - 建议下一步：
+  - 我建议：
+  - 你可以直接回复：
+    - 选定某个方案继续
+    - 指出要改的区域 / 字段
+    - 继续探索新方案
+    - 补充截图 / 数据参考
+    - 进入 `$pm-handoff` 生成精简 PRD / 交付稿
 ```

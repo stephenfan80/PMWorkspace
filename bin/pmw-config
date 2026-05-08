@@ -14,8 +14,8 @@ default_value() {
     default_canvas) echo "iphone-17-portrait-402x874" ;;
     mobile_first) echo "true" ;;
     question_mode) echo "decision-gates" ;;
-    zoon_auto_create) echo "true" ;;
-    zoon_sync_on_brief) echo "true" ;;
+    zoon_auto_create) echo "false" ;;
+    zoon_sync_on_brief) echo "false" ;;
     zoon_protocol_cache_ttl) echo "300" ;;
     zoon_protocol_mode) echo "dynamic" ;;
     zoon_host) echo "https://zoon.up.railway.app" ;;
@@ -39,8 +39,8 @@ ensure_config() {
 # update_check: true | false
 # auto_upgrade: false | true
 # question_mode: decision-gates | off
-# zoon_auto_create: true | false
-# zoon_sync_on_brief: true | false
+# zoon_auto_create: false | true
+# zoon_sync_on_brief: false | true
 # zoon_protocol_cache_ttl: 300
 # zoon_protocol_mode: dynamic | cached | builtin
 # zoon_host: https://zoon.up.railway.app

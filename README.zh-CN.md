@@ -181,7 +181,7 @@ $pm-workspace
 | 技能 | 用户能获得什么 |
 |---|---|
 | `$pm-workspace` | 选择工作方式，进入欢迎引导，记录本轮状态。 |
-| `$pm-autoplan` | 自动串联问题澄清、策略审查、产品简报、协作文档同步和准备度检查。 |
+| `$pm-autoplan` | 自动串联问题澄清、策略审查、本地产品简报、可选协作文档同步和准备度检查。 |
 | `$pm-jobs` | 把功能愿望重新定义成用户问题、当前损失和最小可赢切口。 |
 | `$pm-strategy-review` | 用扩大、保持、收缩、转向四种范围模式判断策略取舍。 |
 | `$pm-brief` | 生成产品简报，让原型、复审和交付有同一份事实来源。 |
@@ -191,7 +191,7 @@ $pm-workspace
 
 ### 产品运行层
 
-- **Product Readiness Dashboard：** `pmw-dashboard readiness --target prototype|handoff` 在出图 / 交付前统一给出准备度判断，覆盖产品简报、AI 协作文档、线上参考、方案差异、不可虚构项和复审状态；默认是简洁 verdict，完整门槛表用 `--details`。
+- **Product Readiness Dashboard：** `pmw-dashboard readiness --target prototype|handoff` 在出图 / 交付前统一给出准备度判断，覆盖产品简报、可选 AI 协作文档、线上参考、方案差异、不可虚构项和复审状态；默认是简洁 verdict，完整门槛表用 `--details`。
 - **Product Artifact Flow：** `pmw-artifact` 记录下游可读产物，让产品简报、原型清单、复审结论和交付稿能流向下一个技能，而不是靠对话记忆重新推断；默认只给摘要，完整链路用 `pmw-artifact flow --details`。
 - **Browser Evidence Lite：** 线上流程截图、状态页、竞品参考和协作文档漂移证据统一登记为 `browser_evidence` 产物，复用 `pmw-artifact`，不新增浏览器证据子系统。
 - **Evidence Dashboard：** `pmw-dashboard status` 默认输出中文状态摘要；`pmw-dashboard status --details` 才展开产品简报版本、协作文档状态、线上参考、假设、不可虚构项、原型清单、复审结论和问题偏好。

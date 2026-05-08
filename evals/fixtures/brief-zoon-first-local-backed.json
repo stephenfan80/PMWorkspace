@@ -1,24 +1,25 @@
 {
   "id": "brief-zoon-first-local-backed",
-  "title": "产品简报必须优先发布到 Zoon 并保留本地审计副本",
+  "title": "产品简报默认本地保存，并按用户选择同步 Zoon",
   "category": "pm-brief",
   "primary_skill": "pm-brief",
-  "prompt": "生成产品简报时，优先自动推送到在线 Zoon 文档，并保持本地状态一致。",
+  "prompt": "生成产品简报时，默认先保存本地 Markdown；只有用户选择在线协作时才推送到 Zoon，并保持本地状态一致。",
   "expected": {
     "mode": "deep",
     "status": "待确认",
     "must_stop": false,
-    "gate": "Zoon-first 同步",
+    "gate": "local-first 简报保存",
     "required_behaviors": [
-      "先推送或追加 Zoon 在线文档",
+      "先保存业务简报和完整本地审计副本",
+      "未启用 Zoon 时记录 disabled 且不阻断出图",
+      "用户选择 Zoon 后才推送或追加在线文档",
       "同步成功后 agent 自动加入协作态",
-      "成功后保存同一份本地审计副本",
       "记录 Zoon URL、同步状态、协作加入状态和最终本地 brief 路径",
       "同步失败时保留本地副本并记录脱敏失败原因"
     ],
     "forbidden_behaviors": [
-      "只保存本地 Markdown",
-      "把 Zoon 当成被动附带同步",
+      "未经用户选择自动创建 Zoon",
+      "把 Zoon 当成每次出图的固定阻断门槛",
       "同步成功后项目状态指向临时文件",
       "暴露 token、ownerSecret 或 API 原始响应"
     ]
@@ -26,7 +27,7 @@
   "contract_checks": [
     {
       "path": "bin/pmw-log",
-      "contains": "Zoon-first, local-backed"
+      "contains": "Local-first, Zoon-optional"
     },
     {
       "path": "bin/pmw-log",
@@ -34,7 +35,7 @@
     },
     {
       "path": "bin/pmw-log",
-      "contains": "ZOON_SYNC_ORDER=online-first"
+      "contains": "ZOON_SYNC_ORDER=explicit-online-sync"
     },
     {
       "path": "bin/pmw-log",
@@ -58,19 +59,19 @@
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "Zoon-first, local-backed publishing"
+      "contains": "local-first, Zoon-optional publishing"
     },
     {
       "path": "pmworkspace-shared/references/zoon-workflow.md",
-      "contains": "Zoon-first，local-backed"
+      "contains": "local-first，Zoon-optional"
     },
     {
       "path": "pmworkspace-shared/references/zoon-drift-check.md",
-      "contains": "先把 Markdown 推送到在线 Zoon，再保存同一份内容为本地审计副本"
+      "contains": "默认先保存本地 Markdown 业务简报和完整本地审计副本"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "产品简报：`pmw-log brief` 必须使用 Zoon-first，local-backed 同步"
+      "contains": "产品简报：`pmw-log brief` 必须使用 local-first，Zoon-optional 同步"
     }
   ]
 }

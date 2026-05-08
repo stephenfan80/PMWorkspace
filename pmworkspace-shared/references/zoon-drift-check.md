@@ -1,6 +1,6 @@
 # Zoon 漂移检查
 
-产品简报创建后，用户可能在对话或 Zoon 里继续调整 brief。PMWorkspace 必须把 Zoon 视为可编辑事实来源，并在原型或交付前检查本地 brief 是否落后。
+产品简报创建后，用户可能在对话或 Zoon 里继续调整 brief。未启用 Zoon 时，本地已对齐 Markdown 是事实来源；已启用或用户提供 Zoon URL 时，PMWorkspace 必须把 Zoon 视为可编辑事实来源，并在原型或交付前检查本地 brief 是否落后。
 
 ## 什么时候检查
 
@@ -36,10 +36,11 @@ pmw-zoon drift --url "<Zoon URL>"
 pmw-log brief "<功能名>"
 ```
 
-`pmw-log brief` 使用 Zoon-first，local-backed 同步：先把 Markdown 推送到在线 Zoon，再保存同一份内容为本地审计副本，并在项目状态中记录最终本地副本路径：
+`pmw-log brief` 使用 local-first，Zoon-optional 同步：默认先保存本地 Markdown 业务简报和完整本地审计副本，并在项目状态中记录最终本地副本路径；只有用户选择在线协作或配置显式开启时才把 Markdown 推送到 Zoon：
 
 - 已有 Zoon URL：追加最新 brief。
-- 没有 Zoon URL 且 `zoon_auto_create: true`：创建新 Zoon 文档。
+- 未启用 Zoon：记录 `last_zoon_sync_status: disabled`，后续出图 / 交付使用本地已对齐简报。
+- 没有 Zoon URL 且 `zoon_auto_create: true` 或 `PMW_ZOON_AUTO_CREATE=true`：创建新 Zoon 文档。
 - 同步成功：记录 `last_zoon_sync_status: synced`、Zoon URL 和最终本地 brief 路径。
 - 协作加入成功：记录 `last_zoon_join_status: joined`；presence 不支持时记录 `unsupported`，presence 失败时记录 `failed` 和脱敏原因。
 - 同步失败：本地 brief 仍然有效，但输出必须标记 `Zoon 同步失败`，并记录 `last_zoon_sync_status: failed` 和脱敏失败原因。
@@ -50,7 +51,7 @@ pmw-log brief "<功能名>"
 - `cached`：只用缓存。
 - `builtin`：只用内置 `/documents/*` 契约。
 
-如果用户在对话中调整 brief，必须重新发布并同步；不能只在对话中改口径而不更新 Zoon。
+如果用户在对话中调整 brief，必须重新保存本地简报；只有已启用 Zoon 或用户再次选择在线协作时，才重新同步 Zoon。不能只在对话中改口径而不更新本地事实源。
 
 ## 版本规则
 

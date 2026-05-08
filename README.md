@@ -50,7 +50,7 @@ Shape fast. Deliver deep.
 1. Reframe the real product problem before jumping into a solution.
 2. Ask focused clarifying questions instead of long generic questionnaires.
 3. Use decision choices when scope, promise, experiment language, or delivery boundaries need a clear owner.
-4. Publish and sync the product summary through the AI collaboration document when available.
+4. Save the product summary locally first, then sync to the AI collaboration document when the user wants online collaboration.
 5. Record online evidence through the existing artifact flow.
 6. Run a readiness check before image generation or handoff.
 7. Use multi-role review to catch strategy, risk, design-system, and data gaps.

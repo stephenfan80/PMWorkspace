@@ -12,12 +12,12 @@
     "required_behaviors": [
       "出图前运行 prototype readiness verdict",
       "交付前运行 handoff readiness verdict",
-      "仪表盘覆盖产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态",
+      "仪表盘覆盖产品简报、可选 Zoon、线上参考、方案差异、不可虚构项和复审状态",
       "verdict 不是可出图或可交付时退回第一条阻断门槛"
     ],
     "forbidden_behaviors": [
       "只输出零散证据状态",
-      "缺少 Zoon 或复审状态仍宣称可交付",
+      "已启用 Zoon 但同步/漂移失败仍宣称可交付",
       "出图前不展示方案差异和不可虚构项",
       "把准备度缺口留到交付后再补"
     ]
@@ -33,7 +33,7 @@
     },
     {
       "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
-      "contains": "| Zoon | Required | Required |"
+      "contains": "| Zoon | Conditional | Conditional |"
     },
     {
       "path": "pmworkspace-shared/references/product-readiness-dashboard.md",

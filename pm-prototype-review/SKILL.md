@@ -2,8 +2,9 @@
 name: pm-prototype-review
 description: |
   PMWorkspace 原型复审。用于 image-2 原型图生成后，按已对齐产品简报、Zoon 最新
-  内容、线上参考、设计系统、主目标、反指标和不可虚构项做质量复审；发现实质问题时，
-  输出需要重出的屏幕和修正后的图片提示词方向。也用于批量原型交付前的验收。
+  内容、线上参考、设计系统、主目标、反指标和不可虚构项做质量复审；用 Product Review
+  Squad 拆出 CEO、Eng、Design、DX、安全、QA、发布工程师角色短结论；发现实质问题时，
+  输出需要重出的屏幕、PM 拍板项或修正后的图片提示词方向。也用于批量原型交付前的验收。
 ---
 
 # 原型复审
@@ -42,11 +43,11 @@ done
 10. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-prototype-review` 且没有当前 run，再创建 runtime run.
 11. Read `../pmworkspace-shared/references/pm-decision-principles.md`; unresolved user promise, data truth, scope, experiment, lead, transaction, privacy, or compliance issues must become `需要 PM 拍板`, not visual fixes.
 12. Read `../pmworkspace-shared/references/pm-eval-system.md` and preserve prototype review contracts.
-13. 建立原型复审控制器，记录 `复审输入`、`输出单元绑定`、`复审视角`、`判定原因`、`行动结论`、`修正方向`、`PM 拍板`、`偏好沉淀`、`反馈资产化` 和 `证据状态`。
+13. 建立原型复审控制器，记录 `复审输入`、`输出单元绑定`、`复审视角`、`Product Review Squad`、`角色短结论`、`判定原因`、`行动结论`、`修正方向`、`PM 拍板`、`偏好沉淀`、`反馈资产化` 和 `证据状态`。
 14. If `pmw-project show` contains a Zoon URL, run `pmw-zoon drift` when available. If drift exists, read the latest Zoon snapshot before judging the image. If drift changes product facts, route back to `$pm-brief` or `$pm-strategy-review` before accepting the image.
 15. For every image, check the bound output unit: 方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本. If an image is not bound to one output unit or prototype-board item, mark `需要补充参考` and do not pass it by visual impression.
 16. Score each screen on five dimensions: 产品一致性、任务完成、信任与反指标、设计系统、可交付性. Scores are diagnostic only; any hard violation overrides the average.
-17. Use PM Review Army lenses for strategy, trust/risk, design system, and data feasibility; merge into `可通过`、`需要重出`、`需要 PM 拍板`, or `需要补充参考`.
+17. Use PM Review Army lenses for strategy, trust/risk, design system, and data feasibility. For deep delivery, high-risk, batch handoff, engineering handoff, production flow, or explicit multi-role review requests, also run Product Review Squad roles: CEO, Eng, Design, DX, 安全, QA, 发布工程师. Each role must output a short conclusion with status, severity, evidence, one-sentence judgment, and action; merge into `可通过`、`需要重出`、`需要 PM 拍板`, or `需要补充参考`.
 18. If a screen violates the product brief, anti-metric, non-fiction boundary, online reference, or design system, mark `需要重出` and produce a concise repair brief for `$pm-prototype-shotgun`; do not accept a pretty but misleading image.
 19. If the issue is unresolved user promise, data truth, scope, experiment, lead, transaction, privacy, or compliance boundary, mark `需要 PM 拍板`, output one current D, and do not create repair prompts until the D is resolved.
 20. Log approved/rejected preferences with `pmw-log taste` only for user feedback or review-confirmed preferences; include scenario, feedback target, source, scope, and confidence. Do not save fact violations, anti-metric risks, non-fiction failures, missing references, or unresolved promises as taste.
@@ -74,6 +75,9 @@ done
 - 输出单元绑定：
 - 证据状态：
 - PM Review Army：
+  - 产品原型底盘：
+  - Product Review Squad：
+  - 角色短结论：
 - 已检查图片：
 - 五维评分：
 - 逐屏结论：

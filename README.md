@@ -121,7 +121,7 @@ PMWorkspace v0.2 turns the skill suite into a local product runtime:
 - **Workbench Map:** `pm-workbench-map.md` aligns README, routing, eval categories, and shared state fields across skills.
 - **Evidence Dashboard:** `pmw-dashboard status` renders a Chinese Markdown status page with brief version, Zoon state, references, assumptions, non-fiction boundaries, prototype list, reviews, and question preferences.
 - **Prototype Shotgun Board:** `pmw-prototype-board` registers each independent image-2 unit and compares schemes without merging multiple screens into one image.
-- **PM Review Army:** prototype review uses strategy, trust/risk, design system, and data feasibility lenses, then merges findings into pass, regenerate, or PM decision.
+- **PM Review Army / Product Review Squad:** prototype review keeps the strategy, trust/risk, design system, and data feasibility lenses, then adds CEO, Eng, Design, DX, security, QA, and release-engineering short conclusions before merging findings into pass, regenerate, PM decision, or missing evidence.
 - **Question Tuning:** `pmw-question-tuning` records whether a Q/D dimension should always be asked, asked only at high risk, defaulted to the recommendation, or avoided unless blocking.
 - **PM Eval:** `pmw-eval` uses dependency-free fixtures to check core gates and output contracts, so skill rules do not silently regress.
 - **Auto-Decision Principles:** shared fact priority and stop gates clarify which low-risk defaults can be auto-accepted and which user promises, data-truth, scope, experiment, lead, transaction, or privacy choices require PM decision.

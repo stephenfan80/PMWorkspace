@@ -1,0 +1,91 @@
+{
+  "id": "review-specialists-required",
+  "title": "PM Review Army 必须拆成可插拔专家短结论",
+  "category": "review-specialists",
+  "primary_skill": "pm-prototype-review",
+  "prompt": "复审一批 image-2 原型图，需要策略、信任/风险、设计系统、数据可行性四个视角像 gstack specialist 一样各自产出短结论，再由原型复审合并。",
+  "expected": {
+    "mode": "deep",
+    "status": "待复审",
+    "must_stop": false,
+    "gate": "可插拔复审专家",
+    "required_behaviors": [
+      "四个默认专家独立输出短结论",
+      "每个专家短结论包含状态、严重度、证据、一句话判断和行动",
+      "原型复审按最高严重度合并专家结论",
+      "平台脚本可记录专家短结论",
+      "dashboard 展示专家汇总"
+    ],
+    "forbidden_behaviors": [
+      "把四个视角合并成一段 PM 总评",
+      "只输出专家名称不输出短结论",
+      "用平均分覆盖硬违规"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/pm-review-army.md",
+      "contains": "## 可插拔专家协议"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-review-army.md",
+      "contains": "`strategy`"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-review-army.md",
+      "contains": "`trust-risk`"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-review-army.md",
+      "contains": "`design-system`"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-review-army.md",
+      "contains": "`data-feasibility`"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-review-army.md",
+      "contains": "pmw-review-specialist add"
+    },
+    {
+      "path": "pmworkspace-shared/references/prototype-quality-review.md",
+      "contains": "四个可插拔专家独立检查"
+    },
+    {
+      "path": "pm-prototype-review/SKILL.md",
+      "contains": "Run PM Review Army as pluggable specialists first"
+    },
+    {
+      "path": "pm-prototype-review/SKILL.md",
+      "contains": "`strategy`、`trust-risk`、`design-system`、`data-feasibility`"
+    },
+    {
+      "path": "bin/pmw-review-specialist",
+      "contains": "review-specialists.jsonl"
+    },
+    {
+      "path": "bin/pmw-review-specialist",
+      "contains": "data-feasibility"
+    },
+    {
+      "path": "bin/pmw-review-specialist",
+      "contains": "summary"
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "## 可插拔复审专家"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "`review-specialists`"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "`review-specialists`"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "四个可插拔专家"
+    }
+  ]
+}

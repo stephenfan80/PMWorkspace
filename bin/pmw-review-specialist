@@ -1,0 +1,273 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import pathlib
+import re
+import subprocess
+import uuid
+from datetime import datetime, timezone
+from typing import Optional
+
+
+SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
+
+EXPERTS = {
+    "strategy": {
+        "label": "策略专家",
+        "focus": "目标用户、核心问题、价值交换、范围取舍、方案是否仍解决真实问题",
+    },
+    "trust-risk": {
+        "label": "信任 / 风险专家",
+        "focus": "反指标、不可虚构项、数据承诺、隐私、用户预期和信任损耗",
+    },
+    "design-system": {
+        "label": "设计系统专家",
+        "focus": "生产样式、信息层级、组件合理性、可读性、移动端可用性",
+    },
+    "data-feasibility": {
+        "label": "数据可行性专家",
+        "focus": "页面数据、自动化能力、资格判断、计算口径和接口可兑现性",
+    },
+}
+
+STATUS_PRIORITY = {
+    "需要 PM 拍板": 4,
+    "需要重出": 3,
+    "需要补充参考": 2,
+    "可通过": 1,
+    "通过": 1,
+}
+SEVERITY_ORDER = {"P0": 4, "P1": 3, "P2": 2, "P3": 1, "": 0}
+
+
+def now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def current_slug() -> str:
+    env_slug = os.environ.get("PMW_PROJECT_SLUG")
+    if env_slug:
+        return env_slug
+    try:
+        return subprocess.check_output([str(SCRIPT_DIR / "pmw-slug")], text=True).strip()
+    except Exception:
+        return "local-project"
+
+
+def project_dir() -> pathlib.Path:
+    return STATE_DIR / "projects" / current_slug()
+
+
+def review_log() -> pathlib.Path:
+    return project_dir() / "review-specialists.jsonl"
+
+
+def read_json(path: pathlib.Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+        return value if isinstance(value, dict) else {}
+    except Exception:
+        return {}
+
+
+def read_jsonl(path: pathlib.Path) -> list[dict]:
+    rows: list[dict] = []
+    if not path.exists():
+        return rows
+    for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        try:
+            value = json.loads(line)
+        except Exception:
+            continue
+        if isinstance(value, dict):
+            rows.append(value)
+    return rows
+
+
+def redact_sensitive(value: Optional[str]) -> str:
+    if not value:
+        return ""
+    text = str(value)
+    text = re.sub(r"(token=)[^&\s]+", r"\1[redacted]", text)
+    text = re.sub(r"(ownerSecret[=: ]*)[^&\s]+", r"\1[redacted]", text)
+    text = re.sub(r"(Authorization: Bearer )[A-Za-z0-9._~+/=-]+", r"\1[redacted]", text)
+    text = re.sub(r"(api[_-]?key[=: ]*)[^&\s]+", r"\1[redacted]", text, flags=re.I)
+    return text
+
+
+def current_run_id() -> str:
+    project = read_json(project_dir() / "project.json")
+    return str(project.get("current_run_id") or project.get("latest_run_id") or "")
+
+
+def append_row(row: dict) -> None:
+    path = review_log()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+
+
+def md_cell(value: object) -> str:
+    text = str(value or "")
+    if isinstance(value, list):
+        text = ", ".join(str(item) for item in value if str(item).strip())
+    return redact_sensitive(text).replace("|", "/").replace("\n", " ").strip() or "未记录"
+
+
+def status_rank(status: str) -> int:
+    for key, rank in STATUS_PRIORITY.items():
+        if key in status:
+            return rank
+    return 0
+
+
+def merge_status(rows: list[dict]) -> tuple[str, str]:
+    if not rows:
+        return "未记录", "暂无专家短结论"
+    worst = max(rows, key=lambda row: status_rank(str(row.get("status") or "")))
+    status = str(worst.get("status") or "未记录")
+    severity = max((str(row.get("severity") or "") for row in rows), key=lambda item: SEVERITY_ORDER.get(item, 0))
+    if "PM" in status:
+        return "需要 PM 拍板", f"{severity or '未标注'}｜{worst.get('expert_label') or worst.get('expert')}：{worst.get('judgment') or ''}"
+    if "重出" in status:
+        return "需要重出", f"{severity or '未标注'}｜{worst.get('expert_label') or worst.get('expert')}：{worst.get('judgment') or ''}"
+    if "补充" in status:
+        return "需要补充参考", f"{severity or '未标注'}｜{worst.get('expert_label') or worst.get('expert')}：{worst.get('judgment') or ''}"
+    return "可通过", f"{severity or '未标注'}｜所有已记录专家无阻断"
+
+
+def command_list(_: argparse.Namespace) -> int:
+    print("# PMWorkspace 可插拔复审专家")
+    print("")
+    print("| expert | 中文名 | 关注点 |")
+    print("|---|---|---|")
+    for expert, meta in EXPERTS.items():
+        print(f"| {expert} | {meta['label']} | {meta['focus']} |")
+    return 0
+
+
+def command_add(args: argparse.Namespace) -> int:
+    expert_meta = EXPERTS.get(args.expert, {})
+    row = {
+        "ts": now(),
+        "review_id": uuid.uuid4().hex[:12],
+        "expert": args.expert,
+        "expert_label": args.label or expert_meta.get("label") or args.expert,
+        "status": redact_sensitive(args.status),
+        "severity": args.severity,
+        "evidence": redact_sensitive(args.evidence),
+        "judgment": redact_sensitive(args.judgment),
+        "action": redact_sensitive(args.action),
+        "scheme": redact_sensitive(args.scheme),
+        "screen": redact_sensitive(args.screen),
+        "run_id": args.run or current_run_id(),
+        "source_skill": "pm-prototype-review",
+        "pluggable": args.expert not in EXPERTS,
+    }
+    append_row(row)
+    print(row["review_id"])
+    return 0
+
+
+def selected_rows(args: argparse.Namespace) -> list[dict]:
+    rows = read_jsonl(review_log())
+    run_id = getattr(args, "run", "") or current_run_id()
+    if run_id:
+        rows = [row for row in rows if row.get("run_id") == run_id]
+    expert = getattr(args, "expert", "")
+    if expert:
+        rows = [row for row in rows if row.get("expert") == expert]
+    return rows[-getattr(args, "limit", 20) :]
+
+
+def command_latest(args: argparse.Namespace) -> int:
+    rows = selected_rows(args)
+    if not rows:
+        return 1
+    print(json.dumps(rows[-1], ensure_ascii=False, indent=2, sort_keys=True))
+    return 0
+
+
+def command_summary(args: argparse.Namespace) -> int:
+    rows = selected_rows(args)
+    verdict, reason = merge_status(rows)
+    print("# PMWorkspace 可插拔复审专家汇总")
+    print("")
+    print(f"- 项目：{current_slug()}")
+    print(f"- 记录文件：{review_log()}")
+    print(f"- 合并结论：{md_cell(verdict)}")
+    print(f"- 合并理由：{md_cell(reason)}")
+    print("")
+    if not rows:
+        print("- 暂无专家短结论")
+        return 0
+    print("| 时间 | 专家 | 结论 | 严重度 | 证据 | 一句话判断 | 行动 | 屏幕 |")
+    print("|---|---|---|---|---|---|---|---|")
+    for row in rows:
+        print(
+            "| "
+            + " | ".join(
+                [
+                    md_cell(row.get("ts")),
+                    md_cell(row.get("expert_label") or row.get("expert")),
+                    md_cell(row.get("status")),
+                    md_cell(row.get("severity")),
+                    md_cell(row.get("evidence")),
+                    md_cell(row.get("judgment")),
+                    md_cell(row.get("action")),
+                    md_cell(f"{row.get('scheme', '')}/{row.get('screen', '')}".strip("/")),
+                ]
+            )
+            + " |"
+        )
+    return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(prog="pmw-review-specialist")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    sub.add_parser("list")
+
+    add = sub.add_parser("add")
+    add.add_argument("--expert", required=True)
+    add.add_argument("--label", default="")
+    add.add_argument("--status", required=True)
+    add.add_argument("--severity", choices=["P0", "P1", "P2", "P3"], default="P2")
+    add.add_argument("--evidence", required=True)
+    add.add_argument("--judgment", required=True)
+    add.add_argument("--action", required=True)
+    add.add_argument("--scheme", default="")
+    add.add_argument("--screen", default="")
+    add.add_argument("--run", default="")
+
+    latest = sub.add_parser("latest")
+    latest.add_argument("--expert", default="")
+    latest.add_argument("--run", default="")
+    latest.add_argument("--limit", type=int, default=20)
+
+    summary = sub.add_parser("summary")
+    summary.add_argument("--expert", default="")
+    summary.add_argument("--run", default="")
+    summary.add_argument("--limit", type=int, default=20)
+
+    args = parser.parse_args()
+    if args.command == "list":
+        return command_list(args)
+    if args.command == "add":
+        return command_add(args)
+    if args.command == "latest":
+        return command_latest(args)
+    if args.command == "summary":
+        return command_summary(args)
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

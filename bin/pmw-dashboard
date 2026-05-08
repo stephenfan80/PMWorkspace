@@ -163,6 +163,21 @@ def artifact_flow_rows(root: pathlib.Path, limit: int = 10) -> list[str]:
     return rendered
 
 
+def review_specialist_rows(root: pathlib.Path, limit: int = 10) -> list[str]:
+    rows = read_jsonl(root / "review-specialists.jsonl")[-limit:]
+    rendered = []
+    for row in rows:
+        rendered.append(
+            f"{redact_sensitive(str(row.get('expert_label') or row.get('expert') or '专家'))}｜"
+            f"{redact_sensitive(str(row.get('status') or '未记录'))}｜"
+            f"{redact_sensitive(str(row.get('severity') or '未标注'))}｜"
+            f"{redact_sensitive(str(row.get('evidence') or '未记录'))}｜"
+            f"{redact_sensitive(str(row.get('judgment') or ''))}｜"
+            f"{redact_sensitive(str(row.get('action') or ''))}"
+        )
+    return rendered
+
+
 def has_non_fiction_boundary(text: str) -> bool:
     lines = text.splitlines()
     for index, line in enumerate(lines):
@@ -358,6 +373,7 @@ def render_status(run_id: Optional[str]) -> str:
     evidence = [e for e in events if e.get("event") == "evidence"]
     artifacts = [e for e in events if e.get("event") == "artifact"]
     artifact_flow = artifact_flow_rows(root)
+    review_specialists = review_specialist_rows(root)
     run_decisions = [e for e in events if e.get("event") == "decision"]
     tuning = read_jsonl(root / "question-tuning.jsonl")[-5:]
     delivery_facts = (read_jsonl(user_dir() / "delivery-facts.jsonl") + read_jsonl(root / "delivery-facts.jsonl"))[-8:]
@@ -400,6 +416,8 @@ def render_status(run_id: Optional[str]) -> str:
     lines.extend(bullet_or_empty(board_rows + manifest_rows))
     lines.extend(["", "## 复审结论", ""])
     lines.extend(bullet_or_empty([f"{r.get('status', '')}｜{r.get('title', '')}：{r.get('summary', '')}" for r in reviews]))
+    lines.extend(["", "## 可插拔复审专家", ""])
+    lines.extend(bullet_or_empty(review_specialists))
     lines.extend(["", "## 产物流动", ""])
     lines.extend(bullet_or_empty(artifact_flow))
     lines.extend(["", "## 产物清单", ""])

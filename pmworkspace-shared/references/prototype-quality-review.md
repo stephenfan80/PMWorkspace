@@ -10,7 +10,8 @@ For Chinese users, report the final check with Chinese labels such as `质量检
 
 - `复审输入`：图片路径或 URL、方案名、屏幕任务、产品简报版本、Zoon 快照、线上参考、设计系统和 prototype-board item。
 - `输出单元绑定`：每张图必须能追溯到一个 `方案 + 屏幕任务`，并绑定主目标、反指标、不可虚构项和产品简报版本；缺绑定时先标 `需要补充参考`，不能凭视觉印象通过。
-- `复审视角`：策略、信任 / 风险、设计系统、数据可行性四个底盘视角必须分别给出问题和严重度；深度交付、高风险、批量交付、研发交付、生产流程或用户要求多角色 review 时，必须追加 Product Review Squad 角色短结论。
+- `可插拔专家`：策略、信任 / 风险、设计系统、数据可行性四个底盘专家必须分别给出短结论、最高严重度、证据、一句话判断和行动；不能合并成一段泛泛 PM 总评。
+- `专家合并结论`：由 `$pm-prototype-review` 根据四个专家的最高严重度合并为 `可通过`、`需要重出`、`需要 PM 拍板` 或 `需要补充参考`；深度交付、高风险、批量交付、研发交付、生产流程或用户要求多角色 review 时，再追加 Product Review Squad 角色短结论。
 - `Product Review Squad`：CEO、Eng、Design、DX、安全、QA、发布工程师七个角色各自输出短结论、最高严重度、证据和行动。
 - `判定原因`：把问题归类为产品事实偏离、反指标风险、不可虚构违规、线上参考偏离、设计系统偏离、未决产品取舍或轻微偏好。
 - `行动结论`：合并为 `可通过`、`需要重出`、`需要 PM 拍板` 或 `需要补充参考`。
@@ -57,9 +58,9 @@ AutoDesign is the default production baseline. Check:
 
 ## PM Review Army / Product Review Squad
 
-批量交付或高风险原型复审时，读取 `pm-review-army.md`，先用策略专家、信任 / 风险专家、设计系统专家和数据可行性专家四个底盘视角检查，再用 CEO、Eng、Design、DX、安全、QA、发布工程师七个 Product Review Squad 角色各自输出短结论，最后合并成 `可通过`、`需要重出`、`需要 PM 拍板` 或 `需要补充参考`。
+所有原型复审都读取 `pm-review-army.md`，先用策略专家、信任 / 风险专家、设计系统专家和数据可行性专家四个可插拔专家独立检查；平台脚本可用时用 `pmw-review-specialist add` 记录每个专家短结论，再用 `pmw-review-specialist summary` 汇总。批量交付或高风险原型复审时，再用 CEO、Eng、Design、DX、安全、QA、发布工程师七个 Product Review Squad 角色各自输出短结论，最后合并成 `可通过`、`需要重出`、`需要 PM 拍板` 或 `需要补充参考`。
 
-角色短结论必须独立表达，不能只写“同上”。合并结论使用最高严重度，不做平均分。
+专家和角色短结论必须独立表达，不能只写“同上”。合并结论使用最高严重度，不做平均分。
 
 ## 如果原型不合格
 

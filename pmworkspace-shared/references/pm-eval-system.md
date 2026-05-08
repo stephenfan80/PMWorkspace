@@ -12,6 +12,7 @@ PMWorkspace eval 第一版用于维护技能规则和输出契约，不运行真
 - 防止多方案只换配色、圆角或插画。
 - 防止历史偏好覆盖当前 brief、Zoon、反指标或不可虚构项。
 - 防止原型复审接受“好看但误导”的图片。
+- 防止 PM Review Army 退化为一段泛泛总评：策略、信任 / 风险、设计系统、数据可行性必须作为可插拔专家独立输出短结论，再由原型复审合并。
 - 防止用户反馈资产混淆：个人偏好、产品认知和 PMWorkspace 进化建议必须分开保存，GitHub 回流默认只生成脱敏本地待审稿。
 - 防止 PMWorkspace 主入口路由分散、run 重复创建或路由输出缺少证据状态。
 - 防止产品交付退化成大而全 PRD：默认只输出精简 PRD 核心字段，接口、数据、埋点和实验缺口可留空但不能虚构，并沉淀为本地交付资产。
@@ -24,6 +25,7 @@ PMWorkspace eval 第一版用于维护技能规则和输出契约，不运行真
 - **场景契约检查：** 检查每个 fixture 是否声明输入、预期状态、停止门槛、禁止行为和必须行为。
 - **运行时契约检查：** 检查 `pmw-run`、`pmw-dashboard`、`pmw-prototype-board`、`pmw-memory` 等脚本是否仍提供需要的记录入口。
 - **产物流动契约检查：** 检查 `pmw-artifact`、`artifact-flow.jsonl`、技能读取协议和 dashboard 展示仍能支持下游接力。
+- **复审专家契约检查：** 检查 `pmw-review-specialist`、四个默认专家、专家短结论结构和 `$pm-prototype-review` 合并协议。
 - **端到端地图检查：** 检查 README、`routing.md`、skill 状态字段和 eval 分类仍能映射到 `pm-workbench-map.md`。
 
 第一阶段仍只做静态规则和场景契约检查；运行时契约和端到端地图检查都通过 fixture 的 `contract_checks` 引用脚本或文档关键短语。
@@ -41,6 +43,7 @@ fixture 的 `category` 必须能映射回 `pm-workbench-map.md` 的链路阶段�
 | `pm-brief` | 产品简报 | 核心信息契约、核心信息先行、支持信息分层、Zoon 漂移、已对齐门槛 |
 | `pm-prototype-shotgun`、`prototype-shotgun`、`prototype-output-contract`、`multi-scheme`、`production-reference`、`screenshot-feedback` | 原型方案 | image-2 前门槛、单图协议、输出单元、线上参考、设计系统 |
 | `prototype-review` | 原型复审 | 复审控制器、重出、拍板、偏好边界 |
+| `review-specialists` | 原型复审 | 可插拔专家、短结论、最高严重度合并、dashboard 专家汇总 |
 | `pm-handoff` | 产品交付 | 精简 PRD、现成文档入口、未复审不交付、未拍板不写验收、交付资产沉淀 |
 | `readiness-dashboard` | 原型方案 / 产品交付 / 运行与记忆 | 出图 / 交付前 Product Readiness Dashboard 和 verdict |
 | `artifact-flow` | 产品简报 / 原型方案 / 原型复审 / 产品交付 / 运行与记忆 | Product Artifact Flow、`pmw-artifact`、上游产物下游可读 |
@@ -160,6 +163,7 @@ fixture 使用 JSON，保存在 `evals/fixtures/`：
 - 原型方案：品牌 VI 和字体包只作为品牌露出、活动视觉或特殊场景参考；不能覆盖 AutoDesign 产品 UI token，也不能写成字体已授权可生产。
 - 原型方案：image-2 不可用时必须停止说明，不能用 HTML、Markdown 线框、拼贴图或方案比较板替代原型图。
 - 原型复审：必须先建立原型复审控制器，并输出复审输入、输出单元绑定、复审视角、判定原因、行动结论、修正方向、PM 拍板、偏好沉淀和证据状态。
+- 原型复审：PM Review Army 必须先运行四个可插拔专家：策略、信任 / 风险、设计系统、数据可行性；每个专家独立输出短结论、最高严重度、证据、一句话判断和行动，再由原型复审合并。
 - 原型复审：深度交付、高风险、批量交付、研发交付、生产流程或用户要求多角色 review 时，必须输出 Product Review Squad：CEO、Eng、Design、DX、安全、QA、发布工程师七个角色短结论，再合并成行动结论。
 - 原型复审：每张图片必须能追溯到一个 `方案 + 屏幕任务`、主目标、反指标、不可虚构项和产品简报版本；缺绑定时标记 `需要补充参考`，不能凭视觉印象通过。
 - 原型复审：违反产品简报、反指标、不可虚构项、线上参考或设计系统时，必须标为 `需要重出`，并只为受影响屏幕输出修复 brief。

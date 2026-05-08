@@ -1,0 +1,265 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import pathlib
+import re
+import sys
+from typing import Iterable
+
+
+SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+ROOT = SCRIPT_DIR.parent
+MANIFEST_PATH = ROOT / "pmworkspace-shared" / "skill-docs" / "skill-docs.manifest.json"
+START_MARKER = "<!-- PMW-GENERATED-CONTRACT:START -->"
+END_MARKER = "<!-- PMW-GENERATED-CONTRACT:END -->"
+
+
+def load_manifest(path: pathlib.Path = MANIFEST_PATH) -> dict:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise SystemExit(f"manifest 读取失败：{path}：{exc}")
+    if not isinstance(data, dict) or not isinstance(data.get("skills"), dict):
+        raise SystemExit("manifest 必须包含 skills 对象")
+    return data
+
+
+def skill_path(skill: str) -> pathlib.Path:
+    return ROOT / skill / "SKILL.md"
+
+
+def as_list(value: object) -> list[str]:
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    return []
+
+
+def bullet_list(items: Iterable[str]) -> list[str]:
+    rows = []
+    for item in items:
+        rows.append(f"- {item}")
+    return rows or ["- 未配置"]
+
+
+def build_contract(skill: str, spec: dict, manifest: dict) -> str:
+    version = manifest.get("version", 1)
+    title = manifest.get("generated_section_title", "PMWorkspace 生成契约")
+    shared_gates = as_list(manifest.get("shared_gates"))
+    preamble_checks = as_list(manifest.get("common_preamble_checks")) + as_list(spec.get("preamble_checks"))
+    references = as_list(spec.get("required_references"))
+    output_fields = as_list(spec.get("output_fields"))
+    lines = [
+        START_MARKER,
+        f"## {title}",
+        "",
+        f"> 本区块由 `bin/pmw-gen-skill-docs` 根据 `pmworkspace-shared/skill-docs/skill-docs.manifest.json` 生成；不要手写修改。更新共享门槛、前置检查或输出字段后，运行 `bin/pmw-gen-skill-docs write`，再运行 `bin/pmw-gen-skill-docs check`。",
+        "",
+        f"- skill：`{skill}`",
+        f"- 契约版本：`{version}`",
+        f"- 阶段：{spec.get('stage', '未配置')}",
+        f"- 定位：{spec.get('purpose', '未配置')}",
+        "",
+        "### 统一前置检查",
+        "",
+        *bullet_list(f"`{item}`" for item in preamble_checks),
+        "",
+        "### 必读共享协议",
+        "",
+        *bullet_list(f"`../pmworkspace-shared/references/{item}`" for item in references),
+        "",
+        "### 共享门槛",
+        "",
+        *bullet_list(shared_gates),
+        "",
+        "### 用户可见输出字段",
+        "",
+        *bullet_list(f"`{item}`" for item in output_fields),
+        END_MARKER,
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def replace_or_insert(text: str, block: str) -> str:
+    pattern = re.compile(re.escape(START_MARKER) + r".*?" + re.escape(END_MARKER) + r"\n?", re.S)
+    if pattern.search(text):
+        return pattern.sub(block, text, count=1)
+
+    marker_match = re.search(r"\nBefore user-facing output,", text)
+    if marker_match:
+        insert_at = marker_match.start() + 1
+        return text[:insert_at] + block + "\n" + text[insert_at:]
+
+    preamble_match = re.search(r"\n## (?:Platform )?Preamble\b", text)
+    if preamble_match:
+        insert_at = preamble_match.start() + 1
+        return text[:insert_at] + block + "\n" + text[insert_at:]
+
+    h1_match = re.search(r"\n# .+\n", text)
+    if h1_match:
+        insert_at = h1_match.end()
+        return text[:insert_at] + "\n" + block + text[insert_at:]
+
+    return block + "\n" + text
+
+
+def select_skills(manifest: dict, selected: str | None) -> list[str]:
+    skills = sorted(manifest["skills"])
+    if not selected:
+        return skills
+    if selected not in manifest["skills"]:
+        raise SystemExit(f"未知 skill：{selected}")
+    return [selected]
+
+
+def generated_text(skill: str, manifest: dict) -> str:
+    path = skill_path(skill)
+    if not path.exists():
+        raise SystemExit(f"缺少 SKILL.md：{path}")
+    current = path.read_text(encoding="utf-8")
+    block = build_contract(skill, manifest["skills"][skill], manifest)
+    return replace_or_insert(current, block)
+
+
+def command_write(args: argparse.Namespace) -> int:
+    manifest = load_manifest()
+    changed = []
+    for skill in select_skills(manifest, args.skill):
+        path = skill_path(skill)
+        next_text = generated_text(skill, manifest)
+        current = path.read_text(encoding="utf-8")
+        if current != next_text:
+            if not args.dry_run:
+                path.write_text(next_text, encoding="utf-8")
+            changed.append(skill)
+    if args.dry_run:
+        if changed:
+            print("以下 skill 文档需要重新生成：")
+            for skill in changed:
+                print(f"- {skill}")
+            return 1
+        print("所有 skill 文档已是最新。")
+        return 0
+    for skill in changed:
+        print(f"updated {skill_path(skill)}")
+    if not changed:
+        print("所有 skill 文档已是最新。")
+    return 0
+
+
+def contract_text(text: str) -> str:
+    start = text.find(START_MARKER)
+    end = text.find(END_MARKER)
+    if start == -1 or end == -1:
+        return ""
+    end += len(END_MARKER)
+    if end < len(text) and text[end : end + 1] == "\n":
+        end += 1
+    return text[start:end]
+
+
+def check_skill(skill: str, manifest: dict) -> list[str]:
+    errors: list[str] = []
+    path = skill_path(skill)
+    if not path.exists():
+        return [f"{skill}: 缺少 SKILL.md"]
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    spec = manifest["skills"][skill]
+    expected = build_contract(skill, spec, manifest)
+    actual = contract_text(text)
+    if not actual:
+        errors.append(f"{skill}: 缺少生成契约区块")
+    elif actual != expected:
+        errors.append(f"{skill}: 生成契约区块已漂移，请运行 bin/pmw-gen-skill-docs write")
+
+    for token in as_list(manifest.get("common_preamble_checks")) + as_list(spec.get("preamble_checks")):
+        if token not in text:
+            errors.append(f"{skill}: 前置检查缺少 `{token}`")
+    for ref in as_list(spec.get("required_references")):
+        if ref not in text:
+            errors.append(f"{skill}: 必读共享协议缺少 `{ref}`")
+    for field in as_list(spec.get("output_fields")):
+        if field not in text:
+            errors.append(f"{skill}: 输出字段缺少 `{field}`")
+    return errors
+
+
+def command_check(args: argparse.Namespace) -> int:
+    manifest = load_manifest()
+    errors: list[str] = []
+    for skill in select_skills(manifest, args.skill):
+        errors.extend(check_skill(skill, manifest))
+    if errors:
+        print("# PMWorkspace skill 文档检查失败")
+        print("")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+    print("# PMWorkspace skill 文档检查通过")
+    print("")
+    for skill in select_skills(manifest, args.skill):
+        print(f"- {skill}")
+    return 0
+
+
+def command_list(args: argparse.Namespace) -> int:
+    manifest = load_manifest()
+    rows = []
+    for skill in select_skills(manifest, args.skill):
+        spec = manifest["skills"][skill]
+        rows.append({"skill": skill, "stage": spec.get("stage", ""), "purpose": spec.get("purpose", "")})
+    if args.json:
+        print(json.dumps({"version": manifest.get("version", 1), "skills": rows}, ensure_ascii=False, indent=2))
+        return 0
+    print("# PMWorkspace skill 文档模板")
+    print("")
+    print("| skill | 阶段 | 定位 |")
+    print("|---|---|---|")
+    for row in rows:
+        print(f"| `{row['skill']}` | {row['stage']} | {row['purpose']} |")
+    return 0
+
+
+def command_render(args: argparse.Namespace) -> int:
+    manifest = load_manifest()
+    print(build_contract(args.skill, manifest["skills"][args.skill], manifest), end="")
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="pmw-gen-skill-docs")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    list_cmd = sub.add_parser("list")
+    list_cmd.add_argument("--skill")
+    list_cmd.add_argument("--json", action="store_true")
+
+    render_cmd = sub.add_parser("render")
+    render_cmd.add_argument("--skill", required=True)
+
+    write_cmd = sub.add_parser("write")
+    write_cmd.add_argument("--skill")
+    write_cmd.add_argument("--dry-run", action="store_true")
+
+    check_cmd = sub.add_parser("check")
+    check_cmd.add_argument("--skill")
+
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    if args.command == "list":
+        return command_list(args)
+    if args.command == "render":
+        return command_render(args)
+    if args.command == "write":
+        return command_write(args)
+    if args.command == "check":
+        return command_check(args)
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

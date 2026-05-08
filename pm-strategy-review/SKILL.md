@@ -11,6 +11,54 @@ description: |
 
 在原型或交付前挑战产品方向。目标是用明确的范围模式判断方向应该扩大、保持、收缩还是转向，并把最大策略矛盾转成一个 PM 可拍板的取舍，而不是默认堆更多功能。
 
+<!-- PMW-GENERATED-CONTRACT:START -->
+## PMWorkspace 生成契约
+
+> 本区块由 `bin/pmw-gen-skill-docs` 根据 `pmworkspace-shared/skill-docs/skill-docs.manifest.json` 生成；不要手写修改。更新共享门槛、前置检查或输出字段后，运行 `bin/pmw-gen-skill-docs write`，再运行 `bin/pmw-gen-skill-docs check`。
+
+- skill：`pm-strategy-review`
+- 契约版本：`1`
+- 阶段：策略审查
+- 定位：识别最大策略矛盾，选择范围模式，并把策略取舍转成产品动作。
+
+### 统一前置检查
+
+- `_PMW_BIN`
+- `pmw-update-check`
+- `usage`
+- `usage pm-strategy-review`
+- `pmw-dashboard`
+- `pmw-artifact`
+
+### 必读共享协议
+
+- `../pmworkspace-shared/references/adversarial-review.md`
+- `../pmworkspace-shared/references/pm-decision-principles.md`
+- `../pmworkspace-shared/references/pm-eval-system.md`
+- `../pmworkspace-shared/references/pm-workbench-map.md`
+- `../pmworkspace-shared/references/runtime-kernel.md`
+
+### 共享门槛
+
+- 先读语言与本地化协议，中文用户默认使用中文字段、中文状态和中文建议。
+- 复用 runtime run：子 skill 发现已有 current_run_id 时不得重新创建 run。
+- 历史偏好、记忆和默认规则不能覆盖本轮事实、brief、Zoon、反指标、不可虚构项或证据门槛。
+- 等待 Q、D、证据或用户确认时必须停住；不能假装已对齐、可出图或可交付。
+- 不得把真实 token、ownerSecret、私密客户资料、内部录音、未脱敏截图或未脱敏 Zoon 内容写进公开仓库。
+
+### 用户可见输出字段
+
+- `策略审查结论`
+- `最大策略矛盾`
+- `范围模式`
+- `建议姿态`
+- `产品动作`
+- `策略取舍`
+- `当前 D`
+- `下一技能`
+- `证据状态`
+<!-- PMW-GENERATED-CONTRACT:END -->
+
 Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. For Chinese users, avoid English labels; use Chinese headings, status values, and recommendations.
 
 ## Preamble

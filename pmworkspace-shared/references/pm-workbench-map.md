@@ -91,6 +91,7 @@
 | `pm-handoff` | 产品交付 | 精简 PRD 核心字段、现成文档入口、未复审不交付、未拍板不写验收、缺口留空、保存 handoff 和交付事实 |
 | `readiness-dashboard` | 原型方案 / 产品交付 / 运行与记忆 | 出图 / 交付前 Product Readiness Dashboard 和 verdict |
 | `artifact-flow` | 产品简报 / 原型方案 / 原型复审 / 产品交付 / 运行与记忆 | 上游产物可被下游读取，brief、prototype manifest、review、handoff 不在对话中断流 |
+| `skill-doc-generator` | 运行与记忆 | `pmw-gen-skill-docs` 用 manifest 生成并检查 SKILL.md 共享契约，防止 preamble、输出字段和共享门槛漂移 |
 | `memory`、`decision-principles`、`eval-system` | 运行与记忆 | 偏好不覆盖事实、eval runner 可用、维护契约 |
 
 新增 fixture 时，先把它放入上表已有分类；如果确实出现新阶段，必须同步更新本文件、`pm-eval-system.md` 和 `evals/README.md`。
@@ -101,4 +102,5 @@
 - `routing.md` 只决定下一技能和 D0，不重复展开每个技能的完整 controller。
 - `pm-eval-system.md` 只维护测试分层、fixture 结构和分类地图，不复制技能全文。
 - 技能 `SKILL.md` 必须读取本文件，并在输出中保留本阶段要求的状态字段。
+- 技能 `SKILL.md` 的共享契约区块由 `pmw-gen-skill-docs` 生成；修改共享 preamble、必读协议、输出字段或共享门槛时，先改 manifest，再重新生成和检查。
 - 如果某个门槛失败，下一技能必须指向最早能补齐该门槛的技能；不要把下游产物伪装成已完成。

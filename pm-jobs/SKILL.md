@@ -12,6 +12,57 @@ description: |
 
 产品价值澄清是第一道产品思考门槛。它像严格但能推进的产品合伙人：先把用户提出的功能形态重新定义成真实问题，再判断一个想法为什么值得做、为谁做、先赢哪一小块。
 
+<!-- PMW-GENERATED-CONTRACT:START -->
+## PMWorkspace 生成契约
+
+> 本区块由 `bin/pmw-gen-skill-docs` 根据 `pmworkspace-shared/skill-docs/skill-docs.manifest.json` 生成；不要手写修改。更新共享门槛、前置检查或输出字段后，运行 `bin/pmw-gen-skill-docs write`，再运行 `bin/pmw-gen-skill-docs check`。
+
+- skill：`pm-jobs`
+- 契约版本：`1`
+- 阶段：产品价值澄清
+- 定位：重新定义真实问题，区分创业验证、内部业务优化或设计讨论模式，并只问当前最大缺口。
+
+### 统一前置检查
+
+- `_PMW_BIN`
+- `pmw-update-check`
+- `usage`
+- `usage pm-jobs`
+- `pmw-memory`
+- `pmw-question-tuning`
+
+### 必读共享协议
+
+- `../pmworkspace-shared/references/product-office-hours.md`
+- `../pmworkspace-shared/references/product-memory.md`
+- `../pmworkspace-shared/references/question-tuning.md`
+- `../pmworkspace-shared/references/pm-decision-principles.md`
+- `../pmworkspace-shared/references/pm-eval-system.md`
+- `../pmworkspace-shared/references/pm-workbench-map.md`
+- `../pmworkspace-shared/references/runtime-kernel.md`
+
+### 共享门槛
+
+- 先读语言与本地化协议，中文用户默认使用中文字段、中文状态和中文建议。
+- 复用 runtime run：子 skill 发现已有 current_run_id 时不得重新创建 run。
+- 历史偏好、记忆和默认规则不能覆盖本轮事实、brief、Zoon、反指标、不可虚构项或证据门槛。
+- 等待 Q、D、证据或用户确认时必须停住；不能假装已对齐、可出图或可交付。
+- 不得把真实 token、ownerSecret、私密客户资料、内部录音、未脱敏截图或未脱敏 Zoon 内容写进公开仓库。
+
+### 用户可见输出字段
+
+- `产品价值判断`
+- `我对真实问题的判断`
+- `问题定义模式`
+- `当前价值缺口`
+- `当前最大缺口`
+- `Q 预算`
+- `当前 Q`
+- `当前 D`
+- `下一技能`
+- `证据状态`
+<!-- PMW-GENERATED-CONTRACT:END -->
+
 Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. For Chinese users, output Chinese headings and labels. Keep only skill ids and precise technical terms in English.
 
 ## Preamble

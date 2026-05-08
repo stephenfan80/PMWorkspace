@@ -10,6 +10,60 @@ description: |
 
 把选定产品方向整理成精简 PRD 和可复用交付资产，同时明确保留未解决的问题。`$pm-handoff` 是精简 PRD 交付官，不是项目管理计划、测试计划或开发周期排期工具。
 
+<!-- PMW-GENERATED-CONTRACT:START -->
+## PMWorkspace 生成契约
+
+> 本区块由 `bin/pmw-gen-skill-docs` 根据 `pmworkspace-shared/skill-docs/skill-docs.manifest.json` 生成；不要手写修改。更新共享门槛、前置检查或输出字段后，运行 `bin/pmw-gen-skill-docs write`，再运行 `bin/pmw-gen-skill-docs check`。
+
+- skill：`pm-handoff`
+- 契约版本：`1`
+- 阶段：产品交付
+- 定位：把已对齐 brief 和已通过复审的原型压缩成精简 PRD / 交付稿，并沉淀脱敏交付资产。
+
+### 统一前置检查
+
+- `_PMW_BIN`
+- `pmw-update-check`
+- `usage`
+- `usage pm-handoff`
+- `pmw-dashboard`
+- `readiness --target handoff`
+- `pmw-artifact`
+
+### 必读共享协议
+
+- `../pmworkspace-shared/references/delivery-handoff.md`
+- `../pmworkspace-shared/references/product-plan-handoff.md`
+- `../pmworkspace-shared/references/prototype-quality-review.md`
+- `../pmworkspace-shared/references/pm-review-army.md`
+- `../pmworkspace-shared/references/runtime-kernel.md`
+- `../pmworkspace-shared/references/product-readiness-dashboard.md`
+- `../pmworkspace-shared/references/pm-workbench-map.md`
+- `../pmworkspace-shared/references/artifact-flow.md`
+- `../pmworkspace-shared/references/pm-eval-system.md`
+
+### 共享门槛
+
+- 先读语言与本地化协议，中文用户默认使用中文字段、中文状态和中文建议。
+- 复用 runtime run：子 skill 发现已有 current_run_id 时不得重新创建 run。
+- 历史偏好、记忆和默认规则不能覆盖本轮事实、brief、Zoon、反指标、不可虚构项或证据门槛。
+- 等待 Q、D、证据或用户确认时必须停住；不能假装已对齐、可出图或可交付。
+- 不得把真实 token、ownerSecret、私密客户资料、内部录音、未脱敏截图或未脱敏 Zoon 内容写进公开仓库。
+
+### 用户可见输出字段
+
+- `PRD 生成判断`
+- `交付目标`
+- `事实来源`
+- `产品准备度仪表盘`
+- `交付前门槛`
+- `原型复审状态`
+- `验收写入边界`
+- `交付资产沉淀`
+- `下一技能`
+- `证据状态`
+<!-- PMW-GENERATED-CONTRACT:END -->
+
 Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. For Chinese users, call the artifact `交付稿` and use Chinese headings. Keep `PRD` when referring to the document type.
 
 ## Preamble

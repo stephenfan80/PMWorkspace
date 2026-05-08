@@ -147,6 +147,7 @@ PMWorkspace v0.2 把技能套件升级成本地产品运行系统：
 - **PM Review Army / Product Review Squad：** 原型复审先运行策略、信任 / 风险、设计系统、数据可行性四个可插拔专家；每个专家独立输出短结论，再由 `$pm-prototype-review` 合并，必要时追加 CEO、Eng、Design、DX、安全、QA、发布工程师短结论。
 - **Question Tuning：** `pmw-question-tuning` 记录用户对 Q/D 的偏好，例如永远问、高风险才问、默认采用推荐或除非阻塞否则少问。
 - **PM Eval：** `pmw-eval` 用无依赖 fixture 检查核心门槛和输出契约，防止 skill 规则退化。
+- **Skill Doc Generator：** `pmw-gen-skill-docs` 从 manifest 生成并检查 SKILL.md 共享契约区块，统一 preamble、共享门槛、必读协议和输出字段。
 - **自动决策原则：** 统一事实优先级和停止门槛，明确低风险默认项可以自动采用，用户承诺、数据真实性、范围、实验口径、线索 / 交易 / 隐私边界必须 PM 拍板。
 
 ## 安装
@@ -263,9 +264,12 @@ bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --re
 bin/pmw-question-tuning summary
 bin/pmw-eval list
 bin/pmw-eval run
+bin/pmw-gen-skill-docs write
+bin/pmw-gen-skill-docs check
 ```
 
 Eval fixture 保存在仓库的 `evals/fixtures/`，安装时会复制到 shared skill bundle，供维护检查使用。
+Skill 文档契约由 `pmworkspace-shared/skill-docs/skill-docs.manifest.json` 生成；更新共享门槛、输出字段或前置检查时，先改 manifest，再运行 `bin/pmw-gen-skill-docs write` 和 `bin/pmw-gen-skill-docs check`。
 
 Zoon 在线简报：
 

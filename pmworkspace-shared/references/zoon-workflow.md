@@ -1,6 +1,6 @@
 # Zoon 工作流
 
-产品简报阶段默认使用 **Zoon-first，local-backed**：先自动创建或更新 Zoon 在线文档，再把同一份 Markdown 保存为本地审计副本，并在创建/更新成功后自动打开到 Codex 内置浏览器，方便用户继续编辑。用户提供 Zoon URL 时，直接把该文档作为事实来源；用户未提供时，使用 `zoon_host` 创建新文档。
+产品简报阶段默认使用 **Zoon-first，local-backed**：先自动创建或更新 Zoon 在线文档，创建或追加成功后让 `pmworkspace` agent 自动加入协作态，再把同一份 Markdown 保存为本地审计副本，并在创建/更新成功后自动打开到 Codex 内置浏览器，方便用户继续编辑。用户提供 Zoon URL 时，直接把该文档作为事实来源；用户未提供时，使用 `zoon_host` 创建新文档。
 
 ## 原则
 
@@ -12,8 +12,8 @@
 - 原型任务的最终输出仍是图片，但必须先完成产品简报对齐。
 - 产品追问后创建的产品简报，默认先写入 Zoon，方便用户在图片生成前修改；本地 Markdown 是审计副本和失败兜底。
 - 用户在对话中调整产品简报后，也必须重新保存并同步到 Zoon；不能只更新对话里的口径。
-- 创建或更新 Zoon 成功后，必须尝试自动打开可编辑 URL；不能只保存本地 Markdown 后结束。
-- `pmw-log brief` 必须优先执行 `pmw-zoon sync`，成功后再记录本地最新 brief，并把 `last_zoon_sync_status`、`last_zoon_sync_brief` 和 Zoon URL 写入项目状态。
+- 创建或更新 Zoon 成功后，必须先自动加入协作态，再尝试自动打开可编辑 URL；不能只保存本地 Markdown 后结束。
+- `pmw-log brief` 必须优先执行 `pmw-zoon sync`，成功后再记录本地最新 brief，并把 `last_zoon_sync_status`、`last_zoon_sync_brief`、`last_zoon_join_status` 和 Zoon URL 写入项目状态。
 - 只有用户明确关闭 Zoon、平台脚本不可用或创建失败时，才能把 Zoon 状态标为未创建，并说明原因。
 
 ## 连接步骤
@@ -26,10 +26,11 @@
    - Host：scheme 和 domain。
    - Slug：`/d/` 后面的片段。
    - Share token：`token` 查询参数。
-3. 写入时使用 `Authorization: Bearer <token>`、`X-Agent-Id: pmworkspace`、`Idempotency-Key` 和 `by: "ai:pmworkspace"`。
+3. 进入协作态时先调用 `POST <host>/api/agent/<slug>/presence`，使用 `Authorization: Bearer <token>`、`x-share-token: <token>`、`X-Agent-Id: pmworkspace`，body 为 `{"agentId":"pmworkspace","name":"PMWorkspace","status":"active"}`。
 4. 创建新文档使用当前协议推荐的 `POST <host>/documents`。
-5. 追加产品简报使用 `POST <host>/documents/:slug/edit/v2`，默认 `insert_at_end`，不做 rewrite。
-6. 原型或交付前读取最新文档，优先使用共享 URL + `Accept: application/json` 取 `markdown/revision/_links/agent`，失败再回退 `Accept: text/markdown`。
+5. 写入时使用 `Authorization: Bearer <token>`、`X-Agent-Id: pmworkspace`、`Idempotency-Key` 和 `by: "ai:pmworkspace"`。
+6. 追加产品简报优先使用 `POST <host>/api/agent/<slug>/edit/v2`，默认 `insert_at_end`，不做 rewrite；只有该 endpoint 返回 404/405 时才回退 `POST <host>/documents/<slug>/edit/v2`。
+7. 原型或交付前读取最新文档，优先使用 `GET <host>/api/agent/<slug>/snapshot` 取 `markdown/revision/blocks/marks`，失败再回退共享 URL + `Accept: application/json`，最后回退 `Accept: text/markdown`。
 
 ## 协作模式
 
@@ -57,15 +58,24 @@ pmw-zoon protocol --host "https://zoon.up.railway.app"
 
 - 动态模式 `zoon_protocol_mode: dynamic`：缓存未过期时使用缓存，过期后重新拉取 `/skill` 和 `/agent-docs`。
 - 缓存模式 `zoon_protocol_mode: cached`：只使用本地缓存，适合离线或固定版本调试。
-- 内置模式 `zoon_protocol_mode: builtin`：完全使用 PMWorkspace 内置 `/documents/*` 契约。
+- 内置模式 `zoon_protocol_mode: builtin`：使用 PMWorkspace 内置 `/api/agent/*` 优先契约，并保留 `/documents/*` 兼容路由。
 - 默认缓存 TTL 是 `zoon_protocol_cache_ttl: 300` 秒。
-- 兼容路由只做兜底；新集成优先 `/documents/*`、`edit/v2`、内容协商和 `X-Agent-Id`。
+- 兼容路由只做兜底；新集成优先 `/api/agent/<slug>/presence`、`/api/agent/<slug>/edit/v2`、`/api/agent/<slug>/snapshot`、内容协商和 `X-Agent-Id`。
+
+### 自动加入协作态
+
+当 Zoon create 或 append 成功并拿到可编辑 URL 后：
+
+1. 先运行 `pmw-zoon join --url "<Zoon URL>"`，或由 `pmw-zoon create|append|sync|read` 内部自动触发同等 presence 调用。
+2. 加入成功时记录 `last_zoon_join_status: joined`；presence endpoint 返回 404/405 时记录 `unsupported` 并按兼容路径继续。
+3. presence 返回 401/403/422 或网络失败时记录 `failed` 和脱敏原因；出图 / 交付准备度中的 Zoon 门槛不通过。
+4. 不把 `ownerSecret`、`agentInviteMessage`、Authorization header、`x-share-token` 或未脱敏 token 写入本地状态。
 
 ### 自动打开
 
 当 Zoon create 或 append 成功并拿到可编辑 URL 后：
 
-1. 优先使用 Codex 内置浏览器 / Browser Use 工具导航到该 URL。
+1. 确认 `pmworkspace` agent 已 joined 或 presence 明确 unsupported 后，优先使用 Codex 内置浏览器 / Browser Use 工具导航到该 URL。
 2. 不要用本地 HTML、Markdown 文件或系统默认浏览器代替内置浏览器中的 Zoon 在线简报。
 3. 如果内置浏览器工具不可用或打开失败，仍返回 Zoon URL，并在输出中写明 `浏览器打开状态：打开失败，可手动打开`。
 4. 如果打开成功，在输出中写明 `浏览器打开状态：已打开`。
@@ -77,7 +87,7 @@ pmw-zoon protocol --host "https://zoon.up.railway.app"
 1. 使用现有 host、slug 和 token。
 2. 除非用户要求新建，否则把产品简报追加到该文档。
 3. 优先使用 append 操作；产品简报不需要块引用。
-4. 追加成功后自动打开该文档的可编辑 URL。
+4. 追加成功后自动加入协作态，并自动打开该文档的可编辑 URL。
 5. 告诉用户：这个 Zoon 文档现在是下一步原型的事实来源。
 
 ### 新建 Zoon 文档
@@ -96,7 +106,7 @@ pmw-zoon sync --title "产品设计简报：<功能名>"
 4. 只向用户返回可编辑 URL，不展示 API 原始响应。
 5. 用 `pmw-project link-zoon <url>` 把链接保存到本地项目记录。
 6. 推荐使用 `pmw-log brief <功能名>` 发布产品简报；它会在 `zoon_sync_on_brief` 未关闭时先调用 `pmw-zoon sync`，成功后再保存本地审计副本，避免 Zoon 和本地 latest brief 指向不同版本。
-7. 创建成功后自动打开可编辑 URL。
+7. 创建成功后自动加入协作态，再自动打开可编辑 URL。
 8. 如果创建失败，保留本地 Markdown，不阻塞下一步，并说明失败原因。
 
 ### 生成原型或交付前

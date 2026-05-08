@@ -227,6 +227,7 @@ bin/pmw-gen-skill-docs check
 
 ```bash
 bin/pmw-zoon protocol --host "https://zoon.up.railway.app"
+bin/pmw-zoon join --url "<协作文档 URL>"
 cat brief.md | bin/pmw-zoon create --title "产品设计简报：通用券站外召回方案"
 cat brief.md | bin/pmw-zoon append --url "<协作文档 URL>"
 cat brief.md | bin/pmw-zoon sync --title "产品设计简报：通用券站外召回方案"

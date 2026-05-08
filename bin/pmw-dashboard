@@ -140,6 +140,7 @@ def redact_sensitive(value: str) -> str:
     value = re.sub(r"(token=)[^&\s]+", r"\1[redacted]", value)
     value = re.sub(r"(ownerSecret[=: ]*)[^&\s]+", r"\1[redacted]", value)
     value = re.sub(r"(Authorization: Bearer )[A-Za-z0-9._~+/=-]+", r"\1[redacted]", value)
+    value = re.sub(r"(x-share-token: )[A-Za-z0-9._~+/=-]+", r"\1[redacted]", value)
     return value
 
 
@@ -265,18 +266,43 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
 
     zoon_url = str(project.get("zoon_url") or "")
     zoon_sync = str(project.get("last_zoon_sync_status") or "")
+    zoon_join = str(project.get("last_zoon_join_status") or "")
+    zoon_join_error = str(project.get("last_zoon_join_error") or "")
     zoon_event = latest_event(events, ["Zoon", "zoon", "漂移"], {"evidence", "gate"})
-    zoon_text = f"{zoon_sync} {zoon_event.get('status', '')} {zoon_event.get('summary', '')}"
+    zoon_text = f"{zoon_sync} {zoon_join} {zoon_event.get('status', '')} {zoon_event.get('summary', '')}"
     zoon_ready = bool(zoon_url) and zoon_sync == "synced" and not contains_any(
         zoon_text,
         ["DRIFT", "有漂移", "实质漂移", "读取失败", "同步失败", "failed"],
+    )
+    if zoon_ready and zoon_join == "joined":
+        zoon_status = "已同步且已加入协作态"
+    elif zoon_ready and zoon_join == "unsupported":
+        zoon_status = "已同步，协作加入不支持"
+    elif zoon_ready:
+        zoon_status = "已同步且无实质漂移"
+    elif zoon_join == "failed":
+        zoon_status = "协作加入失败"
+    elif not zoon_url:
+        zoon_status = "未记录 URL"
+    else:
+        zoon_status = "未通过"
+    zoon_evidence = redact_sensitive(
+        "；".join(
+            item
+            for item in [
+                zoon_url or str(project.get("last_zoon_sync_error") or "未记录"),
+                f"协作加入：{zoon_join}" if zoon_join else "",
+                f"加入失败：{zoon_join_error}" if zoon_join_error and zoon_join == "failed" else "",
+            ]
+            if item
+        )
     )
     rows.append(
         gate_result(
             "Zoon",
             True,
-            "已同步且无实质漂移" if zoon_ready else ("未记录 URL" if not zoon_url else "未通过"),
-            redact_sensitive(zoon_url or project.get("last_zoon_sync_error") or "未记录"),
+            zoon_status,
+            zoon_evidence,
             "继续" if zoon_ready else "运行 pmw-log brief / pmw-zoon sync，并在出图或交付前做漂移检查",
             zoon_ready,
         )
@@ -446,6 +472,9 @@ def render_status(run_id: Optional[str]) -> str:
         f"- 最近 Zoon 同步：{project.get('last_zoon_sync_at') or '未记录'}",
         f"- Zoon 同步本地副本：{project.get('last_zoon_sync_brief') or '未记录'}",
         f"- Zoon 同步失败原因：{project.get('last_zoon_sync_error') or '无'}",
+        f"- Zoon 协作加入状态：{project.get('last_zoon_join_status') or '未记录'}",
+        f"- 最近 Zoon 协作加入：{project.get('last_zoon_join_at') or '未记录'}",
+        f"- Zoon 协作加入失败原因：{redact_sensitive(str(project.get('last_zoon_join_error') or '无'))}",
         "",
         "## 证据与门槛",
         "",

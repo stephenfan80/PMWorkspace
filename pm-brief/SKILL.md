@@ -112,6 +112,7 @@ done
 26. Create or update the Zoon online brief by default:
     - If a Zoon URL is already available, append the brief first with `pmw-zoon sync` / `pmw-zoon append --url <url>`, then keep the local brief path and Zoon URL in project state.
     - If no Zoon URL exists and `zoon_auto_create` is not explicitly disabled, create one first with `pmw-zoon sync --title "产品设计简报：<功能名>"` or `pmw-zoon create --title "产品设计简报：<功能名>"`, then store the local audit copy.
+    - After create or append succeeds, `pmw-zoon` must automatically join the Zoon document as `pmworkspace` via the agent presence API before opening the editable URL or marking the online source ready.
     - After a create or append succeeds, automatically open the editable Zoon URL in the Codex built-in browser when browser tools are available. Do not use HTML, local files, or a macOS default-browser fallback as a substitute for the Zoon online brief.
     - If browser opening fails, still return the editable URL and mark the open status as `打开失败，可手动打开`.
     - Do not leave the Zoon field as a passive uncreated state. If Zoon is disabled or creation fails, write `未启用（原因）` or `创建失败（原因）`.

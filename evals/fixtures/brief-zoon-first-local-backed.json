@@ -11,8 +11,9 @@
     "gate": "Zoon-first 同步",
     "required_behaviors": [
       "先推送或追加 Zoon 在线文档",
+      "同步成功后 agent 自动加入协作态",
       "成功后保存同一份本地审计副本",
-      "记录 Zoon URL、同步状态和最终本地 brief 路径",
+      "记录 Zoon URL、同步状态、协作加入状态和最终本地 brief 路径",
       "同步失败时保留本地副本并记录脱敏失败原因"
     ],
     "forbidden_behaviors": [
@@ -36,12 +37,24 @@
       "contains": "ZOON_SYNC_ORDER=online-first"
     },
     {
+      "path": "bin/pmw-log",
+      "contains": "ZOON_JOIN_STATUS"
+    },
+    {
       "path": "bin/pmw-project",
       "contains": "last_zoon_sync_status"
     },
     {
+      "path": "bin/pmw-project",
+      "contains": "last_zoon_join_status"
+    },
+    {
       "path": "bin/pmw-dashboard",
       "contains": "Zoon 同步本地副本"
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "Zoon 协作加入状态"
     },
     {
       "path": "pm-brief/SKILL.md",

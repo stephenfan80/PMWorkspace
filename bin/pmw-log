@@ -17,6 +17,7 @@ redact_sensitive() {
   sed -E \
     -e 's/(token=)[^&[:space:]]+/\1[redacted]/g' \
     -e 's/(Authorization: Bearer )[[:alnum:]_.~+\/=-]+/\1[redacted]/g' \
+    -e 's/(x-share-token: )[[:alnum:]_.~+\/=-]+/\1[redacted]/g' \
     -e 's/(ownerSecret[=: ]*)[^&[:space:]]+/\1[redacted]/g'
 }
 
@@ -50,16 +51,24 @@ case "$EVENT" in
     sync_status=""
     sync_detail=""
     zoon_url=""
+    join_status=""
+    join_detail=""
     if [ "$sync_on_brief" != "false" ] && [ -x "$SCRIPT_DIR/pmw-zoon" ]; then
       sync_err="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-sync.XXXXXX")"
       if zoon_url="$(PMW_ZOON_DEFER_PROJECT_UPDATE=1 "$SCRIPT_DIR/pmw-zoon" sync --title "产品设计简报：$name" --brief "$input_file" 2>"$sync_err")"; then
         sync_status="synced"
+        join_status="$(sed -n 's/^ZOON_JOIN_STATUS=//p' "$sync_err" | tail -n 1)"
+        join_detail="$(sed -n 's/^ZOON_JOIN_DETAIL=//p' "$sync_err" | tail -n 1)"
         printf 'ZOON_URL=%s\n' "$zoon_url" >&2
         printf 'ZOON_SYNC_ORDER=online-first\n' >&2
+        [ -n "$join_status" ] && printf 'ZOON_JOIN_STATUS=%s\n' "$join_status" >&2
       else
         sync_status="failed"
+        join_status="$(sed -n 's/^ZOON_JOIN_STATUS=//p' "$sync_err" | tail -n 1)"
+        join_detail="$(sed -n 's/^ZOON_JOIN_DETAIL=//p' "$sync_err" | tail -n 1)"
         sync_detail="$(tr '\n' ' ' < "$sync_err" 2>/dev/null | sed 's/[[:space:]]*$//' | redact_sensitive)"
         printf 'ZOON_SYNC_FAILED=%s\n' "${sync_detail:-unknown}" >&2
+        [ -n "$join_status" ] && printf 'ZOON_JOIN_STATUS=%s\n' "$join_status" >&2
       fi
       rm -f "$sync_err" 2>/dev/null || true
     elif [ "$sync_on_brief" = "false" ]; then
@@ -76,9 +85,11 @@ case "$EVENT" in
     case "$sync_status" in
       synced)
         "$SCRIPT_DIR/pmw-project" set-zoon-sync "$zoon_url" "$file" >/dev/null 2>&1 || true
+        [ -n "$join_status" ] && "$SCRIPT_DIR/pmw-project" set-zoon-join "$join_status" "$join_detail" >/dev/null 2>&1 || true
         ;;
       failed)
         "$SCRIPT_DIR/pmw-project" set-zoon-sync-failed "${sync_detail:-unknown}" "$file" >/dev/null 2>&1 || true
+        [ -n "$join_status" ] && "$SCRIPT_DIR/pmw-project" set-zoon-join "$join_status" "$join_detail" >/dev/null 2>&1 || true
         ;;
       disabled)
         "$SCRIPT_DIR/pmw-project" set-zoon-sync-disabled "$file" >/dev/null 2>&1 || true

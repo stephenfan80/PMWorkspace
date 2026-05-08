@@ -1,0 +1,78 @@
+{
+  "id": "brief-zoon-agent-join-required",
+  "title": "Zoon 创建或追加后必须自动加入协作态",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "产品简报已经同步到 Zoon，下一轮修改需要 agent 能进入同一份文档继续协作。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": false,
+    "gate": "Zoon 协作加入",
+    "required_behaviors": [
+      "创建或追加成功后调用 presence",
+      "优先使用 agent edit/v2 写入",
+      "优先使用 agent snapshot 读取",
+      "记录协作加入状态和脱敏失败原因"
+    ],
+    "forbidden_behaviors": [
+      "只打开浏览器不加入协作态",
+      "第二次修改失败后自动新建替代文档",
+      "把 agentInviteMessage 或 token 写入本地状态"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-zoon",
+      "contains": "join --url <Zoon URL>"
+    },
+    {
+      "path": "bin/pmw-zoon",
+      "contains": "/api/agent/$slug/presence"
+    },
+    {
+      "path": "bin/pmw-zoon",
+      "contains": "/api/agent/$SLUG/edit/v2"
+    },
+    {
+      "path": "bin/pmw-zoon",
+      "contains": "/api/agent/$SLUG/snapshot"
+    },
+    {
+      "path": "bin/pmw-zoon",
+      "contains": "ZOON_JOIN_STATUS"
+    },
+    {
+      "path": "bin/pmw-project",
+      "contains": "set-zoon-join"
+    },
+    {
+      "path": "bin/pmw-project",
+      "contains": "last_zoon_join_error"
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "协作加入失败"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "automatically join the Zoon document as `pmworkspace`"
+    },
+    {
+      "path": "pmworkspace-shared/references/zoon-workflow.md",
+      "contains": "自动加入协作态"
+    },
+    {
+      "path": "pmworkspace-shared/references/zoon-workflow.md",
+      "contains": "POST <host>/api/agent/<slug>/presence"
+    },
+    {
+      "path": "pmworkspace-shared/references/zoon-drift-check.md",
+      "contains": "GET /api/agent/<slug>/snapshot"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "bin/pmw-zoon join --url"
+    }
+  ]
+}

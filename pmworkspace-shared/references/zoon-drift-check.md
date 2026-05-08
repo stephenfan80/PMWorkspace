@@ -18,7 +18,7 @@
 pmw-zoon drift --url "<Zoon URL>"
 ```
 
-`pmw-zoon drift` 读取 Zoon 时应先对共享 URL 使用 `Accept: application/json`，从响应中提取 `markdown`、`revision`、`_links` 和 `agent` 信息；如果 JSON 内容协商失败，再回退到 `Accept: text/markdown`。不要假设固定 markdown 端点永远稳定。
+`pmw-zoon drift` 读取 Zoon 时应先让 `pmworkspace` agent 自动加入协作态，再优先使用 `GET /api/agent/<slug>/snapshot` 提取 `markdown`、`revision`、`blocks` 和 `marks`；如果 agent snapshot 失败，再对共享 URL 使用 `Accept: application/json` 提取 `markdown`、`revision`、`_links` 和 `agent` 信息；如果 JSON 内容协商失败，再回退到 `Accept: text/markdown`。不要假设固定 markdown 端点永远稳定。
 
 结果含义：
 
@@ -41,6 +41,7 @@ pmw-log brief "<功能名>"
 - 已有 Zoon URL：追加最新 brief。
 - 没有 Zoon URL 且 `zoon_auto_create: true`：创建新 Zoon 文档。
 - 同步成功：记录 `last_zoon_sync_status: synced`、Zoon URL 和最终本地 brief 路径。
+- 协作加入成功：记录 `last_zoon_join_status: joined`；presence 不支持时记录 `unsupported`，presence 失败时记录 `failed` 和脱敏原因。
 - 同步失败：本地 brief 仍然有效，但输出必须标记 `Zoon 同步失败`，并记录 `last_zoon_sync_status: failed` 和脱敏失败原因。
 
 同步前会按 `zoon_protocol_mode` 做协议发现：

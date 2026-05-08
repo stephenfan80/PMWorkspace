@@ -66,7 +66,7 @@ def write_project(path: pathlib.Path, data: dict) -> None:
 
 def usage() -> int:
     print(
-        "Usage: pmw-project {get-name|set-name|link-zoon|set-latest-brief|set-zoon-sync|set-zoon-sync-failed|set-zoon-sync-disabled|show} ...",
+        "Usage: pmw-project {get-name|set-name|link-zoon|set-latest-brief|set-zoon-sync|set-zoon-sync-failed|set-zoon-sync-disabled|set-zoon-join|show} ...",
         file=sys.stderr,
     )
     return 1
@@ -75,6 +75,7 @@ def usage() -> int:
 def redact_sensitive(value: str) -> str:
     value = re.sub(r"(token=)[^&\s]+", r"\1[redacted]", value)
     value = re.sub(r"(Authorization: Bearer )[A-Za-z0-9._~+/=-]+", r"\1[redacted]", value)
+    value = re.sub(r"(x-share-token: )[A-Za-z0-9._~+/=-]+", r"\1[redacted]", value)
     value = re.sub(r"(ownerSecret[=: ]*)[^&\s]+", r"\1[redacted]", value)
     return value[:500]
 
@@ -160,6 +161,25 @@ def main() -> int:
         data.setdefault("display_name", fallback_name())
         write_project(path, data)
         print("disabled")
+        return 0
+
+    if command == "set-zoon-join":
+        status = sys.argv[2].strip() if len(sys.argv) > 2 else ""
+        reason = " ".join(sys.argv[3:]).strip() if len(sys.argv) > 3 else ""
+        if status not in {"joined", "failed", "unsupported"}:
+            print("Usage: pmw-project set-zoon-join <joined|failed|unsupported> [reason]", file=sys.stderr)
+            return 1
+        data["last_zoon_join_at"] = now()
+        data["last_zoon_join_status"] = status
+        if status == "joined":
+            data.pop("last_zoon_join_error", None)
+        elif reason:
+            data["last_zoon_join_error"] = redact_sensitive(reason)
+        else:
+            data["last_zoon_join_error"] = status
+        data.setdefault("display_name", fallback_name())
+        write_project(path, data)
+        print(status)
         return 0
 
     if command == "show":

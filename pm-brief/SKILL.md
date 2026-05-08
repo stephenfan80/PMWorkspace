@@ -51,10 +51,10 @@ done
 21. 把已拍板的范围模式和策略取舍写入对抗审查后的设计取舍、方案方向、范围外、决策记录和对原型的影响；未拍板的范围变化或策略取舍只能放进当前 D 或后续 D 队列。
 22. 已对齐且用户要原型时，下一技能是 `$pm-prototype-shotgun`；已对齐且用户要交付时，下一技能是 `$pm-handoff`；未对齐时停在 `$pm-brief` 或回到上游缺失门槛。
 23. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
-24. Save the brief with `pmw-log brief <name>` when platform scripts are available. This automatically creates or appends the brief to Zoon when `zoon_sync_on_brief` is enabled.
+24. Save the brief with `pmw-log brief <name>` when platform scripts are available. It uses Zoon-first, local-backed publishing: first publish to Zoon with `pmw-zoon sync`, then record the same Markdown as the local audit copy and latest brief.
 25. Create or update the Zoon online brief by default:
-    - If a Zoon URL is already available, append the brief with `pmw-zoon append --url <url>`.
-    - If no Zoon URL exists and `zoon_auto_create` is not explicitly disabled, create one with `pmw-zoon sync --title "产品设计简报：<功能名>"` or `pmw-zoon create --title "产品设计简报：<功能名>"`.
+    - If a Zoon URL is already available, append the brief first with `pmw-zoon sync` / `pmw-zoon append --url <url>`, then keep the local brief path and Zoon URL in project state.
+    - If no Zoon URL exists and `zoon_auto_create` is not explicitly disabled, create one first with `pmw-zoon sync --title "产品设计简报：<功能名>"` or `pmw-zoon create --title "产品设计简报：<功能名>"`, then store the local audit copy.
     - After a create or append succeeds, automatically open the editable Zoon URL in the Codex built-in browser when browser tools are available. Do not use HTML, local files, or a macOS default-browser fallback as a substitute for the Zoon online brief.
     - If browser opening fails, still return the editable URL and mark the open status as `打开失败，可手动打开`.
     - Do not leave the Zoon field as a passive uncreated state. If Zoon is disabled or creation fails, write `未启用（原因）` or `创建失败（原因）`.
@@ -67,7 +67,7 @@ done
 
 产品简报不是“已对齐”时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
 
-用户在沟通过程中调整产品简报后，必须重新运行 `pmw-log brief <name>` 保存并自动同步 Zoon；不能只在对话中更新口径。
+用户在沟通过程中调整产品简报后，必须重新运行 `pmw-log brief <name>` 优先同步 Zoon，再保存本地审计副本；不能只在对话中更新口径。
 
 ## 输出
 

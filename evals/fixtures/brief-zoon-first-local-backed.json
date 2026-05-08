@@ -1,0 +1,63 @@
+{
+  "id": "brief-zoon-first-local-backed",
+  "title": "产品简报必须优先发布到 Zoon 并保留本地审计副本",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "生成产品简报时，优先自动推送到在线 Zoon 文档，并保持本地状态一致。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": false,
+    "gate": "Zoon-first 同步",
+    "required_behaviors": [
+      "先推送或追加 Zoon 在线文档",
+      "成功后保存同一份本地审计副本",
+      "记录 Zoon URL、同步状态和最终本地 brief 路径",
+      "同步失败时保留本地副本并记录脱敏失败原因"
+    ],
+    "forbidden_behaviors": [
+      "只保存本地 Markdown",
+      "把 Zoon 当成被动附带同步",
+      "同步成功后项目状态指向临时文件",
+      "暴露 token、ownerSecret 或 API 原始响应"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-log",
+      "contains": "Zoon-first, local-backed"
+    },
+    {
+      "path": "bin/pmw-log",
+      "contains": "PMW_ZOON_DEFER_PROJECT_UPDATE=1"
+    },
+    {
+      "path": "bin/pmw-log",
+      "contains": "ZOON_SYNC_ORDER=online-first"
+    },
+    {
+      "path": "bin/pmw-project",
+      "contains": "last_zoon_sync_status"
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "Zoon 同步本地副本"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "Zoon-first, local-backed publishing"
+    },
+    {
+      "path": "pmworkspace-shared/references/zoon-workflow.md",
+      "contains": "Zoon-first，local-backed"
+    },
+    {
+      "path": "pmworkspace-shared/references/zoon-drift-check.md",
+      "contains": "先把 Markdown 推送到在线 Zoon，再保存同一份内容为本地审计副本"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "产品简报：`pmw-log brief` 必须使用 Zoon-first，local-backed 同步"
+    }
+  ]
+}

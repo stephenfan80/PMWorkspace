@@ -99,7 +99,7 @@ For prototype work, PMWorkspace defaults to mobile-first iPhone 17 portrait `402
 
 Prototype work is locked to image-2 / image generation unless the user explicitly asks for HTML, an interactive web prototype, or frontend implementation. In deep delivery mode, if the product brief is not `Aligned`, PMWorkspace should ask the next diagnostic or decision question instead of producing images, HTML, or a long plan. In quick shaping mode, PMWorkspace may generate the light package after the user approves clearly marked assumptions; the package must be labeled as discussion-ready, not final PRD truth.
 
-Briefs start with compact product core information, then gate status and supporting evidence. Briefs saved through `pmw-log brief` automatically sync to Zoon when enabled: existing Zoon URLs are appended, and new documents are created when `zoon_auto_create` is true. Before prototype or handoff work, PMWorkspace checks for Zoon drift so edits made in the conversation or in Zoon do not fall out of sync.
+Briefs start with compact product core information, then gate status and supporting evidence. Briefs published through `pmw-log brief` use Zoon-first, local-backed sync: PMWorkspace first appends or creates the Zoon online brief, then stores the same Markdown as the local audit copy. Before prototype or handoff work, PMWorkspace checks for Zoon drift so edits made in the conversation or in Zoon do not fall out of sync.
 
 ## Runtime
 

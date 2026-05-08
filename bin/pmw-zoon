@@ -584,7 +584,9 @@ case "$COMMAND" in
       fi
       RESULT="$("$0" create --title "$TITLE" < "$MARKDOWN_FILE")"
     fi
-    "$SCRIPT_DIR/pmw-project" set-zoon-sync "$RESULT" "$BRIEF_PATH" >/dev/null 2>&1 || true
+    if [ "${PMW_ZOON_DEFER_PROJECT_UPDATE:-}" != "1" ]; then
+      "$SCRIPT_DIR/pmw-project" set-zoon-sync "$RESULT" "$BRIEF_PATH" >/dev/null 2>&1 || true
+    fi
     printf '%s\n' "$RESULT"
     ;;
   read)

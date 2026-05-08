@@ -70,7 +70,7 @@ For Chinese users, call this artifact `产品简报` in user-facing output. Keep
 
 快速对齐也必须先确认最少前提：通常只列 1-3 条假设和一个关键确认问题。用户确认前，状态保持 `待确认`。
 
-如果用户已经提供完整 Zoon 产品文档，创建简短对齐摘要，并把最新 Zoon 快照作为事实来源。否则产品简报生成后默认创建 Zoon 在线文档，供用户修改对齐。创建或更新成功后，自动在 Codex 内置浏览器中打开可编辑 URL。
+如果用户已经提供完整 Zoon 产品文档，创建简短对齐摘要，并把最新 Zoon 快照作为事实来源。否则产品简报生成后默认优先创建或更新 Zoon 在线文档，供用户修改对齐；同一份 Markdown 再保存为本地审计副本。创建或更新成功后，自动在 Codex 内置浏览器中打开可编辑 URL。
 
 ## 版本与状态
 
@@ -88,7 +88,7 @@ For Chinese users, call this artifact `产品简报` in user-facing output. Keep
 - `互联网案例启发`：公开最佳实践或同类案例只保留可借鉴原则、不可照搬和对原型影响；参考来源放在支持信息。
 - `原型内容重点`：屏幕必须展示、重点突出、可后置和不可虚构的内容。
 - `已确认前提`：用户明确同意、修改后同意，或批准按假设继续的前提。
-- `Zoon 文档`：产品简报对应的在线协作文档 URL；创建失败时写“创建失败”，并保留本地 Markdown。
+- `Zoon 文档`：产品简报对应的在线协作文档 URL；创建失败时写“创建失败”，并保留本地 Markdown 审计副本。
 - `浏览器打开状态`：`已打开`、`打开失败，可手动打开`，或 `未尝试（说明原因）`。
 - `线上参考状态`：已提供线上参考、无线上参考已确认、缺失待补充，或不适用。
 
@@ -300,7 +300,7 @@ Add only the modules that fit the product. Do not include all modules by default
 
 如果没有现有 Zoon 文档：
 
-- 默认使用 `pmw-log brief <功能名>` 保存产品简报；它会自动调用 `pmw-zoon sync`，没有 Zoon URL 时再创建文档。
+- 默认使用 `pmw-log brief <功能名>` 发布产品简报；它会优先调用 `pmw-zoon sync`，没有 Zoon URL 时创建文档，成功后再保存本地审计副本。
 - 也可以直接使用 `pmw-zoon create --title "产品设计简报：<功能名>"` 新建 Zoon 文档。
 - 创建成功后，用 `pmw-project link-zoon <url>` 保存到本地项目记录。
 - 创建成功后，自动在 Codex 内置浏览器中打开可编辑 URL，方便用户直接编辑。

@@ -13,6 +13,13 @@ json_escape() {
   sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 
+redact_sensitive() {
+  sed -E \
+    -e 's/(token=)[^&[:space:]]+/\1[redacted]/g' \
+    -e 's/(Authorization: Bearer )[[:alnum:]_.~+\/=-]+/\1[redacted]/g' \
+    -e 's/(ownerSecret[=: ]*)[^&[:space:]]+/\1[redacted]/g'
+}
+
 safe_fragment() {
   local value
   value="$(printf '%s' "$1" | tr ' ' '-' | sed 's#[/:]#-#g; s#[[:cntrl:]]##g; s#^-*##; s#-*$##')"
@@ -34,19 +41,51 @@ case "$EVENT" in
   brief)
     name="${2:-brief}"
     file="$PROJECT_DIR/briefs/$(date -u +%Y%m%dT%H%M%SZ)-$(safe_fragment "$name").md"
-    cat > "$file"
-    "$SCRIPT_DIR/pmw-project" set-latest-brief "$file" >/dev/null 2>&1 || true
+    input_file="$(mktemp "${TMPDIR:-/tmp}/pmw-brief-input.XXXXXX")"
+    trap 'rm -f "$input_file" 2>/dev/null || true' EXIT
+    cat > "$input_file"
+
+    # Zoon-first, local-backed: publish online before recording the local audit copy.
     sync_on_brief="${PMW_ZOON_SYNC_ON_BRIEF:-$("$SCRIPT_DIR/pmw-config" get zoon_sync_on_brief 2>/dev/null || echo true)}"
+    sync_status=""
+    sync_detail=""
+    zoon_url=""
     if [ "$sync_on_brief" != "false" ] && [ -x "$SCRIPT_DIR/pmw-zoon" ]; then
       sync_err="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-sync.XXXXXX")"
-      if zoon_url="$("$SCRIPT_DIR/pmw-zoon" sync --title "产品设计简报：$name" --brief "$file" 2>"$sync_err")"; then
+      if zoon_url="$(PMW_ZOON_DEFER_PROJECT_UPDATE=1 "$SCRIPT_DIR/pmw-zoon" sync --title "产品设计简报：$name" --brief "$input_file" 2>"$sync_err")"; then
+        sync_status="synced"
         printf 'ZOON_URL=%s\n' "$zoon_url" >&2
+        printf 'ZOON_SYNC_ORDER=online-first\n' >&2
       else
-        err="$(tr '\n' ' ' < "$sync_err" 2>/dev/null | sed 's/[[:space:]]*$//')"
-        printf 'ZOON_SYNC_FAILED=%s\n' "${err:-unknown}" >&2
+        sync_status="failed"
+        sync_detail="$(tr '\n' ' ' < "$sync_err" 2>/dev/null | sed 's/[[:space:]]*$//' | redact_sensitive)"
+        printf 'ZOON_SYNC_FAILED=%s\n' "${sync_detail:-unknown}" >&2
       fi
       rm -f "$sync_err" 2>/dev/null || true
+    elif [ "$sync_on_brief" = "false" ]; then
+      sync_status="disabled"
+      sync_detail="Zoon sync disabled"
+      printf 'ZOON_SYNC_DISABLED=true\n' >&2
+    else
+      sync_status="failed"
+      sync_detail="pmw-zoon unavailable"
+      printf 'ZOON_SYNC_FAILED=%s\n' "$sync_detail" >&2
     fi
+    cp "$input_file" "$file"
+    "$SCRIPT_DIR/pmw-project" set-latest-brief "$file" >/dev/null 2>&1 || true
+    case "$sync_status" in
+      synced)
+        "$SCRIPT_DIR/pmw-project" set-zoon-sync "$zoon_url" "$file" >/dev/null 2>&1 || true
+        ;;
+      failed)
+        "$SCRIPT_DIR/pmw-project" set-zoon-sync-failed "${sync_detail:-unknown}" "$file" >/dev/null 2>&1 || true
+        ;;
+      disabled)
+        "$SCRIPT_DIR/pmw-project" set-zoon-sync-disabled "$file" >/dev/null 2>&1 || true
+        ;;
+    esac
+    rm -f "$input_file" 2>/dev/null || true
+    trap - EXIT
     echo "$file"
     ;;
   question)

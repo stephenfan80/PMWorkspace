@@ -2,6 +2,7 @@
 import json
 import os
 import pathlib
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -65,10 +66,17 @@ def write_project(path: pathlib.Path, data: dict) -> None:
 
 def usage() -> int:
     print(
-        "Usage: pmw-project {get-name|set-name|link-zoon|set-latest-brief|set-zoon-sync|show} ...",
+        "Usage: pmw-project {get-name|set-name|link-zoon|set-latest-brief|set-zoon-sync|set-zoon-sync-failed|set-zoon-sync-disabled|show} ...",
         file=sys.stderr,
     )
     return 1
+
+
+def redact_sensitive(value: str) -> str:
+    value = re.sub(r"(token=)[^&\s]+", r"\1[redacted]", value)
+    value = re.sub(r"(Authorization: Bearer )[A-Za-z0-9._~+/=-]+", r"\1[redacted]", value)
+    value = re.sub(r"(ownerSecret[=: ]*)[^&\s]+", r"\1[redacted]", value)
+    return value[:500]
 
 
 def main() -> int:
@@ -120,11 +128,38 @@ def main() -> int:
             return 1
         data["zoon_url"] = url
         data["last_zoon_sync_at"] = now()
+        data["last_zoon_sync_status"] = "synced"
+        data.pop("last_zoon_sync_error", None)
         if latest:
             data["last_zoon_sync_brief"] = latest
         data.setdefault("display_name", fallback_name())
         write_project(path, data)
         print(url)
+        return 0
+
+    if command == "set-zoon-sync-failed":
+        reason = sys.argv[2].strip() if len(sys.argv) > 2 else "unknown"
+        latest = sys.argv[3].strip() if len(sys.argv) > 3 else ""
+        data["last_zoon_sync_at"] = now()
+        data["last_zoon_sync_status"] = "failed"
+        data["last_zoon_sync_error"] = redact_sensitive(reason or "unknown")
+        if latest:
+            data["last_zoon_sync_brief"] = latest
+        data.setdefault("display_name", fallback_name())
+        write_project(path, data)
+        print(data["last_zoon_sync_error"])
+        return 0
+
+    if command == "set-zoon-sync-disabled":
+        latest = sys.argv[2].strip() if len(sys.argv) > 2 else ""
+        data["last_zoon_sync_at"] = now()
+        data["last_zoon_sync_status"] = "disabled"
+        data.pop("last_zoon_sync_error", None)
+        if latest:
+            data["last_zoon_sync_brief"] = latest
+        data.setdefault("display_name", fallback_name())
+        write_project(path, data)
+        print("disabled")
         return 0
 
     if command == "show":

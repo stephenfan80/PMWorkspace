@@ -16,6 +16,7 @@ For Chinese users, report the final check with Chinese labels such as `质量检
 - `修正方向`：对 `需要重出` 的屏幕输出给 `$pm-prototype-shotgun` 的简短修复 brief；只重出受影响的屏幕。
 - `PM 拍板`：对用户承诺、数据真实性、范围、实验口径、线索/交易/隐私/合规边界未决的问题，输出一个当前 `D`，不能靠改图解决。
 - `偏好沉淀`：只有用户反馈或复审确认的审美/结构偏好才写入 taste；事实错误、反指标、不可虚构项和 Zoon 漂移不能写成偏好。
+- `反馈资产化`：把复审和用户反馈分成个人偏好、产品认知、PMWorkspace 进化建议和不应保存项；个人资产写入本地用户记忆，进化建议先生成本地脱敏待审稿。
 - `证据状态`：产品简报、Zoon、线上参考、设计系统、prototype-board、图片资产、待决策项和记忆更新状态。
 
 复审控制器的优先级：事实与门槛 > 产品取舍 > 可交付质量 > 用户偏好。偏好只能影响下一轮推荐，不能让违反产品简报、反指标、不可虚构项、线上参考或设计系统的图片通过。
@@ -74,6 +75,28 @@ If a failure is material:
 - `rejected`：记录用户明确拒绝的方向或复审中发现的可复用反模式，必须脱敏并标明适用范围。
 - 不要把“违反不可虚构项”“缺线上参考”“未决承诺口径”写成普通审美偏好；这些是门槛或 D 拍板。
 - 如果同类偏好重复出现，再用 `pmw-memory add-learning` 沉淀短 learning，并注明适用边界。
+
+## 反馈资产化
+
+原型复审结束后，输出：
+
+```text
+反馈资产化：
+- 可沉淀为个人偏好：
+- 可沉淀为产品认知：
+- 可回流 PMWorkspace：
+- 不应保存：
+- 已保存到：
+```
+
+分类规则：
+
+- `个人偏好`：信息密度、信任表达、视觉风格、表单摩擦、结果页结构等表达偏好，写入 `pmw-memory add-feedback --type preference`。
+- `产品认知`：可复用产品判断、反指标、不可虚构边界、场景机制经验，写入 `pmw-memory add-feedback --type product-cognition`。
+- `PMWorkspace 进化建议`：值得产品化的技能规则、eval、输出结构或门槛判断，写入 `pmw-memory add-feedback --type pmworkspace-improvement`，必要时用 `pmw-memory draft-github-feedback` 生成本地待审稿。
+- `不应保存`：事实错误、反指标风险、不可虚构违规、线上参考缺失、未决用户承诺、数据真实性、隐私或合规边界。
+
+GitHub 回流默认只生成本地脱敏待审稿，不自动提交。草稿不得包含真实项目名、Zoon 正文、截图内容、客户信息、token、内部 URL 或未脱敏 PRD。
 
 ## 交付清单
 

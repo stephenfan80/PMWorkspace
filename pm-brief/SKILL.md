@@ -23,6 +23,7 @@ for _CANDIDATE in "$PWD/bin" "$PWD/pmworkspace-shared/bin" "$HOME/.codex/skills/
 done
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-update-check" 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-brief >/dev/null 2>&1 || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" user-summary 2>/dev/null || true
 ```
 
 ## Workflow
@@ -37,7 +38,7 @@ done
 8. Read `../pmworkspace-shared/references/internet-best-practice-research.md` and run lightweight internet best-practice research for the dominant scenario when tools are available.
 9. Read `../pmworkspace-shared/references/zoon-workflow.md`.
 10. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
-11. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory summary` when available.
+11. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory user-summary` plus `pmw-memory summary` when available. If memory changes phrasing or recommendation, explicitly say `基于过往偏好...` or `基于本地产品认知...`; memory cannot override the current brief, Zoon, anti-metric, non-fiction boundary, online reference gate, or missing gate.
 12. 先建立产品简报契约控制器，记录 `来源门槛`、`已完成门槛`、`缺失门槛`、`事实/假设边界`、`策略决策写入`、`简报深度`、`下一技能` 和 `证据状态`；再压缩产品核心信息，避免把材料堆成大文档。
 13. 如果来自 `$pm-jobs` 或 `$pm-strategy-review`，先接收上游输出的风险、范围、价值交换、信任/风险、反指标、可行性、定位、业务冲突和待决策队列。
 14. 如果基础事实仍缺失，退回 `$pm-jobs`，只展开一个当前 Q，不写完整产品简报；如果策略取舍仍未拍板，退回 `$pm-strategy-review`，只展开一个当前 D。

@@ -2,9 +2,16 @@
 
 PMWorkspace 的记忆只保存脱敏后的产品资产和偏好摘要。目标是让后续产品简报和原型方向更贴近用户，而不是保存原始敏感材料。
 
+记忆默认分为两层：
+
+- `个人全局记忆`：单个用户独有，保存在本地 `~/.pmworkspace/user/`，跨项目复用。
+- `项目局部记忆`：保存在 `~/.pmworkspace/projects/<slug>/`，只服务当前项目证据和局部偏好。
+
+个人全局记忆是推荐来源，不是事实来源；当前已对齐产品简报 / 最新 Zoon / 本轮明确输入永远优先。
+
 ## 使用时机
 
-- 新一轮 `$pm-jobs` 或 `$pm-autoplan` 开始时，读取项目记忆摘要。
+- 新一轮 `$pm-jobs`、`$pm-brief` 或 `$pm-prototype-shotgun` 开始时，优先读取 `pmw-memory user-summary`，再读取项目记忆摘要。
 - 多方案原型前，读取偏好摘要，避免重复生成用户已经拒绝的方向。
 - 原型复审或用户反馈后，记录批准/拒绝原因。
 - 用户反复纠正同类问题时，沉淀为 learning。
@@ -16,9 +23,14 @@ PMWorkspace 的记忆只保存脱敏后的产品资产和偏好摘要。目标�
 
 ```bash
 pmw-memory summary
+pmw-memory user-summary
 pmw-memory taste-summary
 pmw-memory search "<关键词>"
 pmw-memory add-learning "<脱敏学习>"
+pmw-memory add-feedback --type preference --note "<脱敏偏好>" --scenario "<场景>" --target "<对象>" --scope "个人全局偏好" --source "用户反馈" --confidence 0.4
+pmw-memory add-feedback --type product-cognition --note "<脱敏产品认知>" --scenario "<场景>" --target "<认知对象>" --scope "同类场景可复用" --source "原型复审" --confidence 0.4
+pmw-memory add-feedback --type pmworkspace-improvement --note "<脱敏产品化建议>" --target "$pm-prototype-review" --scope "PMWorkspace 进化候选" --source "用户反馈" --confidence 0.4
+pmw-memory draft-github-feedback --title "<标题>" --observation "<脱敏观察>" --affected-skill "$pm-prototype-review" --suggested-rule "<建议规则>" --suggested-eval "<建议 eval>"
 ```
 
 偏好反馈仍通过：
@@ -44,6 +56,36 @@ pmw-question-tuning add --dimension "<问题维度>" --policy <always_ask|high_r
 - 常见不可虚构边界。
 - 设计偏好，例如信息密度、信任表达、表单摩擦、结果页结构。
 
+## 全局用户资产
+
+默认本地结构：
+
+```text
+~/.pmworkspace/user/
+  taste-profile.jsonl
+  product-cognition.jsonl
+  pmworkspace-improvements.jsonl
+  pmworkspace-feedback-drafts/
+```
+
+保存边界：
+
+- `taste-profile.jsonl`：跨项目个人偏好，例如信息密度、信任表达、视觉风格、表单摩擦、结果页结构。
+- `product-cognition.jsonl`：脱敏产品认知，例如常用反指标、不可虚构边界、场景机制经验。
+- `pmworkspace-improvements.jsonl`：PMWorkspace 进化候选，记录值得产品化的技能规则、eval、输出结构或门槛判断。
+- `pmworkspace-feedback-drafts/`：准备回流 GitHub 的脱敏 Markdown 待审稿。
+
+每条反馈资产必须包含 `scenario`、`target`、`scope`、`source` 和 `confidence`，并区分 `本项目`、`同类场景可复用`、`个人全局偏好`、`PMWorkspace 进化候选`。
+
+## 反馈资产化分类
+
+原型复审或用户反馈后，把反馈分成：
+
+- `个人偏好`：用户对信息密度、信任表达、视觉风格、表单摩擦、结果页结构等表达方式的稳定偏好。
+- `产品认知`：可复用的产品判断、反指标、不可虚构边界、场景机制经验。
+- `PMWorkspace 进化建议`：技能规则、eval、输出结构、门槛判断中值得产品化的改进。
+- `不应保存`：事实错误、反指标风险、不可虚构违规、线上参考缺失、未决用户承诺、数据真实性、隐私或合规边界。
+
 ## 原型反馈记忆字段
 
 第一阶段优先复用 `taste-profile.jsonl`、`prototype-board.jsonl` 和 `learnings.jsonl`。记录原型反馈时，尽量沉淀为这些脱敏字段：
@@ -61,11 +103,20 @@ pmw-question-tuning add --dimension "<问题维度>" --policy <always_ask|high_r
 - 原始客户资料、录音、敏感截图、完整私密 PRD。
 - token、API key、cookie、Zoon ownerSecret。
 - 未脱敏 Zoon 正文。
+- 真实项目名、内部 URL、截图内容、客户信息或未脱敏 PRD 到 GitHub 回流草稿。
+
+## GitHub 回流边界
+
+- 默认只生成本地脱敏待审稿，不自动提交 GitHub、issue 或 PR。
+- 草稿包含：反馈来源、脱敏观察、影响的技能、建议规则、建议 eval、隐私检查。
+- 只有用户明确要求“提交 GitHub / 部署上线”时，才把待审稿转成仓库变更、issue 或 PR。
+- GitHub 回流草稿不得包含真实项目名、Zoon 正文、截图内容、客户信息、token、内部 URL 或未脱敏 PRD。
 
 ## 应用规则
 
 - 记忆是建议，不是事实来源；如果和当前 brief 冲突，以当前已对齐 brief 或最新 Zoon 为准。
 - 偏好只能影响方案方向和表达方式，不能覆盖主目标、反指标或不可虚构项。
+- 应用个人记忆时必须明示“基于过往偏好”或“基于本地产品认知”，并说明来源和适用范围。
 - 原型复审中的事实错误、反指标风险、不可虚构违规、线上参考缺失或未决用户承诺不能保存成普通偏好；它们必须保留为门槛、重出原因或 `D` 拍板。
 - 原型复审沉淀偏好时，必须写明 `source: 原型复审` 或 `source: 用户反馈`，并标注 `scope`，避免下一轮把局部审美意见当成全局规则。
 - 问题偏好只能影响追问力度，不能覆盖本轮明确事实或高风险门槛。

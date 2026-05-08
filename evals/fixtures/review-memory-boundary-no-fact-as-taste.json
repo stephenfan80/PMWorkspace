@@ -12,7 +12,8 @@
     "required_behaviors": [
       "以不可虚构项为准",
       "不把事实违规保存成 taste",
-      "只记录可复用的审美或结构偏好"
+      "只记录可复用的审美或结构偏好",
+      "全局记忆和 GitHub 回流也必须遵守同一边界"
     ],
     "forbidden_behaviors": [
       "因为用户喜欢而通过违规模块",
@@ -36,6 +37,10 @@
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
       "contains": "事实错误、反指标风险、不可虚构违规、线上参考缺失或未决承诺不能保存成普通 taste。"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-memory.md",
+      "contains": "GitHub 回流草稿不得包含真实项目名、Zoon 正文、截图内容、客户信息、token、内部 URL 或未脱敏 PRD。"
     }
   ]
 }

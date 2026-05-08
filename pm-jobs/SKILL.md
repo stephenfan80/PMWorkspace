@@ -24,6 +24,7 @@ for _CANDIDATE in "$PWD/bin" "$PWD/pmworkspace-shared/bin" "$HOME/.codex/skills/
 done
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-update-check" 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-jobs >/dev/null 2>&1 || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" user-summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-question-tuning" ] && "$_PMW_BIN/pmw-question-tuning" summary 2>/dev/null || true
 ```
 
@@ -31,7 +32,7 @@ done
 
 1. Read `../pmworkspace-shared/references/first-use-onboarding.md` for first contact.
 2. Read `../pmworkspace-shared/references/product-office-hours.md` and follow the 产品价值澄清器协议与 diagnostic state machine: 工作目标模式 -> 场景路由 -> Q 诊断 -> 前提确认 -> D 拍板 -> 产品简报状态.
-3. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory summary` when available to avoid repeating known preferences or resolved decisions.
+3. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory user-summary` plus `pmw-memory summary` when available to avoid repeating known preferences or resolved decisions. If memory changes the recommendation, explicitly say `基于过往偏好...` or `基于本地产品认知...`; memory cannot override the current facts, high-risk gates, brief, Zoon, anti-metric, non-fiction boundary, or reference gate.
 4. Read `../pmworkspace-shared/references/question-tuning.md` and apply saved Q/D preferences without overriding current facts or high-risk gates.
 5. Read `../pmworkspace-shared/references/pm-decision-principles.md` and apply its fact priority before using memory or defaults.
 6. Read `../pmworkspace-shared/references/pm-eval-system.md` so diagnostic output preserves PMWorkspace gate contracts.

@@ -154,6 +154,10 @@ PMWorkspace stores durable assets locally by default:
 ~/.pmworkspace/
   config.yaml
   analytics/usage.jsonl
+  user/taste-profile.jsonl
+  user/product-cognition.jsonl
+  user/pmworkspace-improvements.jsonl
+  user/pmworkspace-feedback-drafts/
   projects/<slug>/briefs/
   projects/<slug>/decisions.jsonl
   projects/<slug>/questions.jsonl
@@ -171,10 +175,11 @@ Defaults:
 
 - Telemetry is local-first: usage logs stay on your machine.
 - Remote anonymous telemetry requires explicit opt-in.
-- Stored assets should include project display names, briefs, decision questions, decisions, Zoon URLs, prototype manifests, taste feedback, and sanitized product learnings.
+- Stored assets should include project display names, briefs, decision questions, decisions, Zoon URLs, prototype manifests, project taste feedback, user-level preferences, sanitized product cognition, local GitHub feedback drafts, and product learnings.
 - Runtime assets include local run audit trails, evidence dashboard inputs, prototype board entries, and question tuning preferences.
 - Handoff assets include PRD-ready, design-ready, experiment-ready, and engineering-ready documents under `handoffs/`.
 - Do not store raw private customer data, tokens, internal recordings, or sensitive screenshots.
+- GitHub feedback drafts stay local and sanitized until the user explicitly asks to submit them.
 
 Project helpers:
 

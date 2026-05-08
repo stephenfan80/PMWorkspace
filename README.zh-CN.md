@@ -175,6 +175,10 @@ PMWorkspace 默认把资产保存在本地：
 ~/.pmworkspace/
   config.yaml
   analytics/usage.jsonl
+  user/taste-profile.jsonl
+  user/product-cognition.jsonl
+  user/pmworkspace-improvements.jsonl
+  user/pmworkspace-feedback-drafts/
   projects/<slug>/briefs/
   projects/<slug>/decisions.jsonl
   projects/<slug>/questions.jsonl
@@ -202,6 +206,9 @@ PMWorkspace 默认把资产保存在本地：
 - Q/D 问题偏好。
 - 用户批准或拒绝的设计偏好。
 - 脱敏后的产品学习和复用判断。
+- 单个用户独有的全局偏好。
+- 脱敏后的产品认知。
+- PMWorkspace 进化候选和本地 GitHub 回流待审稿。
 
 不会保存：
 
@@ -210,6 +217,7 @@ PMWorkspace 默认把资产保存在本地：
 - 未脱敏 Zoon 内容。
 - Zoon ownerSecret 或 API 原始响应。
 - 用户没有明确要求保存的私密 PRD 原文。
+- 未经用户确认，不会把 GitHub 回流待审稿提交到远端。
 
 查看配置：
 

@@ -32,6 +32,7 @@ for _CANDIDATE in "$PWD/bin" "$PWD/pmworkspace-shared/bin" "$HOME/.codex/skills/
 done
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-update-check" 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-prototype-shotgun >/dev/null 2>&1 || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" user-summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
 ```
 
@@ -80,7 +81,7 @@ done
 3. If `pmw-project show` contains a Zoon URL, run `pmw-zoon drift --url <url>` when available, then read the latest document with `pmw-zoon read --url <url>` and treat it as the product source of truth. If drift changes goal, anti-metric, non-fiction boundary, scope, user promise, or scheme direction, route back to `$pm-brief` / `$pm-strategy-review` and stop.
 4. 对每个请求的屏幕运行线上参考门槛；如果必要参考是 `缺失待补充`，先停下来问，不写图片提示词。
 5. Read `design-heuristics.md`, `scenario-experts.md`, and `adversarial-review.md` as needed, but do not change scope or promise without writing the decision back to the product brief.
-6. Use `pmw-memory taste-summary` when available so rejected directions are not repeated as “new”方案; if memory changes the recommendation, explicitly say `基于过往偏好，我建议...`, and never let preference override the current brief, anti-metric, non-fiction boundary, or reference gate.
+6. Use `pmw-memory user-summary` plus `pmw-memory taste-summary` when available so rejected directions are not repeated as “new”方案 and local product cognition can improve recommendations; if memory changes the recommendation, explicitly say `基于过往偏好，我建议...` or `基于本地产品认知...`, and never let memory override the current brief, Zoon, anti-metric, non-fiction boundary, design system, or reference gate.
 7. 输出 `原型出图判断`：先说明我建议这轮出哪些单图、暂时不出哪些屏、为什么这些图能帮助 PM 做产品选择，以及图片生成前门槛。
 8. Propose concept directions with names and tradeoffs. 方案差异必须通过 `方案差异质量`：至少说明每个方向在页面结构、信息架构、交互路径、信任表达或关键任务上的不同；如果只是视觉皮肤差异，停止并重拟方向。
 9. 如果用户、brief、Zoon、截图或参考材料命中汽车之家、AutoDesign、之家或 Autohome，默认载入 AutoDesign 约束。产品 UI 优先使用 AutoDesign token；品牌 VI 和字体包只作为品牌露出、活动视觉或特殊场景参考，字体授权必须保留边界，不能写成生产可用承诺。

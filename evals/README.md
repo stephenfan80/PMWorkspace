@@ -25,6 +25,6 @@ eval 分类必须能映射回 `pmworkspace-shared/references/pm-workbench-map.md
 | `pm-prototype-shotgun`、`prototype-shotgun`、`prototype-output-contract`、`multi-scheme`、`production-reference`、`screenshot-feedback` | 原型方案：image-2 前门槛、单图协议、方案差异质量、输出单元、线上参考、设计系统 |
 | `prototype-review` | 原型复审 |
 | `pm-handoff` | 产品交付 |
-| `memory`、`decision-principles`、`eval-system` | 运行与记忆 |
+| `memory`、`decision-principles`、`eval-system` | 运行与记忆：偏好边界、个人全局记忆、GitHub 待审稿、自动决策、eval runner |
 
 新增分类时，必须同时更新 `pm-workbench-map.md` 和 `pm-eval-system.md`。

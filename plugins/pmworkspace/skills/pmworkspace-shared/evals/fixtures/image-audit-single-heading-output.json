@@ -33,12 +33,9 @@
   "command_checks": [
     {
       "command": [
-        "bin/pmw-image-audit",
-        "audit",
-        "--reference",
-        "plugins/pmworkspace/assets/icon.png",
-        "--image",
-        "plugins/pmworkspace/assets/icon.png"
+        "python3",
+        "-c",
+        "import pathlib, struct, subprocess, sys, zlib\nroot = pathlib.Path('.').resolve()\npath = root / '.pmw-eval-image-audit-1x1.png'\ndef chunk(kind, data):\n    import zlib, struct\n    return struct.pack('>I', len(data)) + kind + data + struct.pack('>I', zlib.crc32(kind + data) & 0xffffffff)\npng = b'\\x89PNG\\r\\n\\x1a\\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', 1, 1, 8, 6, 0, 0, 0)) + chunk(b'IDAT', zlib.compress(b'\\x00\\x00\\x00\\x00\\x00')) + chunk(b'IEND', b'')\npath.write_bytes(png)\ntry:\n    result = subprocess.run([str(root / 'bin' / 'pmw-image-audit'), 'audit', '--reference', str(path), '--image', str(path)], text=True, capture_output=True)\n    sys.stdout.write(result.stdout)\n    sys.stderr.write(result.stderr)\n    sys.exit(result.returncode)\nfinally:\n    path.unlink(missing_ok=True)"
       ],
       "exit_code": 0,
       "contains": [

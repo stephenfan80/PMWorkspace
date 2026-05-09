@@ -4,17 +4,21 @@
 
 > Codex 插件展示名：**AI 产品工作站**。`PMWorkspace` 仍是 GitHub 仓库名、技术包名和 `$pm-workspace` 技能入口。
 
-## Codex Plugin Beta 安装
+## 安装
 
-公开插件库上架前，`Plugins` 默认市场里搜不到它；先把 GitHub 仓库作为本地 marketplace 加进去。
+选择一条主路径即可：
 
-最快方式：
+- **公开插件：** 在 Codex `Plugins` 中安装 **AI 产品工作站**，后续公开版本从 Codex 插件页更新。
+- **GitHub 本地 plugin / Beta 测试：** 公开上架审批前，先把本仓库作为本地 marketplace 加进 Codex。
+- **开发者本地仓库：** clone 仓库后运行 plugin 升级脚本。
+
+GitHub 本地 plugin：
 
 ```bash
 codex plugin marketplace add stephenfan80/PMWorkspace
 ```
 
-如果你之前添加过旧版本或本地路径，先移除再添加：
+如果之前添加过旧版本或本地路径：
 
 ```bash
 codex plugin marketplace remove pmworkspace
@@ -29,13 +33,15 @@ codex plugin marketplace add stephenfan80/PMWorkspace
 4. 搜索 **AI 产品工作站** 或 `PMWorkspace`。
 5. 点击安装 / 启用，之后从 `$pm-workspace` 开始。
 
-本地开发或团队测试也可以从仓库运行升级脚本：
+开发者本地仓库：
 
 ```bash
 git clone https://github.com/stephenfan80/PMWorkspace.git
 cd PMWorkspace
 bin/pmw-upgrade --host codex-plugin
 ```
+
+详细升级、旧版 skill、发布提交说明统一看 `docs/codex-plugin-submission.md` 和 `pmworkspace-shared/references/update-workflow.md`。
 
 PMWorkspace 是一个产品方案工作台。它不是只帮你生成一张好看的原型图，而是把真实问题、产品简报（brief）、AI 协作文档（Zoon）、截图证据、方案差异、复审结论和交付稿串成一条连续的产品工作流。
 
@@ -125,52 +131,7 @@ PMWorkspace 的工作方式更像一支小型产品小队，而不是单个问�
 
 ## 第一次怎么用
 
-公开插件用户：
-
-- 在 Codex 的 `Plugins` 里安装 `AI 产品工作站`。
-- 后续公开版本更新也优先从 Codex 插件页更新。
-- 注意：公开上架审批前，它不会出现在默认插件市场搜索结果里。
-
-GitHub 本地 plugin 试用：
-
-推荐直接添加 GitHub marketplace：
-
-```bash
-codex plugin marketplace add stephenfan80/PMWorkspace
-```
-
-如果已经添加过旧版本：
-
-```bash
-codex plugin marketplace remove pmworkspace
-codex plugin marketplace add stephenfan80/PMWorkspace
-```
-
-重启 Codex 后，在 `Plugins` 页面把 `Built by OpenAI` 筛选切到 `全部`，搜索 `AI 产品工作站` 或 `PMWorkspace`。
-
-开发者也可以从本地仓库安装：
-
-```bash
-git clone https://github.com/stephenfan80/PMWorkspace.git
-cd PMWorkspace
-bin/pmw-upgrade --host codex-plugin
-```
-
-旧版 skill 安装：
-
-```bash
-git clone https://github.com/stephenfan80/PMWorkspace.git
-cd PMWorkspace
-./setup --host codex
-```
-
-已经在本目录里时：
-
-```bash
-./setup --host codex
-```
-
-重启 Codex 后，从 `$pm-workspace` 开始：
+按上方三条主路径之一安装并重启 Codex 后，从 `$pm-workspace` 开始：
 
 ```text
 使用 $pm-workspace 显示欢迎引导，并帮我选择合适的产品工作流。
@@ -351,19 +312,7 @@ UPGRADE_COMMAND pmw-upgrade --host <codex|codex-plugin>
 
 升级时优先使用提示里的 `UPGRADE_COMMAND`。
 
-从 GitHub 本地安装 plugin 的用户：
-
-```bash
-bin/pmw-upgrade --host codex-plugin
-```
-
-旧版 `~/.codex/skills` 用户：
-
-```bash
-bin/pmw-upgrade --host codex
-```
-
-从 Codex 插件库安装的用户：打开 Codex 的 `Plugins`，找到 `AI 产品工作站`，点击更新；如果没有更新按钮，就卸载后重新安装。
+公开插件用户从 Codex `Plugins` 页面更新；GitHub 本地 plugin、开发仓库和旧版 skill 的详细升级路径见 `pmworkspace-shared/references/update-workflow.md`。
 
 暂缓某个版本：
 
@@ -377,33 +326,9 @@ bin/pmw-snooze-update <remote-version-or-commit>
 bin/pmw-config set update_check false
 ```
 
-### 发布新版本
+### 发布与旧版迁移
 
-发布时让 AI 按这个清单处理：
-
-```text
-请发布 PMWorkspace vX.Y.Z。
-
-要求：
-1. 更新 VERSION。
-2. 同步更新 Codex plugin 的 plugin.json version。
-3. 重新构建 plugins/pmworkspace 包。
-4. 检查 skill 契约和 eval。
-5. 更新 README 中的安装与更新说明。
-6. 不要修改用户本地状态目录，不要提交 token、私密截图或客户资料。
-7. 最后给我列出 Codex plugin 用户和旧版 skill 用户分别如何更新。
-```
-
-### 迁移旧名称
-
-如果之前安装过旧的 `product-prototype-designer`：
-
-```bash
-rm -rf ~/.codex/skills/product-prototype-designer
-./setup --host codex
-```
-
-之后使用 `$pm-workspace`。
+发布新版本、插件提交检查、旧版 `product-prototype-designer` / `~/.codex/skills` 迁移说明统一维护在 `docs/codex-plugin-submission.md` 和 `pmworkspace-shared/references/update-workflow.md`。README 不再维护第二套发布清单。
 
 ## 隐私
 

@@ -6,17 +6,21 @@
 
 Codex plugin display name: **AI 产品工作站**. `PMWorkspace` remains the GitHub repository name, package name, and `$pm-workspace` skill entrypoint.
 
-## Codex Plugin Beta Install
+## Install
 
-Before the public plugin listing is approved, it will not appear in the default marketplace search. Add this GitHub repository as a local marketplace first.
+Choose one main path:
 
-Fast path:
+- **Public Codex plugin:** install **AI 产品工作站** from Codex `Plugins`, then update from the Codex plugin UI.
+- **Local GitHub plugin / beta testing:** add this repository as a local marketplace. Before public listing approval, this is the path to make the plugin searchable in Codex.
+- **Developer clone:** clone the repository and run the plugin upgrade script from the working tree.
+
+Local GitHub plugin:
 
 ```bash
 codex plugin marketplace add stephenfan80/PMWorkspace
 ```
 
-If you previously added an older local path, remove and add it again:
+If you previously added an older local path:
 
 ```bash
 codex plugin marketplace remove pmworkspace
@@ -31,7 +35,7 @@ Then:
 4. Search **AI 产品工作站** or `PMWorkspace`.
 5. Install / enable it, then start with `$pm-workspace`.
 
-For local development or team testing, you can also install from a clone:
+Developer clone:
 
 ```bash
 git clone https://github.com/stephenfan80/PMWorkspace.git
@@ -39,7 +43,9 @@ cd PMWorkspace
 bin/pmw-upgrade --host codex-plugin
 ```
 
-PMWorkspace is a product solution workbench for PMs, designers, researchers, operators, and founders. It does more than produce attractive prototype images: it connects the real problem, product summary (brief), AI collaboration document (Zoon), screenshot evidence, scheme differences, review conclusions, and delivery assets into one product workflow.
+Detailed release, upgrade, and legacy skill notes live in `docs/codex-plugin-submission.md` and `pmworkspace-shared/references/update-workflow.md`.
+
+PMWorkspace is a product solution workbench for PMs, designers, researchers, operators, and founders. It does more than produce attractive prototype images: it connects the real problem, product brief, AI collaboration document (Zoon), screenshot evidence, scheme differences, review conclusions, and delivery assets into one product workflow.
 
 Use it when you have an idea, PRD, screenshot, user feedback, or collaboration doc that is not yet ready for design or engineering. PMWorkspace helps reframe the problem, align the core product judgment, generate mobile-first image-2 prototype screens, review the result, and produce compact delivery material.
 
@@ -66,11 +72,11 @@ Shape fast. Deliver deep.
 
 ## What PMWorkspace Produces
 
-- **Product summary:** a concise business-facing brief by default; full Q/D history, sources, readiness, artifact flow, and local paths stay in local audit.
+- **Product brief:** a 1-2 page PM-style brief by default, starting with core value judgment, current-state evidence, target users, user pain / current alternatives, solution approach, success metrics, counter-metrics, and non-fiction boundaries; full Q/D history, sources, readiness, artifact flow, and local paths stay in local audit.
 - **Solution directions:** options that differ by product strategy, information architecture, interaction model, or trust model.
 - **Mobile-first prototype images:** one direction plus one screen equals one image-2 output; use iPhone 17 portrait `402 x 874` only when there is no production screenshot, and use the screenshot's physical long-board pixels when a visual baseline exists.
 - **Evidence records:** online screenshots, status pages, competitor references, and collaboration-doc drift evidence.
-- **Readiness verdicts:** a pre-image or pre-handoff check across summary, collaboration doc, online reference, scheme difference, boundaries, and review status; defaults to a concise verdict, with full tables behind `--details`.
+- **Readiness verdicts:** a pre-image or pre-handoff check across brief, collaboration doc, online reference, scheme difference, boundaries, and review status; defaults to a concise verdict, with full tables behind `--details`.
 - **Review conclusions:** strategy, trust/risk, design-system, and data-feasibility perspectives before final prototype review.
 - **Delivery assets:** compact PRD, design handoff, experiment seed, or engineering handoff.
 
@@ -78,60 +84,21 @@ Shape fast. Deliver deep.
 
 **Quick shaping** is for early ideas and discussion packages. PMWorkspace asks only the few clarifications that affect the shape of the solution, lists assumptions and non-fiction boundaries, and then creates a light package after approval.
 
-**Deep delivery** is for PRDs, design reviews, engineering handoff, production-flow work, high-risk business promises, or AI collaboration document sync. PMWorkspace aligns the product summary before image generation or delivery writing, so the team does not move quickly in the wrong direction.
+**Deep delivery** is for PRDs, design reviews, engineering handoff, production-flow work, high-risk business promises, or AI collaboration document sync. PMWorkspace aligns the product brief before image generation or delivery writing, so the team does not move quickly in the wrong direction.
 
 ## How It Works
 
 1. Reframe the real product problem before jumping into a solution.
 2. Ask focused clarifying questions instead of long generic questionnaires.
 3. Use decision choices when scope, promise, experiment language, or delivery boundaries need a clear owner.
-4. Save the product summary locally first, then sync to the AI collaboration document when the user wants online collaboration.
+4. Save the product brief locally first; after saving, recommend Zoon with an A/B choice, but sync only when the user opts in, provides a Zoon URL, or explicitly needs online collaboration.
 5. Record online evidence through the existing artifact flow.
 6. Run a readiness check before image generation or handoff.
 7. Use multi-role review to catch strategy, risk, design-system, and data gaps.
 
 ## Start
 
-Public plugin install:
-
-- Install `AI 产品工作站` from Codex `Plugins`.
-- Public plugin users should update from the Codex plugin UI.
-- Before public listing approval, it will not appear in the default marketplace search.
-
-Local GitHub plugin install:
-
-Recommended:
-
-```bash
-codex plugin marketplace add stephenfan80/PMWorkspace
-```
-
-If an older local path is already installed:
-
-```bash
-codex plugin marketplace remove pmworkspace
-codex plugin marketplace add stephenfan80/PMWorkspace
-```
-
-Restart Codex, set the `Plugins` filter to `All`, and search `AI 产品工作站` or `PMWorkspace`.
-
-Developers can also install from a local clone:
-
-```bash
-git clone https://github.com/stephenfan80/PMWorkspace.git
-cd PMWorkspace
-bin/pmw-upgrade --host codex-plugin
-```
-
-Legacy skill install:
-
-```bash
-git clone https://github.com/stephenfan80/PMWorkspace.git
-cd PMWorkspace
-./setup --host codex
-```
-
-Then start with:
+After installing through one of the three paths above, start with:
 
 ```text
 Use $pm-workspace to show the welcome guide and help me choose the right PM workflow.
@@ -140,7 +107,7 @@ Use $pm-workspace to show the welcome guide and help me choose the right PM work
 Quick shaping prompt:
 
 ```text
-Use $pm-workspace to quickly shape this product idea into a product summary, 2-3 solution directions, and one mobile prototype image per direction.
+Use $pm-workspace to quickly shape this product idea into a product brief, 2-3 solution directions, and one mobile prototype image per direction.
 
 Idea: <one sentence>
 Known context: <user / scenario / constraints / references>
@@ -150,13 +117,13 @@ Requirement: proceed with clearly marked assumptions, but ask me to approve them
 Deep delivery prompt:
 
 ```text
-Use $pm-workspace to turn this PRD / AI collaboration document / screenshot feedback into a product summary that is ready for prototype design.
+Use $pm-workspace to turn this PRD / AI collaboration document / screenshot feedback into a product brief that is ready for prototype design.
 
 Target user: <who>
 Core problem: <what is hard today>
 Goal: <behavior or metric>
 Constraints: <data / business / policy / design system / scope>
-Output: <summary only / one screen / three directions / handoff>
+Output: <brief only / one screen / three directions / handoff>
 ```
 
 ## Advanced Runtime
@@ -188,15 +155,7 @@ bin/pmw-gen-skill-docs write
 bin/pmw-gen-skill-docs check
 ```
 
-Plugin release commands:
-
-```bash
-bin/pmw-build-plugin
-bin/pmw-upgrade --host codex-plugin
-bin/pmw-upgrade --host codex
-```
-
-When `pmw-update-check` reports `UPGRADE_COMMAND`, run that exact command. Public Codex plugin users should update from the Codex `Plugins` UI; local GitHub plugin users run `pmw-upgrade --host codex-plugin`; legacy skill users run `pmw-upgrade --host codex`.
+For plugin packaging, release submission, upgrade routing, and legacy skill migration, use `docs/codex-plugin-submission.md` and `pmworkspace-shared/references/update-workflow.md`. When `pmw-update-check` reports `UPGRADE_COMMAND`, run that exact command.
 
 AI collaboration document helpers:
 
@@ -212,7 +171,7 @@ bin/pmw-zoon read --url "<document URL>"
 
 ## Prototype Rules
 
-- Deep delivery requires an aligned product summary before image prompts or image generation.
+- Deep delivery requires an aligned product brief before image prompts or image generation.
 - Quick shaping requires explicit approval to proceed with listed assumptions.
 - New pages that continue existing flows, result states, or production styles need online reference checks.
 - Multi-scheme concepts must differ by product strategy, information architecture, interaction model, or trust model.
@@ -222,7 +181,7 @@ bin/pmw-zoon read --url "<document URL>"
 
 ## Privacy
 
-PMWorkspace keeps telemetry local by default. It should not report project names, file paths, prompt contents, screenshots, product-summary text, or customer data. Default project, dashboard, and artifact-flow output redacts tokens, owner secrets, and authorization headers; `pmw-project show --raw` is only for explicit local debugging. Do not store raw private customer data, tokens, internal recordings, or sensitive screenshots in shared materials.
+PMWorkspace keeps telemetry local by default. It should not report project names, file paths, prompt contents, screenshots, product-brief text, or customer data. Default project, dashboard, and artifact-flow output redacts tokens, owner secrets, and authorization headers; `pmw-project show --raw` is only for explicit local debugging. Do not store raw private customer data, tokens, internal recordings, or sensitive screenshots in shared materials.
 
 ## License
 

@@ -115,6 +115,7 @@ nav {
 }
 .hero-h1 em { font-style: normal; color: var(--accent); }
 .hero-h1 .soft { color: var(--muted); }
+.mobile-break { display: none; }
 .hero-desc {
   position: relative; z-index: 1;
   margin-top: 28px;
@@ -815,6 +816,7 @@ footer {
   transition: opacity .65s ease, transform .65s ease;
 }
 .reveal.visible { opacity: 1; transform: translateY(0); }
+.section:target .reveal { opacity: 1; transform: translateY(0); }
 .d1 { transition-delay: .08s; }
 .d2 { transition-delay: .16s; }
 .d3 { transition-delay: .24s; }
@@ -848,18 +850,23 @@ footer {
 }
 
 @media (max-width: 560px) {
+  nav { padding: 0 16px; }
+  .nav-cta { display: none; }
   .pain-grid { grid-template-columns: 1fr; }
   .output-grid { grid-template-columns: 1fr; }
   .adv-grid { grid-template-columns: 1fr; }
   .scenarios-grid { grid-template-columns: 1fr; }
   .hero { padding: 90px 16px 60px; }
+  .hero-h1 { font-size: 36px; line-height: 1.12; letter-spacing: 0; }
+  .hero-h1, .hero-desc { max-width: 100%; overflow-wrap: anywhere; }
+  .hero-desc { max-width: 340px; font-size: 15px; text-wrap: wrap; word-break: break-word; }
+  .mobile-break { display: block; }
   .hero-desc br { display: none; }
   .hero-btns { flex-direction: column; width: 100%; }
   .hero-btns .btn-a, .hero-btns .btn-b { width: 100%; justify-content: center; text-align: center; }
-  .hero-proof { gap: 12px; }
-  .proof-item { width: calc(50% - 6px); text-align: center; }
+  .hero-proof { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; gap: 12px; }
+  .proof-item { width: auto; min-width: 0; text-align: center; }
   .proof-num { font-size: 24px; }
-  .nav-cta { font-size: 12px; padding: 7px 12px; }
   .section { padding: 48px 16px; }
   .section-h2 { font-size: 26px; }
   .section-sub { font-size: 15px; }
@@ -907,7 +914,7 @@ footer {
 
   <h1 class="hero-h1">
     把一句话推进成<br>
-    <em>可评审的产品方案</em>
+    <em>可评审的<span class="mobile-break"></span>产品方案</em>
   </h1>
 
   <p class="hero-desc">

@@ -6,15 +6,36 @@
 
 ## Codex Plugin Beta 安装
 
-公开插件库上架前，`Plugins` 默认市场里搜不到它；先把 GitHub 仓库作为本地 marketplace 加进去：
+公开插件库上架前，`Plugins` 默认市场里搜不到它；先把 GitHub 仓库作为本地 marketplace 加进去。
+
+最快方式：
+
+```bash
+codex plugin marketplace add stephenfan80/PMWorkspace
+```
+
+如果你之前添加过旧版本或本地路径，先移除再添加：
+
+```bash
+codex plugin marketplace remove pmworkspace
+codex plugin marketplace add stephenfan80/PMWorkspace
+```
+
+然后：
+
+1. 完全退出并重启 Codex。
+2. 打开 `Plugins`。
+3. 把筛选从 `Built by OpenAI` 切到 `全部`。
+4. 搜索 **AI 产品工作站** 或 `PMWorkspace`。
+5. 点击安装 / 启用，之后从 `$pm-workspace` 开始。
+
+本地开发或团队测试也可以从仓库运行升级脚本：
 
 ```bash
 git clone https://github.com/stephenfan80/PMWorkspace.git
 cd PMWorkspace
 bin/pmw-upgrade --host codex-plugin
 ```
-
-重启 Codex 后，在 `Plugins` 中把筛选从 `Built by OpenAI` 切到 `全部`，再搜索 **AI 产品工作站** 或 `PMWorkspace`。安装后从 `$pm-workspace` 开始。
 
 PMWorkspace 是一个产品方案工作台。它不是只帮你生成一张好看的原型图，而是把真实问题、产品简报（brief）、AI 协作文档（Zoon）、截图证据、方案差异、复审结论和交付稿串成一条连续的产品工作流。
 
@@ -112,13 +133,28 @@ PMWorkspace 的工作方式更像一支小型产品小队，而不是单个问�
 
 GitHub 本地 plugin 试用：
 
+推荐直接添加 GitHub marketplace：
+
+```bash
+codex plugin marketplace add stephenfan80/PMWorkspace
+```
+
+如果已经添加过旧版本：
+
+```bash
+codex plugin marketplace remove pmworkspace
+codex plugin marketplace add stephenfan80/PMWorkspace
+```
+
+重启 Codex 后，在 `Plugins` 页面把 `Built by OpenAI` 筛选切到 `全部`，搜索 `AI 产品工作站` 或 `PMWorkspace`。
+
+开发者也可以从本地仓库安装：
+
 ```bash
 git clone https://github.com/stephenfan80/PMWorkspace.git
 cd PMWorkspace
 bin/pmw-upgrade --host codex-plugin
 ```
-
-安装后重启 Codex，在 `Plugins` 页面把 `Built by OpenAI` 筛选切到 `全部`，搜索 `AI 产品工作站` 或 `PMWorkspace`。
 
 旧版 skill 安装：
 

@@ -8,15 +8,36 @@ Codex plugin display name: **AI 产品工作站**. `PMWorkspace` remains the Git
 
 ## Codex Plugin Beta Install
 
-Before the public plugin listing is approved, it will not appear in the default marketplace search. Add this GitHub repository as a local marketplace first:
+Before the public plugin listing is approved, it will not appear in the default marketplace search. Add this GitHub repository as a local marketplace first.
+
+Fast path:
+
+```bash
+codex plugin marketplace add stephenfan80/PMWorkspace
+```
+
+If you previously added an older local path, remove and add it again:
+
+```bash
+codex plugin marketplace remove pmworkspace
+codex plugin marketplace add stephenfan80/PMWorkspace
+```
+
+Then:
+
+1. Fully quit and restart Codex.
+2. Open `Plugins`.
+3. Switch the filter from `Built by OpenAI` to `All`.
+4. Search **AI 产品工作站** or `PMWorkspace`.
+5. Install / enable it, then start with `$pm-workspace`.
+
+For local development or team testing, you can also install from a clone:
 
 ```bash
 git clone https://github.com/stephenfan80/PMWorkspace.git
 cd PMWorkspace
 bin/pmw-upgrade --host codex-plugin
 ```
-
-Restart Codex, switch the `Plugins` filter from `Built by OpenAI` to `All`, then search **AI 产品工作站** or `PMWorkspace`. Start with `$pm-workspace`.
 
 PMWorkspace is a product solution workbench for PMs, designers, researchers, operators, and founders. It does more than produce attractive prototype images: it connects the real problem, product summary (brief), AI collaboration document (Zoon), screenshot evidence, scheme differences, review conclusions, and delivery assets into one product workflow.
 
@@ -79,13 +100,28 @@ Public plugin install:
 
 Local GitHub plugin install:
 
+Recommended:
+
+```bash
+codex plugin marketplace add stephenfan80/PMWorkspace
+```
+
+If an older local path is already installed:
+
+```bash
+codex plugin marketplace remove pmworkspace
+codex plugin marketplace add stephenfan80/PMWorkspace
+```
+
+Restart Codex, set the `Plugins` filter to `All`, and search `AI 产品工作站` or `PMWorkspace`.
+
+Developers can also install from a local clone:
+
 ```bash
 git clone https://github.com/stephenfan80/PMWorkspace.git
 cd PMWorkspace
 bin/pmw-upgrade --host codex-plugin
 ```
-
-After installing, restart Codex, set the `Plugins` filter to `All`, and search `AI 产品工作站` or `PMWorkspace`.
 
 Legacy skill install:
 

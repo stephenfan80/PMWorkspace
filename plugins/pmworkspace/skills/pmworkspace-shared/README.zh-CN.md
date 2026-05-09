@@ -2,6 +2,20 @@
 
 **把模糊想法推进到可评审、可出图、可交付。**
 
+> Codex 插件展示名：**AI 产品工作站**。`PMWorkspace` 仍是 GitHub 仓库名、技术包名和 `$pm-workspace` 技能入口。
+
+## Codex Plugin Beta 安装
+
+公开插件库上架前，可以先用 GitHub 本地 plugin 方式安装：
+
+```bash
+git clone https://github.com/stephenfan80/PMWorkspace.git
+cd PMWorkspace
+bin/pmw-upgrade --host codex-plugin
+```
+
+重启 Codex 后，在 `Plugins` 中搜索 **AI 产品工作站** 或 `PMWorkspace`。安装后从 `$pm-workspace` 开始。
+
 PMWorkspace 是一个产品方案工作台。它不是只帮你生成一张好看的原型图，而是把真实问题、产品简报（brief）、AI 协作文档（Zoon）、截图证据、方案差异、复审结论和交付稿串成一条连续的产品工作流。
 
 你可以把一句想法、一段 PRD、一张线上截图、一份用户反馈或一个协作文档丢进来。PMWorkspace 会先帮你判断真正要解决的问题，再把它推进成能讨论、能评审、能出图、能交付的产品资产。
@@ -92,7 +106,7 @@ PMWorkspace 的工作方式更像一支小型产品小队，而不是单个问�
 
 公开插件用户：
 
-- 在 Codex 的 `Plugins` 里安装 `PMWorkspace`。
+- 在 Codex 的 `Plugins` 里安装 `AI 产品工作站`。
 - 后续公开版本更新也优先从 Codex 插件页更新。
 
 GitHub 本地 plugin 试用：
@@ -311,7 +325,7 @@ bin/pmw-upgrade --host codex-plugin
 bin/pmw-upgrade --host codex
 ```
 
-从 Codex 插件库安装的用户：打开 Codex 的 `Plugins`，找到 `PMWorkspace`，点击更新；如果没有更新按钮，就卸载后重新安装。
+从 Codex 插件库安装的用户：打开 Codex 的 `Plugins`，找到 `AI 产品工作站`，点击更新；如果没有更新按钮，就卸载后重新安装。
 
 暂缓某个版本：
 

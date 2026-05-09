@@ -1,7 +1,7 @@
 {
   "name": "pmworkspace",
-  "version": "0.1.11",
-  "description": "PMWorkspace helps product managers turn ideas, PRDs, screenshots, and feedback into aligned product briefs, image-2 prototype directions, reviews, and compact handoff assets.",
+  "version": "0.1.12",
+  "description": "AI 产品工作站 helps product managers turn ideas, PRDs, screenshots, and feedback into aligned product briefs, image-2 prototype directions, reviews, and compact handoff assets.",
   "author": {
     "name": "Stephen Fan",
     "url": "https://github.com/stephenfan80"
@@ -11,6 +11,8 @@
   "license": "MIT",
   "keywords": [
     "pmworkspace",
+    "ai-product-workstation",
+    "ai-product-workbench",
     "product-manager",
     "product-manager-workflow",
     "product-management",
@@ -31,6 +33,8 @@
     "user-feedback",
     "design-handoff",
     "handoff",
+    "AI 产品工作站",
+    "AI产品工作站",
     "产品经理",
     "产品简报",
     "产品原型",
@@ -41,9 +45,9 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "PMWorkspace",
+    "displayName": "AI 产品工作站",
     "shortDescription": "Product briefs, image-2 prototypes, reviews, and PRDs",
-    "longDescription": "PMWorkspace is a product workbench for product managers. It turns fuzzy ideas, PRDs, screenshots, customer insight, or prototype requests into quick shaping or deep delivery workflows. It captures assumptions, goals, counter-metrics, constraints, and non-fiction boundaries; produces aligned product briefs; supports mobile-first image-2 prototype directions; reviews prototypes against product intent; and prepares compact PRD or design handoff assets.",
+    "longDescription": "AI 产品工作站, powered by PMWorkspace, is a product workbench for product managers. It turns fuzzy ideas, PRDs, screenshots, customer insight, or prototype requests into quick shaping or deep delivery workflows. It captures assumptions, goals, counter-metrics, constraints, and non-fiction boundaries; produces aligned product briefs; supports mobile-first image-2 prototype directions; reviews prototypes against product intent; and prepares compact PRD or design handoff assets.",
     "developerName": "Stephen Fan",
     "category": "Productivity",
     "capabilities": [
@@ -55,9 +59,9 @@
     "privacyPolicyURL": "https://github.com/stephenfan80/PMWorkspace#privacy",
     "termsOfServiceURL": "https://github.com/stephenfan80/PMWorkspace#license",
     "defaultPrompt": [
-      "用 PMWorkspace 把这个产品想法快速成型为产品简报、方案方向和移动端原型图。",
-      "用 PMWorkspace 把这份 PRD 或截图反馈整理成可出图产品简报。",
-      "用 PMWorkspace 复审这批原型，并整理成精简 PRD 交付稿。"
+      "用 AI 产品工作站把这个产品想法快速成型为产品简报、方案方向和移动端原型图。",
+      "用 AI 产品工作站把这份 PRD 或截图反馈整理成可出图产品简报。",
+      "用 AI 产品工作站复审这批原型，并整理成精简 PRD 交付稿。"
     ],
     "brandColor": "#1677FF",
     "composerIcon": "./assets/icon.png",

@@ -1,6 +1,6 @@
-# PMWorkspace Codex Plugin 上架提交材料
+# AI 产品工作站 Codex Plugin 上架提交材料
 
-本文档用于准备 PMWorkspace 进入 Codex 插件库 / 插件目录时的提交材料。提交前先运行：
+本文档用于准备 **AI 产品工作站**（powered by PMWorkspace）进入 Codex 插件库 / 插件目录时的提交材料。提交前先运行：
 
 ```bash
 bin/pmw-build-plugin
@@ -11,7 +11,7 @@ bin/pmw-eval run
 ## 插件基础信息
 
 - Plugin name: `pmworkspace`
-- Display name: `PMWorkspace`
+- Display name: `AI 产品工作站`
 - Category: `Productivity`
 - Developer: `Stephen Fan`
 - Repository: `https://github.com/stephenfan80/PMWorkspace`
@@ -22,7 +22,7 @@ bin/pmw-eval run
 
 ## 一句话介绍
 
-PMWorkspace helps product managers turn ideas, PRDs, screenshots, and feedback into aligned product briefs, image-2 prototype directions, reviews, and compact handoff assets.
+AI 产品工作站 helps product managers turn ideas, PRDs, screenshots, and feedback into aligned product briefs, image-2 prototype directions, reviews, and compact handoff assets.
 
 ## Short Description
 
@@ -30,20 +30,22 @@ Product briefs, image-2 prototypes, reviews, and PRDs
 
 ## Long Description
 
-PMWorkspace is a product workbench for product managers. It turns fuzzy ideas, PRDs, screenshots, customer insight, or prototype requests into quick shaping or deep delivery workflows. It captures assumptions, goals, counter-metrics, constraints, and non-fiction boundaries; produces aligned product briefs; supports mobile-first image-2 prototype directions; reviews prototypes against product intent; and prepares compact PRD or design handoff assets.
+AI 产品工作站, powered by PMWorkspace, is a product workbench for product managers. It turns fuzzy ideas, PRDs, screenshots, customer insight, or prototype requests into quick shaping or deep delivery workflows. It captures assumptions, goals, counter-metrics, constraints, and non-fiction boundaries; produces aligned product briefs; supports mobile-first image-2 prototype directions; reviews prototypes against product intent; and prepares compact PRD or design handoff assets.
 
 ## 默认 Prompt
 
 ```text
-用 PMWorkspace 把这个产品想法快速成型为产品简报、方案方向和移动端原型图。
-用 PMWorkspace 把这份 PRD 或截图反馈整理成可出图产品简报。
-用 PMWorkspace 复审这批原型，并整理成精简 PRD 交付稿。
+用 AI 产品工作站把这个产品想法快速成型为产品简报、方案方向和移动端原型图。
+用 AI 产品工作站把这份 PRD 或截图反馈整理成可出图产品简报。
+用 AI 产品工作站复审这批原型，并整理成精简 PRD 交付稿。
 ```
 
 ## 搜索关键词
 
 ```text
 pmworkspace
+ai-product-workstation
+ai-product-workbench
 product-manager
 product-manager-workflow
 product-management
@@ -64,6 +66,8 @@ prototype-review
 user-feedback
 design-handoff
 handoff
+AI 产品工作站
+AI产品工作站
 产品经理
 产品简报
 产品原型
@@ -101,7 +105,7 @@ handoff
 公开插件库用户：
 
 ```text
-Codex -> Plugins -> Search "PMWorkspace" -> Install
+Codex -> Plugins -> Search "AI 产品工作站" or "PMWorkspace" -> Install
 ```
 
 安装后推荐触发：
@@ -113,6 +117,7 @@ Codex -> Plugins -> Search "PMWorkspace" -> Install
 也可以搜索：
 
 ```text
+AI 产品工作站
 PMWorkspace
 product brief
 PRD
@@ -162,6 +167,6 @@ image-2
 
 用户更新路径：
 
-- 公开 Codex plugin 用户：从 Codex `Plugins` 页面更新 PMWorkspace。
+- 公开 Codex plugin 用户：从 Codex `Plugins` 页面更新 `AI 产品工作站`。
 - GitHub 本地 plugin 用户：运行 `pmw-upgrade --host codex-plugin`。
 - 旧版 `~/.codex/skills` 用户：运行 `pmw-upgrade --host codex`。

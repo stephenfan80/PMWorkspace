@@ -4,6 +4,20 @@
 
 **Turn a fuzzy product idea into something reviewable, visual, and ready to hand off.**
 
+Codex plugin display name: **AI 产品工作站**. `PMWorkspace` remains the GitHub repository name, package name, and `$pm-workspace` skill entrypoint.
+
+## Codex Plugin Beta Install
+
+Before public plugin listing is available, install the local GitHub plugin:
+
+```bash
+git clone https://github.com/stephenfan80/PMWorkspace.git
+cd PMWorkspace
+bin/pmw-upgrade --host codex-plugin
+```
+
+Restart Codex, then search **AI 产品工作站** or `PMWorkspace` in `Plugins`. Start with `$pm-workspace`.
+
 PMWorkspace is a product solution workbench for PMs, designers, researchers, operators, and founders. It does more than produce attractive prototype images: it connects the real problem, product summary (brief), AI collaboration document (Zoon), screenshot evidence, scheme differences, review conclusions, and delivery assets into one product workflow.
 
 Use it when you have an idea, PRD, screenshot, user feedback, or collaboration doc that is not yet ready for design or engineering. PMWorkspace helps reframe the problem, align the core product judgment, generate mobile-first image-2 prototype screens, review the result, and produce compact delivery material.
@@ -59,7 +73,7 @@ Shape fast. Deliver deep.
 
 Public plugin install:
 
-- Install `PMWorkspace` from Codex `Plugins`.
+- Install `AI 产品工作站` from Codex `Plugins`.
 - Public plugin users should update from the Codex plugin UI.
 
 Local GitHub plugin install:

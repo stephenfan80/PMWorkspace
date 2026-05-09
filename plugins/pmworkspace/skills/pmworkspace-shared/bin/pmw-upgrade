@@ -16,7 +16,7 @@ Usage:
 
 Hosts:
   codex         Update legacy ~/.codex/skills installation.
-  codex-plugin Update local Codex plugin installation at ~/.agents/plugins/plugins/pmworkspace.
+  codex-plugin Add or update the local Codex plugin marketplace package.
 EOF
 }
 
@@ -51,6 +51,7 @@ for version_file in \
   "$SCRIPT_DIR/../../VERSION" \
   "$SCRIPT_DIR/../../../VERSION" \
   "$HOME/.codex/skills/pmworkspace-shared/VERSION" \
+  $(find "$HOME/.codex/plugins/cache" -path "*/pmworkspace/*/skills/pmworkspace-shared/VERSION" -type f 2>/dev/null | sort -r) \
   "$HOME/.agents/plugins/plugins/pmworkspace/skills/pmworkspace-shared/VERSION"; do
   if [ -f "$version_file" ]; then
     old="$(tr -d '[:space:]' < "$version_file")"
@@ -61,6 +62,20 @@ done
 git clone --depth 1 "$REPO_URL" "$tmp/PMWorkspace"
 
 if [ "$HOST_VALUE" = "codex-plugin" ]; then
+  "$tmp/PMWorkspace/bin/pmw-build-plugin"
+
+  if command -v codex >/dev/null 2>&1; then
+    MARKETPLACE_SOURCE="${PMW_MARKETPLACE_SOURCE:-$REPO_URL}"
+    case "$MARKETPLACE_SOURCE" in
+      file://*) MARKETPLACE_SOURCE="${MARKETPLACE_SOURCE#file://}" ;;
+    esac
+    if ! codex plugin marketplace upgrade pmworkspace >/dev/null 2>&1; then
+      codex plugin marketplace add "$MARKETPLACE_SOURCE"
+    fi
+  else
+    echo "codex CLI not found; writing ~/.agents fallback marketplace only." >&2
+  fi
+
   PLUGIN_ROOT="${CODEX_PLUGINS_DIR:-$HOME/.agents/plugins}"
   PLUGIN_DEST="$PLUGIN_ROOT/plugins/pmworkspace"
   MARKETPLACE_PATH="${CODEX_MARKETPLACE_PATH:-$PLUGIN_ROOT/marketplace.json}"

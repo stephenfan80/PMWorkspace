@@ -10,7 +10,7 @@ MARKER_FILE="$STATE_DIR/just-upgraded-from"
 
 detect_install_host() {
   case "$SCRIPT_DIR" in
-    */.agents/plugins/plugins/pmworkspace/skills/pmworkspace-shared/bin|*/plugins/pmworkspace/skills/pmworkspace-shared/bin)
+    */.agents/plugins/plugins/pmworkspace/skills/pmworkspace-shared/bin|*/.codex/plugins/cache/*/pmworkspace/*/skills/pmworkspace-shared/bin|*/plugins/pmworkspace/skills/pmworkspace-shared/bin)
       echo "codex-plugin"
       ;;
     *)
@@ -25,7 +25,9 @@ find_version_file() {
     "$SCRIPT_DIR/../VERSION" \
     "$SCRIPT_DIR/../../VERSION" \
     "$SCRIPT_DIR/../../../VERSION" \
-    "$HOME/.codex/skills/pmworkspace-shared/VERSION"; do
+    "$HOME/.codex/skills/pmworkspace-shared/VERSION" \
+    $(find "$HOME/.codex/plugins/cache" -path "*/pmworkspace/*/skills/pmworkspace-shared/VERSION" -type f 2>/dev/null | sort -r) \
+    "$HOME/.agents/plugins/plugins/pmworkspace/skills/pmworkspace-shared/VERSION"; do
     if [ "$candidate" != "/VERSION" ] && [ -n "${candidate:-}" ] && [ -f "$candidate" ]; then
       echo "$candidate"
       return 0
@@ -40,7 +42,9 @@ find_revision_file() {
     "$SCRIPT_DIR/../REVISION" \
     "$SCRIPT_DIR/../../REVISION" \
     "$SCRIPT_DIR/../../../REVISION" \
-    "$HOME/.codex/skills/pmworkspace-shared/REVISION"; do
+    "$HOME/.codex/skills/pmworkspace-shared/REVISION" \
+    $(find "$HOME/.codex/plugins/cache" -path "*/pmworkspace/*/skills/pmworkspace-shared/REVISION" -type f 2>/dev/null | sort -r) \
+    "$HOME/.agents/plugins/plugins/pmworkspace/skills/pmworkspace-shared/REVISION"; do
     if [ "$candidate" != "/REVISION" ] && [ -n "${candidate:-}" ] && [ -f "$candidate" ]; then
       echo "$candidate"
       return 0

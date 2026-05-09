@@ -108,6 +108,20 @@ AI产品工作站
 Codex -> Plugins -> Search "AI 产品工作站" or "PMWorkspace" -> Install
 ```
 
+公开上架审批前，它不会出现在默认插件市场搜索结果里。Beta / 团队测试用户先运行：
+
+```bash
+codex plugin marketplace add stephenfan80/PMWorkspace
+```
+
+或从本地仓库运行：
+
+```bash
+bin/pmw-upgrade --host codex-plugin
+```
+
+然后重启 Codex，在 `Plugins` 中把筛选从 `Built by OpenAI` 切到 `全部`，再搜索 `AI 产品工作站` 或 `PMWorkspace`。
+
 安装后推荐触发：
 
 ```text

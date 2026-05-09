@@ -40,7 +40,7 @@ If `auto_upgrade: true`, upgrade automatically and report the result.
 ## Install Hosts
 
 - `codex`: legacy skill install under `~/.codex/skills`.
-- `codex-plugin`: local Codex plugin install under `~/.agents/plugins/plugins/pmworkspace`, with `~/.agents/plugins/marketplace.json` updated.
+- `codex-plugin`: local Codex plugin marketplace install via `codex plugin marketplace add/upgrade`, plus a `~/.agents/plugins` fallback package for agent-compatible local installs.
 
 Public Codex plugin users should normally update from the Codex Plugins UI. The `codex-plugin` host is for GitHub/local beta installs and team testing.
 

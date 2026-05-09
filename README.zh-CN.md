@@ -6,7 +6,7 @@
 
 ## Codex Plugin Beta 安装
 
-公开插件库上架前，可以先用 GitHub 本地 plugin 方式安装：
+公开插件库上架前，`Plugins` 默认市场里搜不到它；先把 GitHub 仓库作为本地 marketplace 加进去：
 
 ```bash
 git clone https://github.com/stephenfan80/PMWorkspace.git
@@ -14,7 +14,7 @@ cd PMWorkspace
 bin/pmw-upgrade --host codex-plugin
 ```
 
-重启 Codex 后，在 `Plugins` 中搜索 **AI 产品工作站** 或 `PMWorkspace`。安装后从 `$pm-workspace` 开始。
+重启 Codex 后，在 `Plugins` 中把筛选从 `Built by OpenAI` 切到 `全部`，再搜索 **AI 产品工作站** 或 `PMWorkspace`。安装后从 `$pm-workspace` 开始。
 
 PMWorkspace 是一个产品方案工作台。它不是只帮你生成一张好看的原型图，而是把真实问题、产品简报（brief）、AI 协作文档（Zoon）、截图证据、方案差异、复审结论和交付稿串成一条连续的产品工作流。
 
@@ -108,15 +108,17 @@ PMWorkspace 的工作方式更像一支小型产品小队，而不是单个问�
 
 - 在 Codex 的 `Plugins` 里安装 `AI 产品工作站`。
 - 后续公开版本更新也优先从 Codex 插件页更新。
+- 注意：公开上架审批前，它不会出现在默认插件市场搜索结果里。
 
 GitHub 本地 plugin 试用：
 
 ```bash
 git clone https://github.com/stephenfan80/PMWorkspace.git
 cd PMWorkspace
-bin/pmw-build-plugin
 bin/pmw-upgrade --host codex-plugin
 ```
+
+安装后重启 Codex，在 `Plugins` 页面把 `Built by OpenAI` 筛选切到 `全部`，搜索 `AI 产品工作站` 或 `PMWorkspace`。
 
 旧版 skill 安装：
 

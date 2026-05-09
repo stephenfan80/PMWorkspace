@@ -6,7 +6,7 @@
 
 ## Codex Plugin Beta 安装
 
-公开插件库上架前，可以先用 GitHub 本地 plugin 方式安装：
+公开插件库上架前，`Plugins` 默认市场里搜不到它；先把 GitHub 仓库作为本地 marketplace 加进去：
 
 ```bash
 git clone https://github.com/stephenfan80/PMWorkspace.git
@@ -14,7 +14,7 @@ cd PMWorkspace
 bin/pmw-upgrade --host codex-plugin
 ```
 
-重启 Codex 后，在 `Plugins` 中搜索 **AI 产品工作站** 或 `PMWorkspace`。安装后从 `$pm-workspace` 开始。
+重启 Codex 后，在 `Plugins` 中把筛选从 `Built by OpenAI` 切到 `全部`，再搜索 **AI 产品工作站** 或 `PMWorkspace`。安装后从 `$pm-workspace` 开始。
 
 PMWorkspace 是一个产品方案工作台。它不是只帮你生成一张好看的原型图，而是把真实问题、产品简报（brief）、AI 协作文档（Zoon）、截图证据、方案差异、复审结论和交付稿串成一条连续的产品工作流。
 
@@ -44,7 +44,7 @@ PMWorkspace 接住的就是这种混乱时刻：不是替你跳过思考，而�
 
 - **产品简报：** 默认输出 12-18 行左右的业务简报，只保留产品判断、范围、反指标、不可虚构项和下一步；完整 Q/D、来源、准备度、产物流动和路径进入本地审计。
 - **方案方向：** 不只是换配色，而是在产品策略、信息架构、交互模型或信任模型上给出不同解法。
-- **移动端优先原型图：** 无线上截图时默认按 iPhone 17 竖屏 `402 x 874`；有生产截图时按截图物理像素长板生成。一个方案、一个屏幕、单独一张图。
+- **移动端优先原型图：** 默认按 iPhone 17 竖屏 `402 x 874` 生成 image-2 原型图，一个方案、一个屏幕、单独一张图。
 - **线上证据记录：** 把线上流程截图、状态页、竞品参考和协作文档漂移证据纳入同一条产品链路。
 - **产品准备度判断：** 在出图或交付前统一检查产品简报、协作文档、线上参考、方案差异、不可虚构项和复审状态；默认只给结论和第一条阻断原因，完整表格用 `--details` 展开。
 - **多角色复审结论：** 从策略、信任 / 风险、设计系统、数据可行性等角度指出能不能通过、要不要重出、哪里需要拍板。
@@ -108,15 +108,17 @@ PMWorkspace 的工作方式更像一支小型产品小队，而不是单个问�
 
 - 在 Codex 的 `Plugins` 里安装 `AI 产品工作站`。
 - 后续公开版本更新也优先从 Codex 插件页更新。
+- 注意：公开上架审批前，它不会出现在默认插件市场搜索结果里。
 
 GitHub 本地 plugin 试用：
 
 ```bash
 git clone https://github.com/stephenfan80/PMWorkspace.git
 cd PMWorkspace
-bin/pmw-build-plugin
 bin/pmw-upgrade --host codex-plugin
 ```
+
+安装后重启 Codex，在 `Plugins` 页面把 `Built by OpenAI` 筛选切到 `全部`，搜索 `AI 产品工作站` 或 `PMWorkspace`。
 
 旧版 skill 安装：
 
@@ -171,7 +173,7 @@ cd PMWorkspace
 
 ## 原型输出规则
 
-- 默认移动端优先：无线上截图时 iPhone 17 竖屏 `402 x 874`；有生产截图时使用截图物理像素长板。
+- 默认移动端优先：iPhone 17 竖屏 `402 x 874`。
 - 只有用户明确要求桌面端，或看板 / 内部工具确实需要大屏密度，才使用桌面端。
 - 深度交付中，产品简报没有“已对齐”前，不写图片提示词，不生成图片，不生成 HTML，不输出交付稿。
 - 快速成型中，出图前必须列出关键假设和不可虚构项，并获得用户确认“按这些假设继续”。

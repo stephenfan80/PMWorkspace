@@ -2,7 +2,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PLUGIN_DIR="$ROOT/plugins/pmworkspace"
+DEFAULT_PLUGIN_DIR="$ROOT/plugins/pmworkspace"
+PLUGIN_DIR="$DEFAULT_PLUGIN_DIR"
 
 for required in VERSION pm-workspace pm-autoplan pmworkspace-shared; do
   if [ ! -e "$ROOT/$required" ]; then
@@ -19,6 +20,7 @@ Build the Codex plugin package for PMWorkspace.
 
 Default output:
   <repo>/plugins/pmworkspace
+  <repo>/.agents/plugins/marketplace.json
 EOF
 }
 
@@ -330,6 +332,33 @@ PY
 if [ "$PLUGIN_VERSION" != "$VERSION" ]; then
   echo "Plugin version $PLUGIN_VERSION does not match VERSION $VERSION" >&2
   exit 1
+fi
+
+if [ "$PLUGIN_DIR" = "$DEFAULT_PLUGIN_DIR" ]; then
+  MARKETPLACE_FILE="$ROOT/.agents/plugins/marketplace.json"
+  mkdir -p "$(dirname "$MARKETPLACE_FILE")"
+  cat > "$MARKETPLACE_FILE" <<'EOF'
+{
+  "name": "pmworkspace",
+  "interface": {
+    "displayName": "AI 产品工作站"
+  },
+  "plugins": [
+    {
+      "name": "pmworkspace",
+      "source": {
+        "source": "local",
+        "path": "./plugins/pmworkspace"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
+EOF
 fi
 
 echo "PMWorkspace Codex plugin built at $PLUGIN_DIR ($VERSION@$REVISION)"

@@ -115,7 +115,6 @@ nav {
 }
 .hero-h1 em { font-style: normal; color: var(--accent); }
 .hero-h1 .soft { color: var(--muted); }
-.mobile-break { display: none; }
 .hero-desc {
   position: relative; z-index: 1;
   margin-top: 28px;
@@ -587,104 +586,6 @@ footer {
   font-style: italic;
 }
 
-/* ── INSTALL ─────────────────────────── */
-.install-section { padding-top: 80px; }
-.install-panel {
-  margin-top: 56px;
-  display: grid;
-  grid-template-columns: 1fr 1.1fr;
-  gap: 28px;
-  align-items: stretch;
-}
-.install-card {
-  background: var(--bg2);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 34px 32px;
-}
-.install-card.primary {
-  background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025));
-  border-color: var(--accent-border);
-}
-.install-kicker {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  color: var(--accent);
-  text-transform: uppercase;
-  margin-bottom: 14px;
-}
-.install-title {
-  font-size: 23px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
-}
-.install-copy {
-  margin-top: 12px;
-  font-size: 14.5px;
-  color: var(--muted);
-  line-height: 1.7;
-  font-weight: 300;
-}
-.install-code {
-  margin-top: 22px;
-  background: #111013;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px;
-  padding: 18px 20px;
-  font-family: var(--mono);
-  font-size: 13px;
-  line-height: 1.8;
-  color: var(--text);
-  overflow-x: auto;
-  white-space: pre;
-}
-.install-code .prompt { color: var(--accent); }
-.install-code .dim { color: var(--muted2); }
-.install-steps {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 4px;
-}
-.install-steps li {
-  display: grid;
-  grid-template-columns: 34px 1fr;
-  gap: 14px;
-  align-items: start;
-}
-.install-step-num {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--accent);
-  background: var(--accent-dim);
-  border: 1px solid var(--accent-border);
-}
-.install-step-text {
-  font-size: 14.5px;
-  color: var(--muted);
-  line-height: 1.6;
-}
-.install-step-text strong { color: var(--text); font-weight: 600; }
-.install-note {
-  margin-top: 22px;
-  padding: 14px 16px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.035);
-  border: 1px solid var(--line);
-  font-size: 13.5px;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
 
 /* ── DIFF SECTION ─────────────────────── */
 .diff-section { padding-top: 80px; }
@@ -790,18 +691,11 @@ footer {
   .diff-vs { display: none; }
   .diff-col-plain { border-right: none; border-bottom: 1px solid var(--line); }
   .diff-col { padding: 28px 24px; }
-  .install-panel { grid-template-columns: 1fr; }
-  .install-card { padding: 28px 24px; }
   .memory-inner { grid-template-columns: 1fr; gap: 40px; }
   .memory-section { padding: 56px 20px; }
 }
 @media (max-width: 560px) {
   .diff-col { padding: 24px 18px; }
-  .install-section { padding-top: 48px; }
-  .install-card { padding: 24px 18px; }
-  .install-code { font-size: 11.5px; padding: 14px; }
-  .install-steps li { grid-template-columns: 30px 1fr; gap: 12px; }
-  .install-step-num { width: 30px; height: 30px; }
   .memory-section { padding: 44px 16px; }
   .memory-h2 { font-size: 32px; }
 }
@@ -816,7 +710,6 @@ footer {
   transition: opacity .65s ease, transform .65s ease;
 }
 .reveal.visible { opacity: 1; transform: translateY(0); }
-.section:target .reveal { opacity: 1; transform: translateY(0); }
 .d1 { transition-delay: .08s; }
 .d2 { transition-delay: .16s; }
 .d3 { transition-delay: .24s; }
@@ -850,22 +743,18 @@ footer {
 }
 
 @media (max-width: 560px) {
-  nav { padding: 0 16px; }
-  .nav-cta { display: none; }
   .pain-grid { grid-template-columns: 1fr; }
   .output-grid { grid-template-columns: 1fr; }
   .adv-grid { grid-template-columns: 1fr; }
   .scenarios-grid { grid-template-columns: 1fr; }
   .hero { padding: 90px 16px 60px; }
-  .hero-h1 { font-size: 36px; line-height: 1.12; letter-spacing: 0; }
-  .hero-h1, .hero-desc { max-width: 100%; overflow-wrap: anywhere; }
-  .hero-desc { max-width: 340px; font-size: 15px; text-wrap: wrap; word-break: break-word; }
-  .mobile-break { display: block; }
+  .hero-desc br { display: none; }
   .hero-btns { flex-direction: column; width: 100%; }
   .hero-btns .btn-a, .hero-btns .btn-b { width: 100%; justify-content: center; text-align: center; }
-  .hero-proof { display: grid; grid-template-columns: 1fr; width: 100%; gap: 12px; }
-  .proof-item { width: auto; min-width: 0; text-align: center; }
+  .hero-proof { gap: 12px; }
+  .proof-item { width: calc(50% - 6px); text-align: center; }
   .proof-num { font-size: 24px; }
+  .nav-cta { font-size: 12px; padding: 7px 12px; }
   .section { padding: 48px 16px; }
   .section-h2 { font-size: 26px; }
   .section-sub { font-size: 15px; }
@@ -899,9 +788,8 @@ footer {
     <a href="#output">产出</a>
     <a href="#how">工作方式</a>
     <a href="#modes">使用模式</a>
-    <a href="#install">安装</a>
   </div>
-  <a class="nav-cta" href="#install">添加到 Codex →</a>
+  <a class="nav-cta" href="https://github.com/stephenfan80/PMWorkspace" target="_blank">立即开始使用 →</a>
 </nav>
 
 <!-- ── HERO ── -->
@@ -913,16 +801,16 @@ footer {
 
   <h1 class="hero-h1">
     把一句话推进成<br>
-    <em>可评审的<span class="mobile-break"></span>产品方案</em>
+    <em>可评审的产品方案</em>
   </h1>
 
   <p class="hero-desc">
     老板今天给了一句话，你明天要交方案——<br>
-    PMWorkspace 是你的 <strong>AI 产品小队</strong>，<span class="mobile-break"></span>从混乱输入到简报、原型、<span class="mobile-break"></span>交付文档，一条线串通。
+    PMWorkspace 是你的 <strong>AI 产品小队</strong>，从混乱输入到简报、原型、交付文档，一条线串通。
   </p>
 
   <div class="hero-btns">
-    <a class="btn-a" href="#install">添加到 Codex Plugin</a>
+    <a class="btn-a" href="https://github.com/stephenfan80/PMWorkspace" target="_blank">立即开始使用</a>
     <a class="btn-b" href="#how">了解工作方式 ↓</a>
   </div>
 
@@ -1353,51 +1241,6 @@ footer {
       <div class="scenario-title">通过评审的方向直接变成 PRD</div>
       <div class="scenario-result">保留接口、数据、埋点、实验标准和待补充项，压缩成精简 PRD，可直接进入研发评审流程。</div>
       <div class="scenario-cmd">$pm-handoff</div>
-    </div>
-  </div>
-</div>
-
-<div class="divider"></div>
-
-<!-- ── INSTALL ── -->
-<div id="install" class="section install-section">
-  <div class="section-label reveal">添加到 Codex Plugin</div>
-  <h2 class="section-h2 reveal d1">公开上架前，先用 GitHub marketplace 安装</h2>
-  <p class="section-sub reveal d2">AI 产品工作站暂未进入默认插件市场。按下面步骤添加后，在 Codex 的 Plugins 页面切到“全部”即可搜索到。</p>
-
-  <div class="install-panel reveal d2">
-    <div class="install-card primary">
-      <div class="install-kicker">Step 01 · Terminal</div>
-      <div class="install-title">运行一条命令添加 marketplace</div>
-      <p class="install-copy">首次安装直接运行：</p>
-      <div class="install-code"><span class="prompt">$</span> codex plugin marketplace add stephenfan80/PMWorkspace</div>
-      <p class="install-copy">如果你之前添加过旧版本或本地路径，先移除再添加：</p>
-      <div class="install-code"><span class="prompt">$</span> codex plugin marketplace remove pmworkspace
-<span class="prompt">$</span> codex plugin marketplace add stephenfan80/PMWorkspace</div>
-    </div>
-
-    <div class="install-card">
-      <div class="install-kicker">Step 02 · Codex UI</div>
-      <div class="install-title">重启 Codex，然后在插件页启用</div>
-      <ul class="install-steps">
-        <li>
-          <span class="install-step-num">1</span>
-          <span class="install-step-text">完全退出并重启 <strong>Codex</strong>，让 marketplace 缓存刷新。</span>
-        </li>
-        <li>
-          <span class="install-step-num">2</span>
-          <span class="install-step-text">打开 <strong>Plugins</strong>，把筛选从 <strong>Built by OpenAI</strong> 切到 <strong>全部</strong>。</span>
-        </li>
-        <li>
-          <span class="install-step-num">3</span>
-          <span class="install-step-text">搜索 <strong>AI 产品工作站</strong> 或 <strong>PMWorkspace</strong>，点击安装 / 启用。</span>
-        </li>
-        <li>
-          <span class="install-step-num">4</span>
-          <span class="install-step-text">新开对话，输入 <strong>使用 $pm-workspace 帮我选择产品工作流</strong>。</span>
-        </li>
-      </ul>
-      <div class="install-note">公开插件库正式上架后，普通用户可以直接在 Codex 插件页搜索安装；GitHub marketplace 是当前 beta 和团队测试路径。</div>
     </div>
   </div>
 </div>

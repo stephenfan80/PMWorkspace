@@ -1,6 +1,6 @@
 # PMWorkspace 疑似孤岛 reference 依赖确认报告
 
-本报告只做依赖确认，不删除文件、不修改 skill、不改变生成契约。插件副本只视为 `bin/pmw-build-plugin` 的镜像，不作为独立真源。
+本报告最初只做依赖确认，不删除文件、不修改 skill、不改变生成契约。后续已按本报告的保守建议执行归档 / 移位；插件副本只视为 `bin/pmw-build-plugin` 的镜像，不作为独立真源。
 
 ## 复查范围
 
@@ -20,13 +20,15 @@ git ls-files pmworkspace-shared/references/<file> plugins/pmworkspace/skills/pmw
 
 ## 结论摘要
 
+执行状态更新：D13 `decision-gates.md` 与 D14 `intake.md` 已在职责合并后移除；D15 `product-methodology.md` 与 D16 `prompt-recipes.md` 已移到 appendix / examples；D17 `skill-doc-template-system.md` 保留，并在 D10 generator 收敛后继续承担生成体系说明和 eval 锚点。
+
 | 文件 | 当前引用结论 | 风险级别 | 建议动作 | 是否可直接删除 |
 |---|---|---:|---|---|
-| `decision-gates.md` | 未发现 source skill、README、manifest、generator 或 eval 直接读取该文件；`decision-gates` 只作为 `pmw-config question_mode` 枚举值出现，不等于文档依赖。 | 中 | 合并候选：把仍有价值的门槛定义并入 `product-discovery-gate.md` / `pm-decision-principles.md` 后再归档。 | 否 |
-| `intake.md` | 未发现显式引用；内容与 `first-use-onboarding.md`、`production-reference-gate.md`、`routing.md` 的首次输入 / 线上参考判断重叠。 | 中 | 合并候选：保留最小上下文字段，迁入首次引导或 onboarding 附录。 | 否 |
-| `product-methodology.md` | 未发现显式引用；内容是通用产品方法，和 `product-discovery-gate.md`、`product-office-hours.md`、`pm-decision-principles.md` 有方法论重叠。 | 低-中 | 移位候选：作为 appendix/examples 或压缩进产品发现 reference，不进入运行时必读。 | 否 |
-| `prompt-recipes.md` | 未发现显式引用；内容是启动话术示例，和 README 示例、`welcome-guide.md`、`first-use-onboarding.md` 有重叠。 | 低 | 归档 / 示例候选：若保留，建议移到 examples 或 README 链接区，不作为核心 reference。 | 否 |
-| `skill-doc-template-system.md` | 有 eval 直接断言：`skill-doc-generator-required` 检查该文件包含“manifest 是共享契约源头”；未发现 skill/manifest/generator 直接读取。 | 高 | 保留：它是生成体系的测试契约文档。若改名或移动，必须同步 eval 和插件副本。 | 否 |
+| `decision-gates.md` | 未发现 source skill、README、manifest、generator 或 eval 直接读取该文件；`decision-gates` 只作为 `pmw-config question_mode` 枚举值出现，不等于文档依赖。 | 中 | 已合并有效门槛语言并移除孤岛文件。 | 已处理 |
+| `intake.md` | 未发现显式引用；内容与 `first-use-onboarding.md`、`production-reference-gate.md`、`routing.md` 的首次输入 / 线上参考判断重叠。 | 中 | 已把最小上下文字段迁入首次引导 / onboarding 相关文档，并移除孤岛文件。 | 已处理 |
+| `product-methodology.md` | 未发现显式引用；内容是通用产品方法，和 `product-discovery-gate.md`、`product-office-hours.md`、`pm-decision-principles.md` 有方法论重叠。 | 低-中 | 已移到 `pmworkspace-shared/references/appendix/product-methodology.md`，不进入运行时必读。 | 已处理 |
+| `prompt-recipes.md` | 未发现显式引用；内容是启动话术示例，和 README 示例、`welcome-guide.md`、`first-use-onboarding.md` 有重叠。 | 低 | 已移到 appendix / examples，并补充示例入口。 | 已处理 |
+| `skill-doc-template-system.md` | 有 eval 直接断言：`skill-doc-generator-required` 和 compact gates eval 检查该文件；未发现 skill/manifest/generator 运行时读取。 | 高 | 保留：它是生成体系的测试契约文档。若改名或移动，必须同步 eval 和插件副本。 | 保留 |
 
 ## 逐项依据
 
@@ -71,18 +73,18 @@ git ls-files pmworkspace-shared/references/<file> plugins/pmworkspace/skills/pmw
 
 建议：保留。若未来要瘦身，只能把内容合并到更正式的生成器维护文档，并同步修改 eval；不能按“未被 skill 读取”直接删除。
 
-## 推荐拍板
+## 最终处理
 
-| 决策项 | 默认建议 | 可选动作 |
+| 决策项 | 最终动作 | 结果 |
 |---|---|---|
-| D13 `decision-gates.md` | 合并后归档 | 保留 / 合并 / 归档 / 暂缓 |
-| D14 `intake.md` | 合并到 onboarding 附录 | 保留 / 合并 / 归档 / 暂缓 |
-| D15 `product-methodology.md` | 移到 appendix 或暂缓 | 保留 / 移到 appendix / 合并 / 暂缓 |
-| D16 `prompt-recipes.md` | 移到 examples 或归档 | 保留 / 移到 examples / 归档 / 暂缓 |
-| D17 `skill-doc-template-system.md` | 保留 | 保留 / 合并并同步 eval / 暂缓 |
+| D13 `decision-gates.md` | 合并后归档 | 有效门槛语言已承接，源文件和插件副本已移除。 |
+| D14 `intake.md` | 合并到 onboarding | 最小输入字段已承接，源文件和插件副本已移除。 |
+| D15 `product-methodology.md` | 移到 appendix | 已移到 `pmworkspace-shared/references/appendix/product-methodology.md`。 |
+| D16 `prompt-recipes.md` | 移到 examples / appendix | 已移到 appendix，并新增 `examples/prompt-recipes.md` 入口。 |
+| D17 `skill-doc-template-system.md` | 保留 | eval 仍依赖该文档，D10 后继续作为生成体系说明。 |
 
 ## 下一步边界
 
-- 本轮不删除这些 reference。
-- 若进入下一批删减，先为每个待移除文件新增或更新 eval，明确“删除后谁接住原职责”。
-- 执行删除前必须再次运行 `bin/pmw-eval run`、`bin/pmw-gen-skill-docs check`、`bin/pmw-build-plugin` 和 `git diff --check`。
+- 本轮孤岛 reference 已处理完毕，D17 保留。
+- 若继续做下一批删减，先重新审计新的 D18+；不要把本报告中的旧“候选”状态当作未执行计划。
+- 执行任何新删除前必须再次新增或更新 eval，明确“删除后谁接住原职责”，并运行 `bin/pmw-eval run`、`bin/pmw-gen-skill-docs check`、`bin/pmw-build-plugin` 和 `git diff --check`。

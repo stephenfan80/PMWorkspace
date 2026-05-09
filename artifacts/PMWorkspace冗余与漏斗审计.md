@@ -4,6 +4,8 @@
 
 审计口径：两阶段稳妥。第一阶段只识别明显矛盾、重复规则、低价值噪声和运行时漏斗；不直接删除 skill 或 references。第二阶段等删减决策表拍板后再执行。
 
+执行状态更新：本审计列出的 D1-D17 已完成第一轮保守瘦身。已修正文案冲突、收敛长板 / 简报 / eval / office-hours 真源、归档孤岛 reference，并通过 generator 收敛 `SKILL.md` 共享门槛重复。后续继续瘦身时，应重新审计 D18+，不要沿用本报告里的“待执行”旧状态。
+
 ## 总体结论
 
 PMWorkspace 的核心运行逻辑已经形成闭环：`$pm-workspace` 路由，`$pm-autoplan` 总控，`$pm-jobs` 做产品价值判断，`$pm-brief` 生成产品经理简报，`$pm-prototype-shotgun` 负责 image-2 单图出图，`$pm-prototype-review` 复审，`$pm-handoff` 交付。真正能挡错的是运行时脚本和 eval，而不是单纯靠 skill 长文案。
@@ -38,7 +40,7 @@ PMWorkspace 的核心运行逻辑已经形成闭环：`$pm-workspace` 路由，`
 |---|---|---|---|---|---|
 | N1 | `pm-workbench-map.md:13-23` | 端到端链路表单行过长，单行承载目标、字段、门槛、产物、eval。 | 对模型和维护者都不友好；容易只扫到前半段，忽略不可越过门槛。 | 改成阶段卡片式结构：每阶段保留“职责 / 输入 / 硬门槛 / 输出 / eval”。 | 是 |
 | N2 | `pm-eval-system.md` | 规则密度最高，关键字扫描 237 次。 | 容易变成第二套业务协议，稀释 source references 的优先级。 | 收敛为 eval 合同：保留 fixture 分类、禁止项、验收断言和失败条件；只移除重复业务长解释，不能压缩成纯链接。 | 是 |
-| N3 | 各 `SKILL.md` preamble | `_PMW_BIN` 查找脚本在每个 skill 中重复。 | 这是生成契约的一部分，不能手删，但可读性差。 | 暂不删；后续只通过 manifest 或 shared runner 收敛。 | 否，本轮暂缓 |
+| N3 | 各 `SKILL.md` preamble / 共享门槛 | `_PMW_BIN` 查找脚本仍在每个 skill 中重复；共享门槛长文此前也重复。 | preamble 是生成契约的一部分，不能手删；共享门槛重复会增加阅读噪声。 | 已通过 manifest / generator v2 收敛共享门槛输出，只保留真源和摘要；preamble 暂保留，不手删。 | 否，已完成低风险收敛 |
 | N4 | `product-office-hours.md` | 439 行，是最长 reference，且和 discovery gate / jobs skill 有重叠。 | 对执行模型来说噪声大，重要门槛容易被案例稀释。 | 拆成“产品发现状态机主文档”和“案例 / 反例 / 口吻示例 appendix”。 | 是 |
 
 ## D. 运行时漏斗
@@ -62,6 +64,8 @@ PMWorkspace 的核心运行逻辑已经形成闭环：`$pm-workspace` 路由，`
 ## F. 疑似孤岛 reference
 
 审计依据：`rg` 未发现下列文件被 source skill、README、AGENTS 或 `pmworkspace-shared/skill-docs/skill-docs.manifest.json` 明确引用。该结论只说明“入口不明确”，不等于可以删除。
+
+执行状态更新：D13 `decision-gates.md` 和 D14 `intake.md` 已在合并有效内容后移除；D15 `product-methodology.md` 和 D16 `prompt-recipes.md` 已移到 appendix / examples；D17 `skill-doc-template-system.md` 已确认保留，因为 eval 直接断言该生成体系说明。
 
 | 编号 | 位置 | 当前发现 | 风险 | 建议动作 | 是否需拍板 |
 |---|---|---|---|---|---|

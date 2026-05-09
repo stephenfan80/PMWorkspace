@@ -4,6 +4,10 @@ PMWorkspace eval 用于维护技能规则、输出契约和轻量运行时契约
 
 eval 默认以静态规则检查为主；对 `pmw-*` 本地脚本的关键输出可用 `command_checks` 做轻量 smoke test，但仍不调用外部模型或真实图片生成。
 
+## 真源边界
+
+本文件是 eval 合同，不是第二套业务流程说明。这里必须保留 fixture 分类、禁止项、验收断言和失败条件；具体业务规则以对应 reference 为真源：产品发现看 `product-discovery-gate.md` / `product-office-hours.md`，产品简报看 `product-manager-brief.md` / `product-plan-handoff.md`，原型长板看 `image-prompts.md` / `prototype-shotgun-board.md`，Zoon 看 `zoon-workflow.md`，准备度看 `product-readiness-dashboard.md`。瘦身时只能移除重复业务长解释，不能把本文件压缩成纯链接。
+
 ## 目标
 
 - 防止深度交付未对齐时写 image-2 提示词或生成原型。
@@ -100,7 +104,9 @@ fixture 使用 JSON，保存在 `evals/fixtures/`：
 
 断言面向规则文档、skill 文本和本地脚本输出，不面向模型输出。这样能在不花费 API 成本的情况下，先守住 PMWorkspace 的制度性门槛。
 
-## 必测场景
+## 必测场景（验收断言索引）
+
+本节只保留 eval 需要扫描的验收断言和失败条件短句。若需要理解完整业务流程，回到上方真源文件；若删改下面短句，必须同步更新对应 fixture。
 
 - 端到端地图：README、routing、eval 分类和 skill 状态字段必须共同指向 `pm-workbench-map.md`，不能各自维护一套链路解释。
 - Skill 文档生成：共享 preamble、必读协议、输出字段和共享门槛必须进入 `skill-docs.manifest.json`，由 `pmw-gen-skill-docs write` 生成，且 `pmw-gen-skill-docs check` 能发现漂移。

@@ -54,9 +54,7 @@ If a page is accessible only in the user's browser session, inspect it with brow
 
 用于图片提示词时，把约束摘要放进 `视觉要求` 部分。
 
-默认画布是移动端优先：无线上截图时可用 iPhone 17 竖屏 `402 x 874`；有线上截图 / `visual_baseline` 时必须使用截图物理像素长板。只有用户明确要求，或看板/内部工具在移动端会明显变差时，才选择桌面端。
-
-逻辑画布不等于输出像素。汽车之家生产页如果有 `1179 x 2556` 一类线上截图，prompt 必须写 `目标输出画布：1206px 宽，内容自适应长图，高度不得低于 2615px，可随内容增长`。这类 prompt 不得出现 `402 x 874`、`W402 x H874`、`H874`、`标准首屏` 或 `最低 H874` 作为画布锚点。
+画布规则只保留摘要：无线上截图时可用移动端首屏；有线上截图 / `visual_baseline` 时必须使用截图物理像素长板。详细画布禁词、目标像素写法和出图前检查以 `image-prompts.md` 为真源，输出单元字段以 `prototype-shotgun-board.md` 为真源；本文只负责设计系统约束。
 
 ## Production Design Review
 

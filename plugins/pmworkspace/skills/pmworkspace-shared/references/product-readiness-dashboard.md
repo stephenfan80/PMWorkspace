@@ -30,6 +30,7 @@ pmw-dashboard status
 | Zoon | Conditional | Conditional | 未启用时使用本地已对齐 Markdown，不阻断出图 / 交付；已启用、已有 URL 或用户选择在线协作时，必须已同步且无实质漂移。 |
 | 线上参考 | Required | Required | 已提供线上参考、已确认无线上参考，或明确不适用；未判断时不继续。优先读取最新 `browser_evidence` 产物，没有时回退到 run evidence / gate 事件。 |
 | 视觉基线 | Conditional | Conditional | 已采集线上截图或生产视觉参考时必须登记 `visual_baseline`，包含参考尺寸和目标输出像素；缺视觉基线或缺目标像素时不写 image-2 prompt。新概念页且用户确认无参考时显示不适用。 |
+| 输出画布 | Conditional | Conditional | 有 `visual_baseline` 时，当前 run 的 prototype-board 输出单元必须写 `canvas_mode=physical_longboard` 和 `target_output_pixels`，且不得含 `H874` / `标准首屏` 锚点。 |
 | 方案差异 | Required | Required | 多方案必须在页面结构、信息架构、交互路径、信任表达或关键任务上不同；单方案也要标注不适用或已登记。 |
 | 方案方向确认 | Required | Required | 当前 run 必须记录用户已确认或批准默认方案方向；未确认时不写 image-2 prompt。 |
 | 不可虚构项 | Required | Required | 必须明确不能展示的能力、数据、承诺或动作。 |
@@ -76,6 +77,7 @@ PMWorkspace 产品准备度仪表盘：
 | Zoon | YES/no | ... | ... | ... |
 | 线上参考 | YES | ... | ... | ... |
 | 视觉基线 | YES/no | ... | ... | ... |
+| 输出画布 | YES/no | ... | ... | ... |
 | 方案差异 | YES | ... | ... | ... |
 | 方案方向确认 | YES | ... | ... | ... |
 | 不可虚构项 | YES | ... | ... | ... |

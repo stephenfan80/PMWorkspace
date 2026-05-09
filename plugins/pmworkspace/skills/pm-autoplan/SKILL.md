@@ -112,12 +112,14 @@ done
 18. 快速成型模式：按最早门槛顺序只检测会影响轻量包结构的缺口：核心用户/场景、核心问题、主目标/反指标、不可虚构项、原型屏幕范围、方案差异、假设确认。默认最多问 2-3 个 `Q`。
 19. 快速成型模式：列出关键假设、方案方向和每张图的不可虚构项，请用户确认“按这些假设继续”。确认前不生成图片，并用 `pmw-run event --type gate` 记录当前门槛。
 20. 快速成型模式：确认后输出轻量包：标注假设的产品简报、2-3 个方案方向、每个方案 1 张移动端 image-2 原型图计划，并把状态写成 `基于假设，可讨论`。
-21. 深度交付模式：按最早门槛顺序推进：工作目标模式、场景路由、Q 诊断、前提确认、必要 D、策略审查、产品简报、本地简报保存、可选 Zoon 同步、已启用 Zoon 的漂移检查、线上参考和设计系统基线、Product Readiness Dashboard 的原型准备度或交付准备度。
+21. 深度交付模式：按最早门槛顺序推进：工作目标模式、场景路由、Q 诊断、产品发现深度、前提确认、必要 D、策略审查、产品简报、本地简报保存、可选 Zoon 同步、已启用 Zoon 的漂移检查、线上参考和设计系统基线、Product Readiness Dashboard 的原型准备度或交付准备度。
 22. 深度交付模式：Use `pm-decision-principles.md` to auto-decide only low-risk defaults that do not change product direction; surface any direction-changing item as a single `D` choice question and stop.
 23. Give the user a conclusion-first review: first output `自动评审结论` with `我建议` and `理由`, include a short `工作方式` / progress card, then write the full `评审控制面板` to audit.
 24. For the earliest gate, always declare `门槛等级` as `阻断`、`高风险`、`可自动采用` or `可延后`, and declare `门槛来源`.
 25. Every item in `已自动采用` must include source and why no PM decision is needed, for example `默认移动端优先。来源：PMWorkspace 默认规则。原因：不改变产品方向或用户承诺。`
 26. When enough information exists, create the smallest useful product brief and save it with `pmw-log brief <name>`. This saves the local business brief and audit copy, registers `product_brief` in Product Artifact Flow, and syncs to Zoon only when `PMW_ZOON_SYNC_ON_BRIEF=true` / `zoon_sync_on_brief: true` or the user has explicitly chosen online collaboration.
+    - `enough information` 必须包含产品发现深度：深度交付或现有线上功能优化通常至少覆盖 4 个价值澄清维度，并且必须包含目标用户与触发时刻、用户现状与当前替代、真实问题与当前损失、主目标与反指标。一个 `Q` 加一个 `D` 不能代表产品发现完成。
+    - 如果产品发现深度不足，最早门槛是 `产品发现深度不足`，下一技能必须是 `$pm-jobs`，只展开一个当前最大缺口 `Q`；不要直接写产品简报或进入原型。
     - 本地 Markdown 保存成功后，自动评审的用户可见 `下一步` 必须走 `$pm-brief` 同一段 Zoon 推荐选择，不能只提示“确认后进入原型 / 交付”。
     - 固定推荐文案：`Zoon 协作建议：这次简报适合多人评审 / 后续原型或 PRD 复用，建议同步到 Zoon；不同步也不影响继续使用本地 Markdown。`
     - 推荐必须说明 Zoon 的好处：多人协作、事实源统一、后续 image-2 原型 / PRD 防漂移；同时说明 `不自动同步，不作为出图或交付阻断`。

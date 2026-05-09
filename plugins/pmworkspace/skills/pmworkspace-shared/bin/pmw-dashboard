@@ -177,12 +177,26 @@ def has_target_pixels(row: dict) -> bool:
         str(row.get(key) or "")
         for key in ["status", "title", "summary", "path", "url"]
     )
+    return text_has_target_pixels(text)
+
+
+def text_has_target_pixels(text: str) -> bool:
     if not text:
         return False
-    pixel_pair = r"\d{3,5}\s*(?:x|X|×)\s*\d{3,5}"
+    pixel_pair = r"\d{3,5}\s*(?:x|X|×)\s*(?:>=\s*)?\d{3,5}"
     pixel_width = r"\d{3,5}\s*(?:px|像素|宽)"
     target_pattern = rf"(目标输出|目标输出像素|target|Target)[^。\n；;]*(?:{pixel_pair}|{pixel_width})"
     return bool(re.search(target_pattern, text))
+
+
+def text_has_canvas_anchor(text: str) -> bool:
+    return bool(
+        re.search(r"402\s*(?:x|X|×)\s*874", text)
+        or re.search(r"W402\s*(?:x|X|×)\s*H874", text, flags=re.I)
+        or re.search(r"\bH874\b", text, flags=re.I)
+        or "标准首屏" in text
+        or "最低 H874" in text
+    )
 
 
 def read_text(path_value: str) -> str:
@@ -550,6 +564,38 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
     )
 
     board = current_board_items(root, brief_path, brief_version, run_id)
+    if visual_required:
+        bad_canvas_rows = []
+        for item in board:
+            canvas_mode = str(item.get("canvas_mode") or "")
+            target_output = str(item.get("target_output_pixels") or "")
+            if canvas_mode != "physical_longboard" or not text_has_target_pixels(f"目标输出：{target_output}") or text_has_canvas_anchor(target_output):
+                bad_canvas_rows.append(f"{item.get('scheme') or '未命名'} / {item.get('screen') or '未命名屏幕'}")
+        canvas_ready = bool(board) and not bad_canvas_rows
+        if not board:
+            canvas_status = "未登记"
+            canvas_evidence = "prototype-board 暂无当前 run 输出单元"
+        elif canvas_ready:
+            canvas_status = "物理长板已锁定"
+            canvas_evidence = f"{len(board)} 个输出单元已使用 canvas_mode=physical_longboard 和 target_output_pixels"
+        else:
+            canvas_status = "缺物理长板字段"
+            canvas_evidence = "未通过：" + "；".join(bad_canvas_rows[:5])
+    else:
+        canvas_ready = True
+        canvas_status = "不适用"
+        canvas_evidence = "无线上截图视觉基线；标准首屏模式可按默认移动端画布执行"
+    rows.append(
+        gate_result(
+            "输出画布",
+            visual_required,
+            canvas_status,
+            redact_sensitive(canvas_evidence),
+            "继续" if canvas_ready else "当前 run 的每个 prototype-board 输出单元必须写 canvas_mode=physical_longboard 和 target_output_pixels，且不能含 H874 / 标准首屏锚点",
+            canvas_ready,
+        )
+    )
+
     scheme_event = latest_event(events, ["方案差异", "方案方向", "方案比较板"], {"evidence", "gate", "artifact", "decision"})
     scheme_text = f"{scheme_event.get('status', '')} {scheme_event.get('summary', '')}"
     scheme_ready = bool(board or scheme_event) and not contains_any(scheme_text, ["只换皮", "未通过", "缺失", "待确认"])

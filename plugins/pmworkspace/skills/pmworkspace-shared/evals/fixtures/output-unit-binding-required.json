@@ -11,7 +11,7 @@
     "gate": "图片输出契约",
     "required_behaviors": [
       "每张图绑定方案名",
-      "每张图绑定屏幕任务、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统和 image-2 状态",
+      "每张图绑定屏幕任务、主目标、反指标、不可虚构项、产品简报版本、画布模式、目标输出像素、线上参考状态、设计系统和 image-2 状态",
       "一个方案加一个屏幕等于一张图片"
     ],
     "forbidden_behaviors": [
@@ -23,11 +23,11 @@
   "contract_checks": [
     {
       "path": "pm-prototype-shotgun/SKILL.md",
-      "contains": "For each image output unit, declare scheme, screen task, canvas, main goal, anti-metric, non-fiction boundary"
+      "contains": "For each image output unit, declare scheme, screen task, canvas mode, canvas, main goal, anti-metric, non-fiction boundary"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "输出单元：每张图必须绑定方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统和 image-2 状态。"
+      "contains": "有线上截图时，每张图还必须绑定视觉基线状态、`canvas_mode=physical_longboard` 和目标输出像素"
     }
   ]
 }

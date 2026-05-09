@@ -16,9 +16,13 @@ pmw-prototype-board add \
   --goal "<主目标>" \
   --anti-metric "<反指标>" \
   --non-fiction "<不可虚构项>" \
+  --canvas-mode "<standard_first_screen|physical_longboard>" \
+  --target-output-pixels "<无线上截图可空；有视觉基线时必须写目标输出画布>" \
   --image "<图片路径或 URL，可为空>" \
   --status "计划生成"
 ```
+
+有 `visual_baseline` 时，`--canvas-mode` 必须是 `physical_longboard`，`--target-output-pixels` 必须写物理长板目标，例如 `1206 x >=2615` 或 `1206px 宽，高度不得低于 2615px`；不得写 `H874`、`标准首屏` 或 `402 x 874` 作为画布锚点。
 
 生成后把图片路径或 URL 补写到同一个方案/屏幕单元：
 
@@ -53,5 +57,6 @@ pmw-prototype-board list
 - 只有用户明确要求展示材料时，才可以额外做展示板。
 - 方案比较板是审计和比较记录，不是 image-2 图片的替代物。
 - 每个 board item 必须能追溯到已对齐产品简报版本、主目标、反指标和不可虚构项。
+- 每个 board item 在有线上截图视觉基线时，必须能追溯到 `canvas_mode=physical_longboard` 和 `target_output_pixels`。
 - 每个 board item 必须保留独立状态：`计划生成`、`已生成`、`生成失败`、`待重试` 或 `需要重出`；批量成功不能掩盖单张失败。
 - 如果 `pmw-prototype-board add` 或 `pmw-prototype-board image` 不可用，原型计划必须写明 `方案比较板：未写入（原因）`，不能假装已经记录。

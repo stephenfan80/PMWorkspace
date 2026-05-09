@@ -122,9 +122,9 @@ done
 - 多方案生成前先确认概念方向，除非用户明确批准使用默认方向。
 - 设计原型默认只能使用 image-2 / 图像生成输出方案图片；HTML 只在用户明确要求“HTML”“可交互网页”“前端实现”或“本地网页原型”时允许。
 - 如果当前环境无法生成 image-2 图片，停止并说明无法出图；不要用 HTML、Markdown 线框或拼图替代设计原型。
-- 默认移动端优先：标准首屏使用 iPhone 17 `W402 x H874`；结果页、报告页、详情页等长内容屏幕允许使用移动长板 `W402 x H自适应（最低 H874）`。
-- 移动长板必须保持宽度 `402` 不变，高度按内容自然增长且不得低于 `874`；不能为了塞进 `874` 高度而缩小字体、压缩间距、裁切内容或遮挡底部操作区。
-- 汽车之家 / AutoDesign 生产页必须额外声明目标输出像素：默认 3x 移动端长板，宽度不低于参考截图 95%，优先 `1179-1206px`；高度按内容自然增长。缺视觉基线或缺目标输出像素时不写 image-2 prompt。
+- 默认移动端优先分两种互斥模式：无线上截图时使用 `标准移动端首屏`，可按 iPhone 17 `402 x 874`；有生产截图 / `visual_baseline` 时使用 `线上截图物理长板`，必须以参考图物理像素和目标输出像素为 image-2 画布。
+- 线上截图物理长板模式中，`402` 只允许作为内部逻辑宽度记录，不能进入 image-2 prompt 的画布字段；prompt 中不得出现 `402 x 874`、`W402 x H874`、`H874`、`标准首屏` 或 `最低 H874` 作为画布锚点。
+- 汽车之家 / AutoDesign 生产页必须额外声明目标输出画布：默认 3x 移动端长板，宽度不低于参考截图 95%，优先 `1179-1206px`；高度不得低于参考图高度，可随内容增长。缺视觉基线或缺目标输出像素时不写 image-2 prompt。
 - 只有用户明确要求，或看板/内部工具密度确实需要时，才使用桌面端。
 
 ## Multi-Scheme Rules
@@ -151,15 +151,16 @@ done
 8. Propose concept directions with names and tradeoffs. 方案差异必须通过 `方案差异质量`：至少说明每个方向在页面结构、信息架构、交互路径、信任表达或关键任务上的不同；如果只是视觉皮肤差异，停止并重拟方向。
 9. 如果用户、brief、Zoon、截图或参考材料命中汽车之家、AutoDesign、之家或 Autohome，默认载入 AutoDesign 约束。产品 UI 优先使用 AutoDesign token；品牌 VI 和字体包只作为品牌露出、活动视觉或特殊场景参考，字体授权必须保留边界，不能写成生产可用承诺。若用户提供了线上截图，截图基线优先于泛化 AutoDesign token，并且必须用 `visual_baseline` 锁定参考尺寸与目标输出像素。
 10. 多方案生成前确认方案方向；如果用户已经明确批准默认方向，记录 `方案方向确认：默认方向已批准`，否则停在方向确认，不写 image-2 提示词。
-11. For each image output unit, declare scheme, screen task, canvas, main goal, anti-metric, non-fiction boundary. Also declare target output pixels, 线上参考状态, 视觉基线状态, design system, image-2 status, and brief dependency. 一个输出单元等于一张图片，不能把多个方案或多个屏幕合成拼图。
-    - `画布` 字段只能使用明确设备尺寸：短内容写 `标准首屏：iPhone 17 W402 x H874`；长内容写 `移动长板：iPhone 17 W402 x H自适应（最低 H874）`。
-    - `目标输出像素` 字段在有线上截图时必须写明确宽高或宽度 + 自适应高度；汽车之家生产页通常写 `参考截图尺寸：1179 x 2556；目标输出：3x 长板，宽度 1179-1206px，高度按内容增长`。
+11. For each image output unit, declare scheme, screen task, canvas mode, canvas, main goal, anti-metric, non-fiction boundary. Also declare target output pixels, 线上参考状态, 视觉基线状态, design system, image-2 status, and brief dependency. 一个输出单元等于一张图片，不能把多个方案或多个屏幕合成拼图。
+    - 无线上截图时，`画布模式` 写 `standard_first_screen`，`画布` 可写 `标准移动端首屏：iPhone 17 402 x 874`。
+    - 有线上截图 / `visual_baseline` 时，`画布模式` 必须写 `physical_longboard`，`画布` 必须写 `线上截图物理长板`；`目标输出像素` 必须写明确宽高或宽度 + 最小高度，例如 `参考截图尺寸：1179 x 2556；目标输出画布：1206px 宽，内容自适应长图，高度不得低于 2615px，可随内容增长`。
+    - 有线上截图时，最终 image-2 prompt 不得包含 `402 x 874`、`W402 x H874`、`H874`、`标准首屏` 或 `最低 H874`。
     - 移动长板仍是一张连续移动端界面，不得拆成多张图、拼图、多屏故事板或桌面端。
 12. 把批量请求拆成顺序单图队列：`3 个方案` -> 3 个输出单元，`3 个方案 x 2 个屏幕` -> 6 个输出单元。每个输出单元单独调用一次 image-2；不要把多个单元合成一个 prompt。
 13. 平台脚本可用时，先用 `pmw-prototype-board add` 登记每个方案/屏幕单元；如果写入失败，输出 `方案比较板：未写入（原因）`，不能假装已记录。
 14. 平台脚本可用时运行 `pmw-dashboard readiness --target prototype`；用户可见输出只包含短 verdict / 第一阻断原因。如果 verdict 是 `不可出图`，根据第一条阻断行退回 `$pm-brief`、线上参考门槛、方案方向确认或不可虚构项补齐，不写 image-2 prompt。只有用户要求看审计时才展示 `pmw-dashboard readiness --details`。
 15. 数据佐证缺失时不阻断出图，但必须把 `未验证风险` 写入用户可见输出和每个 image-2 prompt 的不可虚构项：不得展示确定性承诺、真实验证过的数值、已核验结果或无法兑现的数据能力，只能使用示例、区间、占位或明确标注假设。
-16. 在每个输出单元的图片生成前门槛通过后，逐个 Generate with image-2 / image generation。每次生成只服务当前一个输出单元，并在 prompt 中写明禁止拼图、并排比较、一图多屏、一图多方案。 如果当前环境无法生成 image-2，停止并说明，不用 HTML、Markdown 线框或方案比较板替代。
+16. 在每个输出单元的图片生成前门槛通过后，先把最终 prompt 交给 `pmw-prototype-prompt-check`；有视觉基线时检查失败必须重写 prompt，不得调用 image-2。检查通过后逐个 Generate with image-2 / image generation。每次生成只服务当前一个输出单元，并在 prompt 中写明禁止拼图、并排比较、一图多屏、一图多方案。 如果当前环境无法生成 image-2，停止并说明，不用 HTML、Markdown 线框或方案比较板替代。
 17. 每张图出图后用 `pmw-prototype-board image` 补充图片路径或 URL；单张失败时记录 `生成失败` 或 `待重试`，不能把批次写成全成功。用户反馈后用 `pmw-prototype-board score` 记录评分。
 18. Run `prototype-quality-review.md`; if a reference screenshot exists, first run `pmw-image-audit audit --image <生成图> --reference <参考图>` and expose `视觉审计：通过 / 需要重出`. Then route substantial post-image review to `$pm-prototype-review`.
 19. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单，它会登记 `prototype_manifest` 到 Product Artifact Flow；再用 `pmw-run event --type artifact` 记录产物。
@@ -191,6 +192,7 @@ done
 图片输出单元：
 - 方案名：
 - 屏幕任务：
+- 画布模式：
 - 画布：
 - 主目标：
 - 反指标：
@@ -221,8 +223,9 @@ done
 - 方案差异质量：
 - 方案方向确认：
 - 画布：
+- prompt 检查：
 - 输出单元清单：
-- 每张图绑定：方案名 / 屏幕任务 / 主目标 / 反指标 / 不可虚构项 / 产品简报版本 / 设计系统 / 线上参考状态 / image-2 状态
+- 每张图绑定：方案名 / 屏幕任务 / 主目标 / 反指标 / 不可虚构项 / 产品简报版本 / 画布模式 / 目标输出像素 / 设计系统 / 线上参考状态 / image-2 状态
 - 单图生成协议：一次 image-2 调用 = 一张图 = 一个方案 + 一个屏幕任务
 - image-2 状态：
 - 已生成 / 计划生成的图片：

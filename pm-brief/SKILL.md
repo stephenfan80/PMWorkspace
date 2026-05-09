@@ -102,10 +102,10 @@ done
 11. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
 12. Read `../pmworkspace-shared/references/product-readiness-dashboard.md`; if the next skill will be `$pm-prototype-shotgun` or `$pm-handoff`, run `pmw-dashboard readiness --target prototype|handoff` when available, use the verdict for gating, and only show the short verdict / first blocker by default.
 13. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory user-summary` plus `pmw-memory summary` when available. If memory changes phrasing or recommendation, explicitly say `基于过往偏好...` or `基于本地产品认知...`; memory cannot override the current brief, Zoon, anti-metric, non-fiction boundary, online reference gate, or missing gate.
-14. 先建立产品简报契约控制器，记录 `来源门槛`、`已完成门槛`、`缺失门槛`、`事实/假设边界`、`策略决策写入`、`简报深度`、`上游产物`、`本轮产物`、`下游可读`、`产物流动`、`下一技能` 和 `证据状态`；再压缩产品核心信息，避免把材料堆成大文档。
+14. 先建立产品简报契约控制器，记录 `来源门槛`、`已完成门槛`、`缺失门槛`、`事实/假设边界`、`策略决策写入`、`产品发现深度`、`简报深度`、`上游产物`、`本轮产物`、`下游可读`、`产物流动`、`下一技能` 和 `证据状态`；再压缩产品核心信息，避免把材料堆成大文档。
 14. 如果来自 `$pm-jobs` 或 `$pm-strategy-review`，先接收上游输出的范围模式、风险、范围、价值交换、信任/风险、反指标、可行性、定位、业务冲突和待决策队列。
-15. 如果基础事实仍缺失，退回 `$pm-jobs`，只展开一个当前 Q，不写完整产品简报；如果策略取舍仍未拍板，退回 `$pm-strategy-review`，只展开一个当前 D。
-16. 确认已完成工作目标模式、Q 诊断、前提确认和必要 D 拍板；如果缺失，只输出短对齐摘要、缺失门槛和下一技能，不写完整产品简报。
+15. 如果基础事实仍缺失，退回 `$pm-jobs`，只展开一个当前 Q，不写完整产品简报；基础事实包括产品定位与链路角色、目标人群、触发时刻、用户现状、当前替代方案、真实问题与当前损失、主目标、反指标、约束、数据可用性和不可虚构项。如果策略取舍仍未拍板，退回 `$pm-strategy-review`，只展开一个当前 D。
+16. 确认已完成工作目标模式、Q 诊断、产品发现深度门槛、前提确认和必要 D 拍板；如果缺失，只输出短对齐摘要、缺失门槛和下一技能，不写完整产品简报。一个 `Q` 加一个 `D` 不能代表产品发现完成；`D` 不能替代事实诊断。
 17. 如果已有 Zoon URL，先运行 `pmw-zoon drift` 或读取最新 Zoon 快照；Zoon 漂移如果改变目标、反指标、不可虚构项、范围、用户承诺或方案方向，确认状态退回 `待确认`，并回到 `$pm-jobs` 或 `$pm-strategy-review`。
 18. 根据模糊程度、风险等级和证据状态选择快速版、标准版或深度版产品简报。简报深度只代表证据和风险处理深度，不代表内容越写越长；快速版、标准版、深度版都使用同一套核心信息。
 19. 用户可见输出必须先给业务版 `产品核心信息`，只保留会改变原型结构、复审判断、交付范围或用户承诺的内容；`产品简报门槛`、`支持信息`、Zoon、线上参考、检索来源、已保存资产和证据边界默认进入内部审计，不压过核心判断。用户可见业务简报不得出现 `## 产品简报门槛` 或 `## 支持信息`，深度版也不能把业务简报写成长状态日志。

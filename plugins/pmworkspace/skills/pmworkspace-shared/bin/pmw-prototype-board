@@ -94,6 +94,8 @@ def command_add(args: argparse.Namespace) -> int:
         "main_goal": args.goal,
         "anti_metric": args.anti_metric,
         "non_fiction": args.non_fiction,
+        "canvas_mode": args.canvas_mode,
+        "target_output_pixels": args.target_output_pixels,
         "image": args.image,
         "status": args.status,
     }
@@ -154,8 +156,8 @@ def command_list(_args: argparse.Namespace) -> int:
     if not items:
         print("暂无方案。")
         return 0
-    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 图片 | 评分 | 状态 |")
-    print("|---|---|---|---|---|---|---|---|---|")
+    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 画布模式 | 目标输出像素 | 图片 | 评分 | 状态 |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|")
     for item in items:
         key = (item.get("scheme", ""), item.get("screen", ""))
         scheme_key = (item.get("scheme", ""), "")
@@ -172,6 +174,8 @@ def command_list(_args: argparse.Namespace) -> int:
             item.get("main_goal", ""),
             item.get("anti_metric", ""),
             item.get("non_fiction", ""),
+            item.get("canvas_mode", ""),
+            item.get("target_output_pixels", ""),
             image_row.get("image") or item.get("image", ""),
             score_text,
             status,
@@ -191,6 +195,8 @@ def build_parser() -> argparse.ArgumentParser:
     add.add_argument("--goal", default="")
     add.add_argument("--anti-metric", default="")
     add.add_argument("--non-fiction", default="")
+    add.add_argument("--canvas-mode", choices=["", "standard_first_screen", "physical_longboard"], default="")
+    add.add_argument("--target-output-pixels", default="")
     add.add_argument("--image", default="")
     add.add_argument("--status", default="计划生成")
     add.add_argument("--run")

@@ -94,7 +94,7 @@ done
 6. Read `../pmworkspace-shared/references/pm-eval-system.md` so diagnostic output preserves PMWorkspace gate contracts.
 7. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 产品价值澄清 stage fields.
 8. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-jobs` 且没有当前 run，再创建 runtime run.
-9. Build the 产品价值澄清控制器 from `product-office-hours.md`: 模式来源、问题定义模式、已知事实、证据状态、已覆盖价值澄清维度、我对真实问题的判断、重新定义后问题、当前价值判断、当前价值缺口、当前最大缺口、Q 预算、当前动作.
+9. Build the 产品价值澄清控制器 from `product-office-hours.md`: 模式来源、问题定义模式、已知事实、证据状态、已覆盖价值澄清维度、仍缺失维度、产品发现深度、我对真实问题的判断、重新定义后问题、当前价值判断、当前价值缺口、当前最大缺口、Q 预算、当前动作.
 10. 如果来自 `$pm-autoplan`，只解决自动评审交给 `$pm-jobs` 的最早门槛：工作目标、场景、Q 诊断或前提确认；不要假装后续产品简报、原型或交付已完成。
 11. 先确认或推断 `工作目标模式`：验证价值、优化线上指标、业务评审、设计评审或研发交付；如果无法从上下文判断，用一个选择题询问。
 12. 判断 `问题定义模式`：创业验证、内部业务优化或设计讨论；如果输入同时命中多个模式，按风险选择更严格的模式，并在输出里说明模式来源。
@@ -110,19 +110,23 @@ done
 22. If the missing item is a fact, ask one `Q`; if facts are enough but a tradeoff changes direction, scope, promise, experiment framing, or handoff, ask one `D`.
 23. 如果用户只给功能愿望，不能把功能名直接写成核心问题；先追问真实用户、触发场景、当前损失或现状替代。
 24. 进入方案方向、前提确认或产品简报前，必须识别当前替代方案和最小可赢切口；如果仍宽泛，先收窄，不直接写完整产品简报。
-25. 在信息足够后，输出 2-4 条前提确认；用户不同意时回到对应 `Q` 或 `D`。
-26. Read `../pmworkspace-shared/references/decision-question-mode.md`; when a missing answer would change product direction, prototype scope, experiment framing, user promise, or handoff, ask it as a D-numbered choice question.
-27. 输出价值判断先行的简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。未完成前提确认或关键 D 拍板时，不能标记为 `已对齐`。
-28. 平台脚本可用时，用 `pmw-project set-name "<中文项目名>"` 保存中文项目名，用 `pmw-log question`、`pmw-log decision` 和 `pmw-run event` 记录关键选择。
+25. 进入前提确认、策略审查或产品简报前，必须通过产品发现深度门槛：深度交付或现有线上功能优化通常至少覆盖 4 个价值澄清维度，并且必须包含 `目标用户与触发时刻`、`用户现状与当前替代`、`真实问题与当前损失`、`主目标与反指标`。一个 `Q` 加一个 `D` 不能代表已完成产品定位、用户现状、真实损失、目标和反指标的分析；`D` 只能拍板取舍，不能替代事实诊断。
+26. 如果产品发现深度不足，当前价值缺口写成 `产品发现深度不足`，只问一个当前最大缺口 `Q`，并说明它会影响产品定位、用户任务、价值交换、首屏主张、反指标或不可虚构项中的哪一项；不要进入 `$pm-brief`。
+27. 在信息足够后，输出 2-4 条前提确认；用户不同意时回到对应 `Q` 或 `D`。
+28. Read `../pmworkspace-shared/references/decision-question-mode.md`; when a missing answer would change product direction, prototype scope, experiment framing, user promise, or handoff, ask it as a D-numbered choice question.
+29. 输出价值判断先行的简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。未完成前提确认、产品发现深度门槛或关键 D 拍板时，不能标记为 `已对齐`。
+30. 平台脚本可用时，用 `pmw-project set-name "<中文项目名>"` 保存中文项目名，用 `pmw-log question`、`pmw-log decision` 和 `pmw-run event` 记录关键选择。
 
 ## 价值澄清追问
 
 从诊断维度池里优先选择一个动态问题。固定的是维度，不是用户可见的问题文本或标题。
 
+- 产品定位与链路角色
 - 强痛人群与触发时刻
 - 现状替代与当前损失
 - 最小可赢切口
 - 主目标与反指标
+- 价值交换与信任边界
 - 证据与最弱假设
 - 约束边界与不可虚构项
 - 原型内容重点

@@ -44,6 +44,14 @@
 pmw-artifact add --kind browser_evidence --title "线上参考：<页面/流程>" --status "已采集" --source-skill pm-brief --path "<截图路径>" --url "<线上 URL>" --summary "<页面任务、视觉基线、交互模式、必须保留、可以挑战>"
 ```
 
+当线上参考是截图或等价视觉基线时，还要登记 `visual_baseline`，把截图转成出图可执行约束：
+
+```bash
+pmw-image-audit baseline --reference "<截图路径>" --register
+```
+
+`visual_baseline` 至少包含参考图路径、参考像素尺寸、逻辑宽度推断、目标输出像素、核心字号层级、页面边距、模块间距、底部栏高度和参考优先级。只登记 `browser_evidence` 不足以放行 image-2 prompt。
+
 如果参考缺失、读取失败或权限不足，不创建假证据；使用 `pmw-run event --type evidence` 记录 `线上参考状态：读取失败/待补充`。
 
 ## 缺失时的提问
@@ -71,6 +79,8 @@ pmw-artifact add --kind browser_evidence --title "线上参考：<页面/流程>
 承接页面：<上一步页面、入口或来源>
 相似线上模式：<相似结果页、状态页、活动页、表单页；没有则写“暂无”>
 视觉基线：<线上截图 / 用户确认无参考后的概念稿 / AutoDesign 默认生产基线 / 其他设计系统>
+视觉基线状态：<已登记 visual_baseline / 缺目标输出像素 / 缺失待补充 / 不适用>
+目标输出像素：<参考图尺寸 + 目标输出尺寸；没有参考时写不适用>
 ```
 
 如果 `线上参考需求：需要` 且 `线上参考状态：缺失待补充`，产品简报确认状态不能标记为 `已对齐`。

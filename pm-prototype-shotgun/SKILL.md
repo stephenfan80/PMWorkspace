@@ -93,6 +93,7 @@ done
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" readiness --target prototype 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" latest --kind product_brief 2>/dev/null || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" latest --kind visual_baseline 2>/dev/null || true
 ```
 
 ## Hard Gates
@@ -114,15 +115,16 @@ done
 - Read `../pmworkspace-shared/references/prototype-quality-review.md`.
 - Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-prototype-shotgun` 且没有当前 run，再创建 runtime run.
 - 原型出图前必须先输出 `原型出图判断`，说明我建议出哪些图、暂时不出哪些图、为什么，以及图片生成前门槛；不能直接写 image-2 prompt。
-- 原型出图前必须运行 Product Readiness Dashboard；`产品简报`、`产品简报确认`、`Zoon`、`线上参考`、`方案差异`、`方案方向确认`、`不可虚构项` 未通过时，停止在第一条阻断门槛，不写 image-2 prompt。默认只向用户展示短 verdict 和第一条阻断原因，完整表格只在审计 / 调试输出中展示。`数据佐证` 和 `复审状态` 出图前展示但不阻断，出图后再进入复审。
+- 原型出图前必须运行 Product Readiness Dashboard；`产品简报`、`产品简报确认`、`Zoon`、`线上参考`、必要的 `视觉基线`、`方案差异`、`方案方向确认`、`不可虚构项` 未通过时，停止在第一条阻断门槛，不写 image-2 prompt。默认只向用户展示短 verdict 和第一条阻断原因，完整表格只在审计 / 调试输出中展示。`数据佐证` 和 `复审状态` 出图前展示但不阻断，出图后再进入复审。
 - 产品简报未“已对齐”时，不写提示词，不生成图片，不生成 HTML，不输出交付稿。
-- 现有功能迭代必须有当前截图或等价视觉基线。
+- 现有功能迭代必须有当前截图或等价视觉基线；只登记线上参考不够，还必须把截图转成 `visual_baseline`，包含参考图尺寸、目标输出像素、字号层级、间距节奏、组件密度和底部栏约束。
 - 新页面如果承接线上流程、结果页、状态页或生产样式，必须先拿到线上参考，或得到用户明确确认“没有线上参考，按新页面概念稿推进”。
 - 多方案生成前先确认概念方向，除非用户明确批准使用默认方向。
 - 设计原型默认只能使用 image-2 / 图像生成输出方案图片；HTML 只在用户明确要求“HTML”“可交互网页”“前端实现”或“本地网页原型”时允许。
 - 如果当前环境无法生成 image-2 图片，停止并说明无法出图；不要用 HTML、Markdown 线框或拼图替代设计原型。
 - 默认移动端优先：标准首屏使用 iPhone 17 `W402 x H874`；结果页、报告页、详情页等长内容屏幕允许使用移动长板 `W402 x H自适应（最低 H874）`。
 - 移动长板必须保持宽度 `402` 不变，高度按内容自然增长且不得低于 `874`；不能为了塞进 `874` 高度而缩小字体、压缩间距、裁切内容或遮挡底部操作区。
+- 汽车之家 / AutoDesign 生产页必须额外声明目标输出像素：默认 3x 移动端长板，宽度不低于参考截图 95%，优先 `1179-1206px`；高度按内容自然增长。缺视觉基线或缺目标输出像素时不写 image-2 prompt。
 - 只有用户明确要求，或看板/内部工具密度确实需要时，才使用桌面端。
 
 ## Multi-Scheme Rules
@@ -145,12 +147,13 @@ done
 4. 对每个请求的屏幕运行线上参考门槛；如果必要参考是 `缺失待补充`，先停下来问，不写图片提示词。
 5. Read `design-heuristics.md`, `scenario-experts.md`, and `adversarial-review.md` as needed, but do not change scope or promise without writing the decision back to the product brief.
 6. Use `pmw-memory user-summary` plus `pmw-memory taste-summary` when available so rejected directions are not repeated as “new”方案 and local product cognition can improve recommendations; if memory changes the recommendation, explicitly say `基于过往偏好，我建议...` or `基于本地产品认知...`, and never let memory override the current brief, Zoon, anti-metric, non-fiction boundary, design system, or reference gate.
-7. 输出 `原型出图判断`：先说明我建议这轮出哪些单图、暂时不出哪些屏、为什么这些图能帮助 PM 做产品选择，以及图片生成前门槛。必须展示 `产品简报确认`、`方案方向确认` 和 `数据佐证` 状态；数据缺失时写明 `数据佐证：未提供，本方案存在未验证风险`。
+7. 输出 `原型出图判断`：先说明我建议这轮出哪些单图、暂时不出哪些屏、为什么这些图能帮助 PM 做产品选择，以及图片生成前门槛。必须展示 `产品简报确认`、`方案方向确认`、`数据佐证`、`视觉基线状态` 和 `目标输出像素`；数据缺失时写明 `数据佐证：未提供，本方案存在未验证风险`。
 8. Propose concept directions with names and tradeoffs. 方案差异必须通过 `方案差异质量`：至少说明每个方向在页面结构、信息架构、交互路径、信任表达或关键任务上的不同；如果只是视觉皮肤差异，停止并重拟方向。
-9. 如果用户、brief、Zoon、截图或参考材料命中汽车之家、AutoDesign、之家或 Autohome，默认载入 AutoDesign 约束。产品 UI 优先使用 AutoDesign token；品牌 VI 和字体包只作为品牌露出、活动视觉或特殊场景参考，字体授权必须保留边界，不能写成生产可用承诺。
+9. 如果用户、brief、Zoon、截图或参考材料命中汽车之家、AutoDesign、之家或 Autohome，默认载入 AutoDesign 约束。产品 UI 优先使用 AutoDesign token；品牌 VI 和字体包只作为品牌露出、活动视觉或特殊场景参考，字体授权必须保留边界，不能写成生产可用承诺。若用户提供了线上截图，截图基线优先于泛化 AutoDesign token，并且必须用 `visual_baseline` 锁定参考尺寸与目标输出像素。
 10. 多方案生成前确认方案方向；如果用户已经明确批准默认方向，记录 `方案方向确认：默认方向已批准`，否则停在方向确认，不写 image-2 提示词。
-11. For each image output unit, declare scheme, screen task, canvas, main goal, anti-metric, non-fiction boundary, 线上参考状态, design system, image-2 status, and brief dependency. 一个输出单元等于一张图片，不能把多个方案或多个屏幕合成拼图。
+11. For each image output unit, declare scheme, screen task, canvas, target output pixels, main goal, anti-metric, non-fiction boundary, 线上参考状态, 视觉基线状态, design system, image-2 status, and brief dependency. 一个输出单元等于一张图片，不能把多个方案或多个屏幕合成拼图。
     - `画布` 字段只能使用明确设备尺寸：短内容写 `标准首屏：iPhone 17 W402 x H874`；长内容写 `移动长板：iPhone 17 W402 x H自适应（最低 H874）`。
+    - `目标输出像素` 字段在有线上截图时必须写明确宽高或宽度 + 自适应高度；汽车之家生产页通常写 `参考截图尺寸：1179 x 2556；目标输出：3x 长板，宽度 1179-1206px，高度按内容增长`。
     - 移动长板仍是一张连续移动端界面，不得拆成多张图、拼图、多屏故事板或桌面端。
 12. 把批量请求拆成顺序单图队列：`3 个方案` -> 3 个输出单元，`3 个方案 x 2 个屏幕` -> 6 个输出单元。每个输出单元单独调用一次 image-2；不要把多个单元合成一个 prompt。
 13. 平台脚本可用时，先用 `pmw-prototype-board add` 登记每个方案/屏幕单元；如果写入失败，输出 `方案比较板：未写入（原因）`，不能假装已记录。
@@ -158,7 +161,7 @@ done
 15. 数据佐证缺失时不阻断出图，但必须把 `未验证风险` 写入用户可见输出和每个 image-2 prompt 的不可虚构项：不得展示确定性承诺、真实验证过的数值、已核验结果或无法兑现的数据能力，只能使用示例、区间、占位或明确标注假设。
 16. 在每个输出单元的图片生成前门槛通过后，逐个 Generate with image-2 / image generation。每次生成只服务当前一个输出单元，并在 prompt 中写明禁止拼图、并排比较、一图多屏、一图多方案。 如果当前环境无法生成 image-2，停止并说明，不用 HTML、Markdown 线框或方案比较板替代。
 17. 每张图出图后用 `pmw-prototype-board image` 补充图片路径或 URL；单张失败时记录 `生成失败` 或 `待重试`，不能把批次写成全成功。用户反馈后用 `pmw-prototype-board score` 记录评分。
-18. Run `prototype-quality-review.md`, then route substantial post-image review to `$pm-prototype-review`.
+18. Run `prototype-quality-review.md`; if a reference screenshot exists, first run `pmw-image-audit audit --image <生成图> --reference <参考图>` and expose `视觉审计：通过 / 需要重出`. Then route substantial post-image review to `$pm-prototype-review`.
 19. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单，它会登记 `prototype_manifest` 到 Product Artifact Flow；再用 `pmw-run event --type artifact` 记录产物。
 20. Record approved/rejected design feedback with `pmw-log taste`, including scenario, feedback target, source, scope, and confidence when available.
 21. 批量输出后运行 `pmw-dashboard status`，最终说明只给每张图的业务状态和下一步；方案比较板、产物流动和证据状态默认留在审计中。
@@ -174,6 +177,8 @@ done
 - 为什么：
 - 准备度：<可出图 / 不可出图>，<第一阻断原因或关键门槛已通过>
 - 数据佐证：<已佐证 / 未提供，本方案存在未验证风险 / 不适用>
+- 视觉基线：<已登记 / 缺目标输出像素 / 缺失待补充 / 不适用>
+- 目标输出像素：<例如 1206 x 自适应长板；无参考时说明不适用>
 - 下一步：
 
 方案方向：
@@ -192,6 +197,8 @@ done
 - 不可虚构项：
 - 产品简报版本：
 - 线上参考状态：
+- 视觉基线状态：
+- 目标输出像素：
 - 设计系统：
 - image-2 状态：
 
@@ -208,6 +215,8 @@ done
 - 图片生成前门槛：
 - 场景：
 - 线上参考：
+- 视觉基线：
+- 目标输出像素：
 - 设计系统：
 - 方案差异质量：
 - 方案方向确认：
@@ -218,6 +227,7 @@ done
 - image-2 状态：
 - 已生成 / 计划生成的图片：
 - 质量检查：
+- 视觉审计：
 - 已保存清单：
 - 方案比较板：
 - 证据状态：

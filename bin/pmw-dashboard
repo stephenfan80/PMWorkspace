@@ -165,6 +165,26 @@ def latest_browser_evidence(root: pathlib.Path) -> dict:
     return rows[-1] if rows else {}
 
 
+def latest_visual_baseline(root: pathlib.Path, run_id: str = "") -> dict:
+    if run_id:
+        return current_artifact(root, "visual_baseline", run_id)
+    rows = artifact_rows(root, "visual_baseline")
+    return rows[-1] if rows else {}
+
+
+def has_target_pixels(row: dict) -> bool:
+    text = " ".join(
+        str(row.get(key) or "")
+        for key in ["status", "title", "summary", "path", "url"]
+    )
+    if not text:
+        return False
+    pixel_pair = r"\d{3,5}\s*(?:x|X|×)\s*\d{3,5}"
+    pixel_width = r"\d{3,5}\s*(?:px|像素|宽)"
+    target_pattern = rf"(目标输出|目标输出像素|target|Target)[^。\n；;]*(?:{pixel_pair}|{pixel_width})"
+    return bool(re.search(target_pattern, text))
+
+
 def read_text(path_value: str) -> str:
     if not path_value:
         return ""
@@ -227,6 +247,19 @@ def browser_evidence_rows(root: pathlib.Path, limit: int = 5) -> list[str]:
         rendered.append(
             f"{redact_sensitive(str(row.get('status') or '未记录'))}｜"
             f"{redact_sensitive(str(row.get('title') or '浏览器证据'))}｜"
+            f"{redact_sensitive(location)}｜"
+            f"{redact_sensitive(str(row.get('summary') or '未记录摘要'))}"
+        )
+    return rendered
+
+
+def visual_baseline_rows(root: pathlib.Path, limit: int = 5) -> list[str]:
+    rendered = []
+    for row in artifact_rows(root, "visual_baseline", limit):
+        location = artifact_location(row) or "未记录位置"
+        rendered.append(
+            f"{redact_sensitive(str(row.get('status') or '未记录'))}｜"
+            f"{redact_sensitive(str(row.get('title') or '视觉基线'))}｜"
             f"{redact_sensitive(location)}｜"
             f"{redact_sensitive(str(row.get('summary') or '未记录摘要'))}"
         )
@@ -440,6 +473,7 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
 
     browser_evidence = latest_browser_evidence(root)
     if browser_evidence:
+        reference_has_visual_source = True
         reference_text = (
             f"{browser_evidence.get('status', '')} "
             f"{browser_evidence.get('title', '')} "
@@ -453,6 +487,10 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         )
     else:
         reference_event = latest_event(events, ["线上参考", "生产基线", "当前截图", "截图", "录屏"], {"evidence", "gate"})
+        reference_has_visual_source = bool(reference_event) and contains_any(
+            f"{reference_event.get('title', '')} {reference_event.get('summary', '')}",
+            ["生产基线", "当前截图", "截图", "录屏", "视觉基线"],
+        )
         reference_text = f"{reference_event.get('status', '')} {reference_event.get('summary', '')}"
         reference_ready = bool(reference_event) and not contains_any(reference_text, ["缺失", "待补充", "未判断", "失败"])
         reference_status = reference_event.get("status") or "未判断"
@@ -465,6 +503,49 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
             redact_sensitive(str(reference_evidence)),
             "继续" if reference_ready else "先判断是否承接线上流程；必要时补截图、录屏或相似状态页",
             reference_ready,
+        )
+    )
+
+    visual_baseline = latest_visual_baseline(root, run_id)
+    visual_text = (
+        f"{visual_baseline.get('status', '')} "
+        f"{visual_baseline.get('title', '')} "
+        f"{visual_baseline.get('summary', '')}"
+    )
+    visual_required = reference_ready and reference_has_visual_source
+    visual_has_target = has_target_pixels(visual_baseline)
+    visual_ready = bool(visual_baseline) and visual_has_target and not contains_any(
+        visual_text,
+        ["缺失", "待补充", "未判断", "失败", "不可访问", "未登记"],
+    )
+    if not visual_required:
+        visual_status = "不适用" if not reference_ready else "未启用"
+        visual_evidence = "无已采集线上截图；若是现有功能迭代，线上参考门槛会先阻断"
+        visual_action = "继续" if reference_ready else "先补线上参考"
+        visual_passed = True
+    elif not visual_baseline:
+        visual_status = "未登记"
+        visual_evidence = "已采集线上参考，但未登记 visual_baseline"
+        visual_action = "先登记 visual_baseline：参考图路径、像素尺寸、目标输出像素、字号 / 间距 / 密度基线"
+        visual_passed = False
+    elif not visual_has_target:
+        visual_status = "缺目标输出像素"
+        visual_evidence = f"visual_baseline：{visual_baseline.get('title') or '视觉基线'}｜{visual_baseline.get('summary') or artifact_location(visual_baseline) or '未记录目标输出'}"
+        visual_action = "补齐目标输出像素；汽车之家生产页通常写 3x 长板，宽度不低于参考截图 95%，优先 1179-1206px"
+        visual_passed = False
+    else:
+        visual_status = visual_baseline.get("status") or "已登记"
+        visual_evidence = f"visual_baseline：{visual_baseline.get('title') or '视觉基线'}｜{visual_baseline.get('summary') or artifact_location(visual_baseline) or '已记录'}"
+        visual_action = "继续；image-2 prompt 必须写入视觉基线和目标输出像素"
+        visual_passed = visual_ready
+    rows.append(
+        gate_result(
+            "视觉基线",
+            visual_required,
+            redact_sensitive(str(visual_status)),
+            redact_sensitive(str(visual_evidence)),
+            visual_action,
+            visual_passed,
         )
     )
 
@@ -653,6 +734,7 @@ def render_status(run_id: Optional[str]) -> str:
     artifacts = [e for e in events if e.get("event") == "artifact"]
     artifact_flow = artifact_flow_rows(root)
     browser_evidence = browser_evidence_rows(root)
+    visual_baselines = visual_baseline_rows(root)
     review_specialists = review_specialist_rows(root)
     run_decisions = [e for e in events if e.get("event") == "decision"]
     tuning = read_jsonl(root / "question-tuning.jsonl")[-5:]
@@ -688,6 +770,8 @@ def render_status(run_id: Optional[str]) -> str:
     lines.extend(bullet_or_empty([f"{r.get('status', '')}｜{r.get('title', '')}：{r.get('summary', '')}" for r in evidence]))
     lines.extend(["", "## 浏览器证据", ""])
     lines.extend(bullet_or_empty(browser_evidence))
+    lines.extend(["", "## 视觉基线", ""])
+    lines.extend(bullet_or_empty(visual_baselines))
     lines.extend(["", "## 决策与问题", ""])
     decision_rows = [f"{r.get('status', '')}｜{r.get('title', '')}：{r.get('summary', '')}" for r in run_decisions]
     decision_rows.extend([f"{r.get('title', r.get('question_id', ''))}：{r.get('body') or r.get('summary') or r.get('user_choice') or ''}" for r in decisions + questions])

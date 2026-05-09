@@ -1,6 +1,6 @@
 # Product Artifact Flow
 
-PMWorkspace 产物流动层让每一步产物都能被下游技能读取，而不是只存在于对话里。产品简报、原型清单、复审结论和交付稿必须登记为下游可读产物。浏览器证据也以 `browser_evidence` 产物进入同一条 Product Artifact Flow。
+PMWorkspace 产物流动层让每一步产物都能被下游技能读取，而不是只存在于对话里。产品简报、原型清单、复审结论和交付稿必须登记为下游可读产物。浏览器证据和视觉基线也进入同一条 Product Artifact Flow：`browser_evidence` 说明线上参考在哪里，`visual_baseline` 说明参考图如何转成可执行的尺寸、字号、间距和密度约束。
 
 ## 目标
 
@@ -15,6 +15,7 @@ PMWorkspace 产物流动层让每一步产物都能被下游技能读取，而�
 | `$pm-jobs` / `$pm-strategy-review` | `decision`、`strategy_review` | `$pm-brief` | 把事实、范围、策略取舍写进产品契约。 |
 | `$pm-brief` | `product_brief` | `$pm-prototype-shotgun`、`$pm-handoff` | 作为原型、复审和交付的产品真源。 |
 | 浏览器 / 截图 / Zoon 检查 | `browser_evidence` | `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` | 记录线上流程截图、状态页、竞品参考或 Zoon 漂移证据，支撑线上参考门槛。 |
+| 视觉基线 | `visual_baseline` | `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` | 记录参考图路径、像素尺寸、逻辑宽度推断、目标输出像素、核心字号层级、页面边距、模块间距、底部栏高度和参考优先级。 |
 | `$pm-prototype-shotgun` | `prototype_manifest` | `$pm-prototype-review` | 绑定方案、屏幕、主目标、反指标、不可虚构项和 brief 版本。 |
 | `$pm-prototype-review` | `prototype_review`、`repair_brief` | `$pm-prototype-shotgun`、`$pm-handoff` | 决定可通过、需要重出、需要 PM 拍板或补参考。 |
 | `$pm-handoff` | `handoff`、`acceptance_seed`、`release_doc_seed` | `document-release`、`ship`、`qa` | 让文档同步、发布准备和 QA 不重新猜验收口径。 |
@@ -34,11 +35,16 @@ pmw-artifact add \
 
 pmw-artifact latest --kind product_brief
 pmw-artifact latest --kind browser_evidence
+pmw-artifact latest --kind visual_baseline
 pmw-artifact flow
 pmw-artifact flow --details
 pmw-dashboard status
 pmw-dashboard status --details
 ```
+
+`visual_baseline` 的最小摘要包含：参考图路径、参考像素尺寸、逻辑宽度推断、目标输出像素、核心字号层级、页面边距、模块间距、底部栏高度、参考优先级和不可压缩项。有线上截图时，视觉基线优先级高于泛化 AutoDesign token；缺视觉基线时，现有功能迭代不能写 image-2 prompt。
+
+可用 `pmw-image-audit baseline --reference <截图路径> --register` 从参考图生成并登记视觉基线；出图后用 `pmw-image-audit audit --image <生成图> --reference <参考图>` 做尺寸 / 长板复审。
 
 `pmw-log brief`、`pmw-log prototype` 和 `pmw-log handoff` 会自动写入 `artifact-flow.jsonl`；手动命令只用于额外产物、修复 brief、验收种子或文档同步种子。
 

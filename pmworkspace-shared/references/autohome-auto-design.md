@@ -10,6 +10,7 @@ This file is a reusable summary, not a copy of the internal design site. If the 
 - The goal is consistent product experience, reusable components, and production-friendly design-to-development handoff.
 - Prototypes should feel like realistic Autohome app screens, not marketing posters or decorative concept art.
 - Product UI uses AutoDesign as the primary source of visual truth. Brand VI material is secondary and should not override product UI tokens unless the task is explicitly a brand/marketing visual.
+- When the user provides a current Autohome production screenshot, that screenshot becomes the highest visual baseline for the current prototype. Its pixel size, typography hierarchy, spacing rhythm, component density, and bottom bar behavior override generic AutoDesign guidance.
 
 ## Color Tokens
 
@@ -56,6 +57,7 @@ Usage:
 - Maintain clear hierarchy with few type levels.
 - Ensure primary text contrast is production-readable; do not use faint text for important values.
 - Local or brand font packages require authorization confirmation. Do not present custom fonts as production-ready defaults in generated product UI.
+- For production screenshot reproduction, keep visual hierarchy close to the reference: nav titles and vehicle/model titles should remain prominent, price numbers should stay the dominant numeric layer, CTA text should remain readable, and chart labels / tags / helper text must not be compressed to tiny sizes to fit more content.
 
 ## Brand VI And Font Boundary
 
@@ -68,6 +70,7 @@ Usage:
 
 - Standard design canvas reference: 375px mobile width.
 - For generated prototypes, use the user's requested canvas, commonly iPhone 17 `402 x 874`, while preserving AutoDesign spacing logic.
+- For Autohome production-page prototypes with a screenshot reference, also lock the pixel output. Default target is a 3x mobile long board: width no lower than the reference screenshot's 95%, preferably `1179-1206px` when the reference is a modern iPhone screenshot. Height should grow with content; do not squeeze first screen, explanation modules, sample lists, and bottom CTA into a shorter canvas.
 - Use an 8-point grid for page structure and a 4-point grid for fine adjustment.
 - Spacing scale: `4, 8, 12, 16, 24, 32, 48, 64px`.
 - Use closer spacing for strongly related information and larger spacing for separate modules.
@@ -141,9 +144,12 @@ Use these rules for lead forms:
 ```text
 AutoDesign production constraints:
 - Use Autohome mobile app style, not a marketing poster.
+- Screenshot baseline: if a production screenshot is provided, follow its pixel size, typography hierarchy, spacing rhythm, card density, chart density, bottom toolbar height, and long-board proportions before applying generic tokens.
+- Pixel output: for a reference such as `1179 x 2556`, target a 3x mobile long board with width no lower than 1179px and preferably 1206px. Height is adaptive and may exceed the reference when content is longer.
 - Colors: primary blue #0088FF, blue gradient #0099FF -> #0088FF, commercial orange #FF6600, primary text #111E36, secondary text #464E64, weak text #828CA0, divider #E6E9F0, page background #F8F9FC, white cards.
 - Typography: system Chinese font, prominent numbers may use HarmonyOS Sans SC; clear hierarchy using 12/14/16/18/20/24/28/32px sizes.
 - Layout: 8-point grid for structure, 4-point grid for details; spacing 4/8/12/16/24/32; consistent margins and gutters.
+- Do not shrink Chinese text, chart axis labels, cards, tags, or bottom CTA to force more modules into the image.
 - Radius: small buttons/tags 2px, cards/images 3px, dialogs/toasts/bottom sheets 6px, large bottom sheets 8px.
 - Buttons: one primary action per screen; bottom primary button height 48px, blue gradient, concise verb-object text.
 - Forms: short labels, phone number visible and editable on the first screen for lead forms, required agreement near submit.
@@ -164,4 +170,5 @@ Before generating or finalizing an Autohome prototype, check:
 - Are privacy agreements near the submit action?
 - If calls are expected, is the reason and scope clearly explained?
 - Are spacing, radius, and typography aligned to the profile?
+- If a production screenshot is provided, does the generated image pass size / long-board audit against the reference, and does it avoid visibly smaller fonts or tighter spacing?
 - Does the result page fulfill the user's promised value before asking for more action?

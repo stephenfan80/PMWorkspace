@@ -17,6 +17,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - `产品简报来源`：已对齐产品简报版本、Zoon URL / 快照状态、最新漂移检查结论。
 - `Product Readiness Dashboard`：用 `pmw-dashboard readiness --target prototype` 统一检查产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态；verdict 不是 `可出图` 时停止。默认只展示短 verdict 和第一阻断原因，完整表格只在审计 / 调试时展开。
 - `图片生成前门槛`：产品简报已对齐、Zoon 无实质漂移、线上参考门槛通过、设计系统已载入、image-2 可用。
+- `视觉基线`：当用户提供线上截图或生产视觉参考时，必须登记 `visual_baseline`，记录参考图路径、像素尺寸、逻辑宽度推断、目标输出像素、核心字号层级、页面边距、模块间距、底部栏高度和参考优先级。
 - `方案差异质量`：每个方案差异来自页面结构、信息架构、交互路径、信任表达或关键任务；如果只是配色、圆角、插画、卡片皮肤不同，停止并重拟方向。
 - `方案方向确认`：用户已确认方向，或明确批准使用默认方向；未确认时只输出方向和取舍，不写图片提示词。
 - `输出单元清单`：把每个 `方案 + 屏幕任务` 拆成一张独立图片，并绑定主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统、image-2 状态和画布。
@@ -44,6 +45,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - 工作目标模式、Q 诊断、前提确认和必要 D 拍板已经完成。
 - 变化类型已判断为新功能或现有功能迭代。
 - 现有功能迭代已包含当前生产截图或等价基线证据。
+- 已提供线上截图或生产视觉参考时，已登记 `visual_baseline`，且其中包含目标输出像素；缺视觉基线或缺目标像素时，不写 image-2 prompt。
 - 已读取 `production-reference-gate.md`，并判断新页面是否承接线上流程、结果状态或生产样式。
 - 如果新页面需要线上参考，用户已提供参考，或已明确确认没有线上参考并批准按概念稿推进。
 - 对话或 Zoon 中已有快速版、标准版或深度版产品简报。
@@ -53,6 +55,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - 每张图片已经绑定方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统和 image-2 状态。
 - 每个输出单元已经登记到 Prototype Shotgun Board，或已说明脚本不可用的原因。
 - 画布决策遵循移动端优先：标准首屏使用 iPhone 17 `W402 x H874`；结果页、报告页、详情页等长内容屏幕可以使用移动长板 `W402 x H自适应（最低 H874）`；除非用户明确要求桌面端，或看板/内部工具确实需要大屏密度。
+- 汽车之家 / AutoDesign 生产页还必须声明 `参考截图尺寸` 和 `目标输出像素`；线上截图基线覆盖泛化 token。目标默认是 3x 移动端长板，宽度不低于参考截图的 95%，优先 `1179-1206px`；高度按内容自然增长。
 - 已通过 `design-system-workflow.md` 载入 AutoDesign 生产基线。
 - 对抗审查中的实质改动已写回产品简报。
 - 已运行 Product Readiness Dashboard，且出图前 required 行的 verdict 是 `可出图`。
@@ -93,6 +96,8 @@ For every image generation request, declare the output unit before prompting:
 - 反指标：<这个屏幕不能伤害的信任、质量或体验指标>
 - 不可虚构项：<不能画进屏幕的未支持数据、能力、承诺或动作>
 - 线上参考状态：<已提供线上参考 / 无线上参考已确认 / 缺失待补充 / 不适用>
+- 视觉基线状态：<已登记，参考尺寸 / 目标输出像素 / 缺失待补充 / 不适用>
+- 目标输出像素：<例如 1206 x 自适应长板；若有参考截图，写参考尺寸和目标宽高>
 - 设计系统：<AutoDesign / 用户提供设计系统 / 截图基线 / 默认生产基线>
 - image-2 状态：<计划生成 / 已生成 / 生成失败 / 待重试 / 需要重出>
 - 依赖：<产品简报版本和来源>
@@ -104,6 +109,7 @@ Rules:
 - 默认短内容输出单元画布是 `标准首屏：iPhone 17 W402 x H874`。
 - 结果页、报告页、详情页等长内容输出单元允许写 `移动长板：iPhone 17 W402 x H自适应（最低 H874）`；宽度必须固定为 `402`，高度可以超过 `874` 且不得低于 `874`。
 - 移动长板必须是一张连续移动端界面；不要为了塞进 `H874` 缩小字体、压缩间距、裁切内容、遮挡底部操作区，或拆成多图 / 拼图 / 多屏故事板。
+- 有线上截图时，图片输出契约必须同时写逻辑画布和像素输出：逻辑画布用于产品结构，目标输出像素用于 image-2 生成规格。汽车之家生产页默认写 `参考截图尺寸：<w x h>`、`目标输出：3x 移动端长板，宽度不低于参考截图 95%，优先 1179-1206px，高度按内容增长`。
 - 桌面端输出单元必须说明为什么移动端不合适。
 - 除非用户明确要展示板，否则不要创建拼贴图、三联图、并排比较图、一图多屏、一图多方案或多屏故事板。
 - 如果用户要 `3 个方向`，确认方向后生成三张独立图片。
@@ -131,6 +137,7 @@ Rules:
   - 页面类型：<新页面 / 现有页面迭代 / 不明确>
   - 线上参考需求：<需要 / 不需要 / 待判断>
   - 线上参考状态：<已提供线上参考 / 无线上参考已确认 / 缺失待补充 / 不适用>
+  - 视觉基线：<参考图路径、参考尺寸、目标输出像素、优先级>
   - 承接页面：<上一步页面、入口或来源>
   - 相似线上模式：<相似结果页、状态页、活动页、表单页>
   - 核心问题：<具体问题和当前损失>
@@ -160,11 +167,12 @@ Rules:
 
 视觉要求：
 - 平台/设备：<默认标准首屏 iPhone 17 W402 x H874；长内容使用移动长板 iPhone 17 W402 x H自适应（最低 H874）；只有明确要求或确有必要时用桌面端>
+- 输出像素：<有线上截图时写参考截图尺寸和目标输出像素；汽车之家生产页默认 3x 长板，宽度 1179-1206px，高度自适应>
 - 字体：<品牌字体或参考风格>
 - 色彩：<品牌/参考色>
 - 布局密度：<紧凑 / 标准 / 宽松>
 - 设计系统约束：<适用时粘贴 design-system-workflow.md 的简短摘要>
-- AutoDesign 基线：除非用户提供的设计系统明确覆盖，使用接近生产的 AutoDesign token、间距、组件和反模式约束。汽车之家产品 UI 优先使用 AutoDesign token，品牌 VI 色和字体包只作为品牌露出、活动视觉或特殊场景参考，不能覆盖产品 UI token，也不能写成字体已授权可生产。
+- AutoDesign 基线：除非用户提供的设计系统明确覆盖，使用接近生产的 AutoDesign token、间距、组件和反模式约束。汽车之家产品 UI 中，线上截图的字号层级、间距节奏、组件密度和长板尺寸优先于泛化 AutoDesign token；品牌 VI 色和字体包只作为品牌露出、活动视觉或特殊场景参考，不能覆盖产品 UI token，也不能写成字体已授权可生产。
 - 避免：不要红色标注框、不要水印、不要外部说明、不要文字重叠。
 ```
 
@@ -175,10 +183,13 @@ Use this block by default as the production-quality visual baseline. If the prod
 ```text
 AutoDesign production constraints:
 - Make it look like a real Autohome mobile app screen, not a marketing poster or abstract concept.
-- Canvas: iPhone 17 mobile width W402. Use H874 for standard first-screen prototypes; for long result/report/detail pages, use adaptive height with minimum H874 while keeping W402 fixed. Preserve AutoDesign's 375px mobile canvas logic.
+- Visual baseline first: if a production screenshot is provided, match its typography hierarchy, spacing rhythm, component density, bottom bar height, and long-board proportions before applying generic AutoDesign tokens.
+- Canvas: iPhone 17 logical mobile width W402. Use H874 for standard first-screen prototypes; for long result/report/detail pages, use adaptive height with minimum H874 while keeping W402 fixed. Preserve AutoDesign's 375px mobile canvas logic.
+- Pixel output: for Autohome production-page prototypes with screenshot reference, generate a 3x mobile long board. Write the reference screenshot size, for example `参考截图尺寸：1179 x 2556`; write target output, for example `目标输出：宽度不低于 1179px，优先 1206px，高度按内容自然增长`. Do not output a narrow 851px image when the reference is 1179px wide.
 - Colors: primary blue #0088FF, blue gradient #0099FF -> #0088FF, commercial orange #FF6600 only for price/deal/subsidy emphasis, cyan #25C9FF only for IM-like emphasis, primary text #111E36, secondary text #464E64, weak text #828CA0, divider #E6E9F0, page background #F8F9FC, white cards.
 - Typography: system Chinese font; prominent numbers can use HarmonyOS Sans SC; use production-like sizes from 12/14/16/18/20/24/28/32px with clear hierarchy.
 - Layout: 8-point grid for structure and 4-point grid for details; use spacing 4/8/12/16/24/32px; align cards, fields, and CTAs to consistent margins.
+- Do not shrink Chinese typography, chart axis labels, cards, tags, CTA text, or bottom toolbar just to fit more modules in a shorter canvas. If the screen includes first screen + explanation module + sample list + bottom CTA, use a longer board.
 - Radius and depth: small tags/buttons 2px, cards/images 3px, dialogs/toasts/bottom sheets 6px, large bottom sheets 8px; use subtle shadow only where hierarchy needs it.
 - Components: use AutoDesign-like NavBar, Button, Form, ToolBar, Tag, card, and result modules.
 - Buttons: one dominant primary action per screen; bottom primary button height 48px, blue gradient, concise verb-object copy.
@@ -260,6 +271,7 @@ Constraints:
 - 产品意图块足够具体，可以指导信息层级。
 - 对抗审查决策已反映在屏幕内容中。
 - 适用时已命名设计系统。
+- 已采集线上截图时，提示词已写入 `视觉基线状态`、`参考截图尺寸` 和 `目标输出像素`；缺任一项时停止。
 - 提示词包含具体颜色、字体、间距、圆角和组件约束。
 - 提示词明确声明一次 image-2 调用只生成一张图、一个方案和一个屏幕任务。
 - 除非用户明确要求比较动作，否则屏幕只有一个主要动作。
@@ -272,6 +284,7 @@ Constraints:
 After generation, use `prototype-quality-review.md`:
 
 - 对照已对齐的产品简报、场景路由、方案方向、可行性边界和 AutoDesign 基线检查图片。
+- 有参考图时先运行 `pmw-image-audit audit --image <生成图> --reference <参考图>`；宽度低于参考截图 95%、长板高度低于参考截图 95%、底部栏遮挡或内容裁切时，结论至少是 `需要重出`。
 - 如果某个屏幕有实质问题，只修改对应提示词/屏幕。
 - 最终回答包含简短交付清单，不写长篇理由。
 

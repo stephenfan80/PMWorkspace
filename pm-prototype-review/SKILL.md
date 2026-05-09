@@ -87,6 +87,7 @@ done
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" taste-summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" latest --kind prototype_manifest 2>/dev/null || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" latest --kind visual_baseline 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-review-specialist" ] && "$_PMW_BIN/pmw-review-specialist" summary 2>/dev/null || true
 ```
 
@@ -107,18 +108,19 @@ done
 13. Read `../pmworkspace-shared/references/pm-eval-system.md` and preserve prototype review contracts.
 14. 建立原型复审控制器，记录 `复审输入`、`输出单元绑定`、`可插拔专家`、`专家合并结论`、`Product Review Squad`、`角色短结论`、`判定原因`、`行动结论`、`修正方向`、`PM 拍板`、`偏好沉淀`、`反馈资产化`、`上游产物`、`本轮产物`、`下游可读`、`产物流动` 和 `证据状态`；这些默认写入审计，用户可见输出只保留复审结论、逐屏结论、需要调整和下一步。
 15. If `pmw-project show` contains a Zoon URL, run `pmw-zoon drift` when available. If drift exists, read the latest Zoon snapshot before judging the image. If drift changes product facts, route back to `$pm-brief` or `$pm-strategy-review` before accepting the image.
-16. For every image, check the bound output unit: 方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本. If an image is not bound to one output unit or prototype-board item, mark `需要补充参考` and do not pass it by visual impression.
-17. Score each screen on five dimensions: 产品一致性、任务完成、信任与反指标、设计系统、可交付性. Scores are diagnostic only; any hard violation overrides the average.
-18. Run PM Review Army as pluggable specialists first: `strategy`、`trust-risk`、`design-system`、`data-feasibility` must each output an independent short conclusion with status, severity, evidence, one-sentence judgment, and action. When platform scripts are available, record each with `pmw-review-specialist add`, then run `pmw-review-specialist summary`; `$pm-prototype-review` merges the four specialist outputs into `可通过`、`需要重出`、`需要 PM 拍板`, or `需要补充参考`.
-19. For deep delivery, high-risk, batch handoff, engineering handoff, production flow, or explicit multi-role review requests, also run Product Review Squad roles: CEO, Eng, Design, DX, 安全, QA, 发布工程师. Each role must output a short conclusion with status, severity, evidence, one-sentence judgment, and action; merge role outputs after the pluggable specialist merge.
-20. If a screen violates the product brief, anti-metric, non-fiction boundary, online reference, or design system, mark `需要重出` and produce a concise repair brief for `$pm-prototype-shotgun`; do not accept a pretty but misleading image.
-21. If the issue is unresolved user promise, data truth, scope, experiment, lead, transaction, privacy, or compliance boundary, mark `需要 PM 拍板`, output one current D, and do not create repair prompts until the D is resolved.
-22. Log approved/rejected preferences with `pmw-log taste` only for user feedback or review-confirmed preferences; include scenario, feedback target, source, scope, and confidence. Do not save fact violations, anti-metric risks, non-fiction failures, missing references, or unresolved promises as taste.
-23. 将复审和用户反馈做 `反馈资产化`：分类为 `个人偏好`、`产品认知`、`PMWorkspace 进化建议` 或 `不应保存`。个人偏好用 `pmw-memory add-feedback --type preference`，产品认知用 `pmw-memory add-feedback --type product-cognition`，进化建议用 `pmw-memory add-feedback --type pmworkspace-improvement`；需要回流 GitHub 时只生成本地脱敏待审稿 `pmw-memory draft-github-feedback`，不自动提交。
-24. Log scheme scores with `pmw-prototype-board score --screen <屏幕任务>` when applicable.
-25. If repeated preferences emerge, save a learning with `pmw-memory add-learning`, but keep it脱敏 and scoped.
-26. 复审结束时用 `pmw-run event --type review` 记录结论；如果输出修复 brief 或可交付复审结论，使用 `pmw-artifact add --kind prototype_review` 或 `--kind repair_brief` 登记到 Product Artifact Flow，并运行 `pmw-dashboard status` 获取短摘要；完整状态只在审计 / 调试时展开。
-27. 复审结束必须给出明确下一步引导。`可通过` 时引导用户选择：选定方案进入 `$pm-handoff`、继续改某一张图、继续探索新方案、补充截图/数据参考；`需要重出` 时只让用户确认修复方向或直接重出受影响单图；`需要 PM 拍板` 时只展开一个当前 `D`。
+16. For every image, check the bound output unit: 方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、视觉基线状态、目标输出像素. If an image is not bound to one output unit or prototype-board item, mark `需要补充参考` and do not pass it by visual impression.
+17. If a reference screenshot and generated image path exist, run `pmw-image-audit audit --image <生成图> --reference <参考图>` before expert review. If it returns `需要重出`, the merged conclusion is at least `需要重出`; do not override a failed width / long-board audit with subjective visual approval.
+18. Score each screen on five dimensions: 产品一致性、任务完成、信任与反指标、设计系统、可交付性. Scores are diagnostic only; any hard violation overrides the average.
+19. Run PM Review Army as pluggable specialists first: `strategy`、`trust-risk`、`design-system`、`data-feasibility` must each output an independent short conclusion with status, severity, evidence, one-sentence judgment, and action. When platform scripts are available, record each with `pmw-review-specialist add`, then run `pmw-review-specialist summary`; `$pm-prototype-review` merges the four specialist outputs into `可通过`、`需要重出`、`需要 PM 拍板`, or `需要补充参考`.
+20. For deep delivery, high-risk, batch handoff, engineering handoff, production flow, or explicit multi-role review requests, also run Product Review Squad roles: CEO, Eng, Design, DX, 安全, QA, 发布工程师. Each role must output a short conclusion with status, severity, evidence, one-sentence judgment, and action; merge role outputs after the pluggable specialist merge.
+21. If a screen violates the product brief, anti-metric, non-fiction boundary, online reference, visual baseline, target output pixels, or design system, mark `需要重出` and produce a concise repair brief for `$pm-prototype-shotgun`; do not accept a pretty but misleading image.
+22. If the issue is unresolved user promise, data truth, scope, experiment, lead, transaction, privacy, or compliance boundary, mark `需要 PM 拍板`, output one current D, and do not create repair prompts until the D is resolved.
+23. Log approved/rejected preferences with `pmw-log taste` only for user feedback or review-confirmed preferences; include scenario, feedback target, source, scope, and confidence. Do not save fact violations, anti-metric risks, non-fiction failures, missing references, failed image audit, or unresolved promises as taste.
+24. 将复审和用户反馈做 `反馈资产化`：分类为 `个人偏好`、`产品认知`、`PMWorkspace 进化建议` 或 `不应保存`。个人偏好用 `pmw-memory add-feedback --type preference`，产品认知用 `pmw-memory add-feedback --type product-cognition`，进化建议用 `pmw-memory add-feedback --type pmworkspace-improvement`；需要回流 GitHub 时只生成本地脱敏待审稿 `pmw-memory draft-github-feedback`，不自动提交。
+25. Log scheme scores with `pmw-prototype-board score --screen <屏幕任务>` when applicable.
+26. If repeated preferences emerge, save a learning with `pmw-memory add-learning`, but keep it脱敏 and scoped.
+27. 复审结束时用 `pmw-run event --type review` 记录结论；如果输出修复 brief 或可交付复审结论，使用 `pmw-artifact add --kind prototype_review` 或 `--kind repair_brief` 登记到 Product Artifact Flow，并运行 `pmw-dashboard status` 获取短摘要；完整状态只在审计 / 调试时展开。
+28. 复审结束必须给出明确下一步引导。`可通过` 时引导用户选择：选定方案进入 `$pm-handoff`、继续改某一张图、继续探索新方案、补充截图/数据参考；`需要重出` 时只让用户确认修复方向或直接重出受影响单图；`需要 PM 拍板` 时只展开一个当前 `D`。
 
 ## 复审标准
 
@@ -147,6 +149,10 @@ done
 - Zoon 漂移检查：
 - 复审输入：
 - 输出单元绑定：
+- 视觉审计：
+  - visual_baseline：
+  - 参考图 / 目标输出像素：
+  - pmw-image-audit 结果：
 - PM Review Army：
   - 可插拔专家：
   - 专家合并结论：

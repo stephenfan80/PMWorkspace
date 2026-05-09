@@ -113,7 +113,12 @@ case "$EVENT" in
   decision)
     title="${2:-decision}"
     body="${3:-}"
-    printf '{"ts":"%s","title":"%s","body":"%s"}\n' "$ts" "$(printf '%s' "$title" | json_escape)" "$(printf '%s' "$body" | json_escape)" >> "$PROJECT_DIR/decisions.jsonl"
+    run_id="$(current_run_id || true)"
+    printf '{"ts":"%s","run_id":"%s","title":"%s","body":"%s"}\n' \
+      "$ts" \
+      "$(printf '%s' "$run_id" | json_escape)" \
+      "$(printf '%s' "$title" | json_escape)" \
+      "$(printf '%s' "$body" | json_escape)" >> "$PROJECT_DIR/decisions.jsonl"
     ;;
   brief)
     name="${2:-brief}"
@@ -255,8 +260,10 @@ case "$EVENT" in
       *) echo "confidence must be confirmed, assumed, or rejected" >&2; exit 1 ;;
     esac
     mkdir -p "$PROJECT_DIR"
-    printf '{"ts":"%s","dimension":"%s","source":"%s","summary":"%s","confidence":"%s"}\n' \
+    run_id="$(current_run_id || true)"
+    printf '{"ts":"%s","run_id":"%s","dimension":"%s","source":"%s","summary":"%s","confidence":"%s"}\n' \
       "$ts" \
+      "$(printf '%s' "$run_id" | json_escape)" \
       "$(printf '%s' "$dimension" | json_escape)" \
       "$(printf '%s' "$source" | json_escape)" \
       "$(printf '%s' "$summary" | json_escape)" \
@@ -269,8 +276,10 @@ case "$EVENT" in
     recommended="${4:-}"
     user_choice="${5:-}"
     summary="${6:-}"
-    printf '{"ts":"%s","question_id":"%s","title":"%s","recommended":"%s","user_choice":"%s","summary":"%s"}\n' \
+    run_id="$(current_run_id || true)"
+    printf '{"ts":"%s","run_id":"%s","question_id":"%s","title":"%s","recommended":"%s","user_choice":"%s","summary":"%s"}\n' \
       "$ts" \
+      "$(printf '%s' "$run_id" | json_escape)" \
       "$(printf '%s' "$question_id" | json_escape)" \
       "$(printf '%s' "$title" | json_escape)" \
       "$(printf '%s' "$recommended" | json_escape)" \

@@ -1,0 +1,48 @@
+{
+  "id": "prototype-image-baseline-requires-physical-longboard",
+  "title": "有视觉基线时记录图片必须绑定物理长板输出单元",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "当前 run 已有线上截图 visual_baseline，但 prototype-board 输出单元缺少 physical_longboard。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要重出",
+    "must_stop": true,
+    "gate": "输出单元画布绑定",
+    "required_behaviors": [
+      "pmw-prototype-board image 读取当前 visual_baseline",
+      "缺 canvas_mode=physical_longboard 时返回非零",
+      "记录 audit_verdict=需要重出",
+      "禁止作为交付结果展示"
+    ],
+    "forbidden_behaviors": [
+      "有视觉基线但未审计就通过图片",
+      "只依赖 readiness 口头阻断",
+      "把缺少物理长板字段的图片标成已生成"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-prototype-board",
+      "contains": "canvas_mode=physical_longboard"
+    },
+    {
+      "path": "bin/pmw-prototype-board",
+      "contains": "audit_verdict"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\"; export PMW_PROJECT_SLUG=baseline-mode-test; mkdir -p \"$PMW_HOME/projects/baseline-mode-test\"; python3 - \"$tmp/ref.png\" 1179 2556 \"$tmp/img.png\" 1206 2615 <<'PY'\nimport struct, sys, zlib\nargs=sys.argv[1:]\ndef png(path,w,h):\n    raw=b''.join(b'\\x00'+b'\\xff\\xff\\xff' * w for _ in range(h))\n    def chunk(t,d):\n        return struct.pack('>I',len(d))+t+d+struct.pack('>I',zlib.crc32(t+d)&0xffffffff)\n    data=b'\\x89PNG\\r\\n\\x1a\\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',w,h,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(raw,1))+chunk(b'IEND',b'')\n    open(path,'wb').write(data)\npng(args[0],int(args[1]),int(args[2])); png(args[3],int(args[4]),int(args[5]))\nPY\nbin/pmw-image-audit baseline --reference \"$tmp/ref.png\" --target-width 1206 --target-height 2615 --register >/dev/null; bin/pmw-prototype-board add --scheme 方案A --screen 首屏 --brief-version v1 --canvas-mode standard_first_screen --target-output-pixels 'iPhone 17 402 x 874' >/dev/null; set +e; bin/pmw-prototype-board image --scheme 方案A --screen 首屏 --image \"$tmp/img.png\"; code=$?; cat \"$PMW_HOME/projects/baseline-mode-test/prototype-board.jsonl\"; rm -rf \"$tmp\"; exit $code"
+      ],
+      "exit_code": 2,
+      "contains": [
+        "\"audit_verdict\": \"需要重出\"",
+        "canvas_mode=physical_longboard"
+      ]
+    }
+  ]
+}

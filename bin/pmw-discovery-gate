@@ -62,6 +62,8 @@ DIRECTIONAL_DECISION_KEYWORDS = [
 ]
 
 PLACEHOLDER_TOKENS = ["待补充", "未提供", "未确认", "不清楚", "TBD", "TODO", "暂无", "待定"]
+CONFIRMED_TOKENS = ["已确认", "已同意", "已选择", "用户确认", "用户同意", "选择", "选了", "批准"]
+NEGATIVE_TOKENS = ["待确认", "未确认", "需要确认", "不同意", "未选择", "待拍板", "需要 PM 拍板"]
 
 
 def now() -> str:
@@ -115,6 +117,11 @@ def read_run_events(run_id: str) -> list[dict]:
     if not run_id:
         return []
     return read_jsonl(project_dir() / "runs" / f"{run_id}.jsonl")
+
+
+def row_matches_run(row: dict, run_id: str) -> bool:
+    row_run = str(row.get("run_id") or "")
+    return not run_id or not row_run or row_run == run_id
 
 
 def read_text(path_value: str) -> str:
@@ -174,6 +181,8 @@ def collect_evidence_texts(args: argparse.Namespace, run_id: str) -> list[tuple[
     if latest_brief and latest_brief != args.brief:
         texts.append(("最新产品简报", read_text(latest_brief)))
     for row in read_jsonl(root / "discovery.jsonl"):
+        if not row_matches_run(row, run_id):
+            continue
         parts = [row.get("dimension"), row.get("source"), row.get("summary"), row.get("confidence")]
         texts.append(("产品发现记录", " ".join(str(part or "") for part in parts)))
     for row in read_run_events(run_id):
@@ -181,14 +190,18 @@ def collect_evidence_texts(args: argparse.Namespace, run_id: str) -> list[tuple[
         texts.append(("当前 run", " ".join(str(part or "") for part in parts)))
     for path_name in ["questions.jsonl", "decisions.jsonl", "artifact-flow.jsonl"]:
         for row in read_jsonl(root / path_name):
+            if not row_matches_run(row, run_id):
+                continue
             parts = [row.get(key) for key in sorted(row)]
             texts.append((path_name, " ".join(str(part or "") for part in parts)))
     return [(source, text) for source, text in texts if text.strip()]
 
 
-def explicit_discovery_dimensions() -> dict[str, list[str]]:
+def explicit_discovery_dimensions(run_id: str) -> dict[str, list[str]]:
     covered: dict[str, list[str]] = {dimension: [] for dimension in DIMENSIONS}
     for row in read_jsonl(project_dir() / "discovery.jsonl"):
+        if not row_matches_run(row, run_id):
+            continue
         dimension = str(row.get("dimension") or "")
         confidence = str(row.get("confidence") or "")
         if dimension in covered and confidence != "rejected" and useful_text(str(row.get("summary") or "")):
@@ -197,7 +210,7 @@ def explicit_discovery_dimensions() -> dict[str, list[str]]:
 
 
 def covered_dimensions(args: argparse.Namespace, run_id: str) -> dict[str, list[str]]:
-    covered = explicit_discovery_dimensions()
+    covered = explicit_discovery_dimensions(run_id)
     for source, text in collect_evidence_texts(args, run_id):
         for dimension in DIMENSIONS:
             if covered[dimension]:
@@ -208,17 +221,28 @@ def covered_dimensions(args: argparse.Namespace, run_id: str) -> dict[str, list[
 
 
 def event_is_confirmed(row: dict) -> bool:
+    question_id = str(row.get("question_id") or "")
+    if question_id:
+        choice = str(row.get("user_choice") or "").strip()
+        cleaned_choice = re.sub(r"[\s#：:|`>*_\-]+", "", choice)
+        if not cleaned_choice or any(token.lower() in cleaned_choice.lower() for token in PLACEHOLDER_TOKENS):
+            return False
+        text = f"{choice} {row.get('status', '')} {row.get('summary', '')}"
+        return not any(token in text for token in NEGATIVE_TOKENS)
+
     text = f"{row.get('status', '')} {row.get('summary', '')} {row.get('body', '')} {row.get('user_choice', '')}"
-    positive = any(token in text for token in ["已确认", "已同意", "已选择", "用户确认", "用户同意", "选", "批准"])
-    negative = any(token in text for token in ["待确认", "未确认", "需要确认", "不同意", "未选择"])
-    return positive and not negative
+    if any(token in text for token in NEGATIVE_TOKENS):
+        return False
+    if any(token in text for token in CONFIRMED_TOKENS):
+        return True
+    return row.get("event") == "decision" and useful_text(str(row.get("summary") or row.get("body") or ""))
 
 
 def count_directional_decisions(run_id: str) -> tuple[int, bool]:
     rows: list[dict] = []
     root = project_dir()
-    rows.extend(read_jsonl(root / "questions.jsonl"))
-    rows.extend(read_jsonl(root / "decisions.jsonl"))
+    rows.extend(row for row in read_jsonl(root / "questions.jsonl") if row_matches_run(row, run_id))
+    rows.extend(row for row in read_jsonl(root / "decisions.jsonl") if row_matches_run(row, run_id))
     rows.extend(read_run_events(run_id))
     count = 0
     exemption = False

@@ -181,9 +181,18 @@ def command_image(args: argparse.Namespace) -> int:
     audit_payload: dict = {}
     audit_exit = 0
     audit_note = ""
-    if baseline and item.get("canvas_mode") == "physical_longboard":
-        reference = artifact_location(baseline)
-        audit_exit, audit_payload, audit_note = audit_image(args.image, reference)
+    if baseline:
+        if item.get("canvas_mode") != "physical_longboard":
+            audit_exit = 2
+            audit_payload = {
+                "verdict": "需要重出",
+                "failures": [
+                    "当前 run 有 visual_baseline，但输出单元未登记 canvas_mode=physical_longboard，不能把图片作为交付结果展示"
+                ],
+            }
+        else:
+            reference = artifact_location(baseline)
+            audit_exit, audit_payload, audit_note = audit_image(args.image, reference)
     audit_verdict = str(audit_payload.get("verdict") or "")
     status = args.status
     if audit_verdict and audit_verdict != "通过":

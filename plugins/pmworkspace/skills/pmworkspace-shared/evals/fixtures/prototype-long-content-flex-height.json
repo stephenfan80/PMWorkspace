@@ -1,0 +1,48 @@
+{
+  "id": "prototype-long-content-flex-height",
+  "title": "长内容结果页允许移动长板画布",
+  "category": "prototype-output-contract",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "产品简报已对齐，为一个内容很长的报告结果页生成 image-2 原型。",
+  "expected": {
+    "mode": "deep",
+    "status": "可生成",
+    "must_stop": false,
+    "gate": "长内容移动画布",
+    "required_behaviors": [
+      "声明移动长板画布",
+      "宽度固定 W402",
+      "高度自适应且不得低于 H874",
+      "不裁切内容、不压缩字体、不遮挡底部操作区",
+      "仍然只生成一张连续移动端界面"
+    ],
+    "forbidden_behaviors": [
+      "强行固定为 402 x 874",
+      "把长内容改成桌面端",
+      "把报告拆成多张图或多屏故事板",
+      "用 HTML 替代 image-2 原型"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "移动长板 `W402 x H自适应（最低 H874）`"
+    },
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "contains": "移动长板：iPhone 17 W402 x H自适应（最低 H874）"
+    },
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "contains": "宽度必须固定为 `402`，高度可以超过 `874` 且不得低于 `874`"
+    },
+    {
+      "path": "pmworkspace-shared/references/prototype-quality-review.md",
+      "contains": "长结果页、报告页或详情页使用 `H > 874` 的移动长板不算违规"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "长结果页 / 报告页 / 详情页可以使用 `移动长板：iPhone 17 W402 x H自适应（最低 H874）`"
+    }
+  ]
+}

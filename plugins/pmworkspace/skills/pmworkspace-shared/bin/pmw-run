@@ -1,0 +1,194 @@
+#!/usr/bin/env python3
+import argparse
+import json
+import os
+import pathlib
+import subprocess
+import sys
+import uuid
+from datetime import datetime, timezone
+
+
+SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
+VALID_TYPES = {"gate", "decision", "evidence", "artifact", "review"}
+
+
+def now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def current_slug() -> str:
+    env_slug = os.environ.get("PMW_PROJECT_SLUG")
+    if env_slug:
+        return env_slug
+    try:
+        return subprocess.check_output([str(SCRIPT_DIR / "pmw-slug")], text=True).strip()
+    except Exception:
+        return "local-project"
+
+
+def project_dir() -> pathlib.Path:
+    path = STATE_DIR / "projects" / current_slug()
+    path.mkdir(parents=True, exist_ok=True)
+    (path / "runs").mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def project_path() -> pathlib.Path:
+    return project_dir() / "project.json"
+
+
+def read_project() -> dict:
+    path = project_path()
+    if path.exists():
+        try:
+            value = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(value, dict):
+                return value
+        except Exception:
+            pass
+    return {"slug": current_slug()}
+
+
+def write_project(data: dict) -> None:
+    data["slug"] = current_slug()
+    data["updated_at"] = now()
+    project_path().write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    try:
+        (STATE_DIR / "current-project").write_text(data["slug"] + "\n", encoding="utf-8")
+    except Exception:
+        pass
+
+
+def append_jsonl(path: pathlib.Path, row: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+
+
+def latest_run_id() -> str:
+    data = read_project()
+    run_id = str(data.get("current_run_id") or data.get("latest_run_id") or "").strip()
+    if run_id:
+        return run_id
+    runs = sorted((project_dir() / "runs").glob("*.jsonl"))
+    if runs:
+        return runs[-1].stem
+    print("NO_RUN: run `pmw-run start --skill <skill> --mode <quick|deep> --goal <目标>` first", file=sys.stderr)
+    raise SystemExit(1)
+
+
+def run_path(run_id: str) -> pathlib.Path:
+    return project_dir() / "runs" / f"{run_id}.jsonl"
+
+
+def make_run_id(skill: str) -> str:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    clean = "".join(c if c.isalnum() or c in "-_" else "-" for c in skill).strip("-") or "pm-workspace"
+    return f"{stamp}-{clean}-{uuid.uuid4().hex[:6]}"
+
+
+def validate_status(status: str) -> None:
+    if not status or any(ord(ch) < 32 for ch in status):
+        print("status must be a non-empty single-line value", file=sys.stderr)
+        raise SystemExit(1)
+
+
+def command_start(args: argparse.Namespace) -> int:
+    run_id = args.run_id or make_run_id(args.skill)
+    row = {
+        "ts": now(),
+        "event": "run_start",
+        "run_id": run_id,
+        "skill": args.skill,
+        "mode": args.mode,
+        "goal": args.goal,
+        "status": "已开始",
+    }
+    append_jsonl(run_path(run_id), row)
+    data = read_project()
+    data["current_run_id"] = run_id
+    data["latest_run_id"] = run_id
+    data["latest_run_status"] = "已开始"
+    write_project(data)
+    print(run_id)
+    return 0
+
+
+def command_event(args: argparse.Namespace) -> int:
+    validate_status(args.status)
+    if args.type not in VALID_TYPES:
+        print("Invalid event type. Use one of: " + ", ".join(sorted(VALID_TYPES)), file=sys.stderr)
+        return 1
+    run_id = args.run or latest_run_id()
+    row = {
+        "ts": now(),
+        "event": args.type,
+        "run_id": run_id,
+        "status": args.status,
+        "title": args.title,
+        "summary": args.summary,
+    }
+    append_jsonl(run_path(run_id), row)
+    print(run_path(run_id))
+    return 0
+
+
+def command_finish(args: argparse.Namespace) -> int:
+    validate_status(args.status)
+    run_id = args.run or latest_run_id()
+    row = {
+        "ts": now(),
+        "event": "run_finish",
+        "run_id": run_id,
+        "status": args.status,
+        "next": args.next,
+    }
+    append_jsonl(run_path(run_id), row)
+    data = read_project()
+    data["latest_run_id"] = run_id
+    data["latest_run_status"] = args.status
+    data["latest_run_next"] = args.next
+    if data.get("current_run_id") == run_id:
+        data.pop("current_run_id", None)
+    write_project(data)
+    print(run_id)
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="pmw-run")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    start = sub.add_parser("start")
+    start.add_argument("--skill", required=True)
+    start.add_argument("--mode", required=True, choices=["quick", "deep"])
+    start.add_argument("--goal", required=True)
+    start.add_argument("--run-id")
+    start.set_defaults(func=command_start)
+
+    event = sub.add_parser("event")
+    event.add_argument("--type", required=True)
+    event.add_argument("--status", required=True)
+    event.add_argument("--title", required=True)
+    event.add_argument("--summary", required=True)
+    event.add_argument("--run")
+    event.set_defaults(func=command_event)
+
+    finish = sub.add_parser("finish")
+    finish.add_argument("--status", required=True)
+    finish.add_argument("--next", required=True)
+    finish.add_argument("--run")
+    finish.set_defaults(func=command_finish)
+    return parser
+
+
+def main() -> int:
+    parser = build_parser()
+    args = parser.parse_args()
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

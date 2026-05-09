@@ -1,0 +1,41 @@
+{
+  "id": "brief-zoon-drift-material-change-blocks-alignment",
+  "title": "Zoon 实质漂移必须阻止旧简报继续已对齐",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "用户说 Zoon 里把主目标和承诺口径改了，但本地产品简报还是 v1 已对齐，用户要求直接进入原型。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "Zoon 实质漂移",
+    "required_behaviors": [
+      "读取最新 Zoon 快照",
+      "把确认状态退回待确认",
+      "回到对应 Q 或 D"
+    ],
+    "forbidden_behaviors": [
+      "沿用旧的已对齐状态",
+      "直接进入原型",
+      "忽略用户承诺变化"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "`DRIFT` 如果改变目标、反指标、不可虚构项、范围、用户承诺或方案方向，不能继续标记为 `已对齐`"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "Zoon 漂移如果改变目标、反指标、不可虚构项、范围、用户承诺或方案方向"
+    },
+    {
+      "path": "pmworkspace-shared/references/zoon-drift-check.md",
+      "contains": "如果 Zoon 中的人工修改改变目标、反指标、不可虚构项、范围、用户承诺或方案方向，回到对应 `Q` 或 `D`。"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "产品简报：Zoon 漂移如果改变目标、反指标、不可虚构项、范围、用户承诺或方案方向，必须重新确认"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "pmworkspace-deep-input-routes-to-deep-gate",
+  "title": "PRD、Zoon、截图或交付目标默认进入深度交付门槛",
+  "category": "pm-workspace-routing",
+  "primary_skill": "pm-workspace",
+  "prompt": "我有一份 Zoon PRD 和线上截图，想整理后给研发评审。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "深度交付产品对齐",
+    "required_behaviors": [
+      "识别深度交付信号",
+      "停在产品对齐门槛",
+      "禁止未对齐直接出图"
+    ],
+    "forbidden_behaviors": [
+      "按快速成型假设直接推进",
+      "忽略线上截图",
+      "未对齐写 image-2 提示词"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "PRD、Zoon、访谈、支持洞察、线上截图、录屏、生产视觉基线"
+    },
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "深度交付分数高于快速成型分数时，默认深度交付"
+    },
+    {
+      "path": "pm-workspace/SKILL.md",
+      "contains": "深度交付模式写图片提示词或生成图片前，必须先完成产品简报对齐。"
+    }
+  ]
+}

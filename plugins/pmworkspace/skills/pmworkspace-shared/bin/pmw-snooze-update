@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+STATE_DIR="${PMW_HOME:-$HOME/.pmworkspace}"
+VERSION="${1:?Usage: pmw-snooze-update <version>}"
+mkdir -p "$STATE_DIR"
+printf '%s %s\n' "$VERSION" "$(date +%s)" > "$STATE_DIR/update-snoozed"

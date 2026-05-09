@@ -1,0 +1,33 @@
+{
+  "id": "memory-rejected-direction-not-new",
+  "title": "被拒绝过的方向不能当作新方案推荐",
+  "category": "memory",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "用户上一轮明确拒绝营销海报式首屏，本轮再次要求 3 个方案。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": false,
+    "gate": "偏好记忆应用",
+    "required_behaviors": [
+      "读取 taste-summary",
+      "避免重复推荐被拒绝方向",
+      "说明基于过往偏好"
+    ],
+    "forbidden_behaviors": [
+      "把被拒绝方向包装成新方案",
+      "让偏好覆盖反指标",
+      "保存原始敏感反馈"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "rejected directions are not repeated as “new”方案"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-decision-principles.md",
+      "contains": "用户拒绝过的方案方向，不要在下一轮作为“新方案”重新推荐。"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "autoplan-finish-only-terminal",
+  "title": "自动产品评审只有到达终态才 finish run",
+  "category": "autoplan",
+  "primary_skill": "pm-autoplan",
+  "prompt": "自动评审发现需要一个 D 拍板或缺线上参考，应停下等待用户。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "等待 Q/D/证据",
+    "required_behaviors": [
+      "记录 gate 或 evidence",
+      "保留当前 run",
+      "等待用户回答",
+      "不到终态不 finish"
+    ],
+    "forbidden_behaviors": [
+      "停在 D 时 finish run",
+      "等待证据时关闭 run",
+      "继续生成图片"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/runtime-kernel.md",
+      "contains": "只有到达本轮终态时才调用 `pmw-run finish`"
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "Call `pmw-run finish` only when the current run reaches a terminal readiness state"
+    },
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "如果继续用当前 run，在审计中记录当前 `run_id`"
+    }
+  ]
+}

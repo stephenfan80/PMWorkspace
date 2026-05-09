@@ -1,0 +1,331 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PLUGIN_DIR="$ROOT/plugins/pmworkspace"
+
+for required in VERSION pm-workspace pm-autoplan pmworkspace-shared; do
+  if [ ! -e "$ROOT/$required" ]; then
+    echo "pmw-build-plugin must be run from the PMWorkspace source repository; missing $ROOT/$required" >&2
+    exit 1
+  fi
+done
+
+usage() {
+  cat <<'EOF'
+Usage: pmw-build-plugin [--dest <path>]
+
+Build the Codex plugin package for PMWorkspace.
+
+Default output:
+  <repo>/plugins/pmworkspace
+EOF
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --dest)
+      PLUGIN_DIR="${2:?Missing path after --dest}"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+VERSION="$(tr -d '[:space:]' < "$ROOT/VERSION")"
+if ! printf '%s' "$VERSION" | grep -qE '^[0-9]+(\.[0-9]+){1,3}$'; then
+  echo "Invalid VERSION: $VERSION" >&2
+  exit 1
+fi
+
+REVISION="unknown"
+if REVISION_FROM_GIT="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null)"; then
+  REVISION="$REVISION_FROM_GIT"
+elif [ -f "$ROOT/REVISION" ]; then
+  REVISION="$(tr -d '[:space:]' < "$ROOT/REVISION")"
+fi
+
+rm -rf "$PLUGIN_DIR"
+mkdir -p "$PLUGIN_DIR/.codex-plugin" "$PLUGIN_DIR/skills" "$PLUGIN_DIR/assets"
+
+cat > "$PLUGIN_DIR/.codex-plugin/plugin.json" <<EOF
+{
+  "name": "pmworkspace",
+  "version": "$VERSION",
+  "description": "PMWorkspace helps product managers turn ideas, PRDs, screenshots, and feedback into aligned product briefs, image-2 prototype directions, reviews, and compact handoff assets.",
+  "author": {
+    "name": "Stephen Fan",
+    "url": "https://github.com/stephenfan80"
+  },
+  "homepage": "https://github.com/stephenfan80/PMWorkspace",
+  "repository": "https://github.com/stephenfan80/PMWorkspace",
+  "license": "MIT",
+  "keywords": [
+    "pmworkspace",
+    "product-manager",
+    "product-manager-workflow",
+    "product-management",
+    "product-discovery",
+    "product-strategy",
+    "product-requirements",
+    "prd",
+    "requirements",
+    "prototype",
+    "ui-prototype",
+    "mobile-prototype",
+    "product-brief",
+    "brief",
+    "image-2",
+    "screenshot-feedback",
+    "ux-review",
+    "prototype-review",
+    "user-feedback",
+    "design-handoff",
+    "handoff",
+    "产品经理",
+    "产品简报",
+    "产品原型",
+    "原型图",
+    "截图反馈",
+    "设计评审",
+    "精简PRD"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "PMWorkspace",
+    "shortDescription": "Product briefs, image-2 prototypes, reviews, and PRDs",
+    "longDescription": "PMWorkspace is a product workbench for product managers. It turns fuzzy ideas, PRDs, screenshots, customer insight, or prototype requests into quick shaping or deep delivery workflows. It captures assumptions, goals, counter-metrics, constraints, and non-fiction boundaries; produces aligned product briefs; supports mobile-first image-2 prototype directions; reviews prototypes against product intent; and prepares compact PRD or design handoff assets.",
+    "developerName": "Stephen Fan",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/stephenfan80/PMWorkspace",
+    "privacyPolicyURL": "https://github.com/stephenfan80/PMWorkspace#privacy",
+    "termsOfServiceURL": "https://github.com/stephenfan80/PMWorkspace#license",
+    "defaultPrompt": [
+      "用 PMWorkspace 把这个产品想法快速成型为产品简报、方案方向和移动端原型图。",
+      "用 PMWorkspace 把这份 PRD 或截图反馈整理成可出图产品简报。",
+      "用 PMWorkspace 复审这批原型，并整理成精简 PRD 交付稿。"
+    ],
+    "brandColor": "#1677FF",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/logo.png",
+    "screenshots": [
+      "./assets/screenshot-onboarding.png",
+      "./assets/screenshot-brief.png",
+      "./assets/screenshot-prototype.png"
+    ]
+  }
+}
+EOF
+
+for skill in \
+  pm-workspace \
+  pm-autoplan \
+  pm-jobs \
+  pm-strategy-review \
+  pm-brief \
+  pm-prototype-shotgun \
+  pm-prototype-review \
+  pm-handoff; do
+  cp -R "$ROOT/$skill" "$PLUGIN_DIR/skills/$skill"
+done
+
+cp -R "$ROOT/pmworkspace-shared" "$PLUGIN_DIR/skills/pmworkspace-shared"
+for doc in README.md README.zh-CN.md; do
+  [ -f "$ROOT/$doc" ] && cp "$ROOT/$doc" "$PLUGIN_DIR/skills/pmworkspace-shared/$doc"
+done
+if [ -d "$ROOT/evals" ]; then
+  rm -rf "$PLUGIN_DIR/skills/pmworkspace-shared/evals"
+  cp -R "$ROOT/evals" "$PLUGIN_DIR/skills/pmworkspace-shared/evals"
+fi
+mkdir -p "$PLUGIN_DIR/skills/pmworkspace-shared/bin"
+cp -R "$ROOT/bin/"* "$PLUGIN_DIR/skills/pmworkspace-shared/bin/"
+cp "$ROOT/VERSION" "$PLUGIN_DIR/skills/pmworkspace-shared/VERSION"
+printf '%s\n' "$REVISION" > "$PLUGIN_DIR/skills/pmworkspace-shared/REVISION"
+chmod +x "$PLUGIN_DIR/skills/pmworkspace-shared/bin/"*
+
+python3 - "$PLUGIN_DIR/assets" <<'PY'
+import os
+import struct
+import sys
+import textwrap
+import zlib
+
+assets = sys.argv[1]
+os.makedirs(assets, exist_ok=True)
+
+try:
+    from PIL import Image, ImageDraw, ImageFont
+except Exception:
+    Image = ImageDraw = ImageFont = None
+
+def fallback_png(path, width, height, bg, accent, band=False):
+    rows = []
+    for y in range(height):
+        row = bytearray()
+        for x in range(width):
+            r, g, b = bg
+            if band and (y < height // 5 or x < width // 16):
+                r, g, b = accent
+            if not band and (x - width // 2) ** 2 + (y - height // 2) ** 2 < (min(width, height) // 3) ** 2:
+                r, g, b = accent
+            row.extend((r, g, b))
+        rows.append(b"\x00" + bytes(row))
+    raw = b"".join(rows)
+
+    def chunk(kind, data):
+        return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF)
+
+    with open(path, "wb") as f:
+        f.write(b"\x89PNG\r\n\x1a\n")
+        f.write(chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)))
+        f.write(chunk(b"IDAT", zlib.compress(raw, 9)))
+        f.write(chunk(b"IEND", b""))
+
+def font(size, bold=False):
+    candidates = [
+        "/System/Library/Fonts/Supplemental/Arial Bold.ttf" if bold else "/System/Library/Fonts/Supplemental/Arial.ttf",
+        "/Library/Fonts/Arial Bold.ttf" if bold else "/Library/Fonts/Arial.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    ]
+    for path in candidates:
+        if path and os.path.exists(path):
+            return ImageFont.truetype(path, size)
+    return ImageFont.load_default()
+
+if Image is None:
+    fallback_png(os.path.join(assets, "icon.png"), 256, 256, (22, 119, 255), (255, 255, 255))
+    fallback_png(os.path.join(assets, "logo.png"), 512, 512, (15, 23, 42), (22, 119, 255))
+    fallback_png(os.path.join(assets, "screenshot-onboarding.png"), 1200, 760, (248, 250, 252), (22, 119, 255), True)
+    fallback_png(os.path.join(assets, "screenshot-brief.png"), 1200, 760, (245, 253, 250), (15, 118, 110), True)
+    fallback_png(os.path.join(assets, "screenshot-prototype.png"), 1200, 760, (255, 247, 237), (234, 88, 12), True)
+    raise SystemExit
+
+def round_rect(draw, box, radius, fill, outline=None, width=1):
+    draw.rounded_rectangle(box, radius=radius, fill=fill, outline=outline, width=width)
+
+def text(draw, xy, value, fill, size=24, bold=False, max_width=None, line_gap=8):
+    f = font(size, bold)
+    lines = []
+    if max_width:
+        approx = max(12, int(max_width / max(size * 0.52, 1)))
+        for para in value.split("\n"):
+            lines.extend(textwrap.wrap(para, width=approx) or [""])
+    else:
+        lines = value.split("\n")
+    x, y = xy
+    for line in lines:
+        draw.text((x, y), line, font=f, fill=fill)
+        bbox = draw.textbbox((x, y), line, font=f)
+        y += (bbox[3] - bbox[1]) + line_gap
+    return y
+
+def make_icon(path, size, bg, mark):
+    img = Image.new("RGB", (size, size), bg)
+    d = ImageDraw.Draw(img)
+    round_rect(d, (28, 28, size - 28, size - 28), 48, mark)
+    d.rectangle((size * 0.31, size * 0.30, size * 0.69, size * 0.38), fill=(255, 255, 255))
+    d.rectangle((size * 0.31, size * 0.47, size * 0.60, size * 0.55), fill=(255, 255, 255))
+    d.rectangle((size * 0.31, size * 0.64, size * 0.73, size * 0.72), fill=(255, 255, 255))
+    img.save(path)
+
+def screenshot(path, accent, title, subtitle, left_title, left_items, right_title, right_items, footer):
+    img = Image.new("RGB", (1200, 760), (248, 250, 252))
+    d = ImageDraw.Draw(img)
+    d.rectangle((0, 0, 1200, 760), fill=(248, 250, 252))
+    d.rectangle((0, 0, 1200, 132), fill=accent)
+    text(d, (72, 42), title, (255, 255, 255), 40, True)
+    text(d, (72, 94), subtitle, (225, 239, 255), 22)
+
+    round_rect(d, (72, 174, 548, 610), 18, (255, 255, 255), (226, 232, 240), 2)
+    round_rect(d, (604, 174, 1128, 610), 18, (255, 255, 255), (226, 232, 240), 2)
+    text(d, (106, 208), left_title, (15, 23, 42), 28, True)
+    y = 264
+    for item in left_items:
+        round_rect(d, (106, y, 514, y + 62), 12, (241, 245, 249), None)
+        d.ellipse((124, y + 22, 142, y + 40), fill=accent)
+        text(d, (158, y + 19), item, (51, 65, 85), 20, False, 320, 4)
+        y += 82
+
+    text(d, (638, 208), right_title, (15, 23, 42), 28, True)
+    y = 264
+    for item in right_items:
+        round_rect(d, (638, y, 1094, y + 62), 12, (248, 250, 252), (226, 232, 240), 1)
+        text(d, (660, y + 18), item, (30, 41, 59), 20, False, 390, 4)
+        y += 82
+
+    round_rect(d, (72, 642, 1128, 704), 16, (15, 23, 42), None)
+    text(d, (104, 663), footer, (226, 232, 240), 20)
+    img.save(path)
+
+make_icon(os.path.join(assets, "icon.png"), 256, (22, 119, 255), (255, 255, 255))
+make_icon(os.path.join(assets, "logo.png"), 512, (15, 23, 42), (22, 119, 255))
+
+screenshot(
+    os.path.join(assets, "screenshot-onboarding.png"),
+    (22, 119, 255),
+    "PMWorkspace starts from the product goal",
+    "Quick shaping or deep delivery, chosen before output.",
+    "First-run choices",
+    ["10 min quick shaping", "PRD or screenshot to brief", "Prototype review and handoff"],
+    "Visible workflow card",
+    ["Current mode", "Earliest blocker", "One next action"],
+    "Default prompt: use $pm-workspace to choose the right product workflow.",
+)
+screenshot(
+    os.path.join(assets, "screenshot-brief.png"),
+    (15, 118, 110),
+    "Turn scattered context into an aligned product brief",
+    "Goals, users, counter-metrics, constraints, and non-fiction boundaries.",
+    "Inputs",
+    ["Idea / PRD", "Screenshot feedback", "Customer insight"],
+    "Output contract",
+    ["Product brief version", "Assumptions and risks", "Readiness dashboard"],
+    "The brief becomes the source of truth for prototype, review, and handoff.",
+)
+screenshot(
+    os.path.join(assets, "screenshot-prototype.png"),
+    (234, 88, 12),
+    "Generate mobile-first image-2 prototype directions",
+    "One scheme plus one screen equals one image, then review before handoff.",
+    "Prototype units",
+    ["Scheme name", "Screen task", "Main goal and anti-metric"],
+    "Review gates",
+    ["Non-fiction boundary", "Visual baseline", "Compact PRD handoff"],
+    "PMWorkspace keeps fast prototype work tied to product judgment.",
+)
+PY
+
+if [ -d "$ROOT/assets/plugin-listing" ]; then
+  for asset in icon.png logo.png screenshot-onboarding.png screenshot-brief.png screenshot-prototype.png; do
+    if [ -f "$ROOT/assets/plugin-listing/$asset" ]; then
+      cp "$ROOT/assets/plugin-listing/$asset" "$PLUGIN_DIR/assets/$asset"
+    fi
+  done
+fi
+
+PLUGIN_VERSION="$(python3 - "$PLUGIN_DIR/.codex-plugin/plugin.json" <<'PY'
+import json
+import sys
+with open(sys.argv[1], encoding="utf-8") as f:
+    print(json.load(f)["version"])
+PY
+)"
+if [ "$PLUGIN_VERSION" != "$VERSION" ]; then
+  echo "Plugin version $PLUGIN_VERSION does not match VERSION $VERSION" >&2
+  exit 1
+fi
+
+echo "PMWorkspace Codex plugin built at $PLUGIN_DIR ($VERSION@$REVISION)"

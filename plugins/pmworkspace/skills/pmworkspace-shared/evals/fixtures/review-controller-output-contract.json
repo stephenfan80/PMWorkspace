@@ -1,0 +1,47 @@
+{
+  "id": "review-controller-output-contract",
+  "title": "原型复审必须输出复审控制器字段",
+  "category": "prototype-review",
+  "primary_skill": "pm-prototype-review",
+  "prompt": "复审这一批 image-2 原型图，判断哪些能进入交付。",
+  "expected": {
+    "mode": "deep",
+    "status": "待复审",
+    "must_stop": false,
+    "gate": "原型复审控制器",
+    "required_behaviors": [
+      "建立原型复审控制器",
+      "输出复审输入和输出单元绑定",
+      "输出复审视角、判定原因和行动结论",
+      "输出 Product Review Squad 角色短结论",
+      "输出证据状态"
+    ],
+    "forbidden_behaviors": [
+      "只给审美评价",
+      "省略输出单元绑定",
+      "省略证据状态"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/prototype-quality-review.md",
+      "contains": "## 原型复审控制器"
+    },
+    {
+      "path": "pm-prototype-review/SKILL.md",
+      "contains": "建立原型复审控制器，记录 `复审输入`"
+    },
+    {
+      "path": "pm-prototype-review/SKILL.md",
+      "contains": "- 输出单元绑定："
+    },
+    {
+      "path": "pm-prototype-review/SKILL.md",
+      "contains": "- Product Review Squad："
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "原型复审：必须先建立原型复审控制器"
+    }
+  ]
+}

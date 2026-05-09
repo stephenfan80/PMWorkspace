@@ -1,0 +1,44 @@
+{
+  "id": "brief-aligned-routes-prototype-or-handoff",
+  "title": "只有已对齐且门槛通过的产品简报才能路由到原型或交付",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "产品简报已确认、线上参考已提供，用户要求下一步出 image-2 原型或转交付稿。",
+  "expected": {
+    "mode": "deep",
+    "status": "已对齐",
+    "must_stop": false,
+    "gate": "产品简报已对齐",
+    "required_behaviors": [
+      "检查确认状态",
+      "检查线上参考门槛",
+      "运行准备度短 verdict",
+      "按用户目标路由到 $pm-prototype-shotgun 或 $pm-handoff",
+      "把证据状态写入审计而不是默认展示"
+    ],
+    "forbidden_behaviors": [
+      "未对齐也路由到原型",
+      "未检查线上参考门槛",
+      "默认展开证据状态表",
+      "省略下一步"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "已对齐且用户要原型时，下一技能是 `$pm-prototype-shotgun`；已对齐且用户要交付时，下一技能是 `$pm-handoff`"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "已对齐且用户要原型时，下一技能是 `$pm-prototype-shotgun`；已对齐且用户要交付时，下一技能是 `$pm-handoff`"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "内部审计必须继续记录产品简报门槛、事实/假设边界、Zoon 同步、漂移检查、准备度 verdict、产物流动和已保存资产"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "产品简报：只有确认状态已对齐、线上参考门槛通过且无未解决缺失门槛时"
+    }
+  ]
+}

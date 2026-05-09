@@ -1,0 +1,44 @@
+{
+  "id": "autoplan-owner-definition-contract",
+  "title": "自动产品评审必须定义靠谱产品负责人",
+  "category": "autoplan",
+  "primary_skill": "pm-autoplan",
+  "prompt": "维护者要求自动产品评审先定义清楚靠谱产品负责人，再优化判断逻辑。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "靠谱产品负责人定义",
+    "required_behaviors": [
+      "定义平衡总控姿态",
+      "事实优先",
+      "结论明确",
+      "自动但不越权",
+      "最早门槛优先",
+      "交接负责"
+    ],
+    "forbidden_behaviors": [
+      "把自动评审定义成一键跑完",
+      "允许历史偏好覆盖事实",
+      "替用户默认关键承诺"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "## 靠谱产品负责人定义"
+    },
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "`$pm-autoplan` 的默认姿态是 `平衡总控`"
+    },
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "**自动但不越权**"
+    },
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "**交接负责**"
+    }
+  ]
+}

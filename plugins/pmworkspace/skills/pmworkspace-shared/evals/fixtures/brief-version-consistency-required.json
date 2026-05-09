@@ -1,0 +1,50 @@
+{
+  "id": "brief-version-consistency-required",
+  "title": "产品简报版本必须在 latest_brief、Zoon 同步和产物流动中保持一致",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "用户修改了方案方向或表单字段后保存新版产品简报。",
+  "expected": {
+    "mode": "deep",
+    "status": "已保存",
+    "must_stop": false,
+    "gate": "简报版本一致性",
+    "required_behaviors": [
+      "保存 brief 时自动计算新版本",
+      "latest_brief 记录同一版本",
+      "Zoon 同步状态记录同一版本",
+      "artifact-flow 摘要包含同一版本"
+    ],
+    "forbidden_behaviors": [
+      "用户改方向后仍停留旧版本",
+      "latest_brief 和 Zoon 同步版本不一致",
+      "artifact-flow 无法追溯版本"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-log",
+      "contains": "latest_project_brief_version_number"
+    },
+    {
+      "path": "bin/pmw-log",
+      "contains": "set-latest-brief \"$file\" \"$brief_version\""
+    },
+    {
+      "path": "bin/pmw-log",
+      "contains": "set-zoon-sync \"$zoon_url\" \"$file\" \"$brief_version\""
+    },
+    {
+      "path": "bin/pmw-log",
+      "contains": "业务简报版本：${brief_version}"
+    },
+    {
+      "path": "bin/pmw-project",
+      "contains": "latest_brief_version"
+    },
+    {
+      "path": "bin/pmw-project",
+      "contains": "last_zoon_sync_brief_version"
+    }
+  ]
+}

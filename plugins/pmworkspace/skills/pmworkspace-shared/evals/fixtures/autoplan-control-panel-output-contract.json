@@ -1,0 +1,62 @@
+{
+  "id": "autoplan-control-panel-output-contract",
+  "title": "自动产品评审必须建立内部控制面板但默认隐藏",
+  "category": "autoplan",
+  "primary_skill": "pm-autoplan",
+  "prompt": "使用 $pm-autoplan 自动推进这个产品想法，按推荐走，但关键点让我拍板。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": false,
+    "gate": "自动评审内部控制面板",
+    "required_behaviors": [
+      "先输出自动评审结论",
+      "用户可见输出包含我建议、理由、当前需要确认和下一步",
+      "内部记录模式来源",
+      "内部记录推进阶段",
+      "内部记录最早门槛",
+      "内部记录门槛等级和门槛来源",
+      "内部记录停止原因、下一技能、交接上下文和证据状态"
+    ],
+    "forbidden_behaviors": [
+      "只输出最终建议",
+      "默认展开控制面板字段",
+      "省略内部最早门槛",
+      "省略内部下一技能"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "## 自动评审控制器"
+    },
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "每次默认用户输出必须包含 `自动评审结论`、`我建议`、`理由`、`当前需要确认` 和 `下一步`。"
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "自动评审结论："
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "内部评审控制面板（默认不展示，写入审计）："
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "- 模式来源："
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "- 门槛等级："
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "- 交接上下文："
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "- 下一技能："
+    }
+  ]
+}

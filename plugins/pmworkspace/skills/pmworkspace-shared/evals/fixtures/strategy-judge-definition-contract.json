@@ -1,0 +1,42 @@
+{
+  "id": "strategy-judge-definition-contract",
+  "title": "策略审查必须定义为策略取舍裁判",
+  "category": "pm-strategy-review",
+  "primary_skill": "pm-strategy-review",
+  "prompt": "使用 $pm-strategy-review 审查一个产品方向。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": false,
+    "gate": "策略取舍裁判定义",
+    "required_behaviors": [
+      "定义策略取舍裁判",
+      "不重新做 $pm-jobs 事实诊断",
+      "不替 $pm-brief 写产品契约",
+      "识别最大策略矛盾"
+    ],
+    "forbidden_behaviors": [
+      "把策略审查写成风险清单",
+      "用策略审查补写缺失事实",
+      "直接生成产品简报"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/adversarial-review.md",
+      "contains": "## 策略取舍裁判"
+    },
+    {
+      "path": "pmworkspace-shared/references/adversarial-review.md",
+      "contains": "不重新做 `$pm-jobs` 的事实诊断。"
+    },
+    {
+      "path": "pmworkspace-shared/references/adversarial-review.md",
+      "contains": "不替 `$pm-brief` 写产品契约。"
+    },
+    {
+      "path": "pm-strategy-review/SKILL.md",
+      "contains": "PMWorkspace 策略取舍裁判"
+    }
+  ]
+}

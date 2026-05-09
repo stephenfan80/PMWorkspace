@@ -1,0 +1,88 @@
+{
+  "id": "browser-evidence-lite-required",
+  "title": "浏览器证据必须轻量进入 Product Artifact Flow",
+  "category": "artifact-flow",
+  "primary_skill": "pm-workspace",
+  "prompt": "维护者希望补 gstack 的证据采集能力，但保持 PMWorkspace 简洁，不新增独立证据子系统。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "Browser Evidence Capture Lite",
+    "required_behaviors": [
+      "线上截图、状态页、竞品参考和 Zoon 漂移证据登记为 browser_evidence",
+      "复用 pmw-artifact 和 artifact-flow.jsonl",
+      "Product Readiness Dashboard 的线上参考行优先读取 browser_evidence",
+      "读取失败或缺失仍用 run evidence/gate 阻断",
+      "status 页面展示浏览器证据"
+    ],
+    "forbidden_behaviors": [
+      "新增独立浏览器证据 CLI",
+      "新增专用证据状态文件",
+      "把私密截图、token、ownerSecret 或 API 原始响应写入公开仓库",
+      "把竞品参考当成可直接复制的素材"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/browser-evidence.md",
+      "contains": "PMWorkspace Browser Evidence Capture Lite 是轻量证据协议"
+    },
+    {
+      "path": "pmworkspace-shared/references/browser-evidence.md",
+      "contains": "不新增专用 CLI，不新增专用状态文件"
+    },
+    {
+      "path": "pmworkspace-shared/references/browser-evidence.md",
+      "contains": "pmw-artifact add --kind browser_evidence"
+    },
+    {
+      "path": "pmworkspace-shared/references/browser-evidence.md",
+      "contains": "--source-skill pm-brief"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "优先读取最新 `browser_evidence` 产物"
+    },
+    {
+      "path": "pmworkspace-shared/references/production-reference-gate.md",
+      "contains": "优先登记为 `browser_evidence` 产物"
+    },
+    {
+      "path": "pmworkspace-shared/references/artifact-flow.md",
+      "contains": "浏览器证据也以 `browser_evidence` 产物进入同一条 Product Artifact Flow。"
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "latest_browser_evidence"
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "artifact_rows(root, \"browser_evidence\""
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "## 浏览器证据"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "bin/pmw-artifact add --kind browser_evidence"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "浏览器证据：无 / 已采集 / 读取失败 / 待补充"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "浏览器证据必须以 `browser_evidence` 产物流入 Product Artifact Flow"
+    },
+    {
+      "path": "README.md",
+      "not_contains": "pmw-evidence"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "not_contains": "pmw-evidence"
+    }
+  ]
+}

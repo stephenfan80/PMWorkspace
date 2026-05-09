@@ -1,0 +1,46 @@
+{
+  "id": "brief-core-first-output",
+  "title": "产品简报输出必须核心信息先行",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "生成一份产品简报，用户需要先看到产品判断，再看门槛状态。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "核心信息先行",
+    "required_behaviors": [
+      "先输出产品核心信息",
+      "只输出业务简报版的当前需要确认和下一步",
+      "产品简报门槛和支持信息写入内部审计"
+    ],
+    "forbidden_behaviors": [
+      "先输出长状态表",
+      "只输出控制器字段",
+      "把信息来源放在第一屏中心",
+      "默认展开产品简报门槛或支持信息"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "用户可见第一屏只放业务简报，不放工作流字段、仪表盘表格、产物流动或本地路径"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "产品核心信息："
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "内部审计必须继续记录产品简报门槛"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "只有用户要求看状态或调试时才展开"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "产品简报：用户可见输出必须核心信息先行，只输出业务简报版的 `产品核心信息`、`当前需要确认` 和 `下一步`"
+    }
+  ]
+}

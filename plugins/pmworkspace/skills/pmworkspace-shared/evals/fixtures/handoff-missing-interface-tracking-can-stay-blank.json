@@ -1,0 +1,38 @@
+{
+  "id": "handoff-missing-interface-tracking-can-stay-blank",
+  "title": "接口、数据、埋点或实验普通缺口可留空待补充",
+  "category": "pm-handoff",
+  "primary_skill": "pm-handoff",
+  "prompt": "PRD 先写出来，接口名、字段、埋点事件和实验周期我还没有。",
+  "expected": {
+    "mode": "deep",
+    "status": "可交付",
+    "must_stop": false,
+    "gate": "普通交付缺口",
+    "required_behaviors": [
+      "缺口不改变承诺时保留空值",
+      "写入待补充项",
+      "用户可跳过普通待补充项",
+      "不虚构接口、字段、事件名或实验阈值"
+    ],
+    "forbidden_behaviors": [
+      "虚构接口可用性",
+      "虚构埋点事件",
+      "虚构实验判断阈值"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "每项状态使用 `待补充`、`已跳过` 或 `已补充`"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "用户可以回复 `跳过某项` 或 `全部先跳过`"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "普通缺口不阻断当前 PRD"
+    }
+  ]
+}

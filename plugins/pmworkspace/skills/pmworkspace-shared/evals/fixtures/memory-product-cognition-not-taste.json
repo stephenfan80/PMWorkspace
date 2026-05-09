@@ -1,0 +1,41 @@
+{
+  "id": "memory-product-cognition-not-taste",
+  "title": "产品认知不能混写成普通审美偏好",
+  "category": "memory",
+  "primary_skill": "pm-prototype-review",
+  "prompt": "用户反馈里既有审美偏好，也有关于反指标和不可虚构边界的产品认知。",
+  "expected": {
+    "mode": "deep",
+    "status": "待复审",
+    "must_stop": false,
+    "gate": "反馈分类",
+    "required_behaviors": [
+      "把表达偏好写成个人偏好",
+      "把反指标和不可虚构边界写成产品认知",
+      "不把产品认知混写成 taste"
+    ],
+    "forbidden_behaviors": [
+      "把反指标当审美偏好",
+      "把不可虚构违规当喜欢/不喜欢",
+      "丢失产品认知来源和范围"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-memory.md",
+      "contains": "`产品认知`：可复用的产品判断、反指标、不可虚构边界、场景机制经验。"
+    },
+    {
+      "path": "pmworkspace-shared/references/prototype-quality-review.md",
+      "contains": "`产品认知`：可复用产品判断、反指标、不可虚构边界、场景机制经验"
+    },
+    {
+      "path": "bin/pmw-memory",
+      "contains": "product-cognition.jsonl"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "产品认知不能混写成普通审美偏好"
+    }
+  ]
+}

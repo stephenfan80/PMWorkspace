@@ -1,0 +1,65 @@
+{
+  "id": "brief-contract-controller-output",
+  "title": "产品简报必须核心信息先行并把契约控制器写入审计",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "把上游已经完成追问和策略审查的结果整理成产品简报。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "产品简报契约控制器",
+    "required_behaviors": [
+      "建立产品简报契约控制器",
+      "先输出产品核心信息",
+      "用户可见输出只保留业务简报和当前需要确认",
+      "把产品简报门槛和支持信息写入审计",
+      "把来源门槛、简报深度、缺失门槛和事实/假设边界写入审计",
+      "把下一技能和证据状态写入审计"
+    ],
+    "forbidden_behaviors": [
+      "只输出普通简报状态",
+      "省略内部证据状态",
+      "先给长状态表再给产品判断",
+      "默认输出产品简报门槛或产物流动"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "## 产品简报契约控制器"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "默认用户可见输出只给业务可决策内容"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "先建立产品简报契约控制器，记录 `来源门槛`"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "产品核心信息："
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "用户可见第一屏只放业务简报，不放工作流字段、仪表盘表格、产物流动或本地路径"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "内部审计必须继续记录产品简报门槛"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "事实/假设边界"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "准备度 verdict"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "产品简报：必须先建立产品简报契约控制器"
+    }
+  ]
+}

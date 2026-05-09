@@ -1,0 +1,38 @@
+{
+  "id": "jobs-one-max-gap-question-only",
+  "title": "产品追问每轮只展开当前最大缺口的一个 Q",
+  "category": "pm-jobs",
+  "primary_skill": "pm-jobs",
+  "prompt": "帮我提升转化率，直接给方案。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要补充",
+    "must_stop": true,
+    "gate": "当前最大缺口 Q",
+    "required_behaviors": [
+      "识别当前最大缺口",
+      "只展开一个 Q",
+      "等待用户回答",
+      "不输出长开放问题清单"
+    ],
+    "forbidden_behaviors": [
+      "一次问多个 Q",
+      "批量输出开放问题",
+      "直接生成方案或原型"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "用户可见输出只能展开一个 `Q` 或一个 `D`"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "每轮只选择当前最大缺口生成一个 Q。"
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "Stop after each `Q` and wait for the user; do not batch open questions"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "strategy-one-d-for-material-tradeoff",
+  "title": "策略审查遇到实质取舍时只展开一个 D",
+  "category": "pm-strategy-review",
+  "primary_skill": "pm-strategy-review",
+  "prompt": "事实已经清楚，但团队要决定是先展示免费价值再留资，还是先留手机号解锁详细结果。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "价值交换 D 拍板",
+    "required_behaviors": [
+      "识别价值交换取舍",
+      "展开一个完整 D",
+      "停止等待用户拍板",
+      "只提示后续 D 队列标题"
+    ],
+    "forbidden_behaviors": [
+      "一次展开多个 D",
+      "静默采用范围变化",
+      "直接进入原型"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/adversarial-review.md",
+      "contains": "如果事实足够，但不同选择会改变范围、价值交换、用户承诺、实验口径、信任风险、可行性边界或交付责任，展开一个完整 `D` 并停止。"
+    },
+    {
+      "path": "pm-strategy-review/SKILL.md",
+      "contains": "每轮只展开一个完整 `D`"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "事实足够但不同选择会改变范围、价值交换、用户承诺、实验口径、信任风险、可行性边界或交付责任时，只展开一个完整 `D` 并停止。"
+    }
+  ]
+}

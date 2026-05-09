@@ -1,0 +1,37 @@
+{
+  "id": "pmworkspace-welcome-homepage",
+  "title": "空泛请求展示产品首页式欢迎",
+  "category": "pm-workspace-entry",
+  "primary_skill": "pm-workspace",
+  "prompt": "用户只输入 $pm-workspace，或问 PMWorkspace 能做什么。",
+  "expected": {
+    "mode": "quick",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "欢迎引导",
+    "required_behaviors": [
+      "展示产品首页式欢迎",
+      "给出任务入口",
+      "推荐第一步"
+    ],
+    "forbidden_behaviors": [
+      "要求用户猜命令",
+      "直接生成原型图",
+      "输出内部引用文件清单"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/welcome-guide.md",
+      "contains": "## 产品首页式欢迎"
+    },
+    {
+      "path": "pmworkspace-shared/references/welcome-guide.md",
+      "contains": "快速成型，深度交付。"
+    },
+    {
+      "path": "pm-workspace/SKILL.md",
+      "contains": "Read `../pmworkspace-shared/references/welcome-guide.md` only when"
+    }
+  ]
+}

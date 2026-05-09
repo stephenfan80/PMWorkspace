@@ -1,0 +1,8 @@
+interface:
+  display_name: "PMWorkspace"
+  short_description: "产品经理和设计师的工作台"
+  brand_color: "#1677FF"
+  default_prompt: "使用 $pm-workspace 显示欢迎引导，并帮我选择合适的产品工作流。"
+
+policy:
+  allow_implicit_invocation: true

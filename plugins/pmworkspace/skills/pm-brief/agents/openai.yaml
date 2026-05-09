@@ -1,0 +1,8 @@
+interface:
+  display_name: "产品简报"
+  short_description: "生成可复用产品简报"
+  brand_color: "#0F766E"
+  default_prompt: "使用 $pm-brief 把这次产品对齐整理成可复用的产品简报。"
+
+policy:
+  allow_implicit_invocation: true

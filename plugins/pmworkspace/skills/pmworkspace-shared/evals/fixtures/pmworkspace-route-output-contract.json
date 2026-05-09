@@ -1,0 +1,45 @@
+{
+  "id": "pmworkspace-route-output-contract",
+  "title": "主入口路由后默认只输出业务摘要并把完整路由写入审计",
+  "category": "pm-workspace-routing",
+  "primary_skill": "pm-workspace",
+  "prompt": "使用 $pm-workspace 帮我快速成型一个新想法。",
+  "expected": {
+    "mode": "quick",
+    "status": "待确认",
+    "must_stop": false,
+    "gate": "路由输出契约",
+    "required_behaviors": [
+      "输出业务判断",
+      "输出工作方式",
+      "输出当前需要确认",
+      "输出下一步",
+      "把当前模式、当前门槛和下一技能写入审计",
+      "把为什么、run_id 和证据状态写入审计"
+    ],
+    "forbidden_behaviors": [
+      "只给下一技能",
+      "默认输出 run_id",
+      "默认展开证据状态",
+      "省略内部路由审计"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "## 路由输出契约"
+    },
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "当前模式："
+    },
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "下一技能："
+    },
+    {
+      "path": "pm-workspace/SKILL.md",
+      "contains": "Default user-facing output should show a short `工作方式` card plus `业务判断`、`当前需要确认` and `下一步`"
+    }
+  ]
+}

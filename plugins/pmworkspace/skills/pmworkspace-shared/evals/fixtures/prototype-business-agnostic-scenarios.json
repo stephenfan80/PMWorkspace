@@ -1,0 +1,37 @@
+{
+  "id": "prototype-business-agnostic-scenarios",
+  "title": "原型方案质量规则不能局限留资业务",
+  "category": "pm-prototype-shotgun",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "产品简报已对齐，这是社区或直播场景，也要生成多方案。",
+  "expected": {
+    "mode": "deep",
+    "status": "可生成",
+    "must_stop": false,
+    "gate": "业务场景泛化",
+    "required_behaviors": [
+      "社区、直播、产品库等非留资场景也适用",
+      "使用同一套方案差异质量标准",
+      "不把留资规则当作唯一业务形态"
+    ],
+    "forbidden_behaviors": [
+      "默认按留资表单设计",
+      "忽略社区场景",
+      "忽略直播或产品库场景"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "规则不局限留资业务；社区、直播、产品库、交易、内容、工具、看板等场景也必须用同一套方案质量标准。"
+    },
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "contains": "lead forms, community, live streaming, product libraries, transaction flows, content screens, tools, and dashboards"
+    },
+    {
+      "path": "pmworkspace-shared/references/design-system-workflow.md",
+      "contains": "lead forms, community, live streaming, product libraries, transaction flows, content screens, tools, and dashboards"
+    }
+  ]
+}

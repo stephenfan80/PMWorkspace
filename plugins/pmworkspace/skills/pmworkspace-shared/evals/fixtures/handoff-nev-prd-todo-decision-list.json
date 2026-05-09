@@ -1,0 +1,56 @@
+{
+  "id": "handoff-nev-prd-todo-decision-list",
+  "title": "新能源汽车 PRD 待补充项必须支持补充或跳过",
+  "category": "pm-handoff",
+  "primary_skill": "pm-handoff",
+  "prompt": "基于新能源汽车权益与安心线索转化工具生成精简 PRD。接口、数据源、埋点方案和实验阈值仍待补充。",
+  "expected": {
+    "mode": "deep",
+    "status": "可交付",
+    "must_stop": false,
+    "gate": "新能源汽车 PRD 待补充项",
+    "required_behaviors": [
+      "不输出 PRD 生成判断模块",
+      "待补充项覆盖入口位置、续航模拟规则、电池质保规则、本地权益 / 补贴、线索提交接口、合规文案、埋点方案和实验阈值",
+      "下一步允许用户补充某项、跳过某项或全部先跳过",
+      "普通缺口不阻断 PRD 交付",
+      "会改变范围、用户承诺、数据真实性、合规、实验口径或验收标准的缺口仍触发当前 D"
+    ],
+    "forbidden_behaviors": [
+      "把 PRD 生成判断作为用户可见正文模块",
+      "把普通接口、埋点、实验阈值缺口当作当前阻断",
+      "默认强制用户逐项回答所有待补充项",
+      "允许承诺边界或验收标准类缺口被跳过"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "not_contains": "## PRD 生成判断"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "## 下一步：待补充决策清单"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "用户可以回复 `跳过某项` 或 `全部先跳过`"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "不能标记为 `已跳过`，必须升级为一个当前 `D`"
+    },
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "不输出 `PRD 生成判断`"
+    },
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "普通缺口不阻断当前 PRD"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "交付控制器默认内部审计，不进入 PRD 正文"
+    }
+  ]
+}

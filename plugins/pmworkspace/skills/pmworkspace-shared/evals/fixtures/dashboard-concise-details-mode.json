@@ -1,0 +1,46 @@
+{
+  "id": "dashboard-concise-details-mode",
+  "title": "Dashboard 和产物流动默认简洁，详情必须显式展开",
+  "category": "readiness-dashboard",
+  "primary_skill": "pm-workspace",
+  "prompt": "用户没有要求看审计，只需要知道现在能不能出图或交付。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "简洁状态输出",
+    "required_behaviors": [
+      "默认 readiness 只给目标、结论、原因和下一步",
+      "默认 status 只给摘要",
+      "完整表格必须用 --details",
+      "产物流动完整表格必须用 flow --details"
+    ],
+    "forbidden_behaviors": [
+      "默认展示完整准备度表",
+      "默认展示完整 artifact-flow 表",
+      "把后台路径作为默认用户状态"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "默认用户可见输出只给结论和下一步，不展示完整门槛表"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "完整门槛表属于内部审计输出"
+    },
+    {
+      "path": "pmworkspace-shared/references/artifact-flow.md",
+      "contains": "pmw-artifact flow --details"
+    },
+    {
+      "path": "bin/pmw-artifact",
+      "contains": "需要完整产物流动表时，运行 `pmw-artifact flow --details`。"
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "status.add_argument(\"--details\""
+    }
+  ]
+}

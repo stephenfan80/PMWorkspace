@@ -21,7 +21,7 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 > 本区块由 `bin/pmw-gen-skill-docs` 根据 `pmworkspace-shared/skill-docs/skill-docs.manifest.json` 生成；不要手写修改。更新共享门槛、前置检查或输出字段后，运行 `bin/pmw-gen-skill-docs write`，再运行 `bin/pmw-gen-skill-docs check`。
 
 - skill：`pm-workspace`
-- 契约版本：`1`
+- 契约版本：`2`
 - 阶段：主入口路由
 - 定位：判断快速成型 / 深度交付，创建或衔接 run，并把用户任务路由到最小可用的下一技能。
 
@@ -43,11 +43,8 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 
 ### 共享门槛
 
-- 先读语言与本地化协议，中文用户默认使用中文字段、中文状态和中文建议。
-- 复用 runtime run：子 skill 发现已有 current_run_id 时不得重新创建 run。
-- 历史偏好、记忆和默认规则不能覆盖本轮事实、brief、Zoon、反指标、不可虚构项或证据门槛。
-- 等待 Q、D、证据或用户确认时必须停住；不能假装已对齐、可出图或可交付。
-- 不得把真实 token、ownerSecret、私密客户资料、内部录音、未脱敏截图或未脱敏 Zoon 内容写进公开仓库。
+- 真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。
+- 摘要：中文本地化、复用 `current_run_id`、记忆不覆盖本轮事实、等待 Q/D/证据/确认时停住、禁止泄露 token/ownerSecret/私密资料。
 
 ### 默认用户可见输出字段
 

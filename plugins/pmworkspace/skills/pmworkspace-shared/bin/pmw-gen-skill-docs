@@ -10,7 +10,13 @@ from typing import Iterable
 
 
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
-ROOT = SCRIPT_DIR.parent
+BASE_ROOT = SCRIPT_DIR.parent
+if (BASE_ROOT / "pm-workspace").exists() and (BASE_ROOT / "pmworkspace-shared").exists():
+    ROOT = BASE_ROOT
+elif BASE_ROOT.name == "pmworkspace-shared" and (BASE_ROOT.parent / "pm-workspace").exists():
+    ROOT = BASE_ROOT.parent
+else:
+    ROOT = BASE_ROOT
 MANIFEST_PATH = ROOT / "pmworkspace-shared" / "skill-docs" / "skill-docs.manifest.json"
 START_MARKER = "<!-- PMW-GENERATED-CONTRACT:START -->"
 END_MARKER = "<!-- PMW-GENERATED-CONTRACT:END -->"
@@ -43,6 +49,15 @@ def bullet_list(items: Iterable[str]) -> list[str]:
     return rows or ["- 未配置"]
 
 
+def shared_gate_summary(shared_gates: list[str]) -> list[str]:
+    if not shared_gates:
+        return ["- 未配置"]
+    return [
+        "- 真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。",
+        "- 摘要：中文本地化、复用 `current_run_id`、记忆不覆盖本轮事实、等待 Q/D/证据/确认时停住、禁止泄露 token/ownerSecret/私密资料。",
+    ]
+
+
 def build_contract(skill: str, spec: dict, manifest: dict) -> str:
     version = manifest.get("version", 1)
     title = manifest.get("generated_section_title", "PMWorkspace 生成契约")
@@ -72,7 +87,7 @@ def build_contract(skill: str, spec: dict, manifest: dict) -> str:
         "",
         "### 共享门槛",
         "",
-        *bullet_list(shared_gates),
+        *shared_gate_summary(shared_gates),
         "",
         "### 默认用户可见输出字段",
         "",

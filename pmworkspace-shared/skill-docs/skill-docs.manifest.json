@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "generated_section_title": "PMWorkspace 生成契约",
   "shared_gates": [
     "先读语言与本地化协议，中文用户默认使用中文字段、中文状态和中文建议。",

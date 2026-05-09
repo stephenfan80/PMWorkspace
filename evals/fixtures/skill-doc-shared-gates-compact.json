@@ -1,0 +1,62 @@
+{
+  "id": "skill-doc-shared-gates-compact",
+  "title": "SKILL.md 共享门槛必须由 manifest 做真源并压缩输出",
+  "category": "skill-doc-generator",
+  "primary_skill": "pm-workspace",
+  "prompt": "维护者希望减少各 SKILL.md 生成区块中的重复共享门槛，但不能丢失 manifest 真源和生成检查。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "共享门槛压缩输出",
+    "required_behaviors": [
+      "manifest 继续保存完整 shared_gates",
+      "生成器只在每个 SKILL.md 输出共享门槛真源和压缩摘要",
+      "SKILL.md 不再重复完整 shared_gates 长列表",
+      "pmw-gen-skill-docs check 仍能发现生成区块漂移"
+    ],
+    "forbidden_behaviors": [
+      "手工删除 SKILL.md 生成区块",
+      "把 shared_gates 从 manifest 删除",
+      "让每个 SKILL.md 继续重复完整共享门槛长文",
+      "压缩后缺少事实优先、等待门槛或隐私边界摘要"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/skill-docs/skill-docs.manifest.json",
+      "contains": "\"shared_gates\""
+    },
+    {
+      "path": "bin/pmw-gen-skill-docs",
+      "contains": "shared_gate_summary"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "摘要：中文本地化、复用 `current_run_id`、记忆不覆盖本轮事实、等待 Q/D/证据/确认时停住、禁止泄露 token/ownerSecret/私密资料。"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "not_contains": "先读语言与本地化协议，中文用户默认使用中文字段、中文状态和中文建议。"
+    },
+    {
+      "path": "pmworkspace-shared/references/skill-doc-template-system.md",
+      "contains": "共享门槛压缩输出"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "bin/pmw-gen-skill-docs check"
+      ],
+      "exit_code": 0,
+      "contains": "PMWorkspace skill 文档检查通过"
+    }
+  ]
+}

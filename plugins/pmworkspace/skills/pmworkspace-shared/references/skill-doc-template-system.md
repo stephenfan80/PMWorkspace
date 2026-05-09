@@ -4,8 +4,9 @@ PMWorkspace 的 `SKILL.md` 仍保留人工写作的工作流判断，但共享�
 
 ## 设计原则
 
-- **manifest 是共享契约源头**：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 定义每个 `$pm-*` skill 的阶段、定位、前置检查、必读共享协议和输出字段。
+- **manifest 是共享契约源头**：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 定义每个 `$pm-*` skill 的阶段、定位、前置检查、必读共享协议、输出字段和共享门槛。
 - **SKILL.md 是提交产物**：生成后的契约区块直接提交到各 `SKILL.md`，运行时无需再生成。
+- **共享门槛压缩输出**：每个 `SKILL.md` 只写共享门槛真源和压缩摘要，完整条目留在 manifest，避免 8 个 skill 重复同一段长文。
 - **人工工作流仍人工维护**：复杂判断、Q/D 规则、Zoon 流程、image-2 规则和交付边界仍写在正文；生成器只维护容易漂移的共享结构。
 - **检查优先于重写**：`check` 会验证生成区块、preamble token、必读 reference 和输出字段，发现漂移直接失败。
 

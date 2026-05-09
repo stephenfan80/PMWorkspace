@@ -160,6 +160,22 @@ def artifact_location(row: dict) -> str:
     return str(row.get("url") or row.get("path") or "")
 
 
+def normalize_version(value: str) -> str:
+    match = re.search(r"v?\s*([0-9]+)", value or "", flags=re.I)
+    return f"v{match.group(1)}" if match else (value or "").strip()
+
+
+def event_after_file(row: dict, path_value: str) -> bool:
+    if not row or not path_value:
+        return False
+    try:
+        event_ts = datetime.fromisoformat(str(row.get("ts") or "").replace("Z", "+00:00"))
+        file_ts = datetime.fromtimestamp(pathlib.Path(path_value).stat().st_mtime, timezone.utc)
+        return event_ts >= file_ts
+    except Exception:
+        return True
+
+
 def latest_browser_evidence(root: pathlib.Path) -> dict:
     rows = artifact_rows(root, "browser_evidence")
     return rows[-1] if rows else {}
@@ -564,6 +580,35 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
     )
 
     board = current_board_items(root, brief_path, brief_version, run_id)
+    if board:
+        binding_failures = []
+        normalized_latest_version = normalize_version(brief_version)
+        for item in board:
+            row_path = str(item.get("brief_path") or "")
+            row_version = normalize_version(str(item.get("brief_version") or ""))
+            path_ok = bool(row_path and brief_path and same_path(row_path, brief_path))
+            version_ok = bool(row_version and normalized_latest_version and row_version == normalized_latest_version)
+            if not path_ok or not version_ok:
+                binding_failures.append(
+                    f"{item.get('scheme') or '未命名'} / {item.get('screen') or '未命名屏幕'}：brief={row_version or '未记录'}，latest={normalized_latest_version or '未记录'}"
+                )
+        binding_ready = not binding_failures
+        binding_status = "已绑定当前 brief" if binding_ready else "绑定旧 brief"
+        binding_evidence = f"{len(board)} 个输出单元" if binding_ready else "；".join(binding_failures[:5])
+    else:
+        binding_ready = True
+        binding_status = "暂无输出单元"
+        binding_evidence = "尚未登记 prototype-board 输出单元；方案差异门槛会继续判断"
+    rows.append(
+        gate_result(
+            "输出单元绑定",
+            bool(board),
+            binding_status,
+            redact_sensitive(binding_evidence),
+            "继续" if binding_ready else "重新用当前 latest brief 登记 prototype-board 输出单元；旧版本输出单元不能放行出图",
+            binding_ready,
+        )
+    )
     if visual_required:
         bad_canvas_rows = []
         for item in board:
@@ -612,7 +657,8 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
 
     scheme_confirm = latest_event(events, ["方案方向确认", "方案方向", "原型出图判断"], {"gate", "decision"})
     scheme_confirm_text = f"{scheme_confirm.get('status', '')} {scheme_confirm.get('summary', '')}"
-    scheme_confirm_ready = bool(scheme_confirm) and contains_any(scheme_confirm_text, ["已确认", "已批准", "默认方向已批准", "可出图", "已对齐"]) and not contains_any(
+    scheme_confirm_fresh = event_after_file(scheme_confirm, brief_path) if scheme_confirm else False
+    scheme_confirm_ready = bool(scheme_confirm) and scheme_confirm_fresh and contains_any(scheme_confirm_text, ["已确认", "已批准", "默认方向已批准", "可出图", "已对齐"]) and not contains_any(
         scheme_confirm_text,
         ["待确认", "需要补充", "不可出图", "缺失", "未批准"],
     )
@@ -620,10 +666,41 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         gate_result(
             "方案方向确认",
             True,
-            "已确认" if scheme_confirm_ready else ("未记录" if not scheme_confirm else scheme_confirm.get("status", "待确认")),
+            "已确认" if scheme_confirm_ready else ("未记录" if not scheme_confirm else ("已过期" if not scheme_confirm_fresh else scheme_confirm.get("status", "待确认"))),
             scheme_confirm.get("summary") or "当前 run 未记录方案方向确认",
-            "继续" if scheme_confirm_ready else "先确认方案方向；未确认前不写 image-2 prompt",
+            "继续" if scheme_confirm_ready else "先基于当前 latest brief 重新确认方案方向；未确认前不写 image-2 prompt",
             scheme_confirm_ready,
+        )
+    )
+
+    board_rows = read_jsonl(root / "prototype-board.jsonl")
+    scoped_screens = {(row.get("scheme"), row.get("screen")) for row in board}
+    image_failures = []
+    for row in board_rows:
+        if row.get("record_type") != "image":
+            continue
+        if run_id and row.get("run_id") and row.get("run_id") != run_id:
+            continue
+        if scoped_screens and (row.get("scheme"), row.get("screen")) not in scoped_screens:
+            continue
+        verdict = str(row.get("audit_verdict") or "")
+        status = str(row.get("status") or "")
+        if verdict and verdict != "通过" or "需要重出" in status:
+            failures = row.get("audit_failures") or []
+            if isinstance(failures, list):
+                failure_text = "；".join(str(item) for item in failures)
+            else:
+                failure_text = str(failures)
+            image_failures.append(f"{row.get('scheme') or '未命名'} / {row.get('screen') or '未命名屏幕'}：{verdict or status} {failure_text}")
+    image_audit_required = bool(image_failures)
+    rows.append(
+        gate_result(
+            "原型图片审计",
+            image_audit_required,
+            "存在需要重出的图片" if image_failures else "暂无失败图片",
+            "；".join(image_failures[:5]) if image_failures else "出图后 pmw-prototype-board image 会记录视觉审计结果",
+            "重出失败图片；视觉审计失败的图片不能作为交付结果展示" if image_failures else "继续",
+            not image_failures,
         )
     )
 

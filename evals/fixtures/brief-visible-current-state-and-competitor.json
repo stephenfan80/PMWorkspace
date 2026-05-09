@@ -1,0 +1,37 @@
+{
+  "id": "brief-visible-current-state-and-competitor",
+  "title": "现状和竞品必须进入业务简报正文",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "用户要求一份产品经理简报，不是内部审计。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "现状和竞品可见",
+    "required_behaviors": [
+      "业务正文包含背景与现状",
+      "业务正文包含竞品 / 行业做法",
+      "支持信息仍保留为内部审计"
+    ],
+    "forbidden_behaviors": [
+      "把现状默认隐藏进支持信息",
+      "把竞品默认隐藏进支持信息",
+      "默认输出本地路径和 run_id"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "但 `背景与现状`、`用户痛点与当前替代`、`竞品 / 行业做法`、`产品机会与解决思路` 属于业务正文"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-manager-brief.md",
+      "contains": "用户可见业务简报必须包含现状、竞品 / 行业做法、痛点和解决思路"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "这些业务内容不能默认藏进 `支持信息`"
+    }
+  ]
+}

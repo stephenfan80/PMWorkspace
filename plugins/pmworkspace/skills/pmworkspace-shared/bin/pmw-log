@@ -129,6 +129,18 @@ case "$EVENT" in
         echo "BRIEF_NOT_CONFIRMED: 当前产品简报声明为已对齐，但当前 run 未记录「产品简报确认 / 前提确认：已对齐」。请先让用户确认产品简报或关键前提。" >&2
         exit 2
       fi
+      if [ ! -x "$SCRIPT_DIR/pmw-discovery-gate" ]; then
+        echo "DISCOVERY_GATE_UNAVAILABLE: 缺少 pmw-discovery-gate，不能把产品简报保存为已对齐。" >&2
+        exit 2
+      fi
+      discovery_report="$(mktemp "${TMPDIR:-/tmp}/pmw-discovery-gate.XXXXXX")"
+      if ! "$SCRIPT_DIR/pmw-discovery-gate" check --target brief --brief "$input_file" --json >"$discovery_report" 2>&1; then
+        echo "DISCOVERY_GATE_BLOCKED: 产品发现深度不足，不能把产品简报保存为已对齐。请继续通过 Q/D 补齐产品价值判断。" >&2
+        cat "$discovery_report" >&2
+        rm -f "$discovery_report" 2>/dev/null || true
+        exit 2
+      fi
+      rm -f "$discovery_report" 2>/dev/null || true
     fi
     previous_version_number="$(latest_project_brief_version_number || true)"
     input_version_number="$(version_number_from_file "$input_file" || true)"
@@ -213,6 +225,43 @@ case "$EVENT" in
     rm -f "$input_file" "$business_file" 2>/dev/null || true
     trap - EXIT
     echo "$file"
+    ;;
+  discovery)
+    shift || true
+    dimension=""
+    source="对话"
+    summary=""
+    confidence="confirmed"
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --dimension)
+          dimension="${2:-}"; shift 2 ;;
+        --source)
+          source="${2:-}"; shift 2 ;;
+        --summary)
+          summary="${2:-}"; shift 2 ;;
+        --confidence)
+          confidence="${2:-}"; shift 2 ;;
+        *)
+          echo "unknown discovery option: $1" >&2; exit 1 ;;
+      esac
+    done
+    if [ -z "$dimension" ] || [ -z "$summary" ]; then
+      echo "usage: pmw-log discovery --dimension <id> --source <source> --summary <text> [--confidence confirmed|assumed]" >&2
+      exit 1
+    fi
+    case "$confidence" in
+      confirmed|assumed|rejected) ;;
+      *) echo "confidence must be confirmed, assumed, or rejected" >&2; exit 1 ;;
+    esac
+    mkdir -p "$PROJECT_DIR"
+    printf '{"ts":"%s","dimension":"%s","source":"%s","summary":"%s","confidence":"%s"}\n' \
+      "$ts" \
+      "$(printf '%s' "$dimension" | json_escape)" \
+      "$(printf '%s' "$source" | json_escape)" \
+      "$(printf '%s' "$summary" | json_escape)" \
+      "$(printf '%s' "$confidence" | json_escape)" >> "$PROJECT_DIR/discovery.jsonl"
+    echo "$PROJECT_DIR/discovery.jsonl"
     ;;
   question)
     question_id="${2:-D1}"

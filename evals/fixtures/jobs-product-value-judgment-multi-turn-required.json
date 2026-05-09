@@ -1,0 +1,42 @@
+{
+  "id": "jobs-product-value-judgment-multi-turn-required",
+  "title": "产品价值判断必须累计多轮 Q/D 后才能进入简报",
+  "category": "pm-jobs",
+  "primary_skill": "pm-jobs",
+  "prompt": "用户只回答了一个产品对象 Q，并选择了一个方向 D，助手准备生成已对齐简报。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要补充",
+    "must_stop": true,
+    "gate": "产品价值判断不足",
+    "required_behaviors": [
+      "先输出产品价值判断",
+      "累计多个 Q/D",
+      "D 不能替代事实诊断",
+      "继续问一个当前最大缺口 Q"
+    ],
+    "forbidden_behaviors": [
+      "总共只问一个 Q 或一个 D",
+      "直接生成已对齐产品简报",
+      "用选择题替代用户现状和当前替代诊断"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-discovery-gate.md",
+      "contains": "一个 `Q` 加一个 `D` 不能代表产品发现完成"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-discovery-gate.md",
+      "contains": "最终确认产品简报前，深度交付默认至少需要 2 个方向性 `D`"
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "深度交付或现有线上功能优化通常累计 3-5 个动态 Q"
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "最终确认产品简报前通常至少完成 2 个方向性 `D`"
+    }
+  ]
+}

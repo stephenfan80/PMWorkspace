@@ -1,0 +1,340 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import pathlib
+import re
+import subprocess
+import sys
+from datetime import datetime, timezone
+from typing import Optional
+
+
+SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
+
+DIMENSIONS = {
+    "product_role": {
+        "label": "产品定位与链路角色",
+        "question": "Q：这个能力在完整业务链路里主要负责什么，是帮助用户做决策、建立信任、解释价格 / 结果，还是承接转化？",
+        "keywords": ["产品定位", "链路角色", "定位", "决策", "信任", "解释", "转化", "交付", "中枢"],
+        "section_keywords": ["核心价值判断", "产品定位", "链路角色", "产品机会"],
+    },
+    "target_trigger": {
+        "label": "目标用户与触发场景",
+        "question": "Q：最需要这个产品判断的是哪类用户？他们在什么触发时刻会打开这个页面或流程？",
+        "keywords": ["目标用户", "目标人群", "用户 / 场景", "触发场景", "触发时刻", "需求发生时刻", "谁在什么时刻"],
+        "section_keywords": ["目标用户", "触发场景", "用户 / 场景", "目标人群"],
+    },
+    "current_alternative": {
+        "label": "用户现状与当前替代",
+        "question": "Q：用户今天不用这个方案时，具体怎么判断、比价、咨询、绕路、等待或放弃？",
+        "keywords": ["用户现状", "当前替代", "现状替代", "当前状态", "Current State", "workaround", "替代方案", "今天怎么"],
+        "section_keywords": ["背景与现状", "用户痛点与当前替代", "当前替代", "现状"],
+    },
+    "pain_loss": {
+        "label": "真实痛点与当前损失",
+        "question": "Q：当前现状给用户或业务造成的真实损失是什么，是困惑、时间成本、金钱风险、信任损耗、转化流失还是客服压力？",
+        "keywords": ["真实痛点", "用户痛点", "核心问题", "当前损失", "损失", "痛点", "困惑", "流失", "信任损耗", "失败后果"],
+        "section_keywords": ["用户痛点", "核心问题", "真实痛点", "当前损失"],
+    },
+    "goal_countermetric": {
+        "label": "主目标与反指标",
+        "question": "Q：这次最想改善的主目标是什么？同时必须保护哪个反指标，避免为了转化牺牲信任、质量或履约边界？",
+        "keywords": ["主目标", "成功指标", "目标指标", "反指标", "KPI", "不能牺牲", "Success Criteria", "成功标准"],
+        "section_keywords": ["成功指标与反指标", "主目标", "反指标", "成功标准"],
+    },
+}
+
+DIRECTIONAL_DECISION_KEYWORDS = [
+    "D",
+    "拍板",
+    "取舍",
+    "选择",
+    "定位",
+    "范围",
+    "价值交换",
+    "信任承诺",
+    "数据承诺",
+    "转化动作",
+]
+
+PLACEHOLDER_TOKENS = ["待补充", "未提供", "未确认", "不清楚", "TBD", "TODO", "暂无", "待定"]
+
+
+def now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def current_slug() -> str:
+    env_slug = os.environ.get("PMW_PROJECT_SLUG")
+    if env_slug:
+        return env_slug
+    try:
+        return subprocess.check_output([str(SCRIPT_DIR / "pmw-slug")], text=True).strip()
+    except Exception:
+        return "local-project"
+
+
+def project_dir() -> pathlib.Path:
+    return STATE_DIR / "projects" / current_slug()
+
+
+def read_json(path: pathlib.Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+        return value if isinstance(value, dict) else {}
+    except Exception:
+        return {}
+
+
+def read_jsonl(path: pathlib.Path) -> list[dict]:
+    rows: list[dict] = []
+    if not path.exists():
+        return rows
+    for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        try:
+            value = json.loads(line)
+        except Exception:
+            continue
+        if isinstance(value, dict):
+            rows.append(value)
+    return rows
+
+
+def current_run_id() -> str:
+    project = read_json(project_dir() / "project.json")
+    return str(project.get("current_run_id") or project.get("latest_run_id") or "")
+
+
+def read_run_events(run_id: str) -> list[dict]:
+    if not run_id:
+        return []
+    return read_jsonl(project_dir() / "runs" / f"{run_id}.jsonl")
+
+
+def read_text(path_value: str) -> str:
+    if not path_value:
+        return ""
+    path = pathlib.Path(path_value).expanduser()
+    if not path.exists():
+        return ""
+    return path.read_text(encoding="utf-8", errors="ignore")
+
+
+def useful_text(value: str) -> bool:
+    cleaned = re.sub(r"[\s#：:|`>*_\-]+", "", value or "")
+    if len(cleaned) < 4:
+        return False
+    return not any(token.lower() in cleaned.lower() for token in PLACEHOLDER_TOKENS)
+
+
+def section_has_content(text: str, section_keywords: list[str]) -> bool:
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        if not any(keyword in line for keyword in section_keywords):
+            continue
+        if not re.search(r"(^|\s)#|：|:", line):
+            continue
+        window: list[str] = []
+        for next_line in lines[index : min(len(lines), index + 10)]:
+            if next_line.startswith("## ") and window:
+                break
+            window.append(next_line)
+        body = "\n".join(window)
+        body = re.sub(r"^#+\s*.*$", "", body, flags=re.M)
+        for keyword in section_keywords:
+            body = body.replace(keyword, "")
+        if useful_text(body):
+            return True
+    return False
+
+
+def text_covers_dimension(text: str, dimension: str) -> bool:
+    spec = DIMENSIONS[dimension]
+    if section_has_content(text, spec["section_keywords"]):
+        return True
+    if not useful_text(text):
+        return False
+    keyword_hits = sum(1 for keyword in spec["keywords"] if keyword.lower() in text.lower())
+    return keyword_hits >= 2
+
+
+def collect_evidence_texts(args: argparse.Namespace, run_id: str) -> list[tuple[str, str]]:
+    root = project_dir()
+    texts: list[tuple[str, str]] = []
+    if args.brief:
+        texts.append(("候选产品简报", read_text(args.brief)))
+    project = read_json(root / "project.json")
+    latest_brief = str(project.get("latest_brief") or "")
+    if latest_brief and latest_brief != args.brief:
+        texts.append(("最新产品简报", read_text(latest_brief)))
+    for row in read_jsonl(root / "discovery.jsonl"):
+        parts = [row.get("dimension"), row.get("source"), row.get("summary"), row.get("confidence")]
+        texts.append(("产品发现记录", " ".join(str(part or "") for part in parts)))
+    for row in read_run_events(run_id):
+        parts = [row.get("event"), row.get("status"), row.get("title"), row.get("summary")]
+        texts.append(("当前 run", " ".join(str(part or "") for part in parts)))
+    for path_name in ["questions.jsonl", "decisions.jsonl", "artifact-flow.jsonl"]:
+        for row in read_jsonl(root / path_name):
+            parts = [row.get(key) for key in sorted(row)]
+            texts.append((path_name, " ".join(str(part or "") for part in parts)))
+    return [(source, text) for source, text in texts if text.strip()]
+
+
+def explicit_discovery_dimensions() -> dict[str, list[str]]:
+    covered: dict[str, list[str]] = {dimension: [] for dimension in DIMENSIONS}
+    for row in read_jsonl(project_dir() / "discovery.jsonl"):
+        dimension = str(row.get("dimension") or "")
+        confidence = str(row.get("confidence") or "")
+        if dimension in covered and confidence != "rejected" and useful_text(str(row.get("summary") or "")):
+            covered[dimension].append(str(row.get("source") or "discovery ledger"))
+    return covered
+
+
+def covered_dimensions(args: argparse.Namespace, run_id: str) -> dict[str, list[str]]:
+    covered = explicit_discovery_dimensions()
+    for source, text in collect_evidence_texts(args, run_id):
+        for dimension in DIMENSIONS:
+            if covered[dimension]:
+                continue
+            if text_covers_dimension(text, dimension):
+                covered[dimension].append(source)
+    return covered
+
+
+def event_is_confirmed(row: dict) -> bool:
+    text = f"{row.get('status', '')} {row.get('summary', '')} {row.get('body', '')} {row.get('user_choice', '')}"
+    positive = any(token in text for token in ["已确认", "已同意", "已选择", "用户确认", "用户同意", "选", "批准"])
+    negative = any(token in text for token in ["待确认", "未确认", "需要确认", "不同意", "未选择"])
+    return positive and not negative
+
+
+def count_directional_decisions(run_id: str) -> tuple[int, bool]:
+    rows: list[dict] = []
+    root = project_dir()
+    rows.extend(read_jsonl(root / "questions.jsonl"))
+    rows.extend(read_jsonl(root / "decisions.jsonl"))
+    rows.extend(read_run_events(run_id))
+    count = 0
+    exemption = False
+    seen: set[str] = set()
+    for row in rows:
+        text = " ".join(str(row.get(key) or "") for key in sorted(row))
+        if "D 豁免原因" in text or "D豁免原因" in text:
+            exemption = True
+        question_id = str(row.get("question_id") or "")
+        looks_directional = (
+            question_id.upper().startswith("D")
+            or row.get("event") == "decision"
+            or any(keyword in text for keyword in DIRECTIONAL_DECISION_KEYWORDS)
+        )
+        if not looks_directional or not event_is_confirmed(row):
+            continue
+        fingerprint = f"{row.get('title') or question_id}:{row.get('summary') or row.get('body') or row.get('user_choice')}"
+        if fingerprint in seen:
+            continue
+        seen.add(fingerprint)
+        count += 1
+    return count, exemption
+
+
+def build_payload(args: argparse.Namespace) -> dict:
+    run_id = args.run or current_run_id()
+    covered = covered_dimensions(args, run_id)
+    missing = [dimension for dimension, sources in covered.items() if not sources]
+    decision_count, d_exemption = count_directional_decisions(run_id)
+    needs_decisions = args.target in {"brief", "alignment"}
+    decision_ready = decision_count >= args.min_decisions or (d_exemption and args.allow_d_exemption)
+    passed = not missing and (decision_ready or not needs_decisions)
+    next_dimension = missing[0] if missing else ""
+    next_question = DIMENSIONS[next_dimension]["question"] if next_dimension else (
+        "D：请拍板产品定位 / 范围、价值交换 / 信任承诺或数据承诺 / 转化动作中的下一个方向性取舍。"
+        if not decision_ready and needs_decisions
+        else ""
+    )
+    return {
+        "checked_at": now(),
+        "run_id": run_id,
+        "target": args.target,
+        "verdict": "passed" if passed else "blocked",
+        "passed": passed,
+        "covered_dimensions": {
+            dimension: {"label": DIMENSIONS[dimension]["label"], "sources": sources}
+            for dimension, sources in covered.items()
+            if sources
+        },
+        "missing_dimensions": [
+            {"dimension": dimension, "label": DIMENSIONS[dimension]["label"]}
+            for dimension in missing
+        ],
+        "directional_decisions_count": decision_count,
+        "required_directional_decisions": args.min_decisions if needs_decisions else 0,
+        "d_exemption": d_exemption,
+        "next_question": next_question,
+    }
+
+
+def render_markdown(payload: dict) -> str:
+    covered = payload["covered_dimensions"]
+    missing = payload["missing_dimensions"]
+    lines = [
+        "# PMWorkspace 产品发现门槛",
+        "",
+        f"- Verdict：{'通过' if payload['passed'] else '阻断'}（{payload['verdict']}）",
+        f"- 当前 run：{payload['run_id'] or '暂无'}",
+        f"- 方向性 D：{payload['directional_decisions_count']} / {payload['required_directional_decisions']}",
+        "",
+        "## 已覆盖维度",
+    ]
+    if covered:
+        for item in covered.values():
+            lines.append(f"- {item['label']}：{', '.join(item['sources'])}")
+    else:
+        lines.append("- 暂无")
+    lines.extend(["", "## 缺失维度"])
+    if missing:
+        for item in missing:
+            lines.append(f"- {item['label']}")
+    else:
+        lines.append("- 无")
+    if payload.get("next_question"):
+        lines.extend(["", "## 下一轮", f"- {payload['next_question']}"])
+    lines.append("")
+    return "\n".join(lines)
+
+
+def command_check(args: argparse.Namespace) -> int:
+    payload = build_payload(args)
+    if args.json:
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+    else:
+        print(render_markdown(payload), end="")
+    return 0 if payload["passed"] else 2
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="pmw-discovery-gate")
+    sub = parser.add_subparsers(dest="command", required=True)
+    check = sub.add_parser("check")
+    check.add_argument("--target", choices=["brief", "alignment", "prototype"], default="brief")
+    check.add_argument("--brief", default="")
+    check.add_argument("--run", default="")
+    check.add_argument("--min-decisions", type=int, default=2)
+    check.add_argument("--allow-d-exemption", action="store_true")
+    check.add_argument("--json", action="store_true")
+    check.set_defaults(func=command_check)
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -322,7 +322,7 @@ def build_parser() -> argparse.ArgumentParser:
     list_cmd = sub.add_parser("list")
     list_cmd.add_argument("--json", action="store_true")
     run_cmd = sub.add_parser("run")
-    run_cmd.add_argument("--fixture")
+    run_cmd.add_argument("--fixture", "--id", dest="fixture")
     run_cmd.add_argument("--json", action="store_true")
     return parser
 

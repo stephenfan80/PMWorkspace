@@ -143,6 +143,15 @@ def latest_visual_baseline() -> dict:
     return rows[-1] if rows else {}
 
 
+def same_path(left: str, right: str) -> bool:
+    if not left or not right:
+        return False
+    try:
+        return pathlib.Path(left).expanduser().resolve() == pathlib.Path(right).expanduser().resolve()
+    except Exception:
+        return left == right
+
+
 def parse_target_size(text: str) -> tuple[Optional[int], Optional[int]]:
     match = re.search(r"目标输出[^0-9]*(\d{3,5})\s*(?:x|X|×)\s*(?:>=\s*)?(\d{3,5})", text)
     if match:
@@ -224,7 +233,11 @@ def command_audit(args: argparse.Namespace) -> int:
     image_width, image_height = read_size(args.image)
     reference_width, reference_height = read_size(args.reference)
     baseline = latest_visual_baseline()
-    baseline_target_width, baseline_target_height = parse_target_size(str(baseline.get("summary") or ""))
+    baseline_reference = str(baseline.get("path") or "")
+    if same_path(baseline_reference, args.reference):
+        baseline_target_width, baseline_target_height = parse_target_size(str(baseline.get("summary") or ""))
+    else:
+        baseline_target_width, baseline_target_height = None, None
     target_width = args.target_width or baseline_target_width or reference_width
     target_height = args.target_height or (
         scaled_height(reference_width, reference_height, target_width) if args.target_width else reference_height

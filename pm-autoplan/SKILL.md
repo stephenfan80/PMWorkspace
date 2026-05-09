@@ -31,10 +31,13 @@ description: |
 - `usage pm-autoplan`
 - `pmw-dashboard`
 - `pmw-artifact`
+- `pmw-discovery-gate`
 
 ### 必读共享协议
 
 - `../pmworkspace-shared/references/autoplan-workflow.md`
+- `../pmworkspace-shared/references/product-discovery-gate.md`
+- `../pmworkspace-shared/references/product-manager-brief.md`
 - `../pmworkspace-shared/references/runtime-kernel.md`
 - `../pmworkspace-shared/references/pm-workbench-map.md`
 - `../pmworkspace-shared/references/product-readiness-dashboard.md`
@@ -88,6 +91,7 @@ done
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-question-tuning" ] && "$_PMW_BIN/pmw-question-tuning" summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" flow 2>/dev/null || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-discovery-gate" ] && "$_PMW_BIN/pmw-discovery-gate" check --target alignment 2>/dev/null || true
 ```
 
 ## Workflow
@@ -103,22 +107,24 @@ done
 9. Read `../pmworkspace-shared/references/routing.md`; if `$pm-autoplan` was entered from `$pm-workspace`, inherit its mode and run. If called directly, use routing D0 to choose mode.
 10. Read `../pmworkspace-shared/references/question-tuning.md`.
 11. Read `../pmworkspace-shared/references/product-office-hours.md`.
-12. Read `../pmworkspace-shared/references/adversarial-review.md`.
-13. Read `../pmworkspace-shared/references/product-plan-handoff.md`.
-14. Read `../pmworkspace-shared/references/zoon-workflow.md` and `../pmworkspace-shared/references/zoon-drift-check.md`.
+12. Read `../pmworkspace-shared/references/product-discovery-gate.md`.
+13. Read `../pmworkspace-shared/references/product-manager-brief.md`.
+14. Read `../pmworkspace-shared/references/adversarial-review.md`.
+15. Read `../pmworkspace-shared/references/product-plan-handoff.md`.
+16. Read `../pmworkspace-shared/references/zoon-workflow.md` and `../pmworkspace-shared/references/zoon-drift-check.md`.
 15. Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run，不要重新 `pmw-run start`；如果用户直接调用 `$pm-autoplan` 且没有当前 run，再 start `pmw-run start --skill pm-autoplan --mode <quick|deep> --goal "<本轮目标>"`.
 16. Build the automatic review control panel from `autoplan-workflow.md`: 靠谱产品负责人姿态、模式来源、事实来源优先级、当前阶段、最早阻塞门槛、门槛等级、门槛来源、可自动采用项、必须 PM 拍板项、下一技能和交接上下文.
 17. 快速成型模式：先做生产/高风险升级检查；如果出现生产流程、高风险承诺、真实数据、线索/交易/隐私或研发交付信号，升级到深度交付门槛，不要继续轻量包。
 18. 快速成型模式：按最早门槛顺序只检测会影响轻量包结构的缺口：核心用户/场景、核心问题、主目标/反指标、不可虚构项、原型屏幕范围、方案差异、假设确认。默认最多问 2-3 个 `Q`。
 19. 快速成型模式：列出关键假设、方案方向和每张图的不可虚构项，请用户确认“按这些假设继续”。确认前不生成图片，并用 `pmw-run event --type gate` 记录当前门槛。
 20. 快速成型模式：确认后输出轻量包：标注假设的产品简报、2-3 个方案方向、每个方案 1 张移动端 image-2 原型图计划，并把状态写成 `基于假设，可讨论`。
-21. 深度交付模式：按最早门槛顺序推进：工作目标模式、场景路由、Q 诊断、产品发现深度、前提确认、必要 D、策略审查、产品简报、本地简报保存、可选 Zoon 同步、已启用 Zoon 的漂移检查、线上参考和设计系统基线、Product Readiness Dashboard 的原型准备度或交付准备度。
+21. 深度交付模式：按最早门槛顺序推进：工作目标模式、产品价值判断、场景路由、多轮 Q 诊断、产品发现深度、多轮 D 拍板、前提确认、策略审查、产品经理简报、本地简报保存、Zoon A/B 推荐、已启用 Zoon 的漂移检查、线上参考和设计系统基线、Product Readiness Dashboard 的原型准备度或交付准备度。
 22. 深度交付模式：Use `pm-decision-principles.md` to auto-decide only low-risk defaults that do not change product direction; surface any direction-changing item as a single `D` choice question and stop.
 23. Give the user a conclusion-first review: first output `自动评审结论` with `我建议` and `理由`, include a short `工作方式` / progress card, then write the full `评审控制面板` to audit.
 24. For the earliest gate, always declare `门槛等级` as `阻断`、`高风险`、`可自动采用` or `可延后`, and declare `门槛来源`.
 25. Every item in `已自动采用` must include source and why no PM decision is needed, for example `默认移动端优先。来源：PMWorkspace 默认规则。原因：不改变产品方向或用户承诺。`
 26. When enough information exists, create the smallest useful product brief and save it with `pmw-log brief <name>`. This saves the local business brief and audit copy, registers `product_brief` in Product Artifact Flow, and syncs to Zoon only when `PMW_ZOON_SYNC_ON_BRIEF=true` / `zoon_sync_on_brief: true` or the user has explicitly chosen online collaboration.
-    - `enough information` 必须包含产品发现深度：深度交付或现有线上功能优化通常至少覆盖 4 个价值澄清维度，并且必须包含目标用户与触发时刻、用户现状与当前替代、真实问题与当前损失、主目标与反指标。一个 `Q` 加一个 `D` 不能代表产品发现完成。
+    - `enough information` 必须先通过 `pmw-discovery-gate check --target brief`：深度交付或现有线上功能优化必须覆盖产品定位与链路角色、目标用户与触发时刻、用户现状与当前替代、真实痛点与当前损失、主目标与反指标，并且最终确认产品简报前通常至少完成 2 个方向性 `D`。一个 `Q` 加一个 `D` 不能代表产品发现完成。
     - 如果产品发现深度不足，最早门槛是 `产品发现深度不足`，下一技能必须是 `$pm-jobs`，只展开一个当前最大缺口 `Q`；不要直接写产品简报或进入原型。
     - 本地 Markdown 保存成功后，自动评审的用户可见 `下一步` 必须走 `$pm-brief` 同一段 Zoon 推荐选择，不能只提示“确认后进入原型 / 交付”。
     - 固定推荐文案：`Zoon 协作建议：这次简报适合多人评审 / 后续原型或 PRD 复用，建议同步到 Zoon；不同步也不影响继续使用本地 Markdown。`

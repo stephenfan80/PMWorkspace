@@ -1,6 +1,6 @@
 {
   "id": "brief-core-contract-definition",
-  "title": "产品简报必须定义产品核心信息契约",
+  "title": "产品简报必须定义产品经理简报契约",
   "category": "pm-brief",
   "primary_skill": "pm-brief",
   "prompt": "把已经完成价值澄清和策略取舍的材料整理成产品简报。",
@@ -8,11 +8,11 @@
     "mode": "deep",
     "status": "待确认",
     "must_stop": true,
-    "gate": "产品核心信息契约",
+    "gate": "产品经理简报契约",
     "required_behaviors": [
-      "定义产品核心信息契约",
+      "定义产品经理简报契约",
       "说明产品简报不是 PRD、会议纪要或信息仓库",
-      "只压缩会影响原型、复审或交付的判断"
+      "先回答为什么值得做、为谁做、现状为什么不够好、如何解决痛点"
     ],
     "forbidden_behaviors": [
       "把产品简报写成信息仓库",
@@ -23,7 +23,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",
-      "contains": "## 产品核心信息契约"
+      "contains": "## 产品经理简报契约"
     },
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",
@@ -31,15 +31,15 @@
     },
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",
-      "contains": "只保留会改变原型结构、复审判断、交付范围或用户承诺的核心信息"
+      "contains": "它必须先回答“为什么值得做、为谁做、现状为什么不够好、这个产品如何解决痛点”"
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "产品核心信息契约"
+      "contains": "产品经理简报"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "产品简报：必须定义“产品核心信息契约”"
+      "contains": "产品简报：必须定义“产品经理简报契约”"
     }
   ]
 }

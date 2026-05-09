@@ -50,10 +50,13 @@
       "preamble_checks": [
         "usage pm-autoplan",
         "pmw-dashboard",
-        "pmw-artifact"
+        "pmw-artifact",
+        "pmw-discovery-gate"
       ],
       "required_references": [
         "autoplan-workflow.md",
+        "product-discovery-gate.md",
+        "product-manager-brief.md",
         "runtime-kernel.md",
         "pm-workbench-map.md",
         "product-readiness-dashboard.md",
@@ -87,9 +90,11 @@
       "preamble_checks": [
         "usage pm-jobs",
         "pmw-memory",
-        "pmw-question-tuning"
+        "pmw-question-tuning",
+        "pmw-discovery-gate"
       ],
       "required_references": [
+        "product-discovery-gate.md",
         "product-office-hours.md",
         "product-memory.md",
         "question-tuning.md",
@@ -146,13 +151,16 @@
     },
     "pm-brief": {
       "stage": "产品简报",
-      "purpose": "把已完成的产品判断压缩成核心信息契约，默认本地保存，并按用户选择同步到 Zoon。",
+      "purpose": "把已完成的产品发现、价值判断和策略取舍写成产品经理简报，默认本地保存，并按用户选择同步到 Zoon。",
       "preamble_checks": [
         "usage pm-brief",
         "pmw-memory",
-        "pmw-artifact"
+        "pmw-artifact",
+        "pmw-discovery-gate"
       ],
       "required_references": [
+        "product-discovery-gate.md",
+        "product-manager-brief.md",
         "product-plan-handoff.md",
         "production-reference-gate.md",
         "pm-decision-principles.md",
@@ -165,7 +173,8 @@
         "product-readiness-dashboard.md"
       ],
       "output_fields": [
-        "产品核心信息",
+        "产品简报",
+        "核心价值判断",
         "确认状态",
         "当前需要确认",
         "下一步"

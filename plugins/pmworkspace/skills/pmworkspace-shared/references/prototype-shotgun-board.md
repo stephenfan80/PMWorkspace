@@ -34,6 +34,8 @@ pmw-prototype-board image \
   --status "已生成"
 ```
 
+如果当前 run 有 `visual_baseline` 且输出单元是 `physical_longboard`，`pmw-prototype-board image` 会自动调用 `pmw-image-audit`。审计失败时图片状态必须写成 `需要重出`，命令返回非 0；助手不能把这张图展示为交付结果。
+
 用户反馈后记录评分：
 
 ```bash
@@ -59,4 +61,5 @@ pmw-prototype-board list
 - 每个 board item 必须能追溯到已对齐产品简报版本、主目标、反指标和不可虚构项。
 - 每个 board item 在有线上截图视觉基线时，必须能追溯到 `canvas_mode=physical_longboard` 和 `target_output_pixels`。
 - 每个 board item 必须保留独立状态：`计划生成`、`已生成`、`生成失败`、`待重试` 或 `需要重出`；批量成功不能掩盖单张失败。
+- 已登记的 board item 必须绑定当前 latest brief 的 `brief_path` 和 `brief_version`；旧版本 brief 的输出单元必须重新登记，不能靠当前 run 里的旧方案确认放行。
 - 如果 `pmw-prototype-board add` 或 `pmw-prototype-board image` 不可用，原型计划必须写明 `方案比较板：未写入（原因）`，不能假装已经记录。

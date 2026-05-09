@@ -30,9 +30,11 @@ description: |
 - `usage pm-jobs`
 - `pmw-memory`
 - `pmw-question-tuning`
+- `pmw-discovery-gate`
 
 ### 必读共享协议
 
+- `../pmworkspace-shared/references/product-discovery-gate.md`
 - `../pmworkspace-shared/references/product-office-hours.md`
 - `../pmworkspace-shared/references/product-memory.md`
 - `../pmworkspace-shared/references/question-tuning.md`
@@ -82,12 +84,14 @@ done
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-jobs >/dev/null 2>&1 || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" user-summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-question-tuning" ] && "$_PMW_BIN/pmw-question-tuning" summary 2>/dev/null || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-discovery-gate" ] && "$_PMW_BIN/pmw-discovery-gate" check --target alignment 2>/dev/null || true
 ```
 
 ## Workflow
 
 1. Read `../pmworkspace-shared/references/first-use-onboarding.md` for first contact.
-2. Read `../pmworkspace-shared/references/product-office-hours.md` and follow the 产品价值澄清器协议与 diagnostic state machine: 工作目标模式 -> 问题定义模式 -> 场景路由 -> 真实问题重定义 -> Q 诊断 -> 前提确认 -> D 拍板 -> 产品简报状态.
+2. Read `../pmworkspace-shared/references/product-discovery-gate.md` and treat it as the hard gate before product brief.
+3. Read `../pmworkspace-shared/references/product-office-hours.md` and follow the 产品价值澄清器协议与 diagnostic state machine: 工作目标模式 -> 问题定义模式 -> 场景路由 -> 真实问题重定义 -> Q 诊断 -> D 拍板 -> 前提确认 -> 产品简报状态.
 3. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory user-summary` plus `pmw-memory summary` when available to avoid repeating known preferences or resolved decisions. If memory changes the recommendation, explicitly say `基于过往偏好...` or `基于本地产品认知...`; memory cannot override the current facts, high-risk gates, brief, Zoon, anti-metric, non-fiction boundary, or reference gate.
 4. Read `../pmworkspace-shared/references/question-tuning.md` and apply saved Q/D preferences without overriding current facts or high-risk gates.
 5. Read `../pmworkspace-shared/references/pm-decision-principles.md` and apply its fact priority before using memory or defaults.
@@ -105,17 +109,17 @@ done
 17. Read `../pmworkspace-shared/references/production-reference-gate.md`，判断新页面是否仍需要线上参考。
 18. If the request is an existing-feature iteration, require current production screenshots, screen recording, or equivalent visual baseline before proceeding.
 19. 如果新页面承接线上流程、结果状态或生产样式，要求截图、录屏、相似页面参考，或用户明确确认没有线上参考。
-20. Ask `Q` diagnostic questions one at a time. 默认最多问 3 个动态 Q；只有信息不足以生成有价值原型时，最多追加到 5 个。Stop after each `Q` and wait for the user; do not batch open questions and do not output a long md plan.
+20. Ask `Q` diagnostic questions one at a time. Stop after each `Q` and wait for the user; do not batch open questions. 深度交付或现有线上功能优化通常累计 3-5 个动态 Q；每轮只展开一个并等待用户回答，不批量开放问题，也不输出长 md 方案。快速成型可以少问，但仍必须给出核心价值暂判和最小假设确认。
 21. 如果当前价值缺口 / 当前最大缺口是证据门槛，停在一个证据请求；不要继续问后续产品问题。
 22. If the missing item is a fact, ask one `Q`; if facts are enough but a tradeoff changes direction, scope, promise, experiment framing, or handoff, ask one `D`.
 23. 如果用户只给功能愿望，不能把功能名直接写成核心问题；先追问真实用户、触发场景、当前损失或现状替代。
 24. 进入方案方向、前提确认或产品简报前，必须识别当前替代方案和最小可赢切口；如果仍宽泛，先收窄，不直接写完整产品简报。
-25. 进入前提确认、策略审查或产品简报前，必须通过产品发现深度门槛：深度交付或现有线上功能优化通常至少覆盖 4 个价值澄清维度，并且必须包含 `目标用户与触发时刻`、`用户现状与当前替代`、`真实问题与当前损失`、`主目标与反指标`。一个 `Q` 加一个 `D` 不能代表已完成产品定位、用户现状、真实损失、目标和反指标的分析；`D` 只能拍板取舍，不能替代事实诊断。
+25. 进入前提确认、策略审查或产品简报前，必须通过产品发现深度门槛：深度交付或现有线上功能优化必须覆盖 `产品定位与链路角色`、`目标用户与触发时刻`、`用户现状与当前替代`、`真实痛点与当前损失`、`主目标与反指标`。最终确认产品简报前通常至少完成 2 个方向性 `D`；一个 `Q` 加一个 `D` 不能代表已完成产品定位、用户现状、真实损失、目标和反指标的分析，`D` 也不能替代事实诊断。
 26. 如果产品发现深度不足，当前价值缺口写成 `产品发现深度不足`，只问一个当前最大缺口 `Q`，并说明它会影响产品定位、用户任务、价值交换、首屏主张、反指标或不可虚构项中的哪一项；不要进入 `$pm-brief`。
 27. 在信息足够后，输出 2-4 条前提确认；用户不同意时回到对应 `Q` 或 `D`。
 28. Read `../pmworkspace-shared/references/decision-question-mode.md`; when a missing answer would change product direction, prototype scope, experiment framing, user promise, or handoff, ask it as a D-numbered choice question.
 29. 输出价值判断先行的简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。未完成前提确认、产品发现深度门槛或关键 D 拍板时，不能标记为 `已对齐`。
-30. 平台脚本可用时，用 `pmw-project set-name "<中文项目名>"` 保存中文项目名，用 `pmw-log question`、`pmw-log decision` 和 `pmw-run event` 记录关键选择。
+30. 平台脚本可用时，用 `pmw-project set-name "<中文项目名>"` 保存中文项目名，用 `pmw-log discovery --dimension <id> --source <source> --summary <text> --confidence confirmed`、`pmw-log question`、`pmw-log decision` 和 `pmw-run event` 记录关键事实与选择。进入产品简报前运行 `pmw-discovery-gate check --target brief`。
 
 ## 价值澄清追问
 
@@ -139,6 +143,7 @@ done
 
 ```text
 产品价值判断：
+- 核心价值暂判：
 - 我对真实问题的判断：
 - 我现在判断：
 - 当前价值缺口：

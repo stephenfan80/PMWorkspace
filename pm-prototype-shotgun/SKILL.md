@@ -161,8 +161,8 @@ done
 14. 平台脚本可用时运行 `pmw-dashboard readiness --target prototype`；用户可见输出只包含短 verdict / 第一阻断原因。如果 verdict 是 `不可出图`，根据第一条阻断行退回 `$pm-brief`、线上参考门槛、方案方向确认或不可虚构项补齐，不写 image-2 prompt。只有用户要求看审计时才展示 `pmw-dashboard readiness --details`。
 15. 数据佐证缺失时不阻断出图，但必须把 `未验证风险` 写入用户可见输出和每个 image-2 prompt 的不可虚构项：不得展示确定性承诺、真实验证过的数值、已核验结果或无法兑现的数据能力，只能使用示例、区间、占位或明确标注假设。
 16. 在每个输出单元的图片生成前门槛通过后，先把最终 prompt 交给 `pmw-prototype-prompt-check`；有视觉基线时检查失败必须重写 prompt，不得调用 image-2。检查通过后逐个 Generate with image-2 / image generation。每次生成只服务当前一个输出单元，并在 prompt 中写明禁止拼图、并排比较、一图多屏、一图多方案。 如果当前环境无法生成 image-2，停止并说明，不用 HTML、Markdown 线框或方案比较板替代。
-17. 每张图出图后用 `pmw-prototype-board image` 补充图片路径或 URL；单张失败时记录 `生成失败` 或 `待重试`，不能把批次写成全成功。用户反馈后用 `pmw-prototype-board score` 记录评分。
-18. Run `prototype-quality-review.md`; if a reference screenshot exists, first run `pmw-image-audit audit --image <生成图> --reference <参考图>` and expose `视觉审计：通过 / 需要重出`. Then route substantial post-image review to `$pm-prototype-review`.
+17. 每张图出图后用 `pmw-prototype-board image` 补充图片路径或 URL；当当前 run 有 `visual_baseline` 且输出单元是 `physical_longboard` 时，脚本会自动调用 `pmw-image-audit`。如果返回 `需要重出` 或命令非 0，必须把该图标为 `需要重出`，不能展示为交付结果，也不能把批次写成全成功。
+18. Run `prototype-quality-review.md`; if a reference screenshot exists, first trust the `pmw-prototype-board image` audit result or run `pmw-image-audit audit --image <生成图> --reference <参考图>` again for复核，并 expose `视觉审计：通过 / 需要重出`. Then route substantial post-image review to `$pm-prototype-review`.
 19. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单，它会登记 `prototype_manifest` 到 Product Artifact Flow；再用 `pmw-run event --type artifact` 记录产物。
 20. Record approved/rejected design feedback with `pmw-log taste`, including scenario, feedback target, source, scope, and confidence when available.
 21. 批量输出后运行 `pmw-dashboard status`，最终说明只给每张图的业务状态和下一步；方案比较板、产物流动和证据状态默认留在审计中。

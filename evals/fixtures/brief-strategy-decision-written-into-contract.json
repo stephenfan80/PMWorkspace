@@ -31,7 +31,7 @@
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "先建立产品简报契约控制器，记录 `来源门槛`、`已完成门槛`、`缺失门槛`、`事实/假设边界`、`策略决策写入`"
+      "contains": "先建立产品经理简报控制器，记录 `来源门槛`、`已完成门槛`、`缺失门槛`、`事实/假设边界`、`策略决策写入`"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",

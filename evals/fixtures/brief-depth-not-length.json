@@ -10,13 +10,13 @@
     "must_stop": true,
     "gate": "深度不等于长度",
     "required_behaviors": [
-      "快速版、标准版、深度版使用同一套核心信息",
-      "深度版只在支持信息里补证据和边界",
-      "核心信息保持精简"
+      "快速版可以压缩，标准版和深度版使用产品经理简报结构",
+      "深度只代表证据和风险处理深度",
+      "审计日志不写进正文"
     ],
     "forbidden_behaviors": [
       "把深度版写成长章节堆叠",
-      "扩写核心信息压过判断",
+      "把审计日志搬进业务正文",
       "用深度替代门槛确认"
     ]
   },
@@ -27,11 +27,11 @@
     },
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",
-      "contains": "快速版、标准版、深度版都使用同一套核心信息"
+      "contains": "快速版可以压缩，标准版和深度版都使用产品经理简报结构"
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "简报深度只代表证据和风险处理深度，不代表内容越写越长"
+      "contains": "简报深度不等于内容长度；深度只代表证据和风险处理深度"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",

@@ -1,0 +1,47 @@
+{
+  "id": "prototype-board-brief-version-match-required",
+  "title": "prototype-board 输出单元必须绑定当前 latest brief",
+  "category": "readiness-dashboard",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "当前 latest brief 是 v2，但 prototype-board 输出单元仍绑定 v1。",
+  "expected": {
+    "mode": "deep",
+    "status": "不可出图",
+    "must_stop": true,
+    "gate": "输出单元绑定",
+    "required_behaviors": [
+      "readiness 展示输出单元绑定门槛",
+      "旧 brief 版本阻断出图",
+      "要求重新登记输出单元"
+    ],
+    "forbidden_behaviors": [
+      "用旧输出单元放行当前 brief",
+      "只看 run_id 不看 brief_version",
+      "忽略 brief_path"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "输出单元绑定"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "旧 brief 版本的输出单元不能放行出图"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\"; export PMW_PROJECT_SLUG=bind-test; root=\"$PMW_HOME/projects/bind-test\"; mkdir -p \"$root/runs\" \"$root/briefs\"; brief=\"$root/briefs/current.md\"; printf '# 产品设计简报：测试\\n产品简报版本：v2\\n确认状态：已对齐\\n\\n## 核心价值判断\\n- 一句话判断：已确认。\\n## 数据 / 能力 / 约束与不可虚构项\\n- 不可虚构项：不得虚构。\\n' > \"$brief\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\",\"latest_brief\":\"%s\",\"latest_brief_version\":\"v2\"}\\n' \"$brief\" > \"$root/project.json\"; printf '{\"ts\":\"2099-01-01T00:00:00Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"已对齐\",\"title\":\"产品简报确认\",\"summary\":\"用户确认\"}\\n{\"ts\":\"2099-01-01T00:00:01Z\",\"event\":\"decision\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"方案方向确认\",\"summary\":\"默认方向已批准\"}\\n' > \"$root/runs/r1.jsonl\"; printf '{\"record_type\":\"item\",\"run_id\":\"r1\",\"scheme\":\"方案A\",\"screen\":\"首屏\",\"brief_path\":\"/tmp/old.md\",\"brief_version\":\"v1\",\"main_goal\":\"测试\",\"anti_metric\":\"测试\",\"non_fiction\":\"不得虚构\",\"canvas_mode\":\"standard_first_screen\",\"target_output_pixels\":\"\"}\\n' > \"$root/prototype-board.jsonl\"; bin/pmw-dashboard readiness --target prototype --details; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0,
+      "contains": [
+        "输出单元绑定",
+        "绑定旧 brief"
+      ]
+    }
+  ]
+}

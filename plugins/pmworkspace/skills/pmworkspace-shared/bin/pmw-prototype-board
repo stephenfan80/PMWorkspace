@@ -58,6 +58,24 @@ def board_path() -> pathlib.Path:
     return project_dir() / "prototype-board.jsonl"
 
 
+def artifact_log() -> pathlib.Path:
+    return project_dir() / "artifact-flow.jsonl"
+
+
+def read_jsonl(path: pathlib.Path) -> list[dict]:
+    rows: list[dict] = []
+    if not path.exists():
+        return rows
+    for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        try:
+            value = json.loads(line)
+        except Exception:
+            continue
+        if isinstance(value, dict):
+            rows.append(value)
+    return rows
+
+
 def append_row(row: dict) -> None:
     path = board_path()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -66,18 +84,51 @@ def append_row(row: dict) -> None:
 
 
 def read_rows() -> list[dict]:
-    path = board_path()
-    rows = []
-    if not path.exists():
-        return rows
-    for line in path.read_text(encoding="utf-8").splitlines():
-        try:
-            value = json.loads(line)
-        except Exception:
+    return read_jsonl(board_path())
+
+
+def artifact_location(row: dict) -> str:
+    return str(row.get("path") or row.get("url") or "")
+
+
+def latest_visual_baseline(run_id: str = "") -> dict:
+    rows = [row for row in read_jsonl(artifact_log()) if row.get("kind") == "visual_baseline"]
+    if run_id:
+        for row in reversed(rows):
+            if row.get("run_id") == run_id:
+                return row
+    return rows[-1] if rows else {}
+
+
+def latest_item(run_id: str, scheme: str, screen: str) -> dict:
+    for row in reversed(read_rows()):
+        if row.get("record_type", "item") != "item":
             continue
-        if isinstance(value, dict):
-            rows.append(value)
-    return rows
+        if row.get("scheme") != scheme or row.get("screen") != screen:
+            continue
+        row_run = str(row.get("run_id") or "")
+        if run_id and row_run and row_run != run_id:
+            continue
+        return row
+    return {}
+
+
+def audit_image(image: str, reference: str) -> tuple[int, dict, str]:
+    if not pathlib.Path(image).expanduser().exists():
+        return 2, {"verdict": "需要重出", "failures": ["生成图不是可读取的本地文件，无法完成视觉审计"]}, ""
+    if not pathlib.Path(reference).expanduser().exists():
+        return 2, {"verdict": "需要补充参考", "failures": ["视觉基线参考图不是可读取的本地文件"]}, ""
+    result = subprocess.run(
+        [str(SCRIPT_DIR / "pmw-image-audit"), "audit", "--image", image, "--reference", reference, "--json"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    try:
+        payload = json.loads(result.stdout)
+    except Exception:
+        payload = {"verdict": "需要重出", "failures": [result.stderr.strip() or result.stdout.strip() or "视觉审计输出不可解析"]}
+    return result.returncode, payload if isinstance(payload, dict) else {}, result.stderr
 
 
 def command_add(args: argparse.Namespace) -> int:
@@ -124,19 +175,44 @@ def command_score(args: argparse.Namespace) -> int:
 
 
 def command_image(args: argparse.Namespace) -> int:
+    run_id = args.run or current_run_id()
+    item = latest_item(run_id, args.scheme, args.screen)
+    baseline = latest_visual_baseline(run_id)
+    audit_payload: dict = {}
+    audit_exit = 0
+    audit_note = ""
+    if baseline and item.get("canvas_mode") == "physical_longboard":
+        reference = artifact_location(baseline)
+        audit_exit, audit_payload, audit_note = audit_image(args.image, reference)
+    audit_verdict = str(audit_payload.get("verdict") or "")
+    status = args.status
+    if audit_verdict and audit_verdict != "通过":
+        status = "需要重出"
     row = {
         "ts": now(),
         "record_type": "image",
-        "run_id": args.run or current_run_id(),
+        "run_id": run_id,
         "scheme": args.scheme,
         "screen": args.screen,
         "image": args.image,
-        "status": args.status,
+        "status": status,
         "note": args.note,
     }
+    if audit_payload:
+        row.update(
+            {
+                "audit_verdict": audit_verdict,
+                "image_width": audit_payload.get("image_width"),
+                "image_height": audit_payload.get("image_height"),
+                "target_width": audit_payload.get("target_width"),
+                "target_height": audit_payload.get("target_height"),
+                "audit_failures": audit_payload.get("failures") or [],
+                "audit_note": audit_note.strip(),
+            }
+        )
     append_row(row)
     print(board_path())
-    return 0
+    return 0 if audit_exit == 0 else 2
 
 
 def command_list(_args: argparse.Namespace) -> int:
@@ -167,6 +243,8 @@ def command_list(_args: argparse.Namespace) -> int:
         if score.get("note"):
             score_text += f"：{score.get('note')}"
         status = score.get("status") or image_row.get("status") or item.get("status") or "计划生成"
+        if image_row.get("audit_verdict") and image_row.get("audit_verdict") != "通过":
+            status = f"{status}（视觉审计：{image_row.get('audit_verdict')}）"
         values = [
             item.get("scheme", ""),
             item.get("screen", ""),

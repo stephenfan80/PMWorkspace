@@ -1,0 +1,42 @@
+{
+  "id": "brief-pm-template-best-practice-required",
+  "title": "产品简报必须使用产品经理简报结构",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "生成一份可用于评审和后续原型的产品简报。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "产品经理简报模板",
+    "required_behaviors": [
+      "开头给核心价值判断",
+      "包含背景与现状",
+      "包含目标用户、痛点、当前替代和竞品 / 行业做法",
+      "包含解决思路、指标、反指标和约束"
+    ],
+    "forbidden_behaviors": [
+      "只输出 8 行产品核心信息",
+      "把现状和竞品全部隐藏进审计",
+      "跳过用户痛点和当前替代"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-manager-brief.md",
+      "contains": "## 推荐结构"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "核心价值判断"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "背景与现状"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "竞品 / 行业做法"
+    }
+  ]
+}

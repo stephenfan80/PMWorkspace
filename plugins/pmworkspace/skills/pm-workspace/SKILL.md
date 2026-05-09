@@ -153,7 +153,7 @@ If the user provides a product task in the same message, skip the welcome menu a
 - 未启用 Zoon 时，后续原型/交付优先读取本地已对齐产品简报，Product Readiness Dashboard 不应把 Zoon 当作阻断门槛。
 - 原型图生成后，批量交付前默认使用 `$pm-prototype-review` 做产品一致性、设计系统、不可虚构项和反指标复审。
 - 面向用户展示中文项目名；技术 slug 只用于本地目录。
-- 默认原型画布移动端优先：iPhone 17 竖屏 `402 x 874`。
+- 默认原型画布移动端优先：无线上截图时用 iPhone 17 竖屏 `402 x 874`；有生产截图 / `visual_baseline` 时用截图物理像素长板。
 - 只有用户明确要求桌面端，或看板/内部工具明显需要大屏工作区，才使用桌面端。
 - 设计原型默认只能使用 image-2 / 图像生成；HTML 只在用户明确要求可交互网页、HTML 原型或前端实现时允许。
 - 一个方案 + 一个屏幕 = 一张图片。除非用户要求展示板，否则不要创建比较拼图。

@@ -1,14 +1,14 @@
 ---
 name: pm-brief
 description: |
-  PMWorkspace 产品核心信息契约生成器。用于把产品对齐、产品追问输出、
-  策略审查、PRD 笔记、Zoon 文档、截图或客户洞察，压缩成能指导原型、
-  复审和交付的关键产品判断，并保留版本、事实来源、门槛和“已对齐”状态。
+  PMWorkspace 产品经理简报生成器。用于把产品价值判断、多轮 Q/D、策略审查、
+  PRD 笔记、Zoon 文档、截图 / 视频 / 数据、竞品或客户洞察，写成能指导原型、
+  复审和交付的 1-2 页产品简报，并保留版本、事实来源、门槛和“已对齐”状态。
 ---
 
-# 产品核心信息契约
+# 产品经理简报
 
-创建后续原型、复审、交付稿和实验步骤都必须读取的产品核心信息契约。产品简报不是 PRD、会议纪要或信息仓库；它只把会影响原型、复审或交付的判断压缩准确。
+创建后续原型、复审、交付稿和实验步骤都必须读取的产品经理简报。它不是会议纪要，也不只是 8 行产品核心信息；它要先讲清“为什么值得做、为谁做、现状为什么不够好、这个产品如何解决痛点”，再进入方案和原型。
 
 <!-- PMW-GENERATED-CONTRACT:START -->
 ## PMWorkspace 生成契约
@@ -18,7 +18,7 @@ description: |
 - skill：`pm-brief`
 - 契约版本：`1`
 - 阶段：产品简报
-- 定位：把已完成的产品判断压缩成核心信息契约，默认本地保存，并按用户选择同步到 Zoon。
+- 定位：把已完成的产品发现、价值判断和策略取舍写成产品经理简报，默认本地保存，并按用户选择同步到 Zoon。
 
 ### 统一前置检查
 
@@ -28,9 +28,12 @@ description: |
 - `usage pm-brief`
 - `pmw-memory`
 - `pmw-artifact`
+- `pmw-discovery-gate`
 
 ### 必读共享协议
 
+- `../pmworkspace-shared/references/product-discovery-gate.md`
+- `../pmworkspace-shared/references/product-manager-brief.md`
 - `../pmworkspace-shared/references/product-plan-handoff.md`
 - `../pmworkspace-shared/references/production-reference-gate.md`
 - `../pmworkspace-shared/references/pm-decision-principles.md`
@@ -52,7 +55,8 @@ description: |
 
 ### 默认用户可见输出字段
 
-- `产品核心信息`
+- `产品简报`
+- `核心价值判断`
 - `确认状态`
 - `当前需要确认`
 - `下一步`
@@ -85,12 +89,15 @@ done
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-brief >/dev/null 2>&1 || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" user-summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" flow 2>/dev/null || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-discovery-gate" ] && "$_PMW_BIN/pmw-discovery-gate" check --target brief 2>/dev/null || true
 ```
 
 ## Workflow
 
-1. Read `../pmworkspace-shared/references/product-plan-handoff.md`.
-2. Read `../pmworkspace-shared/references/production-reference-gate.md`，并写入页面类型和线上参考状态。
+1. Read `../pmworkspace-shared/references/product-discovery-gate.md`; product brief confirmation requires this gate.
+2. Read `../pmworkspace-shared/references/product-manager-brief.md`; use its business brief structure by default.
+3. Read `../pmworkspace-shared/references/product-plan-handoff.md`.
+4. Read `../pmworkspace-shared/references/production-reference-gate.md`，并写入页面类型和线上参考状态。
 3. Read `../pmworkspace-shared/references/pm-decision-principles.md` before deciding whether to write a brief, ask a D, or apply memory.
 4. Read `../pmworkspace-shared/references/pm-eval-system.md` and preserve the brief gate contracts it lists.
 5. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 产品简报 stage fields.
@@ -102,20 +109,21 @@ done
 11. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
 12. Read `../pmworkspace-shared/references/product-readiness-dashboard.md`; if the next skill will be `$pm-prototype-shotgun` or `$pm-handoff`, run `pmw-dashboard readiness --target prototype|handoff` when available, use the verdict for gating, and only show the short verdict / first blocker by default.
 13. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory user-summary` plus `pmw-memory summary` when available. If memory changes phrasing or recommendation, explicitly say `基于过往偏好...` or `基于本地产品认知...`; memory cannot override the current brief, Zoon, anti-metric, non-fiction boundary, online reference gate, or missing gate.
-14. 先建立产品简报契约控制器，记录 `来源门槛`、`已完成门槛`、`缺失门槛`、`事实/假设边界`、`策略决策写入`、`产品发现深度`、`简报深度`、`上游产物`、`本轮产物`、`下游可读`、`产物流动`、`下一技能` 和 `证据状态`；再压缩产品核心信息，避免把材料堆成大文档。
+14. 先建立产品经理简报控制器，记录 `来源门槛`、`已完成门槛`、`缺失门槛`、`事实/假设边界`、`策略决策写入`、`产品发现深度`、`简报深度`、`上游产物`、`本轮产物`、`下游可读`、`产物流动`、`下一技能` 和 `证据状态`；再写业务简报，避免把审计日志堆成正文。
 14. 如果来自 `$pm-jobs` 或 `$pm-strategy-review`，先接收上游输出的范围模式、风险、范围、价值交换、信任/风险、反指标、可行性、定位、业务冲突和待决策队列。
-15. 如果基础事实仍缺失，退回 `$pm-jobs`，只展开一个当前 Q，不写完整产品简报；基础事实包括产品定位与链路角色、目标人群、触发时刻、用户现状、当前替代方案、真实问题与当前损失、主目标、反指标、约束、数据可用性和不可虚构项。如果策略取舍仍未拍板，退回 `$pm-strategy-review`，只展开一个当前 D。
-16. 确认已完成工作目标模式、Q 诊断、产品发现深度门槛、前提确认和必要 D 拍板；如果缺失，只输出短对齐摘要、缺失门槛和下一技能，不写完整产品简报。一个 `Q` 加一个 `D` 不能代表产品发现完成；`D` 不能替代事实诊断。
+15. 如果基础事实仍缺失，退回 `$pm-jobs`，只展开一个当前 Q，不写完整产品简报；如果 `pmw-discovery-gate check --target brief` 阻断，也退回 `$pm-jobs` 补齐产品发现维度。基础事实包括产品定位与链路角色、目标人群、触发时刻、用户现状、当前替代方案、真实问题与当前损失、主目标、反指标、约束、数据可用性和不可虚构项。如果策略取舍仍未拍板，退回 `$pm-strategy-review`，只展开一个当前 D。
+16. 确认已完成工作目标模式、多轮 Q 诊断、产品发现深度门槛、至少 2 个方向性 D（或记录 D 豁免原因）、前提确认和必要策略拍板；如果缺失，只输出短对齐摘要、缺失门槛和下一技能，不写完整产品简报。一个 `Q` 加一个 `D` 不能代表产品发现完成；`D` 不能替代事实诊断。
 17. 如果已有 Zoon URL，先运行 `pmw-zoon drift` 或读取最新 Zoon 快照；Zoon 漂移如果改变目标、反指标、不可虚构项、范围、用户承诺或方案方向，确认状态退回 `待确认`，并回到 `$pm-jobs` 或 `$pm-strategy-review`。
-18. 根据模糊程度、风险等级和证据状态选择快速版、标准版或深度版产品简报。简报深度只代表证据和风险处理深度，不代表内容越写越长；快速版、标准版、深度版都使用同一套核心信息。
-19. 用户可见输出必须先给业务版 `产品核心信息`，只保留会改变原型结构、复审判断、交付范围或用户承诺的内容；`产品简报门槛`、`支持信息`、Zoon、线上参考、检索来源、已保存资产和证据边界默认进入内部审计，不压过核心判断。用户可见业务简报不得出现 `## 产品简报门槛` 或 `## 支持信息`，深度版也不能把业务简报写成长状态日志。
-20. 产品核心信息必须包含一句话判断、用户 / 场景、核心问题、方案方向、本版范围、反指标、不可虚构项、原型重点和下一步。
+18. 根据模糊程度、风险等级和证据状态选择快速版、标准版或深度版产品简报。简报深度不等于内容长度；深度只代表证据和风险处理深度，不代表把审计日志写进正文。快速版可以压缩，标准版和深度版都使用产品经理简报结构。
+19. 用户可见输出必须先给业务版 `产品简报`，默认包含 `核心价值判断`、`背景与现状`、`目标用户与触发场景`、`用户痛点与当前替代`、`竞品 / 行业做法`、`产品机会与解决思路`、`本版范围与方案方向`、`成功指标与反指标`、`数据 / 能力 / 约束与不可虚构项`、`待验证问题与下一步`。这些业务内容不能默认藏进 `支持信息`；本地路径、run、Zoon 状态表、产物流动和完整证据边界仍进入内部审计。
+    - Zoon、线上参考、检索来源、已保存资产和证据边界默认进入内部审计；业务正文只保留会影响产品判断的现状、竞品、痛点、替代方案和解决思路。
+20. `产品核心信息` 可以作为简报摘要保留，但不能替代产品经理简报正文；产品简报必须讲清现状证据、用户痛点、当前替代、竞品 / 行业做法和解决思路。
 21. 互联网案例启发只保留 `可借鉴原则`、`不可照搬` 和 `对原型影响`；参考来源放入内部审计。最佳实践不能覆盖当前 brief、Zoon、线上截图、反指标或不可虚构项。
 22. 把已拍板的范围模式和策略取舍写入对抗审查后的设计取舍、方案方向、范围外、决策记录和对原型的影响；未拍板的范围变化或策略取舍只能放进当前 D 或后续 D 队列。
 23. 已对齐且用户要原型时，下一技能是 `$pm-prototype-shotgun`；已对齐且用户要交付时，下一技能是 `$pm-handoff`；未对齐时停在 `$pm-brief` 或回到上游缺失门槛。
 24. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
 25. 产品简报生成后必须先停在 `产品简报确认`：把 2-4 条关键前提、方案方向、反指标、不可虚构项和 `风险 / 待验证` 展示给用户。只有用户明确确认产品简报或关键前提后，当前 run 才能记录 `产品简报确认：已对齐`，并且产品简报确认状态才能写成 `已对齐`；未确认时保存为 `待确认`，不能把下一技能指向 `$pm-prototype-shotgun`。
-26. Save the brief with `pmw-log brief <name>` when platform scripts are available. It uses local-first, Zoon-optional publishing: save the business brief as latest brief, save the full input as a local audit copy, and automatically register `product_brief` in Product Artifact Flow. 完整审计副本保存在本地. It syncs to Zoon only when `PMW_ZOON_SYNC_ON_BRIEF=true` / `zoon_sync_on_brief: true` or the user explicitly chose online collaboration. 如果输入简报声明 `确认状态：已对齐`，但当前 run 没有 `产品简报确认 / 前提确认：已对齐` 记录，平台脚本会拒绝保存为已对齐。
+26. Save the brief with `pmw-log brief <name>` when platform scripts are available. It uses local-first, Zoon-optional publishing: save the business brief as latest brief, save the full input as a local audit copy, and automatically register `product_brief` in Product Artifact Flow. 完整审计副本保存在本地. It syncs to Zoon only when `PMW_ZOON_SYNC_ON_BRIEF=true` / `zoon_sync_on_brief: true` or the user explicitly chose online collaboration. 如果输入简报声明 `确认状态：已对齐`，但当前 run 没有 `产品简报确认 / 前提确认：已对齐` 记录，或 `pmw-discovery-gate check --target brief` 未通过，平台脚本会拒绝保存为已对齐。
     - 本地 Markdown 保存成功后，用户可见 `下一步` 必须默认推荐 Zoon，但不能自动同步：`Zoon 协作建议：这次简报适合多人评审 / 后续原型或 PRD 复用，建议同步到 Zoon；不同步也不影响继续使用本地 Markdown。`
     - 推荐必须说明 Zoon 的好处：多人协作、事实源统一、后续 image-2 原型 / PRD 防漂移；同时说明 `不自动同步，不作为出图或交付阻断`。
     - 推荐后必须让用户用一个轻量 `D` 选择：`D：是否同步到在线协作文档（Zoon）？A. 先不需要，使用本地 Markdown 继续；B. 需要，同步到 Zoon 供团队在线修改。`
@@ -132,7 +140,7 @@ done
 
 只有“已对齐”的产品简报才能进入图片提示词。用户未确认时，标记为“待确认”，并在生成原型前停止。未完成前提确认或关键 D 拍板时，确认状态不能写成“已对齐”。如果页面需要线上参考但状态是“缺失待补充”，确认状态不能写成“已对齐”。
 
-如果产品简报契约控制器显示 `缺失门槛`、`策略决策写入：未完成`、`Zoon 漂移检查：有实质变化` 或 `事实/假设边界` 不清，确认状态不能写成“已对齐”，也不能进入 `$pm-prototype-shotgun` 或 `$pm-handoff`。
+如果产品经理简报控制器显示 `缺失门槛`、`策略决策写入：未完成`、`Zoon 漂移检查：有实质变化` 或 `事实/假设边界` 不清，确认状态不能写成“已对齐”，也不能进入 `$pm-prototype-shotgun` 或 `$pm-handoff`。
 
 产品简报不是“已对齐”时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
 
@@ -142,19 +150,20 @@ done
 
 ## 输出
 
-Return the smallest useful brief. 用户可见第一屏只放业务简报，不放工作流字段、仪表盘表格、产物流动或本地路径；默认只允许 `产品核心信息`、`当前需要确认` 和必要的 `下一步`，不得输出 `产品简报门槛`、`支持信息`、run_id、Zoon 状态、产物流动或已保存资产：
+Return the smallest useful product-manager brief. 用户可见第一屏只放业务简报，不放工作流字段、仪表盘表格、产物流动或本地路径；默认输出 `产品简报`、`当前需要确认` 和必要的 `下一步`，不得输出 `产品简报门槛`、`支持信息`、run_id、Zoon 状态、产物流动或已保存资产：
 
 ```text
-产品核心信息：
-- 一句话判断：
-- 用户 / 场景：
-- 核心问题：
-- 方案方向：
-- 本版范围：
-- 反指标：
-- 不可虚构项：
-- 原型重点：
-- 下一步：
+产品简报：
+- 核心价值判断：
+- 背景与现状：
+- 目标用户与触发场景：
+- 用户痛点与当前替代：
+- 竞品 / 行业做法：
+- 产品机会与解决思路：
+- 本版范围与方案方向：
+- 成功指标与反指标：
+- 数据 / 能力 / 约束与不可虚构项：
+- 待验证问题与下一步：
 
 当前需要确认：
 - 无 / Q：... / D：...

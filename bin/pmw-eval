@@ -6,6 +6,7 @@ import json
 import os
 import pathlib
 import re
+import subprocess
 import sys
 from datetime import datetime, timezone
 
@@ -112,6 +113,9 @@ def validate_fixture(fixture: dict) -> list[str]:
         errors.append("contract_checks 必须是非空列表")
     elif not all(isinstance(item, dict) for item in checks):
         errors.append("contract_checks 每项必须是对象")
+    command_checks = fixture.get("command_checks", [])
+    if command_checks and (not isinstance(command_checks, list) or not all(isinstance(item, dict) for item in command_checks)):
+        errors.append("command_checks 必须是对象列表")
     return errors
 
 
@@ -149,12 +153,82 @@ def run_check(check: dict) -> list[str]:
     return errors
 
 
+def run_command_check(check: dict) -> list[str]:
+    errors: list[str] = []
+    command = check.get("command")
+    if not isinstance(command, list) or not command or not all(isinstance(item, str) for item in command):
+        return ["command check 缺少 command 字符串数组"]
+    stdin = check.get("stdin", "")
+    if not isinstance(stdin, str):
+        return ["command check stdin 必须是字符串"]
+    expected_code = check.get("exit_code", 0)
+    if not isinstance(expected_code, int):
+        return ["command check exit_code 必须是整数"]
+    try:
+        result = subprocess.run(
+            command,
+            cwd=ROOT,
+            input=stdin,
+            text=True,
+            capture_output=True,
+            timeout=10,
+            check=False,
+        )
+    except Exception as exc:
+        return [f"command check 执行失败：{exc}"]
+    output = f"{result.stdout}{result.stderr}"
+    if result.returncode != expected_code:
+        errors.append(f"command check 返回码 {result.returncode} != {expected_code}：{' '.join(command)}")
+    contains = check.get("contains", [])
+    if isinstance(contains, str):
+        contains = [contains]
+    if contains:
+        if not isinstance(contains, list) or not all(isinstance(item, str) and item for item in contains):
+            errors.append("command check contains 必须是字符串或非空字符串数组")
+        else:
+            for needle in contains:
+                if needle not in output:
+                    errors.append(f"command check 输出缺少短语：{needle}")
+    not_contains = check.get("not_contains", [])
+    if isinstance(not_contains, str):
+        not_contains = [not_contains]
+    if not_contains:
+        if not isinstance(not_contains, list) or not all(isinstance(item, str) and item for item in not_contains):
+            errors.append("command check not_contains 必须是字符串或非空字符串数组")
+        else:
+            for needle in not_contains:
+                if needle in output:
+                    errors.append(f"command check 输出不应包含短语：{needle}")
+    count = check.get("count")
+    if count is not None:
+        if not isinstance(count, dict):
+            errors.append("command check count 必须是对象")
+        else:
+            needle = count.get("text")
+            expected = count.get("equals")
+            if not isinstance(needle, str) or not needle:
+                errors.append("command check count.text 必须是非空字符串")
+            elif not isinstance(expected, int):
+                errors.append("command check count.equals 必须是整数")
+            else:
+                actual = output.count(needle)
+                if actual != expected:
+                    errors.append(f"command check 输出中 `{needle}` 出现 {actual} 次 != {expected} 次")
+    known = {"command", "stdin", "exit_code", "contains", "not_contains", "count", "note"}
+    unknown = sorted(set(check) - known)
+    if unknown:
+        errors.append(f"command check 包含未知断言字段：{', '.join(unknown)}")
+    return errors
+
+
 def evaluate_fixture(fixture: dict) -> dict:
     schema_errors = validate_fixture(fixture)
     check_errors: list[str] = []
     if not schema_errors:
         for check in fixture.get("contract_checks", []):
             check_errors.extend(run_check(check))
+        for check in fixture.get("command_checks", []):
+            check_errors.extend(run_command_check(check))
     errors = schema_errors + check_errors
     return {
         "id": fixture.get("id", ""),

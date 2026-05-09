@@ -1,0 +1,54 @@
+{
+  "id": "image-audit-single-heading-output",
+  "title": "图片视觉审计输出标题不能重复",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-prototype-review",
+  "prompt": "运行 pmw-image-audit audit 的人类可读输出，用于确认图片尺寸审计结果。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "图片审计输出可读性",
+    "required_behaviors": [
+      "pmw-image-audit audit 可以正常执行",
+      "人类可读输出只出现一个图片视觉审计标题",
+      "输出包含 Verdict 和尺寸表"
+    ],
+    "forbidden_behaviors": [
+      "重复打印 PMWorkspace 图片视觉审计标题",
+      "审计命令返回非零状态",
+      "输出缺少尺寸审计结论"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-eval",
+      "contains": "command_checks"
+    },
+    {
+      "path": "bin/pmw-image-audit",
+      "contains": "print(\"# PMWorkspace 图片视觉审计\")"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bin/pmw-image-audit",
+        "audit",
+        "--reference",
+        "plugins/pmworkspace/assets/icon.png",
+        "--image",
+        "plugins/pmworkspace/assets/icon.png"
+      ],
+      "exit_code": 0,
+      "contains": [
+        "Verdict：通过",
+        "| 项目 | 生成图 | 参考/目标 | 门槛 | 结论 |"
+      ],
+      "count": {
+        "text": "# PMWorkspace 图片视觉审计",
+        "equals": 1
+      }
+    }
+  ]
+}

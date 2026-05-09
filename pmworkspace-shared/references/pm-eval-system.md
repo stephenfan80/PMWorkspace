@@ -1,8 +1,8 @@
 # PMWorkspace Eval 体系
 
-PMWorkspace eval 第一版用于维护技能规则和输出契约，不运行真实 image-2，不做美感判断，也不调用 LLM-as-judge。它验证的是：核心门槛有没有被文档和 skill 保住。
+PMWorkspace eval 用于维护技能规则、输出契约和轻量运行时契约；不运行真实 image-2，不做美感判断，也不调用 LLM-as-judge。它验证的是：核心门槛有没有被文档、skill 和本地脚本保住。
 
-第一版只测规则和输出契约，不跑真实 image-2，也不做美感判断。
+eval 默认以静态规则检查为主；对 `pmw-*` 本地脚本的关键输出可用 `command_checks` 做轻量 smoke test，但仍不调用外部模型或真实图片生成。
 
 ## 目标
 
@@ -31,7 +31,7 @@ PMWorkspace eval 第一版用于维护技能规则和输出契约，不运行真
 - **Skill 文档生成检查：** 检查 `pmw-gen-skill-docs`、manifest、生成契约区块和共享字段防漂移规则。
 - **端到端地图检查：** 检查 README、`routing.md`、skill 状态字段和 eval 分类仍能映射到 `pm-workbench-map.md`。
 
-第一阶段仍只做静态规则和场景契约检查；运行时契约和端到端地图检查都通过 fixture 的 `contract_checks` 引用脚本或文档关键短语。
+默认仍以静态规则和场景契约检查为主；运行时契约可以通过 fixture 的 `contract_checks` 引用脚本关键短语，也可以用 `command_checks` 执行无网络、低成本、确定性的本地命令。
 
 ## Eval 分类地图
 
@@ -77,6 +77,14 @@ fixture 使用 JSON，保存在 `evals/fixtures/`：
       "path": "pm-autoplan/SKILL.md",
       "contains": "确认前不生成图片"
     }
+  ],
+  "command_checks": [
+    {
+      "command": ["bin/pmw-prototype-prompt-check", "--visual-baseline"],
+      "stdin": "参考截图尺寸 1206 x 2622；目标输出画布 1206 x >=2622；不得压缩字体和字号；不得压缩间距；内容自适应。",
+      "exit_code": 0,
+      "contains": "Verdict：通过"
+    }
   ]
 }
 ```
@@ -88,8 +96,9 @@ fixture 使用 JSON，保存在 `evals/fixtures/`：
 - `contains`：指定文件必须包含某个关键短语。
 - `contains_any`：指定文件必须包含候选短语中的至少一个。
 - `not_contains`：指定文件不得包含某个短语；谨慎使用，只用于防止明确错误协议。
+- `command_checks`：可选运行时断言，执行本地命令并检查退出码、输出包含 / 不包含短语，或某段文本出现次数。只用于确定性、无网络、低成本的 `pmw-*` smoke test。
 
-断言面向规则文档和 skill 文本，不面向模型输出。这样能在不花费 API 成本的情况下，先守住 PMWorkspace 的制度性门槛。
+断言面向规则文档、skill 文本和本地脚本输出，不面向模型输出。这样能在不花费 API 成本的情况下，先守住 PMWorkspace 的制度性门槛。
 
 ## 必测场景
 

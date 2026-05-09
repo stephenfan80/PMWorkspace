@@ -3,7 +3,7 @@
   "title": "pmw-eval 必须提供列表、运行和 JSON 输出",
   "category": "eval-system",
   "primary_skill": "pm-workspace",
-  "prompt": "维护者运行 PMWorkspace eval，验证第一阶段规则契约。",
+  "prompt": "维护者运行 PMWorkspace eval，验证规则契约和轻量运行时契约。",
   "expected": {
     "mode": "maintenance",
     "status": "可检查",
@@ -14,7 +14,8 @@
       "支持 run",
       "支持 run --fixture",
       "支持 --json",
-      "输出分类摘要"
+      "输出分类摘要",
+      "支持 command_checks 轻量运行时断言"
     ],
     "forbidden_behaviors": [
       "依赖 pytest",
@@ -33,7 +34,11 @@
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "第一版只测规则和输出契约，不跑真实 image-2，也不做美感判断。"
+      "contains": "对 `pmw-*` 本地脚本的关键输出可用 `command_checks` 做轻量 smoke test"
+    },
+    {
+      "path": "bin/pmw-eval",
+      "contains": "def run_command_check"
     }
   ]
 }

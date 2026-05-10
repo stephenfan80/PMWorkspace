@@ -59,7 +59,9 @@ for version_file in \
   fi
 done
 
-git clone --depth 1 "$REPO_URL" "$tmp/PMWorkspace"
+git clone "$REPO_URL" "$tmp/PMWorkspace"
+
+INSTALLED_REVISION_FILE=""
 
 if [ "$HOST_VALUE" = "codex-plugin" ]; then
   "$tmp/PMWorkspace/bin/pmw-build-plugin"
@@ -79,6 +81,7 @@ if [ "$HOST_VALUE" = "codex-plugin" ]; then
   PLUGIN_ROOT="${CODEX_PLUGINS_DIR:-$HOME/.agents/plugins}"
   PLUGIN_DEST="$PLUGIN_ROOT/plugins/pmworkspace"
   MARKETPLACE_PATH="${CODEX_MARKETPLACE_PATH:-$PLUGIN_ROOT/marketplace.json}"
+  INSTALLED_REVISION_FILE="$PLUGIN_DEST/skills/pmworkspace-shared/REVISION"
 
   "$tmp/PMWorkspace/bin/pmw-build-plugin" --dest "$PLUGIN_DEST"
   mkdir -p "$(dirname "$MARKETPLACE_PATH")"
@@ -123,15 +126,24 @@ with open(tmp, "w", encoding="utf-8") as f:
 os.replace(tmp, path)
 PY
 else
+  CODEX_DEST="${CODEX_SKILLS_DIR:-$HOME/.codex/skills}"
+  INSTALLED_REVISION_FILE="$CODEX_DEST/pmworkspace-shared/REVISION"
   "$tmp/PMWorkspace/setup" "$HOST" "$HOST_VALUE"
 fi
 
 mkdir -p "$STATE_DIR"
 [ -n "$old" ] && printf '%s' "$old" > "$STATE_DIR/just-upgraded-from"
 new="$(tr -d '[:space:]' < "$tmp/PMWorkspace/VERSION")"
-rev="$(git -C "$tmp/PMWorkspace" rev-parse --short HEAD 2>/dev/null || true)"
+rev=""
+if [ -n "$INSTALLED_REVISION_FILE" ] && [ -f "$INSTALLED_REVISION_FILE" ]; then
+  rev="$(tr -d '[:space:]' < "$INSTALLED_REVISION_FILE" 2>/dev/null || true)"
+elif [ -x "$tmp/PMWorkspace/bin/pmw-revision" ]; then
+  rev="$("$tmp/PMWorkspace/bin/pmw-revision" "$tmp/PMWorkspace" 2>/dev/null || true)"
+else
+  rev="$(git -C "$tmp/PMWorkspace" rev-parse HEAD 2>/dev/null || true)"
+fi
 if [ -n "$rev" ]; then
-  echo "PMWorkspace upgraded for $HOST_VALUE from ${old:-unknown} to ${new}@${rev}"
+  echo "PMWorkspace upgraded for $HOST_VALUE from ${old:-unknown} to ${new}@${rev:0:7}"
 else
   echo "PMWorkspace upgraded for $HOST_VALUE from ${old:-unknown} to ${new}"
 fi

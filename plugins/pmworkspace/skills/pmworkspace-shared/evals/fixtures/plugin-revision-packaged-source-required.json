@@ -25,11 +25,27 @@
   "contract_checks": [
     {
       "path": "bin/pmw-build-plugin",
+      "contains": "pmw-revision"
+    },
+    {
+      "path": "bin/pmw-revision",
       "contains": "PACKAGED_REVISION_PATHS=("
     },
     {
-      "path": "bin/pmw-build-plugin",
+      "path": "bin/pmw-revision",
       "contains": "git -C \"$ROOT\" log -n 1 --format=%H --"
+    },
+    {
+      "path": "setup",
+      "contains": "pmw-revision"
+    },
+    {
+      "path": "bin/pmw-upgrade",
+      "not_contains": "git clone --depth 1"
+    },
+    {
+      "path": "bin/pmw-upgrade",
+      "contains": "INSTALLED_REVISION_FILE"
     },
     {
       "path": "docs/codex-plugin-submission.md",
@@ -45,7 +61,15 @@
       "command": [
         "bash",
         "-lc",
-        "tmp=\"$(mktemp -d)\"; trap 'rm -rf \"$tmp\"' EXIT; paths=(VERSION README.md README.zh-CN.md pm-workspace pm-autoplan pm-jobs pm-strategy-review pm-brief pm-prototype-shotgun pm-prototype-review pm-handoff pmworkspace-shared bin evals assets/plugin-listing); existing=(); for p in \"${paths[@]}\"; do [ -e \"$p\" ] && existing+=(\"$p\"); done; expected=\"$(git log -n 1 --format=%H -- \"${existing[@]}\")\"; bin/pmw-build-plugin --dest \"$tmp/pmworkspace\" >/dev/null; actual=\"$(tr -d '[:space:]' < \"$tmp/pmworkspace/skills/pmworkspace-shared/REVISION\")\"; test -n \"$expected\" && test \"$actual\" = \"$expected\""
+        "tmp=\"$(mktemp -d)\"; trap 'rm -rf \"$tmp\"' EXIT; paths=(VERSION README.md README.zh-CN.md pm-workspace pm-autoplan pm-jobs pm-strategy-review pm-brief pm-prototype-shotgun pm-prototype-review pm-handoff pmworkspace-shared bin evals assets/plugin-listing); existing=(); for p in \"${paths[@]}\"; do [ -e \"$p\" ] && existing+=(\"$p\"); done; expected=\"$(git log -n 1 --format=%H -- \"${existing[@]}\")\"; actual=\"$(bin/pmw-revision)\"; bin/pmw-build-plugin --dest \"$tmp/pmworkspace\" >/dev/null; built=\"$(tr -d '[:space:]' < \"$tmp/pmworkspace/skills/pmworkspace-shared/REVISION\")\"; test -n \"$expected\" && test \"$actual\" = \"$expected\" && test \"$built\" = \"$expected\""
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=\"$(mktemp -d)\"; trap 'rm -rf \"$tmp\"' EXIT; expected=\"$(bin/pmw-revision)\"; PATH=\"/usr/bin:/bin:/usr/sbin:/sbin\" PMW_REPO_URL=\"$PWD\" CODEX_PLUGINS_DIR=\"$tmp/plugins\" CODEX_MARKETPLACE_PATH=\"$tmp/marketplace.json\" PMW_HOME=\"$tmp/state\" bin/pmw-upgrade --host codex-plugin >/dev/null; actual=\"$(tr -d '[:space:]' < \"$tmp/plugins/plugins/pmworkspace/skills/pmworkspace-shared/REVISION\")\"; test -n \"$expected\" && test \"$actual\" = \"$expected\""
       ],
       "exit_code": 0
     }

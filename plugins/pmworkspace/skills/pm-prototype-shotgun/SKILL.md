@@ -122,6 +122,7 @@ done
 - 默认移动端优先分两种互斥模式：无线上截图时使用 `standard_first_screen` 模板；有生产截图 / `visual_baseline` 时使用 `physical_longboard` 模板，必须以参考图物理像素和目标输出像素为 image-2 画布。
 - 线上截图物理长板模式中，逻辑宽度只允许写入审计或视觉基线摘要，不能进入 image-2 prompt 的画布字段；prompt 不得出现 `pmw-prototype-prompt-check` 定义的短画布锚点。
 - 汽车之家 / AutoDesign 生产页必须额外声明目标输出画布：默认使用参考截图原始物理像素长板，例如 `1179 x 2556 = 393pt @3x`；字体、间距、卡片和底部栏按参考物理像素比例等比执行。只有显式 override 目标宽度时才允许改宽，并必须同步等比缩放字号、间距和组件。缺视觉基线或缺目标输出像素时不写 image-2 prompt。
+- 视觉还原优先、现有生产截图或截图修改任务默认使用 `screenshot_edit`：以线上截图作为底图，只修改目标区域，保留状态栏、顶部导航、车系头图、车型切换、tab 和底部吸底 CTA。只有产品探索或大幅重构时才显式使用 `redraw`。
 - 只有用户明确要求，或看板/内部工具密度确实需要时，才使用桌面端。
 
 ## Multi-Scheme Rules
@@ -151,6 +152,7 @@ done
 11. For each image output unit, declare scheme, screen task, canvas mode, canvas, main goal, anti-metric, non-fiction boundary. Also declare target output pixels, 线上参考状态, 视觉基线状态, design system, image-2 status, and brief dependency. 一个输出单元等于一张图片，不能把多个方案或多个屏幕合成拼图。
     - 无线上截图时，`画布模式` 写 `standard_first_screen`，并使用 `image-prompts.md` 的对应模板。
     - 有线上截图 / `visual_baseline` 时，`画布模式` 必须写 `physical_longboard`，`画布` 必须写 `线上截图物理长板`；`目标输出像素` 必须写明确宽高或宽度 + 最小高度，例如 `参考截图尺寸：1179 x 2556；识别为 393pt @3x；目标输出画布：1179px 宽，内容自适应长图，高度不得低于 2556px，可随内容增长；字体、间距和组件按参考物理像素等比绘制`。
+    - 有线上截图且目标是视觉还原时，`生成模式` 必须写 `screenshot_edit`，`base_image` 绑定当前 `visual_baseline` 参考图，`edit_scope` 写清只改哪个模块，`preserve_regions` 默认写 `状态栏、顶部导航、车系头图、车型切换、tab、底部吸底 CTA`。
     - 有线上截图时，最终 image-2 prompt 不得包含短画布锚点；以 `pmw-prototype-prompt-check` 为准。
     - 移动长板仍是一张连续移动端界面，不得拆成多张图、拼图、多屏故事板或桌面端。
 12. 把批量请求拆成顺序单图队列：`3 个方案` -> 3 个输出单元，`3 个方案 x 2 个屏幕` -> 6 个输出单元。每个输出单元单独调用一次 image-2；不要把多个单元合成一个 prompt。
@@ -177,6 +179,9 @@ done
 - 数据佐证：<已佐证 / 未提供，本方案存在未验证风险 / 不适用>
 - 视觉基线：<已登记 / 缺目标输出像素 / 缺失待补充 / 不适用>
 - 目标输出像素：<例如 1179 x 自适应长板；无参考时说明不适用>
+- 生成模式：<screenshot_edit / redraw；有线上截图且视觉还原优先默认 screenshot_edit>
+- 编辑范围：<screenshot_edit 时只改哪个模块；无参考时说明不适用>
+- 保留区域：<screenshot_edit 时必须保留的原截图区域>
 - 下一步：
 
 方案方向：
@@ -198,6 +203,10 @@ done
 - 线上参考状态：
 - 视觉基线状态：
 - 目标输出像素：
+- 生成模式：
+- base_image：
+- edit_scope：
+- preserve_regions：
 - 设计系统：
 - image-2 状态：
 

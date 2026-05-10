@@ -9,17 +9,19 @@
     "status": "可检查",
     "must_stop": false,
     "gate": "prompt target pixels",
-    "required_behaviors": [
-      "读取当前 visual_baseline",
-      "校验目标输出宽度等于 baseline target_width",
-      "校验目标输出高度不低于 baseline target_height",
-      "要求 prompt 说明 3x 截图倍率和物理像素等比"
-    ],
-    "forbidden_behaviors": [
-      "prompt 写 1206 仍通过",
-      "只检查是否出现目标输出字段",
-      "忽略 3x 字体和间距比例"
-    ]
+      "required_behaviors": [
+        "读取当前 visual_baseline",
+        "校验目标输出宽度等于 baseline target_width",
+        "校验目标输出高度不低于 baseline target_height",
+        "要求 prompt 说明 3x 截图倍率和物理像素等比",
+        "视觉基线模式默认要求 screenshot_edit 以参考截图为底"
+      ],
+      "forbidden_behaviors": [
+        "prompt 写 1206 仍通过",
+        "只检查是否出现目标输出字段",
+        "忽略 3x 字体和间距比例",
+        "从零重绘整页仍通过"
+      ]
   },
   "contract_checks": [
     {
@@ -33,6 +35,10 @@
     {
       "path": "pmworkspace-shared/references/image-prompts.md",
       "contains": "字体、间距和组件按参考物理像素等比绘制"
+    },
+    {
+      "path": "bin/pmw-prototype-prompt-check",
+      "contains": "check_screenshot_edit_prompt"
     }
   ],
   "command_checks": [
@@ -51,7 +57,7 @@
       "command": [
         "bash",
         "-lc",
-        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=prompt-3x-good; mkdir -p \"$PMW_HOME/projects/prompt-3x-good\"; python3 - \"$tmp/ref.png\" 1179 2556 <<'PY'\nimport struct, sys, zlib\npath,w,h=sys.argv[1],int(sys.argv[2]),int(sys.argv[3])\nraw=b''.join(b'\\x00'+b'\\xff\\xff\\xff'*w for _ in range(h))\ndef chunk(t,d):\n    return struct.pack('>I',len(d))+t+d+struct.pack('>I',zlib.crc32(t+d)&0xffffffff)\nopen(path,'wb').write(b'\\x89PNG\\r\\n\\x1a\\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',w,h,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(raw,1))+chunk(b'IEND',b''))\nPY\nbin/pmw-image-audit baseline --reference \"$tmp/ref.png\" --register >/dev/null; printf '参考截图尺寸：1179 x 2556；识别为 393pt @3x；目标输出画布：1179px 宽，内容自适应长图，高度不得低于 2556px，可随内容增长；不得压缩字体和字号；不得压缩间距；不得把长内容塞进短画布；所有字体、间距、组件按参考物理像素比例等比绘制。' | bin/pmw-prototype-prompt-check --visual-baseline; code=$?; rm -rf \"$tmp\"; exit $code"
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=prompt-3x-good; mkdir -p \"$PMW_HOME/projects/prompt-3x-good\"; python3 - \"$tmp/ref.png\" 1179 2556 <<'PY'\nimport struct, sys, zlib\npath,w,h=sys.argv[1],int(sys.argv[2]),int(sys.argv[3])\nraw=b''.join(b'\\x00'+b'\\xff\\xff\\xff'*w for _ in range(h))\ndef chunk(t,d):\n    return struct.pack('>I',len(d))+t+d+struct.pack('>I',zlib.crc32(t+d)&0xffffffff)\nopen(path,'wb').write(b'\\x89PNG\\r\\n\\x1a\\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',w,h,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(raw,1))+chunk(b'IEND',b''))\nPY\nbin/pmw-image-audit baseline --reference \"$tmp/ref.png\" --register >/dev/null; printf '生成模式：screenshot_edit；以参考截图为底图；参考截图尺寸：1179 x 2556；识别为 393pt @3x；目标输出画布：1179px 宽，内容自适应长图，高度不得低于 2556px，可随内容增长；只修改目标模块：价格说明区；保留状态栏、顶部导航、车系头图、车型切换、tab、底部 CTA；不得从零重绘整页；不得压缩字体和字号；不得压缩间距；不得把长内容塞进短画布；所有字体、间距、组件按参考物理像素比例等比绘制。' | bin/pmw-prototype-prompt-check --visual-baseline; code=$?; rm -rf \"$tmp\"; exit $code"
       ],
       "exit_code": 0,
       "contains": [

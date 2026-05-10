@@ -45,6 +45,7 @@ AutoDesign is the default production baseline. Check:
 
 - If a production screenshot exists, run `pmw-image-audit audit --image <生成图> --reference <参考图>` before visual judgment. `需要重出` 的尺寸审计不能被“看起来还行”覆盖。
 - Autohome screenshot baseline overrides generic AutoDesign tokens for typography hierarchy, spacing rhythm, card density, chart density, and bottom toolbar height.
+- 视觉还原优先且使用 `screenshot_edit` 时，先检查保留区域：状态栏、顶部导航、车系头图、车型切换、tab 和底部吸底 CTA 不应被无故重绘、变形、缩放或换样式；只允许 `edit_scope` 指定的目标区域发生变化。
 - Primary blue, commercial orange, text colors, dividers, and background are plausible.
 - Typography uses production-like Chinese UI hierarchy.
 - Layout uses 8-point structure and 4-point detail rhythm.
@@ -78,7 +79,7 @@ If a failure is material:
 3. 只重新生成受影响的屏幕。
 4. 不要让用户接受违反可行性、信任或设计系统质量的原型。
 
-尺寸 / 长板硬失败包括：生成图宽度低于目标输出 95%、高度低于目标长板 95%、目标输出像素缺失、底部栏遮挡、内容裁切、中文字体明显压缩、图表坐标轴不可读。命中任一项时，复审结论至少是 `需要重出`，且不得把该图作为交付结果展示；必须输出修复后的单图重出 prompt。
+尺寸 / 长板硬失败包括：生成图宽度低于目标输出 95%、高度低于目标长板 95%、目标输出像素缺失、底部栏遮挡、内容裁切、中文字体明显压缩、图表坐标轴不可读。`screenshot_edit` 硬失败还包括：状态栏、顶部导航、车系头图、车型切换、tab 或底部吸底 CTA 被无故重绘变形，或重出 prompt 试图重新生成整页而不是只修受影响区域。命中任一项时，复审结论至少是 `需要重出`，且不得把该图作为交付结果展示；必须输出修复后的单图重出 prompt。
 
 ## 偏好沉淀边界
 

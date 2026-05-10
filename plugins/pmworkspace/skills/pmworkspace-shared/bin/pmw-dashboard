@@ -252,6 +252,27 @@ def target_matches_baseline(target_text: str, baseline: dict) -> tuple[bool, str
     return True, ""
 
 
+def screenshot_edit_status(item: dict, baseline: dict) -> tuple[bool, str]:
+    mode = str(item.get("generation_mode") or "")
+    if not mode:
+        return False, "缺 generation_mode"
+    if mode == "redraw":
+        return True, ""
+    if mode != "screenshot_edit":
+        return False, f"generation_mode={mode} 不支持"
+    base_image = str(item.get("base_image") or "")
+    baseline_image = artifact_location(baseline)
+    if not base_image:
+        return False, "缺 base_image"
+    if baseline_image and not same_path(base_image, baseline_image):
+        return False, "base_image 与 visual_baseline 参考图不一致"
+    if not str(item.get("edit_scope") or "").strip():
+        return False, "缺 edit_scope"
+    if not str(item.get("preserve_regions") or "").strip():
+        return False, "缺 preserve_regions"
+    return True, ""
+
+
 def read_text(path_value: str) -> str:
     if not path_value:
         return ""
@@ -677,6 +698,39 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
             redact_sensitive(canvas_evidence),
             "继续" if canvas_ready else "当前 run 的每个 prototype-board 输出单元必须写 canvas_mode=physical_longboard，并让 target_output_pixels 与 visual_baseline 目标像素一致，且不能含 H874 / 标准首屏锚点",
             canvas_ready,
+        )
+    )
+
+    if visual_required:
+        edit_failures = []
+        for item in board:
+            edit_ok, edit_failure = screenshot_edit_status(item, visual_baseline)
+            if not edit_ok:
+                edit_failures.append(
+                    f"{item.get('scheme') or '未命名'} / {item.get('screen') or '未命名屏幕'}（{edit_failure}）"
+                )
+        edit_ready = bool(board) and not edit_failures
+        if not board:
+            edit_status = "未登记"
+            edit_evidence = "prototype-board 暂无当前 run 输出单元"
+        elif edit_ready:
+            edit_status = "已锁定截图编辑模式"
+            edit_evidence = f"{len(board)} 个输出单元已记录 generation_mode / base_image / edit_scope / preserve_regions"
+        else:
+            edit_status = "截图编辑字段不完整"
+            edit_evidence = "未通过：" + "；".join(edit_failures[:5])
+    else:
+        edit_ready = True
+        edit_status = "不适用"
+        edit_evidence = "无线上截图视觉基线；可按 redraw 或标准首屏模式执行"
+    rows.append(
+        gate_result(
+            "截图编辑模式",
+            visual_required,
+            edit_status,
+            redact_sensitive(edit_evidence),
+            "继续" if edit_ready else "视觉还原优先时默认使用 screenshot_edit；输出单元必须绑定 base_image、edit_scope 和 preserve_regions，redraw 只能显式选择",
+            edit_ready,
         )
     )
 

@@ -49,7 +49,7 @@ def has_forbidden_anchor(text: str) -> list[str]:
         ("402 x 874", r"402\s*(?:x|X|×)\s*874"),
         ("W402 x H874", r"W402\s*(?:x|X|×)\s*H874"),
         ("H874", r"\bH874\b"),
-        ("标准首屏", r"标准首屏"),
+        ("标准首屏", r"标准(?:移动端)?首屏"),
         ("最低 H874", r"最低\s*H874"),
     ]
     return [label for label, pattern in checks if re.search(pattern, text, flags=re.I)]
@@ -74,7 +74,7 @@ def run_check(args: argparse.Namespace) -> int:
             failures.append("缺少参考截图尺寸")
         if not contains_target_output(prompt):
             failures.append("缺少目标输出画布 / 目标输出像素")
-        if not (re.search(r"(不|不得|不能)压缩", prompt) and re.search(r"(字体|字号|文字)", prompt)):
+        if not (re.search(r"(不|不要|不得|不能|禁止)压缩", prompt) and re.search(r"(字体|字号|文字)", prompt)):
             failures.append("缺少不得压缩字体 / 字号约束")
         if "间距" not in prompt:
             failures.append("缺少不得压缩间距约束")

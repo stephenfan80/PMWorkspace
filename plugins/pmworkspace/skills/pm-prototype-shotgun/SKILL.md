@@ -119,8 +119,8 @@ done
 - 多方案生成前先确认概念方向，除非用户明确批准使用默认方向。
 - 设计原型默认只能使用 image-2 / 图像生成输出方案图片；HTML 只在用户明确要求“HTML”“可交互网页”“前端实现”或“本地网页原型”时允许。
 - 如果当前环境无法生成 image-2 图片，停止并说明无法出图；不要用 HTML、Markdown 线框或拼图替代设计原型。
-- 默认移动端优先分两种互斥模式：无线上截图时使用 `标准移动端首屏`，可按 iPhone 17 `402 x 874`；有生产截图 / `visual_baseline` 时使用 `线上截图物理长板`，必须以参考图物理像素和目标输出像素为 image-2 画布。
-- 线上截图物理长板模式中，`402` 只允许作为内部逻辑宽度记录，不能进入 image-2 prompt 的画布字段；prompt 中不得出现 `402 x 874`、`W402 x H874`、`H874`、`标准首屏` 或 `最低 H874` 作为画布锚点。
+- 默认移动端优先分两种互斥模式：无线上截图时使用 `standard_first_screen` 模板；有生产截图 / `visual_baseline` 时使用 `physical_longboard` 模板，必须以参考图物理像素和目标输出像素为 image-2 画布。
+- 线上截图物理长板模式中，逻辑宽度只允许写入审计或视觉基线摘要，不能进入 image-2 prompt 的画布字段；prompt 不得出现 `pmw-prototype-prompt-check` 定义的短画布锚点。
 - 汽车之家 / AutoDesign 生产页必须额外声明目标输出画布：默认 3x 移动端长板，宽度不低于参考截图 95%，优先 `1179-1206px`；高度不得低于参考图高度，可随内容增长。缺视觉基线或缺目标输出像素时不写 image-2 prompt。
 - 只有用户明确要求，或看板/内部工具密度确实需要时，才使用桌面端。
 
@@ -149,9 +149,9 @@ done
 9. 如果用户、brief、Zoon、截图或参考材料命中汽车之家、AutoDesign、之家或 Autohome，默认载入 AutoDesign 约束。产品 UI 优先使用 AutoDesign token；品牌 VI 和字体包只作为品牌露出、活动视觉或特殊场景参考，字体授权必须保留边界，不能写成生产可用承诺。若用户提供了线上截图，截图基线优先于泛化 AutoDesign token，并且必须用 `visual_baseline` 锁定参考尺寸与目标输出像素。
 10. 多方案生成前确认方案方向；如果用户已经明确批准默认方向，记录 `方案方向确认：默认方向已批准`，否则停在方向确认，不写 image-2 提示词。
 11. For each image output unit, declare scheme, screen task, canvas mode, canvas, main goal, anti-metric, non-fiction boundary. Also declare target output pixels, 线上参考状态, 视觉基线状态, design system, image-2 status, and brief dependency. 一个输出单元等于一张图片，不能把多个方案或多个屏幕合成拼图。
-    - 无线上截图时，`画布模式` 写 `standard_first_screen`，`画布` 可写 `标准移动端首屏：iPhone 17 402 x 874`。
+    - 无线上截图时，`画布模式` 写 `standard_first_screen`，并使用 `image-prompts.md` 的对应模板。
     - 有线上截图 / `visual_baseline` 时，`画布模式` 必须写 `physical_longboard`，`画布` 必须写 `线上截图物理长板`；`目标输出像素` 必须写明确宽高或宽度 + 最小高度，例如 `参考截图尺寸：1179 x 2556；目标输出画布：1206px 宽，内容自适应长图，高度不得低于 2615px，可随内容增长`。
-    - 有线上截图时，最终 image-2 prompt 不得包含 `402 x 874`、`W402 x H874`、`H874`、`标准首屏` 或 `最低 H874`。
+    - 有线上截图时，最终 image-2 prompt 不得包含短画布锚点；以 `pmw-prototype-prompt-check` 为准。
     - 移动长板仍是一张连续移动端界面，不得拆成多张图、拼图、多屏故事板或桌面端。
 12. 把批量请求拆成顺序单图队列：`3 个方案` -> 3 个输出单元，`3 个方案 x 2 个屏幕` -> 6 个输出单元。每个输出单元单独调用一次 image-2；不要把多个单元合成一个 prompt。
 13. 平台脚本可用时，先用 `pmw-prototype-board add` 登记每个方案/屏幕单元；如果写入失败，输出 `方案比较板：未写入（原因）`，不能假装已记录。

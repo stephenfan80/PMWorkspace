@@ -12,12 +12,12 @@
     "required_behaviors": [
       "输出单元画布模式只能二选一",
       "标准移动端首屏和线上截图物理长板使用独立模板",
-      "有视觉基线时最终 prompt 不把 402 x 874 和物理长板写在同一字段",
+      "有视觉基线时最终 prompt 不把短画布锚点和物理长板写在同一字段",
       "prototype-long-content-flex-height 仍然通过"
     ],
     "forbidden_behaviors": [
       "把无线上截图和有线上截图的画布示例写在同一行",
-      "让最终 prompt 模板同时出现 402 x 874 和线上截图物理长板",
+      "让最终 prompt 模板同时出现短画布锚点和线上截图物理长板",
       "删除物理长板目标输出像素要求"
     ]
   },
@@ -60,6 +60,15 @@
       ],
       "exit_code": 0,
       "contains": "通过｜prototype-long-content-flex-height"
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "printf '参考截图尺寸：1179 x 2556\\n目标输出画布：1206px 宽，内容自适应长图，高度不得低于 2615px，可随内容增长\\n不得压缩字体和间距\\n画布：标准移动端首屏\\n' | bin/pmw-prototype-prompt-check --visual-baseline"
+      ],
+      "exit_code": 2,
+      "contains": "视觉基线模式禁止出现画布锚点：标准首屏"
     }
   ]
 }

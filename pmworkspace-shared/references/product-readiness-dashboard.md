@@ -31,7 +31,7 @@ pmw-dashboard status
 | 线上参考 | Required | Required | 已提供线上参考、已确认无线上参考，或明确不适用；未判断时不继续。优先读取最新 `browser_evidence` 产物，没有时回退到 run evidence / gate 事件。 |
 | 视觉基线 | Conditional | Conditional | 已采集线上截图或生产视觉参考时必须登记 `visual_baseline`，包含参考尺寸和目标输出像素；缺视觉基线或缺目标像素时不写 image-2 prompt。新概念页且用户确认无参考时显示不适用。 |
 | 输出单元绑定 | Conditional | Conditional | 已登记 prototype-board 输出单元时，`brief_path` 和 `brief_version` 必须等于当前 latest brief；旧 brief 版本的输出单元不能放行出图。 |
-| 输出画布 | Conditional | Conditional | 有 `visual_baseline` 时，当前 run 的 prototype-board 输出单元必须写 `canvas_mode=physical_longboard` 和 `target_output_pixels`，且不得含 `H874` / `标准首屏` 锚点。 |
+| 输出画布 | Conditional | Conditional | 有 `visual_baseline` 时，当前 run 的 prototype-board 输出单元必须写 `canvas_mode=physical_longboard` 和 `target_output_pixels`，且不得含 `pmw-prototype-prompt-check` 定义的短画布锚点。 |
 | 方案差异 | Required | Required | 多方案必须在页面结构、信息架构、交互路径、信任表达或关键任务上不同；单方案也要标注不适用或已登记。 |
 | 方案方向确认 | Required | Required | 当前 run 必须记录用户已确认或批准默认方案方向；未确认时不写 image-2 prompt。 |
 | 不可虚构项 | Required | Required | 必须明确不能展示的能力、数据、承诺或动作。 |

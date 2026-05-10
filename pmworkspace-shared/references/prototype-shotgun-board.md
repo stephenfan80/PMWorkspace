@@ -22,7 +22,7 @@ pmw-prototype-board add \
   --status "计划生成"
 ```
 
-有 `visual_baseline` 时，`--canvas-mode` 必须是 `physical_longboard`，`--target-output-pixels` 必须写物理长板目标，例如 `1206 x >=2615` 或 `1206px 宽，高度不得低于 2615px`；不得写 `H874`、`标准首屏` 或 `402 x 874` 作为画布锚点。
+有 `visual_baseline` 时，`--canvas-mode` 必须是 `physical_longboard`，`--target-output-pixels` 必须写物理长板目标，例如 `1206 x >=2615` 或 `1206px 宽，高度不得低于 2615px`；不得写短画布锚点，具体禁用模式以 `pmw-prototype-prompt-check` 为准。
 
 生成后把图片路径或 URL 补写到同一个方案/屏幕单元：
 

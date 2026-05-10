@@ -54,7 +54,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - 输出计划已经把每个方案/屏幕映射为一张独立图片，不把多个方案合成一张比较图。
 - 每张图片已经绑定方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统和 image-2 状态。
 - 每个输出单元已经登记到 Prototype Shotgun Board，或已说明脚本不可用的原因。
-- 画布决策遵循移动端优先但必须二选一：无线上截图时使用 `标准移动端首屏`，可按 iPhone 17 `402 x 874`；有线上截图 / `visual_baseline` 时使用 `线上截图物理长板`，最终 image-2 prompt 只能写参考图物理尺寸和目标输出像素，不能写 `402 x 874`、`W402 x H874`、`H874`、`标准首屏` 或 `最低 H874` 作为画布锚点。
+- 画布决策遵循移动端优先但必须二选一：无线上截图时使用 `standard_first_screen` 模板；有线上截图 / `visual_baseline` 时使用 `physical_longboard` 模板。最终 image-2 prompt 只写当前模式的正向画布字段，不复制另一种模式的短画布锚点。
 - 汽车之家 / AutoDesign 生产页必须声明 `参考截图尺寸` 和 `目标输出画布`；线上截图基线覆盖泛化 token。目标默认是 3x 移动端长板，宽度不低于参考截图的 95%，优先 `1179-1206px`；高度不得低于参考图高度，可随内容增长。
 - 已通过 `design-system-workflow.md` 载入 AutoDesign 生产基线。
 - 对抗审查中的实质改动已写回产品简报。
@@ -126,9 +126,9 @@ For every image generation request, declare the output unit before prompting:
 Rules:
 
 - 一个输出单元等于一张图片；一次 image-2 调用只服务当前一个输出单元。
-- 无线上截图的短内容输出单元画布是 `标准移动端首屏：iPhone 17 402 x 874`。
+- 无线上截图的短内容输出单元使用上方 `standard_first_screen` 模板。
 - 有线上截图 / `visual_baseline` 的输出单元必须写 `画布模式：physical_longboard`，并写 `目标输出画布：<目标宽度>px 宽，内容自适应长图，高度不得低于 <参考或换算高度>px，可随内容增长`。
-- `standard_first_screen` 和 `physical_longboard` 模板互斥；不要在同一个最终 prompt 字段里同时出现 `402 x 874` 和 `线上截图物理长板`。
+- `standard_first_screen` 和 `physical_longboard` 模板互斥；不要在同一个最终 prompt 字段里同时出现短画布锚点和物理长板字段。
 - 线上截图物理长板必须是一张连续移动端界面；不要为了塞进短画布缩小字体、压缩间距、裁切内容、遮挡底部操作区，或拆成多图 / 拼图 / 多屏故事板。
 - 有线上截图时，图片输出契约必须同时保留内部逻辑宽度和物理像素输出：逻辑宽度只写在审计或视觉基线摘要里，不能进入最终 image-2 prompt 的画布字段。汽车之家生产页默认写 `参考截图尺寸：<w x h>`、`目标输出画布：3x 移动端长板，宽度不低于参考截图 95%，优先 1179-1206px，高度不得低于参考图高度，可随内容增长`。
 - 桌面端输出单元必须说明为什么移动端不合适。
@@ -205,7 +205,7 @@ Use this block by default as the production-quality visual baseline. If the prod
 AutoDesign production constraints:
 - Make it look like a real Autohome mobile app screen, not a marketing poster or abstract concept.
 - Visual baseline first: if a production screenshot is provided, match its typography hierarchy, spacing rhythm, component density, bottom bar height, and long-board proportions before applying generic AutoDesign tokens.
-- Canvas mode: use standard mobile first-screen only when there is no screenshot baseline. If a production screenshot is provided, use physical long-board mode; do not put `402 x 874`, `W402 x H874`, `H874`, `标准首屏`, or `最低 H874` in the final image-2 prompt canvas field.
+- Canvas mode: use the standard mobile first-screen template only when there is no screenshot baseline. If a production screenshot is provided, use physical long-board mode; do not put short-canvas anchors in the final image-2 prompt canvas field.
 - Pixel output: for Autohome production-page prototypes with screenshot reference, generate a 3x mobile long board. Write the reference screenshot size, for example `参考截图尺寸：1179 x 2556`; write target output, for example `目标输出画布：1206px 宽，内容自适应长图，高度不得低于 2615px，可随内容增长`. Do not output a narrow 851px image when the reference is 1179px wide.
 - Colors: primary blue #0088FF, blue gradient #0099FF -> #0088FF, commercial orange #FF6600 only for price/deal/subsidy emphasis, cyan #25C9FF only for IM-like emphasis, primary text #111E36, secondary text #464E64, weak text #828CA0, divider #E6E9F0, page background #F8F9FC, white cards.
 - Typography: system Chinese font; prominent numbers can use HarmonyOS Sans SC; use production-like sizes from 12/14/16/18/20/24/28/32px with clear hierarchy.
@@ -293,7 +293,7 @@ Constraints:
 - 对抗审查决策已反映在屏幕内容中。
 - 适用时已命名设计系统。
 - 已采集线上截图时，提示词已写入 `视觉基线状态`、`参考截图尺寸` 和 `目标输出像素`；缺任一项时停止。
-- 已采集线上截图时，最终 prompt 已通过 `pmw-prototype-prompt-check`；只要出现 `402 x 874`、`W402 x H874`、`H874`、`标准首屏` 或 `最低 H874` 作为画布锚点，就必须重写 prompt。
+- 已采集线上截图时，最终 prompt 已通过 `pmw-prototype-prompt-check`；只要出现脚本定义的短画布锚点，就必须重写 prompt。
 - 提示词包含具体颜色、字体、间距、圆角和组件约束。
 - 提示词明确声明一次 image-2 调用只生成一张图、一个方案和一个屏幕任务。
 - 除非用户明确要求比较动作，否则屏幕只有一个主要动作。

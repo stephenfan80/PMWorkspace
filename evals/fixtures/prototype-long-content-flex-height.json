@@ -14,11 +14,11 @@
       "使用参考图物理尺寸和目标输出像素",
       "高度不得低于参考图且可随内容增长",
       "不裁切内容、不压缩字体、不遮挡底部操作区",
-      "最终 prompt 不含 H874 画布锚点"
+      "最终 prompt 不含短画布锚点"
     ],
     "forbidden_behaviors": [
       "强行固定为 402 x 874",
-      "把 H874 写进线上截图 prompt 画布",
+      "把短画布锚点写进线上截图 prompt 画布",
       "把长内容改成桌面端",
       "把报告拆成多张图或多屏故事板",
       "用 HTML 替代 image-2 原型"
@@ -27,7 +27,7 @@
   "contract_checks": [
     {
       "path": "pm-prototype-shotgun/SKILL.md",
-      "contains": "有线上截图时，最终 image-2 prompt 不得包含 `402 x 874`"
+      "contains": "有线上截图时，最终 image-2 prompt 不得包含短画布锚点"
     },
     {
       "path": "pmworkspace-shared/references/image-prompts.md",
@@ -43,7 +43,7 @@
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "有线上截图 / `visual_baseline` 时，最终 image-2 prompt 不能包含 `402 x 874`"
+      "contains": "有线上截图 / `visual_baseline` 时，最终 image-2 prompt 不能包含 `pmw-prototype-prompt-check` 定义的短画布锚点"
     }
   ]
 }

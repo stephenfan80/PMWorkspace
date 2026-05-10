@@ -31,7 +31,7 @@
     },
     {
       "path": "pmworkspace-shared/references/image-prompts.md",
-      "contains": "目标输出画布为 <目标宽度>px 宽、内容自适应长图、高度不得低于 <目标高度>px"
+      "contains": "目标输出画布：<目标宽度>px 宽，内容自适应长图，高度不得低于 <参考或换算高度>px"
     },
     {
       "path": "pmworkspace-shared/references/image-prompts.md",

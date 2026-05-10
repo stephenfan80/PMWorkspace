@@ -1,0 +1,65 @@
+{
+  "id": "prototype-canvas-mode-mutual-exclusive-template",
+  "title": "原型 prompt 模板不得把标准首屏和物理长板写进同一字段",
+  "category": "prototype-output-contract",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "维护者希望减少 image-2 prompt 模板复制错误，避免有视觉基线时把短画布锚点一起带入最终 prompt。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "互斥画布模板",
+    "required_behaviors": [
+      "输出单元画布模式只能二选一",
+      "标准移动端首屏和线上截图物理长板使用独立模板",
+      "有视觉基线时最终 prompt 不把 402 x 874 和物理长板写在同一字段",
+      "prototype-long-content-flex-height 仍然通过"
+    ],
+    "forbidden_behaviors": [
+      "把无线上截图和有线上截图的画布示例写在同一行",
+      "让最终 prompt 模板同时出现 402 x 874 和线上截图物理长板",
+      "删除物理长板目标输出像素要求"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "contains": "画布模式：<standard_first_screen 或 physical_longboard，只能二选一>"
+    },
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "contains": "无线上截图时追加当前模板："
+    },
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "contains": "有线上截图 / `visual_baseline` 时追加当前模板："
+    },
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "contains": "`standard_first_screen` 和 `physical_longboard` 模板互斥"
+    },
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "not_contains": "画布：<无线上截图：标准移动端首屏 402 x 874 / 有线上截图：线上截图物理长板>"
+    },
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "not_contains": "平台/设备：<无线上截图：标准移动端首屏 iPhone 17 402 x 874；有线上截图：线上截图物理长板"
+    },
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "not_contains": "主要请求：为 <产品/功能> 生成 <屏幕名>。无线上截图时使用标准移动端首屏；有线上截图时使用线上截图物理长板"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "bin/pmw-eval run --id prototype-long-content-flex-height"
+      ],
+      "exit_code": 0,
+      "contains": "通过｜prototype-long-content-flex-height"
+    }
+  ]
+}

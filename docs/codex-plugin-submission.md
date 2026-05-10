@@ -162,6 +162,13 @@ image-2
 - `bin/pmw-eval run` 通过。
 - README 中公开插件、本地 plugin、旧版 skill 三种安装 / 更新路径一致。
 
+## 插件 REVISION 策略
+
+- `plugins/pmworkspace/skills/pmworkspace-shared/REVISION` 记录最近一次打包插件时使用的 source commit，用来判断插件副本对应哪一次 source / references / bin / eval 内容。
+- 改动 source skill、`pmworkspace-shared/references`、`bin`、`evals`、README 或插件 assets 时，必须运行 `bin/pmw-build-plugin`，并把插件副本变化一起提交。
+- 只修改本地交付 artifact、审计报告、PPTX、讲稿、release note 或不进入插件包的维护材料时，不刷新插件 REVISION，也不需要为了让 REVISION 追上 HEAD 单独提交。
+- 若先提交 source 变化再刷新插件包，可以允许一个 revision-only commit；该 commit 只更新插件打包元数据，不代表运行规则又变更。
+
 ## 发布与更新说明
 
 发布新版本时，让 AI 执行：

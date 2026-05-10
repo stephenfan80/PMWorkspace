@@ -74,7 +74,7 @@ Shape fast. Deliver deep.
 
 - **Product brief:** a 1-2 page PM-style brief by default, starting with core value judgment, current-state evidence, target users, user pain / current alternatives, solution approach, success metrics, counter-metrics, and non-fiction boundaries; full Q/D history, sources, readiness, artifact flow, and local paths stay in local audit.
 - **Solution directions:** options that differ by product strategy, information architecture, interaction model, or trust model.
-- **Mobile-first prototype images:** one direction plus one screen equals one image-2 output; use iPhone 17 portrait `402 x 874` only when there is no production screenshot, and use the screenshot's physical long-board pixels when a visual baseline exists.
+- **Mobile-first prototype images:** one direction plus one screen equals one image-2 output; use `standard_first_screen` when there is no production screenshot, and use `physical_longboard` with the screenshot's physical long-board pixels when a visual baseline exists.
 - **Evidence records:** online screenshots, status pages, competitor references, and collaboration-doc drift evidence.
 - **Readiness verdicts:** a pre-image or pre-handoff check across brief, collaboration doc, online reference, scheme difference, boundaries, and review status; defaults to a concise verdict, with full tables behind `--details`.
 - **Review conclusions:** strategy, trust/risk, design-system, and data-feasibility perspectives before final prototype review.

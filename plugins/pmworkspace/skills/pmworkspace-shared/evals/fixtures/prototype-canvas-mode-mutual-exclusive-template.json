@@ -61,6 +61,22 @@
     {
       "path": "pmworkspace-shared/references/first-use-onboarding.md",
       "not_contains": "默认原型设备是移动端优先：无线上截图时使用 iPhone 17 竖屏 `402 x 874`"
+    },
+    {
+      "path": "AGENTS.md",
+      "not_contains": "默认原型输出移动端优先：无线上截图时使用 iPhone 17 竖屏 `402 x 874`"
+    },
+    {
+      "path": "README.md",
+      "not_contains": "use iPhone 17 portrait `402 x 874`"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "not_contains": "无线上截图时默认按 iPhone 17 竖屏 `402 x 874`"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "not_contains": "默认移动端优先：无线上截图时用 iPhone 17 竖屏 `402 x 874`"
     }
   ],
   "command_checks": [

@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="${1:-$(cd "$(dirname "$0")/.." && pwd)}"
+
+PACKAGED_REVISION_PATHS=(
+  VERSION
+  README.md
+  README.zh-CN.md
+  pm-workspace
+  pm-autoplan
+  pm-jobs
+  pm-strategy-review
+  pm-brief
+  pm-prototype-shotgun
+  pm-prototype-review
+  pm-handoff
+  pmworkspace-shared
+  bin
+  evals
+  assets/plugin-listing
+)
+
+revision="unknown"
+if git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  revision_paths=()
+  for revision_path in "${PACKAGED_REVISION_PATHS[@]}"; do
+    if [ -e "$ROOT/$revision_path" ]; then
+      revision_paths+=("$revision_path")
+    fi
+  done
+
+  if [ "${#revision_paths[@]}" -gt 0 ] \
+    && revision_from_git="$(git -C "$ROOT" log -n 1 --format=%H -- "${revision_paths[@]}" 2>/dev/null)" \
+    && [ -n "$revision_from_git" ]; then
+    revision="$revision_from_git"
+  elif revision_from_git="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null)"; then
+    revision="$revision_from_git"
+  fi
+elif [ -f "$ROOT/plugins/pmworkspace/skills/pmworkspace-shared/REVISION" ]; then
+  revision="$(tr -d '[:space:]' < "$ROOT/plugins/pmworkspace/skills/pmworkspace-shared/REVISION")"
+elif [ -f "$ROOT/REVISION" ]; then
+  revision="$(tr -d '[:space:]' < "$ROOT/REVISION")"
+fi
+
+printf '%s\n' "$revision"

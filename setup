@@ -31,13 +31,8 @@ fi
 mkdir -p "$DEST/pmworkspace-shared/bin"
 cp -R "$ROOT/bin/"* "$DEST/pmworkspace-shared/bin/"
 cp "$ROOT/VERSION" "$DEST/pmworkspace-shared/VERSION"
-if REVISION="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null)"; then
-  printf '%s\n' "$REVISION" > "$DEST/pmworkspace-shared/REVISION"
-elif [ -f "$ROOT/REVISION" ]; then
-  cp "$ROOT/REVISION" "$DEST/pmworkspace-shared/REVISION"
-else
-  printf 'unknown\n' > "$DEST/pmworkspace-shared/REVISION"
-fi
+REVISION="$("$ROOT/bin/pmw-revision" "$ROOT")"
+printf '%s\n' "$REVISION" > "$DEST/pmworkspace-shared/REVISION"
 chmod +x "$DEST/pmworkspace-shared/bin/"*
 
 echo "PMWorkspace 已安装到 $DEST"

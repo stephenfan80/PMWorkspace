@@ -67,19 +67,19 @@ PMWorkspace 的核心运行逻辑已经形成闭环：`$pm-workspace` 路由，`
 
 执行状态更新：D13 `decision-gates.md` 和 D14 `intake.md` 已在合并有效内容后移除；D15 `product-methodology.md` 和 D16 `prompt-recipes.md` 已移到 appendix / examples；D17 `skill-doc-template-system.md` 已确认保留，因为 eval 直接断言该生成体系说明。
 
-| 编号 | 位置 | 当前发现 | 风险 | 建议动作 | 是否需拍板 |
+| 编号 | 位置 | 原始发现 | 原始风险 | 最终动作 | 当前状态 |
 |---|---|---|---|---|---|
-| O1 | `pmworkspace-shared/references/decision-gates.md` | 疑似未被显式引用，内容可能和 discovery / readiness 门槛重叠。 | 如果继续漂移，会形成第三套决策门槛；如果直接删除，可能误伤未来 generator 或插件副本依赖。 | 归档候选 / 合并候选：先确认无插件副本、文档入口或未来 generator 依赖，再把有效内容合并到门槛真源。 | 是 |
-| O2 | `pmworkspace-shared/references/intake.md` | 疑似未被显式引用，可能和 `$pm-workspace`、`$pm-autoplan` 的入口诊断重叠。 | 入口信息若不统一，会让“先问什么”继续分叉。 | 归档候选 / 合并候选：保留有价值的最小 intake 字段，合并到路由或 welcome 类文档。 | 是 |
-| O3 | `pmworkspace-shared/references/product-methodology.md` | 疑似未被显式引用，可能和 `product-office-hours.md`、`product-discovery-gate.md` 重叠。 | 产品方法论解释可能稀释运行时硬门槛。 | 合并候选：抽取仍有用的方法原则到 discovery reference，其余归档。 | 是 |
-| O4 | `pmworkspace-shared/references/prompt-recipes.md` | 疑似未被显式引用，可能只作为历史 prompt 示例存在。 | 旧 prompt 可能重新带回过时画布或简报口径。 | 归档候选：先筛掉过时锚点，再把仍可复用的示例移到 appendix/examples。 | 是 |
-| O5 | `pmworkspace-shared/references/skill-doc-template-system.md` | 疑似未被显式引用，但名称显示可能与 skill-doc generator 设计有关。 | 直接删除可能误伤生成契约维护依据。 | 暂缓删除：先确认 generator、manifest、插件副本和未来文档入口都不依赖，再决定合并或归档。 | 是 |
+| O1 | `pmworkspace-shared/references/decision-gates.md` | 疑似未被显式引用，内容可能和 discovery / readiness 门槛重叠。 | 继续漂移会形成第三套决策门槛。 | 有效门槛语言已并入 `product-discovery-gate.md` / 相关真源，孤岛文件已移除。 | 已处理 |
+| O2 | `pmworkspace-shared/references/intake.md` | 疑似未被显式引用，可能和 `$pm-workspace`、`$pm-autoplan` 的入口诊断重叠。 | 入口信息若不统一，会让“先问什么”继续分叉。 | 最小上下文字段已并入 `first-use-onboarding.md`，孤岛文件已移除。 | 已处理 |
+| O3 | `pmworkspace-shared/references/product-methodology.md` | 疑似未被显式引用，可能和 `product-office-hours.md`、`product-discovery-gate.md` 重叠。 | 产品方法论解释可能稀释运行时硬门槛。 | 已移到 `pmworkspace-shared/references/appendix/product-methodology.md`，不进入运行时必读。 | 已处理 |
+| O4 | `pmworkspace-shared/references/prompt-recipes.md` | 疑似未被显式引用，可能只作为历史 prompt 示例存在。 | 旧 prompt 可能重新带回过时画布或简报口径。 | 已移到 appendix / examples，并新增 `examples/prompt-recipes.md` 入口。 | 已处理 |
+| O5 | `pmworkspace-shared/references/skill-doc-template-system.md` | 疑似未被显式引用，但名称显示可能与 skill-doc generator 设计有关。 | 直接删除可能误伤生成契约维护依据。 | 已确认 eval 依赖，继续保留为生成体系说明和测试契约锚点。 | 保留 |
 
-## 建议优先级
+## 执行结果
 
-1. 立即修正 C1 / C2：短简报口径和 Zoon 默认同步口径属于高确定性冲突。
-2. 澄清 C3：按“入口措辞歧义 / 中风险”处理，不把 Zoon 文档场景下的快照读取误判为错误。
-3. 收敛长板出图真源：保留 `image-prompts.md` + `prototype-shotgun-board.md` + 脚本 / eval，其他文件只删重复解释。
-4. 收敛产品简报真源：模板归 `product-manager-brief.md`，门槛归 `product-plan-handoff.md`，执行归 `$pm-brief`。
-5. 把 `pm-eval-system.md` 从规则集合改回测试契约，但保留 fixture 分类、禁止项、验收断言和失败条件。
-6. 处理 README 安装重复、`pm-workbench-map.md` 长表格可读性问题，以及 O1-O5 疑似孤岛 reference 的归属确认。
+1. C1 / C2 / C3 已修正：产品简报、Zoon local-first 和协作文档入口口径已对齐。
+2. 长板出图真源已收敛：`image-prompts.md` 负责 prompt 真源，`prototype-shotgun-board.md` 负责 output unit 真源，脚本 / eval 继续做硬门槛。
+3. 产品简报真源已收敛：模板归 `product-manager-brief.md`，门槛归 `product-plan-handoff.md`，执行归 `$pm-brief`。
+4. `pm-eval-system.md` 已收敛为测试契约，保留 fixture 分类、禁止项、验收断言和失败条件。
+5. README 安装重复、`pm-workbench-map.md` 长表格、AutoDesign 长板重复和英文 README 口径已处理。
+6. O1-O5 已完成归属确认和处理；继续瘦身时从新的 D18+ 审计开始。

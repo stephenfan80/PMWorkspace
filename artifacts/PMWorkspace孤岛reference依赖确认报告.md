@@ -34,36 +34,36 @@ git ls-files pmworkspace-shared/references/<file> plugins/pmworkspace/skills/pmw
 
 ### D13 `decision-gates.md`
 
-- 文件存在于 source 与插件副本，说明当前构建会复制它。
-- 未发现 `decision-gates.md` 文件名被 source skill、README、manifest、generator 或 eval 直接引用。
+- 原始状态：文件存在于 source 与插件副本，说明当时构建会复制它。
+- 原始发现：未发现 `decision-gates.md` 文件名被 source skill、README、manifest、generator 或 eval 直接引用。
 - `decision-gates` 字符串只出现在 `bin/pmw-config` / 插件副本的 `question_mode` 默认值注释中，语义是配置枚举，不是读取该 Markdown。
 - 内容仍包含变化类型、问题真实性、价值交换、数据可行性、产品简报对齐、线上参考等门槛，和当前硬门槛体系重叠。
 
-建议：不要直接删除。先把仍有价值的简洁门槛语言合并到 `product-discovery-gate.md` 或 `pm-decision-principles.md`，再做单独归档提交。
+执行结果：有效门槛语言已合并到 `product-discovery-gate.md` / 相关真源，源文件和插件副本已移除。
 
 ### D14 `intake.md`
 
-- 未发现显式引用。
+- 原始发现：未发现显式引用。
 - 内容主要是首次输入字段、快速问题候选、默认假设和输入摘要模板。
 - 当前运行链路已由 `$pm-workspace` + `routing.md` + `first-use-onboarding.md` + `production-reference-gate.md` 承担首次路由、线上参考判断和最小输入确认。
 
-建议：作为合并候选。若要瘦身，优先保留“最小上下文”和“输入摘要模板”中仍未被覆盖的字段，迁入 onboarding 附录。
+执行结果：最小上下文字段已迁入首次引导 / onboarding 相关文档，源文件和插件副本已移除。
 
 ### D15 `product-methodology.md`
 
-- 未发现显式引用。
+- 原始发现：未发现显式引用。
 - 内容是通用产品判断方法，价值在培训和维护者理解，不在运行时硬门槛。
 - 与产品发现 gate、office-hours 状态机、PM 决策原则存在明显重叠。
 
-建议：不进入运行时必读；可压缩为 appendix 或从审计材料中保留“方法论来源”，后续再决定是否归档。
+执行结果：已移到 `pmworkspace-shared/references/appendix/product-methodology.md`，不进入运行时必读。
 
 ### D16 `prompt-recipes.md`
 
-- 未发现显式引用。
+- 原始发现：未发现显式引用。
 - 内容是用户可复制启动话术，适合作为示例，不适合作为运行时协议。
 - 与 README 的快速成型 / 深度交付示例和 `welcome-guide.md` 存在重叠。
 
-建议：移到 examples 或 README 链接区；若暂时没有入口需求，可归档但不要直接删除。
+执行结果：已移到 appendix / examples，并补充 `examples/prompt-recipes.md` 入口。
 
 ### D17 `skill-doc-template-system.md`
 

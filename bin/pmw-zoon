@@ -28,28 +28,38 @@ json_payload() {
   local title="${2:-}"
   local markdown_file="$3"
   python3 - "$mode" "$title" "$markdown_file" <<'PY'
+import hashlib
 import json
 import sys
 from datetime import datetime, timezone
 
 mode, title, markdown_file = sys.argv[1:4]
 markdown = open(markdown_file, encoding="utf-8").read().strip()
+digest = hashlib.sha256(markdown.encode("utf-8")).hexdigest()
+ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+wrapped = "\n\n<!-- PMWorkspace brief sync hash: %s; synced_at: %s -->\n\n%s\n\n<!-- PMWorkspace brief sync end -->\n" % (digest, ts, markdown)
 if mode == "create":
     print(json.dumps({
         "title": title,
-        "markdown": markdown,
-        "content": markdown,
-        "initialMarkdown": markdown,
+        "markdown": wrapped.strip(),
         "by": "ai:pmworkspace",
     }, ensure_ascii=False))
 elif mode == "append":
-    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    wrapped = "\n\n<!-- PMWorkspace brief sync start: %s -->\n\n%s\n\n<!-- PMWorkspace brief sync end -->\n" % (ts, markdown)
     print(json.dumps({
         "by": "ai:pmworkspace",
         "operations": [{"op": "insert_at_end", "markdown": wrapped}],
-        "markdown": wrapped,
     }, ensure_ascii=False))
+PY
+}
+
+markdown_hash() {
+  local markdown_file="$1"
+  python3 - "$markdown_file" <<'PY'
+import hashlib
+import sys
+
+markdown = open(sys.argv[1], encoding="utf-8").read().strip()
+print(hashlib.sha256(markdown.encode("utf-8")).hexdigest())
 PY
 }
 
@@ -725,7 +735,14 @@ case "$COMMAND" in
       cat > "$MARKDOWN_FILE"
     fi
     if [ -n "$URL" ]; then
-      RESULT="$("$0" append --url "$URL" < "$MARKDOWN_FILE")"
+      DEDUPE="${PMW_ZOON_DEDUP_SYNC:-true}"
+      BRIEF_HASH="$(markdown_hash "$MARKDOWN_FILE")"
+      if [ "$DEDUPE" != "false" ] && "$0" read --url "$URL" 2>/dev/null | grep -Fq "PMWorkspace brief sync hash: $BRIEF_HASH"; then
+        RESULT="$URL"
+        printf 'ZOON_SYNC_SKIPPED_DUPLICATE=true\n' >&2
+      else
+        RESULT="$("$0" append --url "$URL" < "$MARKDOWN_FILE")"
+      fi
     else
       AUTO_CREATE="${PMW_ZOON_AUTO_CREATE:-$(config_get zoon_auto_create)}"
       if [ "$AUTO_CREATE" = "false" ]; then

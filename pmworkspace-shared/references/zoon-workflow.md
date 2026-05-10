@@ -15,6 +15,8 @@
 - 产品追问后创建的产品简报，默认先写入本地业务简报和本地审计副本；保存成功后必须推荐 Zoon 并解释价值，但不自动同步；如果用户选择在线协作，再同步业务简报版到 Zoon。
 - 用户在对话中调整产品简报后，必须重新保存本地简报；只有已启用 Zoon 时才同步到 Zoon，不能只更新对话里的口径。
 - 创建或更新 Zoon 成功后，必须先自动加入协作态，再尝试自动打开可编辑 URL；不能只保存本地 Markdown 后结束。
+- 创建新文档的 payload 只能表达一次正文写入：使用 `title` + 单个 `markdown` 字段，不同时发送 `content`、`initialMarkdown` 等同义字段，避免 Zoon 服务端兼容解析时把同一份简报写入多遍。
+- 追加 / 同步简报时只使用 `operations[].markdown` 表达新增内容，不再额外发送顶层 `markdown` 同义字段；同步块必须带 `PMWorkspace brief sync hash`，同一 hash 已存在时跳过重复追加。
 - `pmw-log brief` 默认只记录本地 latest brief 和完整审计副本，并把 `last_zoon_sync_status` 标记为 `disabled`；当 `zoon_sync_on_brief` 或 `PMW_ZOON_SYNC_ON_BRIEF` 显式开启时，再执行 `pmw-zoon sync` 并记录 `last_zoon_sync_status`、`last_zoon_sync_brief`、`last_zoon_join_status` 和 Zoon URL。
 - 未启用 Zoon 时，出图 / 交付准备度中的 Zoon 行显示 `未启用，使用本地简报`，不作为阻断；已启用或已有 URL 时，才必须检查同步与漂移。
 
@@ -30,9 +32,11 @@
    - Share token：`token` 查询参数。
 3. 进入协作态时先调用 `POST <host>/api/agent/<slug>/presence`，使用 `Authorization: Bearer <token>`、`x-share-token: <token>`、`X-Agent-Id: pmworkspace`，body 为 `{"agentId":"pmworkspace","name":"PMWorkspace","status":"active"}`。
 4. 创建新文档使用当前协议推荐的 `POST <host>/documents`。
-5. 写入时使用 `Authorization: Bearer <token>`、`X-Agent-Id: pmworkspace`、`Idempotency-Key` 和 `by: "ai:pmworkspace"`。
-6. 追加产品简报优先使用 `POST <host>/api/agent/<slug>/edit/v2`，默认 `insert_at_end`，不做 rewrite；只有该 endpoint 返回 404/405 时才回退 `POST <host>/documents/<slug>/edit/v2`。
-7. 原型或交付前读取最新文档，优先使用 `GET <host>/api/agent/<slug>/snapshot` 取 `markdown/revision/blocks/marks`，失败再回退共享 URL + `Accept: application/json`，最后回退 `Accept: text/markdown`。
+5. 新建文档 payload 只包含 `title`、单个 `markdown` 和 `by: "ai:pmworkspace"`；不要为了兼容同时塞 `content` 或 `initialMarkdown`。
+6. 写入时使用 `Authorization: Bearer <token>`、`X-Agent-Id: pmworkspace`、`Idempotency-Key` 和 `by: "ai:pmworkspace"`。
+7. 追加产品简报优先使用 `POST <host>/api/agent/<slug>/edit/v2`，默认 `insert_at_end`，不做 rewrite；payload 只包含 `by` 与 `operations`；只有该 endpoint 返回 404/405 时才回退 `POST <host>/documents/<slug>/edit/v2`。
+8. `pmw-zoon sync` 对已有文档追加前先按同步块 hash 做轻量去重；同一份业务简报已经存在时返回原 URL 并记录跳过，不再再次 append。
+9. 原型或交付前读取最新文档，优先使用 `GET <host>/api/agent/<slug>/snapshot` 取 `markdown/revision/blocks/marks`，失败再回退共享 URL + `Accept: application/json`，最后回退 `Accept: text/markdown`。
 
 ## 协作模式
 

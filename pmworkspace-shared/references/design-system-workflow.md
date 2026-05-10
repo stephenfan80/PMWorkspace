@@ -43,7 +43,7 @@ If a page is accessible only in the user's browser session, inspect it with brow
 线上参考状态：<已提供线上参考 / 无线上参考已确认 / 缺失待补充 / 不适用>
 视觉基线状态：<已登记 / 缺目标输出像素 / 缺失待补充 / 不适用>
 画布模式：<standard_first_screen / physical_longboard>
-画布/设备：<无线上截图时写标准移动端首屏；有线上截图时写线上截图物理长板>
+画布/设备：<按画布模式填写当前唯一模板：standard_first_screen 或 physical_longboard>
 目标输出像素：<有线上截图时写参考尺寸与目标输出画布；汽车之家生产页优先 1179-1206px 宽 3x 长板，高度不得低于参考图且可增长>
 颜色：<主色、强调色、文字、背景、边框>
 字体：<字体族、字号层级、字重规则>

@@ -49,6 +49,18 @@
     {
       "path": "pmworkspace-shared/references/image-prompts.md",
       "not_contains": "主要请求：为 <产品/功能> 生成 <屏幕名>。无线上截图时使用标准移动端首屏；有线上截图时使用线上截图物理长板"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-decision-principles.md",
+      "not_contains": "无线上截图时的默认移动端首屏画布：iPhone 17 竖屏 `402 x 874`"
+    },
+    {
+      "path": "pmworkspace-shared/references/design-system-workflow.md",
+      "not_contains": "画布/设备：<无线上截图时写标准移动端首屏；有线上截图时写线上截图物理长板>"
+    },
+    {
+      "path": "pmworkspace-shared/references/first-use-onboarding.md",
+      "not_contains": "默认原型设备是移动端优先：无线上截图时使用 iPhone 17 竖屏 `402 x 874`"
     }
   ],
   "command_checks": [

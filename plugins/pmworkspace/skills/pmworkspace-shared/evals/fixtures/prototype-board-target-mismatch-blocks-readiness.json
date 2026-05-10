@@ -1,0 +1,48 @@
+{
+  "id": "prototype-board-target-mismatch-blocks-readiness",
+  "title": "prototype-board 目标像素必须匹配当前 visual_baseline",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "当前 visual_baseline 是 1179 x 2556，但 prototype-board 输出单元写成 1206 x 2615，出图准备度必须阻断。",
+  "expected": {
+    "mode": "deep",
+    "status": "不可出图",
+    "must_stop": true,
+    "gate": "输出画布目标像素",
+    "required_behaviors": [
+      "readiness 读取当前 visual_baseline",
+      "readiness 校验 target_output_pixels 与 visual_baseline 一致",
+      "目标宽度不一致时输出画布门槛失败",
+      "阻止进入 image-2 prompt"
+    ],
+    "forbidden_behaviors": [
+      "只检查 target_output_pixels 是否存在",
+      "接受 1179-1206px 泛化范围",
+      "baseline 1179 时放行 1206 输出单元"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "target_matches_baseline"
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "与 visual_baseline"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\"; export PMW_PROJECT_SLUG=board-target-test; root=\"$PMW_HOME/projects/board-target-test\"; mkdir -p \"$root/runs\" \"$root/briefs\"; brief=\"$root/briefs/current.md\"; printf '# 产品设计简报：测试\\n产品简报版本：v2\\n确认状态：已对齐\\n\\n## 核心价值判断\\n- 一句话判断：已确认。\\n## 数据 / 能力 / 约束与不可虚构项\\n- 不可虚构项：不得虚构。\\n' > \"$brief\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\",\"latest_brief\":\"%s\",\"latest_brief_version\":\"v2\"}\\n' \"$brief\" > \"$root/project.json\"; printf '{\"ts\":\"2099-01-01T00:00:00Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"已对齐\",\"title\":\"产品简报确认\",\"summary\":\"用户确认\"}\\n{\"ts\":\"2099-01-01T00:00:01Z\",\"event\":\"decision\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"方案方向确认\",\"summary\":\"默认方向已批准\"}\\n' > \"$root/runs/r1.jsonl\"; python3 - \"$tmp/ref.png\" 1179 2556 <<'PY'\nimport struct, sys, zlib\npath,w,h=sys.argv[1],int(sys.argv[2]),int(sys.argv[3])\nraw=b''.join(b'\\x00'+b'\\xff\\xff\\xff'*w for _ in range(h))\ndef chunk(t,d):\n    return struct.pack('>I',len(d))+t+d+struct.pack('>I',zlib.crc32(t+d)&0xffffffff)\nopen(path,'wb').write(b'\\x89PNG\\r\\n\\x1a\\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',w,h,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(raw,1))+chunk(b'IEND',b''))\nPY\nbin/pmw-artifact add --kind browser_evidence --title 当前截图 --status 已采集 --source-skill pm-brief --path \"$tmp/ref.png\" --summary '当前截图 生产基线' --run r1 >/dev/null; bin/pmw-image-audit baseline --reference \"$tmp/ref.png\" --register --run r1 >/dev/null; bin/pmw-prototype-board add --scheme 方案A --screen 首屏 --brief-path \"$brief\" --brief-version v2 --goal 测试 --anti-metric 测试 --non-fiction 不得虚构 --canvas-mode physical_longboard --target-output-pixels '目标输出 1206 x >=2615' >/dev/null; bin/pmw-dashboard readiness --target prototype --details; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0,
+      "contains": [
+        "不可出图",
+        "目标宽度 1206 与 visual_baseline 1179 不一致"
+      ]
+    }
+  ]
+}

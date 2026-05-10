@@ -85,7 +85,7 @@ fixture 使用 JSON，保存在 `evals/fixtures/`：
   "command_checks": [
     {
       "command": ["bin/pmw-prototype-prompt-check", "--visual-baseline"],
-      "stdin": "参考截图尺寸 1206 x 2622；目标输出画布 1206 x >=2622；不得压缩字体和字号；不得压缩间距；内容自适应。",
+      "stdin": "参考截图尺寸 1179 x 2556；识别为 393pt @3x；目标输出画布 1179 x >=2556；不得压缩字体和字号；不得压缩间距；内容自适应；字体、间距和组件按参考物理像素等比绘制。",
       "exit_code": 0,
       "contains": "Verdict：通过"
     }
@@ -182,7 +182,7 @@ fixture 使用 JSON，保存在 `evals/fixtures/`：
 - 原型方案：一次 image-2 调用只能对应一张图、一个方案和一个屏幕任务；`3 个方案` 必须拆成 3 个输出单元，不能生成一张三联图。
 - 原型方案：image-2 prompt 必须禁止拼图、三联图、并排比较、一图多屏、一图多方案和故事板。
 - 原型方案：输出单元：每张图必须绑定方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统和 image-2 状态。
-- 原型方案：有线上截图时，每张图还必须绑定视觉基线状态、`canvas_mode=physical_longboard` 和目标输出像素；汽车之家生产页默认 3x 移动端长板，宽度不低于参考截图 95%，优先 `1179-1206px`，高度不得低于参考图且可随内容增长。
+- 原型方案：有线上截图时，每张图还必须绑定视觉基线状态、`canvas_mode=physical_longboard` 和目标输出像素；汽车之家生产页默认使用参考截图原始物理像素 3x 移动端长板，字体、间距、卡片和底部栏按参考物理像素比例等比执行；显式 override 目标宽度时也必须同步等比缩放。
 - 原型方案：无线上截图时可使用标准首屏模板；有线上截图 / `visual_baseline` 时，最终 image-2 prompt 不能包含 `pmw-prototype-prompt-check` 定义的短画布锚点，必须使用截图物理像素长板。
 - 原型方案：汽车之家场景必须加载 AutoDesign 约束，产品 UI 优先使用 AutoDesign token。
 - 原型方案：汽车之家 / AutoDesign 场景若提供生产截图，截图基线优先于泛化 AutoDesign token；不得为了塞内容压缩中文字体、图表坐标轴、卡片间距或底部 CTA。

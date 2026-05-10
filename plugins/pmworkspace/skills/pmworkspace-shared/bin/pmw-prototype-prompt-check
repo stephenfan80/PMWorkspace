@@ -61,6 +61,85 @@ def contains_target_output(text: str) -> bool:
     return bool(re.search(rf"(目标输出|目标输出画布|目标输出像素)[^。\n；;]*(?:{pixel_pair}|{pixel_width})", text))
 
 
+def parse_key_int(text: str, key: str) -> int | None:
+    match = re.search(rf"{re.escape(key)}[=：]\s*(\d{{3,5}})", text)
+    return int(match.group(1)) if match else None
+
+
+def parse_target_size(text: str) -> tuple[int | None, int | None]:
+    key_width = parse_key_int(text, "target_width") or parse_key_int(text, "目标宽度")
+    key_height = parse_key_int(text, "target_height") or parse_key_int(text, "目标高度")
+    if key_width or key_height:
+        return key_width, key_height
+    match = re.search(r"目标输出[^。\n；;]*?(\d{3,5})\s*(?:x|X|×)\s*(?:>=\s*)?(\d{3,5})", text)
+    if match:
+        return int(match.group(1)), int(match.group(2))
+    width_match = re.search(r"目标输出[^。\n；;]*?(\d{3,5})\s*(?:px|像素|宽)", text)
+    height_match = re.search(r"(?:高度|高)[^。\n；;]*?(\d{3,5})\s*(?:px|像素)?", text)
+    return (
+        int(width_match.group(1)) if width_match else None,
+        int(height_match.group(1)) if height_match else None,
+    )
+
+
+def parse_reference_size(text: str) -> tuple[int | None, int | None]:
+    key_width = parse_key_int(text, "reference_width") or parse_key_int(text, "参考宽度")
+    key_height = parse_key_int(text, "reference_height") or parse_key_int(text, "参考高度")
+    if key_width or key_height:
+        return key_width, key_height
+    match = re.search(r"(?:参考截图尺寸|参考尺寸)[^。\n；;]*?(\d{3,5})\s*(?:x|X|×)\s*(\d{3,5})", text)
+    if match:
+        return int(match.group(1)), int(match.group(2))
+    return None, None
+
+
+def baseline_metrics(baseline: dict) -> dict:
+    summary = str(baseline.get("summary") or "")
+    reference_width, reference_height = parse_reference_size(summary)
+    target_width, target_height = parse_target_size(summary)
+    scale_match = re.search(r"(?:scale|倍率)[=：]\s*(\d+)", summary)
+    logical_match = re.search(r"(?:logical_width|逻辑宽度)[=：]\s*(\d+)", summary)
+    return {
+        "reference_width": reference_width,
+        "reference_height": reference_height,
+        "target_width": target_width,
+        "target_height": target_height,
+        "scale": int(scale_match.group(1)) if scale_match else None,
+        "logical_width": int(logical_match.group(1)) if logical_match else None,
+    }
+
+
+def check_prompt_matches_baseline(prompt: str, baseline: dict) -> list[str]:
+    failures: list[str] = []
+    if not baseline:
+        return failures
+    metrics = baseline_metrics(baseline)
+    prompt_ref_width, prompt_ref_height = parse_reference_size(prompt)
+    prompt_target_width, prompt_target_height = parse_target_size(prompt)
+    if metrics["reference_width"] and prompt_ref_width and prompt_ref_width != metrics["reference_width"]:
+        failures.append(f"参考截图宽度 {prompt_ref_width} 与 visual_baseline {metrics['reference_width']} 不一致")
+    if metrics["reference_height"] and prompt_ref_height and prompt_ref_height != metrics["reference_height"]:
+        failures.append(f"参考截图高度 {prompt_ref_height} 与 visual_baseline {metrics['reference_height']} 不一致")
+    if metrics["target_width"]:
+        if not prompt_target_width:
+            failures.append("缺少可校验的目标输出宽度")
+        elif prompt_target_width != metrics["target_width"]:
+            failures.append(f"目标输出宽度 {prompt_target_width} 与 visual_baseline {metrics['target_width']} 不一致")
+    if metrics["target_height"]:
+        if not prompt_target_height:
+            failures.append("缺少可校验的目标输出高度")
+        elif prompt_target_height < metrics["target_height"]:
+            failures.append(f"目标输出高度 {prompt_target_height} 低于 visual_baseline {metrics['target_height']}")
+    scale = metrics.get("scale")
+    if scale and scale > 1:
+        scale_pattern = rf"(?:{scale}\s*x|@\s*{scale}\s*x|{scale}\s*倍)"
+        if not re.search(scale_pattern, prompt, flags=re.I):
+            failures.append(f"缺少 {scale}x 截图倍率说明")
+        if not re.search(r"(物理像素|等比|比例)", prompt):
+            failures.append("缺少按参考物理像素等比绘制的约束")
+    return failures
+
+
 def run_check(args: argparse.Namespace) -> int:
     prompt = sys.stdin.read()
     baseline = latest_visual_baseline()
@@ -74,6 +153,7 @@ def run_check(args: argparse.Namespace) -> int:
             failures.append("缺少参考截图尺寸")
         if not contains_target_output(prompt):
             failures.append("缺少目标输出画布 / 目标输出像素")
+        failures.extend(check_prompt_matches_baseline(prompt, baseline))
         if not (re.search(r"(不|不要|不得|不能|禁止)压缩", prompt) and re.search(r"(字体|字号|文字)", prompt)):
             failures.append("缺少不得压缩字体 / 字号约束")
         if "间距" not in prompt:

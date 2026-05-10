@@ -1,0 +1,48 @@
+{
+  "id": "prototype-unauditable-image-blocks-delivery",
+  "title": "有视觉基线但图片不可审计时不能交付",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "当前 run 有 visual_baseline，但 pmw-prototype-board image 记录的生成图不是本地可读图片，必须标记需要重出。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要重出",
+    "must_stop": true,
+    "gate": "图片可审计性",
+    "required_behaviors": [
+      "检查生成图是否为本地可读文件",
+      "不可读取时 audit_verdict=需要重出",
+      "命令返回非零",
+      "禁止作为交付结果展示"
+    ],
+    "forbidden_behaviors": [
+      "无本地路径仍标记已生成",
+      "跳过视觉审计",
+      "把不可审计图片作为最终交付"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-prototype-board",
+      "contains": "生成图不是可读取的本地文件"
+    },
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "不能展示为交付结果"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\"; export PMW_PROJECT_SLUG=unauditable-test; mkdir -p \"$PMW_HOME/projects/unauditable-test\"; python3 - \"$tmp/ref.png\" 1179 2556 <<'PY'\nimport struct, sys, zlib\npath,w,h=sys.argv[1],int(sys.argv[2]),int(sys.argv[3])\nraw=b''.join(b'\\x00'+b'\\xff\\xff\\xff'*w for _ in range(h))\ndef chunk(t,d):\n    return struct.pack('>I',len(d))+t+d+struct.pack('>I',zlib.crc32(t+d)&0xffffffff)\nopen(path,'wb').write(b'\\x89PNG\\r\\n\\x1a\\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',w,h,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(raw,1))+chunk(b'IEND',b''))\nPY\nbin/pmw-image-audit baseline --reference \"$tmp/ref.png\" --register >/dev/null; bin/pmw-prototype-board add --scheme 方案A --screen 首屏 --brief-version v1 --canvas-mode physical_longboard --target-output-pixels '目标输出 1179 x >=2556' >/dev/null; set +e; bin/pmw-prototype-board image --scheme 方案A --screen 首屏 --image \"$tmp/missing.png\"; code=$?; cat \"$PMW_HOME/projects/unauditable-test/prototype-board.jsonl\"; rm -rf \"$tmp\"; exit $code"
+      ],
+      "exit_code": 2,
+      "contains": [
+        "\"audit_verdict\": \"需要重出\"",
+        "生成图不是可读取的本地文件"
+      ]
+    }
+  ]
+}

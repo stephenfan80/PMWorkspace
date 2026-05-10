@@ -91,6 +91,43 @@ def artifact_location(row: dict) -> str:
     return str(row.get("path") or row.get("url") or "")
 
 
+def parse_key_int(text: str, key: str):
+    import re
+
+    match = re.search(rf"{re.escape(key)}[=：]\s*(\d{{3,5}})", text)
+    return int(match.group(1)) if match else None
+
+
+def parse_target_size(text: str):
+    import re
+
+    key_width = parse_key_int(text, "target_width") or parse_key_int(text, "目标宽度")
+    key_height = parse_key_int(text, "target_height") or parse_key_int(text, "目标高度")
+    if key_width or key_height:
+        return key_width, key_height
+    match = re.search(r"目标输出[^。\n；;]*?(\d{3,5})\s*(?:x|X|×)\s*(?:>=\s*)?(\d{3,5})", text)
+    if match:
+        return int(match.group(1)), int(match.group(2))
+    width_match = re.search(r"目标输出[^。\n；;]*?(\d{3,5})\s*(?:px|像素|宽)", text)
+    height_match = re.search(r"(?:高度|高)[^。\n；;]*?(\d{3,5})\s*(?:px|像素)?", text)
+    return (
+        int(width_match.group(1)) if width_match else None,
+        int(height_match.group(1)) if height_match else None,
+    )
+
+
+def target_mismatch(item: dict, baseline: dict) -> str:
+    baseline_width, baseline_height = parse_target_size(str(baseline.get("summary") or ""))
+    if not baseline_width and not baseline_height:
+        return ""
+    item_width, item_height = parse_target_size(f"目标输出：{item.get('target_output_pixels') or ''}")
+    if baseline_width and item_width != baseline_width:
+        return f"输出单元目标宽度 {item_width or '未记录'} 与 visual_baseline {baseline_width} 不一致"
+    if baseline_height and (item_height is None or item_height < baseline_height):
+        return f"输出单元目标高度 {item_height or '未记录'} 低于 visual_baseline {baseline_height}"
+    return ""
+
+
 def latest_visual_baseline(run_id: str = "") -> dict:
     rows = [row for row in read_jsonl(artifact_log()) if row.get("kind") == "visual_baseline"]
     if run_id:
@@ -188,6 +225,14 @@ def command_image(args: argparse.Namespace) -> int:
                 "verdict": "需要重出",
                 "failures": [
                     "当前 run 有 visual_baseline，但输出单元未登记 canvas_mode=physical_longboard，不能把图片作为交付结果展示"
+                ],
+            }
+        elif mismatch := target_mismatch(item, baseline):
+            audit_exit = 2
+            audit_payload = {
+                "verdict": "需要重出",
+                "failures": [
+                    f"{mismatch}，不能把图片作为交付结果展示"
                 ],
             }
         else:

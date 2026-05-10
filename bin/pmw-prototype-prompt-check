@@ -140,11 +140,42 @@ def check_prompt_matches_baseline(prompt: str, baseline: dict) -> list[str]:
     return failures
 
 
+def prompt_generation_mode(prompt: str, strict: bool) -> str:
+    if re.search(r"(?:generation_mode|生成模式)[=：]\s*redraw|\bredraw\b|重绘模式", prompt, flags=re.I):
+        return "redraw"
+    if re.search(r"(?:generation_mode|生成模式)[=：]\s*screenshot_edit|\bscreenshot_edit\b|截图编辑模式|以参考截图为底", prompt, flags=re.I):
+        return "screenshot_edit"
+    return "screenshot_edit" if strict else "redraw"
+
+
+def check_screenshot_edit_prompt(prompt: str, mode: str) -> list[str]:
+    failures: list[str] = []
+    from_scratch = re.search(r"(从零|从头|重新设计整页|重绘整页|重新生成整页|改写所有模块|整体重绘)", prompt)
+    negated_from_scratch = re.search(r"(不|不要|不得|不能|禁止).{0,8}(从零|从头|重新设计整页|重绘整页|重新生成整页|改写所有模块|整体重绘)", prompt)
+    if mode != "redraw" and from_scratch and not negated_from_scratch:
+        failures.append("截图编辑模式禁止从零重绘 / 重新设计整页；若确需大幅重构，必须显式写 generation_mode=redraw")
+    if mode != "screenshot_edit":
+        return failures
+    if not re.search(r"(以|基于|使用).{0,10}(参考截图|线上截图|原截图).{0,10}(为底|底图|基础)|保留原截图", prompt):
+        failures.append("截图编辑模式缺少以参考截图为底的说明")
+    if not (
+        re.search(r"(只|仅).{0,6}(修改|调整|替换|改动).{0,12}(目标区域|目标模块|改动区域|编辑范围)", prompt)
+        or re.search(r"(目标区域|目标模块|edit_scope|编辑范围).{0,12}(只|仅).{0,6}(修改|调整|替换|改动)", prompt)
+    ):
+        failures.append("截图编辑模式必须说明只修改目标区域 / 目标模块")
+    if not re.search(r"保留.{0,30}(状态栏|顶部导航|车系头图|车型切换|tab|底部吸底 CTA|底部 CTA)", prompt, flags=re.I):
+        failures.append("截图编辑模式必须说明保留状态栏、顶部导航、车系头图、tab 或底部 CTA 等区域")
+    if not re.search(r"(不|不要|不得|不能|禁止).{0,8}(从零|重新设计整页|重绘整页|重新生成整页|改写所有模块)", prompt):
+        failures.append("截图编辑模式必须明确不得从零重绘整页")
+    return failures
+
+
 def run_check(args: argparse.Namespace) -> int:
     prompt = sys.stdin.read()
     baseline = latest_visual_baseline()
     strict = args.visual_baseline or bool(baseline)
     failures: list[str] = []
+    mode = prompt_generation_mode(prompt, strict)
     if strict:
         forbidden = has_forbidden_anchor(prompt)
         if forbidden:
@@ -154,6 +185,7 @@ def run_check(args: argparse.Namespace) -> int:
         if not contains_target_output(prompt):
             failures.append("缺少目标输出画布 / 目标输出像素")
         failures.extend(check_prompt_matches_baseline(prompt, baseline))
+        failures.extend(check_screenshot_edit_prompt(prompt, mode))
         if not (re.search(r"(不|不要|不得|不能|禁止)压缩", prompt) and re.search(r"(字体|字号|文字)", prompt)):
             failures.append("缺少不得压缩字体 / 字号约束")
         if "间距" not in prompt:
@@ -166,12 +198,13 @@ def run_check(args: argparse.Namespace) -> int:
             failures.append("缺少长内容不得塞进短画布 / 高度自适应约束")
     verdict = "通过" if not failures else "失败"
     if args.json:
-        print(json.dumps({"verdict": verdict, "strict": strict, "failures": failures}, ensure_ascii=False, indent=2, sort_keys=True))
+        print(json.dumps({"verdict": verdict, "strict": strict, "generation_mode": mode, "failures": failures}, ensure_ascii=False, indent=2, sort_keys=True))
     else:
         print("# PMWorkspace image-2 prompt 检查")
         print("")
         print(f"- Verdict：{verdict}")
         print(f"- 视觉基线模式：{'是' if strict else '否'}")
+        print(f"- 生成模式：{mode}")
         if failures:
             print("- 问题：")
             for failure in failures:

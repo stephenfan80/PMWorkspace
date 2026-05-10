@@ -99,4 +99,4 @@ Evidence Dashboard 回答“现在有哪些证据”；Product Readiness Dashboa
 
 浏览器证据属于 Product Artifact Flow 的轻量产物：用 `pmw-artifact add --kind browser_evidence` 登记线上流程截图、状态页、竞品参考或 Zoon 漂移证据。仪表盘只读取它的状态、URL / 路径和摘要，不引入新的证据库或浏览器自动化命令。
 
-视觉基线属于出图控制产物：用 `pmw-artifact add --kind visual_baseline` 或 `pmw-image-audit baseline --reference <截图路径> --register` 登记参考图尺寸、截图倍率、逻辑点宽、目标输出像素、字号层级、页面边距、模块间距、底部栏高度和参考优先级。汽车之家 / AutoDesign 生产页中，线上截图基线高于泛化 AutoDesign token；默认使用参考截图原始物理像素和 3x 字体 / 间距比例，生成后还要用 `pmw-image-audit audit` 做尺寸 / 长板审计。
+视觉基线属于出图控制产物：用 `pmw-artifact add --kind visual_baseline` 或 `pmw-image-audit baseline --reference <截图路径> --register` 登记参考图尺寸、截图倍率、逻辑点宽、目标输出像素、字号层级、页面边距、模块间距、底部栏高度和参考优先级。汽车之家 / AutoDesign 生产页中，线上截图基线高于泛化 AutoDesign token；默认使用参考截图原始物理像素和 3x 字体 / 间距比例，生成后还要用 `pmw-image-audit audit` 做尺寸 / 长板审计。视觉还原优先时，Product Readiness Dashboard 还会要求 prototype-board 输出单元使用 `generation_mode=screenshot_edit`，并绑定 `base_image`、`edit_scope` 和 `preserve_regions`。

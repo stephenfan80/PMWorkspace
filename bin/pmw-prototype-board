@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
+DEFAULT_PRESERVE_REGIONS = "状态栏、顶部导航、车系头图、车型切换、tab、底部吸底 CTA"
 
 
 def now() -> str:
@@ -171,6 +172,14 @@ def audit_image(image: str, reference: str) -> tuple[int, dict, str]:
 def command_add(args: argparse.Namespace) -> int:
     run_id = args.run or current_run_id()
     brief_path = args.brief_path or current_brief_path()
+    baseline = latest_visual_baseline(run_id)
+    generation_mode = args.generation_mode or ("screenshot_edit" if baseline else "redraw")
+    base_image = args.base_image
+    if generation_mode == "screenshot_edit" and not base_image:
+        base_image = artifact_location(baseline)
+    preserve_regions = args.preserve_regions
+    if generation_mode == "screenshot_edit" and not preserve_regions:
+        preserve_regions = DEFAULT_PRESERVE_REGIONS
     row = {
         "ts": now(),
         "record_type": "item",
@@ -184,6 +193,10 @@ def command_add(args: argparse.Namespace) -> int:
         "non_fiction": args.non_fiction,
         "canvas_mode": args.canvas_mode,
         "target_output_pixels": args.target_output_pixels,
+        "generation_mode": generation_mode,
+        "base_image": base_image,
+        "edit_scope": args.edit_scope,
+        "preserve_regions": preserve_regions,
         "image": args.image,
         "status": args.status,
     }
@@ -286,8 +299,8 @@ def command_list(_args: argparse.Namespace) -> int:
     if not items:
         print("暂无方案。")
         return 0
-    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 画布模式 | 目标输出像素 | 图片 | 评分 | 状态 |")
-    print("|---|---|---|---|---|---|---|---|---|---|---|")
+    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
     for item in items:
         key = (item.get("scheme", ""), item.get("screen", ""))
         scheme_key = (item.get("scheme", ""), "")
@@ -307,6 +320,9 @@ def command_list(_args: argparse.Namespace) -> int:
             item.get("anti_metric", ""),
             item.get("non_fiction", ""),
             item.get("canvas_mode", ""),
+            item.get("generation_mode", ""),
+            item.get("edit_scope", ""),
+            item.get("preserve_regions", ""),
             item.get("target_output_pixels", ""),
             image_row.get("image") or item.get("image", ""),
             score_text,
@@ -329,6 +345,10 @@ def build_parser() -> argparse.ArgumentParser:
     add.add_argument("--non-fiction", default="")
     add.add_argument("--canvas-mode", choices=["", "standard_first_screen", "physical_longboard"], default="")
     add.add_argument("--target-output-pixels", default="")
+    add.add_argument("--generation-mode", choices=["", "screenshot_edit", "redraw"], default="")
+    add.add_argument("--base-image", default="")
+    add.add_argument("--edit-scope", default="")
+    add.add_argument("--preserve-regions", default="")
     add.add_argument("--image", default="")
     add.add_argument("--status", default="计划生成")
     add.add_argument("--run")

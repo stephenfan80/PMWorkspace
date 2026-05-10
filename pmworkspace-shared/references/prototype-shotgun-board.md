@@ -18,11 +18,17 @@ pmw-prototype-board add \
   --non-fiction "<不可虚构项>" \
   --canvas-mode "<standard_first_screen|physical_longboard>" \
   --target-output-pixels "<无线上截图可空；有视觉基线时必须写目标输出画布>" \
+  --generation-mode "<screenshot_edit|redraw>" \
+  --base-image "<screenshot_edit 时写 visual_baseline 参考截图路径>" \
+  --edit-scope "<screenshot_edit 时写只修改的目标区域 / 目标模块>" \
+  --preserve-regions "状态栏、顶部导航、车系头图、车型切换、tab、底部吸底 CTA" \
   --image "<图片路径或 URL，可为空>" \
   --status "计划生成"
 ```
 
 有 `visual_baseline` 时，`--canvas-mode` 必须是 `physical_longboard`，`--target-output-pixels` 必须写与当前 visual_baseline 一致的物理长板目标，例如 `1179 x >=2556` 或 `1179px 宽，高度不得低于 2556px`；不得写短画布锚点，具体禁用模式以 `pmw-prototype-prompt-check` 为准。
+
+视觉还原优先、现有生产截图或截图修改任务默认使用 `--generation-mode screenshot_edit`。脚本在当前 run 有 `visual_baseline` 且未显式指定模式时会默认写入 `screenshot_edit`，并把 `--base-image` 默认绑定为 visual_baseline 参考图，`--preserve-regions` 默认绑定为 `状态栏、顶部导航、车系头图、车型切换、tab、底部吸底 CTA`。`--edit-scope` 必须由助手写清本次只改的目标区域；缺失时 Product Readiness Dashboard 不可出图。产品探索或大幅重构才显式使用 `--generation-mode redraw`。
 
 生成后把图片路径或 URL 补写到同一个方案/屏幕单元：
 
@@ -59,7 +65,7 @@ pmw-prototype-board list
 - 只有用户明确要求展示材料时，才可以额外做展示板。
 - 方案比较板是审计和比较记录，不是 image-2 图片的替代物。
 - 每个 board item 必须能追溯到已对齐产品简报版本、主目标、反指标和不可虚构项。
-- 每个 board item 在有线上截图视觉基线时，必须能追溯到 `canvas_mode=physical_longboard` 和 `target_output_pixels`。
+- 每个 board item 在有线上截图视觉基线时，必须能追溯到 `canvas_mode=physical_longboard`、`target_output_pixels`、`generation_mode`、`base_image`、`edit_scope` 和 `preserve_regions`。
 - 每个 board item 必须保留独立状态：`计划生成`、`已生成`、`生成失败`、`待重试` 或 `需要重出`；批量成功不能掩盖单张失败。
 - 已登记的 board item 必须绑定当前 latest brief 的 `brief_path` 和 `brief_version`；旧版本 brief 的输出单元必须重新登记，不能靠当前 run 里的旧方案确认放行。
 - 如果 `pmw-prototype-board add` 或 `pmw-prototype-board image` 不可用，原型计划必须写明 `方案比较板：未写入（原因）`，不能假装已经记录。

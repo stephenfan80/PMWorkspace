@@ -1,16 +1,16 @@
 # PMWorkspace 冗余与漏斗审计
 
-审计日期：2026-05-09
+审计日期：2026-05-09；最新复查：2026-05-10
 
 原始审计口径：两阶段稳妥。第一阶段只识别明显矛盾、重复规则、低价值噪声和运行时漏斗；第二阶段等删减决策表拍板后再执行。当前文档已更新为执行后状态，历史问题只作为溯源保留。
 
-执行状态更新：本审计列出的 D1-D17 已完成第一轮保守瘦身。已修正文案冲突、收敛长板 / 简报 / eval / office-hours 真源、归档孤岛 reference，并通过 generator 收敛 `SKILL.md` 共享门槛重复。后续继续瘦身时，应重新审计 D18+，不要沿用本报告里的“待执行”旧状态。
+执行状态更新：本审计列出的 D1-D17 已完成第一轮保守瘦身。已修正文案冲突、收敛长板 / 简报 / eval / office-hours 真源、归档孤岛 reference，并通过 generator 收敛 `SKILL.md` 共享门槛重复。2026-05-10 复查已继续清理 `AGENTS.md`、README 和高可见入口中的短画布锚点原文；后续继续瘦身时，应重新审计 D18+，不要沿用本报告里的“待执行”旧状态。
 
 ## 总体结论
 
 PMWorkspace 的核心运行逻辑已经形成闭环：`$pm-workspace` 路由，`$pm-autoplan` 总控，`$pm-jobs` 做产品价值判断，`$pm-brief` 生成产品经理简报，`$pm-prototype-shotgun` 负责 image-2 单图出图，`$pm-prototype-review` 复审，`$pm-handoff` 交付。真正能挡错的是运行时脚本和 eval，而不是单纯靠 skill 长文案。
 
-当前主要风险不是“规则缺失”，而是“规则散落 + 旧文案残留 + 重复解释过多”。这会让执行模型在长上下文中优先记住旧锚点或入口摘要，出现用户指出的两类问题：产品发现只问一个 Q/D 就进入简报，或者有生产截图时仍被短画布锚定。
+历史主要风险不是“规则缺失”，而是“规则散落 + 旧文案残留 + 重复解释过多”。这会让执行模型在长上下文中优先记住旧锚点或入口摘要，出现用户指出的两类问题：产品发现只问一个 Q/D 就进入简报，或者有生产截图时仍被短画布锚定。当前状态是：产品发现、简报、长板、Zoon 和插件同步的硬门槛已落到脚本 / eval / 真源文档；后续风险主要是入口文档或交付物再次写回旧锚点。
 
 ## A. 明显矛盾处理结果
 
@@ -29,7 +29,7 @@ PMWorkspace 的核心运行逻辑已经形成闭环：`$pm-workspace` 路由，`
 
 | 编号 | 位置 | 原始问题 | 原始风险 | 最终处理 | 当前状态 |
 |---|---|---|---|---|---|
-| R1 | `402 x 874` / `H874` 多处出现 | 长板规则散落在 prototype、prompt、design system、AutoDesign、eval 文档中。 | 任一处出现旧写法或上下文不清，image-2 prompt 可能重新被短画布锚定。 | 已保留 `image-prompts.md` 为 prompt 真源，`prototype-shotgun-board.md` 为 output unit 真源；硬门槛和 eval 断言保留。互斥画布模板已补强，避免复制时把标准首屏和物理长板写进同一字段。 | 已处理 |
+| R1 | 短画布锚点多处出现 | 长板规则曾散落在 prototype、prompt、design system、AutoDesign、eval、README 和 AGENTS 中。 | 任一处出现旧写法或上下文不清，image-2 prompt 可能重新被短画布锚定。 | 已保留 `image-prompts.md` 为 prompt 真源，`prototype-shotgun-board.md` 为 output unit 真源；硬门槛和 eval 断言保留。互斥画布模板已补强，入口文档改为模板 ID，短画布具体禁词只保留在 `pmw-prototype-prompt-check` 和 eval 反例中。 | 已处理 |
 | R2 | 产品经理简报结构重复 | `product-plan-handoff.md`、`product-manager-brief.md`、`pm-brief/SKILL.md`、`pm-eval-system.md` 曾重复描述结构。 | 维护时容易一处改成 PM brief，另一处仍像短摘要或审计合同。 | 已保留 `product-manager-brief.md` 为模板真源，`product-plan-handoff.md` 只写门槛和交接，`pm-brief/SKILL.md` 只写执行流程。 | 已处理 |
 | R3 | 产品发现维度和 Q/D 规则重复 | `product-office-hours.md`、`product-discovery-gate.md`、`pm-jobs/SKILL.md` 曾有重叠。 | 执行时容易把“一次只问一个”误读成“总共只问一个”。 | 已保留 `product-discovery-gate.md` 为硬门槛真源；`product-office-hours.md` 主文档只保留产品发现状态机，案例、反例、口吻示例迁到 appendix/examples。 | 已处理 |
 | R4 | 安装与升级命令重复 | 中英文 README 和 update reference 曾重复安装命令。 | 文档维护成本高，版本更新时容易漏改。 | README 只保留公开插件、本地 GitHub plugin、开发安装三条主路径；详细升级迁到 `docs/codex-plugin-submission.md` / `update-workflow.md`。 | 已处理 |
@@ -78,7 +78,7 @@ PMWorkspace 的核心运行逻辑已经形成闭环：`$pm-workspace` 路由，`
 ## 执行结果
 
 1. C1 / C2 / C3 已修正：产品简报、Zoon local-first 和协作文档入口口径已对齐。
-2. 长板出图真源已收敛：`image-prompts.md` 负责 prompt 真源，`prototype-shotgun-board.md` 负责 output unit 真源，脚本 / eval 继续做硬门槛。
+2. 长板出图真源已收敛：`image-prompts.md` 负责 prompt 真源，`prototype-shotgun-board.md` 负责 output unit 真源，`AGENTS.md` / README 等入口文档只写模板 ID，脚本 / eval 继续做硬门槛。
 3. 产品简报真源已收敛：模板归 `product-manager-brief.md`，门槛归 `product-plan-handoff.md`，执行归 `$pm-brief`。
 4. `pm-eval-system.md` 已收敛为测试契约，保留 fixture 分类、禁止项、验收断言和失败条件。
 5. README 安装重复、`pm-workbench-map.md` 长表格、AutoDesign 长板重复和英文 README 口径已处理。

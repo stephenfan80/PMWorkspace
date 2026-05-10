@@ -69,10 +69,10 @@ Zoon 的正确模型是 local-first、Zoon-optional。本地 Markdown 保存成�
 
 ## 10. 物理长板规则
 
-标题：有生产截图时，402 x 874 不能进 prompt
+标题：有生产截图时，短画布锚点不能进 prompt
 
 讲稿：
-长板失败的根因是 prompt 里仍残留 `402 x 874 / H874 / 标准首屏` 这类短画布锚点。现在规则要求：无线上截图时才能用标准移动端首屏；只要有生产截图或 `visual_baseline`，就必须走 `physical_longboard`，写参考图物理尺寸和目标输出像素。`pmw-prototype-prompt-check` 负责在出图前挡掉旧锚点，`pmw-image-audit` 负责在出图后挡掉尺寸不合格的图。
+长板失败的根因是 prompt 里混入了另一种画布模式的短画布锚点。现在规则要求：无线上截图时使用 `standard_first_screen` 模板；只要有生产截图或 `visual_baseline`，就必须走 `physical_longboard`，只写参考图物理尺寸和目标输出像素。短画布禁词由 `pmw-prototype-prompt-check` 定义和拦截，不再散落在入口文档或出图主流程里；`pmw-image-audit` 负责在出图后挡掉尺寸不合格的图。
 
 ## 11. 原型复审与交付
 
@@ -100,7 +100,7 @@ Zoon 的正确模型是 local-first、Zoon-optional。本地 Markdown 保存成�
 标题：修规则，更要修真源
 
 讲稿：
-本轮已经处理完 D1-D17：README 的产品简报和 Zoon 口径改成 PM brief + local-first；长板出图真源收敛到 `image-prompts.md` 和 `prototype-shotgun-board.md`；`pm-eval-system.md` 回到测试契约；`product-office-hours.md` 拆出案例附录；孤岛 reference 已合并、移位或保留；`SKILL.md` 共享门槛由 manifest / generator 压缩输出。最新补强是把 image-2 画布模板拆成互斥模式，避免把 `402 x 874` 和物理长板写进同一个 prompt 字段。
+本轮已经处理完 D1-D17：README 的产品简报和 Zoon 口径改成 PM brief + local-first；长板出图真源收敛到 `image-prompts.md` 和 `prototype-shotgun-board.md`；`pm-eval-system.md` 回到测试契约；`product-office-hours.md` 拆出案例附录；孤岛 reference 已合并、移位或保留；`SKILL.md` 共享门槛由 manifest / generator 压缩输出。最新补强是把 image-2 画布模板拆成互斥模式，并把 `AGENTS.md`、README 和主流程文案改成模板 ID，短画布具体禁词只由脚本和 eval 管。
 
 ## 15. 后续守护点
 

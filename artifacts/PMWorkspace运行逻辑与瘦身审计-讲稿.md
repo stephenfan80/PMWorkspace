@@ -104,7 +104,7 @@ Zoon 的正确模型是 local-first、Zoon-optional。本地 Markdown 保存成�
 
 ## 15. 后续守护点
 
-标题：不要让旧锚点回来
+标题：不要让旧规则回来
 
 讲稿：
 后续不是继续沿 D1-D17 往下拆，而是重新审计 D18+。优先守住四件事：第一，产品发现必须靠 `pmw-discovery-gate`，不能退回一个 Q/D 后写已对齐简报；第二，有视觉基线时 final prompt 不能出现短画布锚点；第三，artifact-only commit 不需要刷新插件 REVISION，只有 source skill、references、bin 或 eval 影响插件包时才 build；第四，PPTX、讲稿和审计报告既然是交付物，就要纳入版本控制，不能长期漂在未跟踪状态。

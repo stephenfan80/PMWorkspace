@@ -2,7 +2,7 @@
 
 使用方式：每一行选择 `保留 / 合并 / 移到 reference / 删除 / 暂缓`。默认建议偏保守，先修冲突和重复真源，再做大规模瘦身。
 
-执行状态更新：截至 2026-05-10 最新复查，D1-D17 已按保守瘦身路线处理完毕；D17 明确保留，D10 已通过 manifest / generator 收敛，未手工删除生成区块。后续补强已把高可见入口文档里的短画布锚点原文改成模板 ID，避免旧锚点回流。
+执行状态更新：截至 2026-05-10 最新复查，D1-D17 已按保守瘦身路线处理完毕；D17 明确保留，D10 已通过 manifest / generator 收敛，未手工删除生成区块。后续补强已把高可见入口文档里的短画布锚点原文改成模板 ID，避免短画布锚点回流。
 
 | 编号 | 对象 | 当前问题 | 推荐选择 | 可选动作 | 影响 |
 |---|---|---|---|---|---|
@@ -10,7 +10,7 @@
 | D2 | `README.zh-CN.md:110` Zoon 默认优先同步口径 | 与 local-first / Zoon-optional 冲突。 | 已合并 | 已改成“本地保存后推荐 Zoon A/B”。 | 已修，commit `b0975ef`。 |
 | D3 | `README.zh-CN.md:203` 协作文档转原型描述 | Zoon 文档场景下读取最新快照合理，但入口文案容易误导为每次都要先同步 Zoon。 | 已合并 | 已改成“已提供或已启用 Zoon 时读取最新快照并检查漂移；未启用用本地简报”。 | 已修，commit `b0975ef`。 |
 | D4 | README 安装 / 升级命令重复 | 中英文 README 和 update reference 都有安装命令。 | 已合并 | README 保留公开插件、本地 GitHub plugin、开发安装三条主路径；详细升级迁到 `update-workflow.md`。 | 已修，commit `6dd77b6`。 |
-| D5 | 长板规则在 12 个文件重复 | 规则正确但分散，旧锚点容易残留。 | 已合并 | `image-prompts.md` 做 prompt 真源；`prototype-shotgun-board.md` 做 output unit 真源；入口文档只写模板 ID；硬门槛和 eval 断言保留。 | 已修并补强防回退。 |
+| D5 | 长板规则在 12 个文件重复 | 规则正确但分散，短画布锚点容易残留。 | 已合并 | `image-prompts.md` 做 prompt 真源；`prototype-shotgun-board.md` 做 output unit 真源；入口文档只写模板 ID；硬门槛和 eval 断言保留。 | 已修并补强防回退。 |
 | D6 | `pm-eval-system.md` 规则密度过高 | 像第二份业务协议。 | 已合并 | 保留 fixture 分类、禁止项、验收断言和失败条件；移除重复业务长解释。 | 已修，commit `268935f`。 |
 | D7 | `product-office-hours.md` 过长 | 已在 references 中，问题不是“移到 reference”，而是与 discovery gate / jobs skill 重叠。 | 已拆分 / 合并 | 主体保留产品发现状态机；案例、反例、口吻示例迁到 appendix/examples。 | 已修，commit `268935f`。 |
 | D8 | 产品简报模板重复 | `product-manager-brief.md`、`product-plan-handoff.md`、`pm-brief/SKILL.md` 都写结构。 | 已合并 | 模板真源归 `product-manager-brief.md`；交接门槛归 `product-plan-handoff.md`；skill 只写执行。 | 已修，commit `268935f`。 |

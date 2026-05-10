@@ -55,7 +55,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - 每张图片已经绑定方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统和 image-2 状态。
 - 每个输出单元已经登记到 Prototype Shotgun Board，或已说明脚本不可用的原因。
 - 画布决策遵循移动端优先但必须二选一：无线上截图时使用 `standard_first_screen` 模板；有线上截图 / `visual_baseline` 时使用 `physical_longboard` 模板。最终 image-2 prompt 只写当前模式的正向画布字段，不复制另一种模式的短画布锚点。
-- 汽车之家 / AutoDesign 生产页必须声明 `参考截图尺寸` 和 `目标输出画布`；线上截图基线覆盖泛化 token。目标默认是 3x 移动端长板，宽度不低于参考截图的 95%，优先 `1179-1206px`；高度不得低于参考图高度，可随内容增长。
+- 汽车之家 / AutoDesign 生产页必须声明 `参考截图尺寸`、截图倍率和 `目标输出画布`；线上截图基线覆盖泛化 token。目标默认使用参考截图原始物理像素长板，例如 `1179 x 2556 = 393pt @3x`；字体、间距、卡片和底部栏按参考物理像素比例等比执行。只有显式 override 目标宽度时才允许改宽，并必须同步等比缩放字号、间距和组件。
 - 已通过 `design-system-workflow.md` 载入 AutoDesign 生产基线。
 - 对抗审查中的实质改动已写回产品简报。
 - 已运行 Product Readiness Dashboard，且出图前 required 行的 verdict 是 `可出图`。
@@ -98,7 +98,7 @@ For every image generation request, declare the output unit before prompting:
 - 不可虚构项：<不能画进屏幕的未支持数据、能力、承诺或动作>
 - 线上参考状态：<已提供线上参考 / 无线上参考已确认 / 缺失待补充 / 不适用>
 - 视觉基线状态：<已登记，参考尺寸 / 目标输出像素 / 缺失待补充 / 不适用>
-- 目标输出像素：<例如 1206 x 自适应长板；若有参考截图，写参考尺寸和目标宽高>
+- 目标输出像素：<例如 1179 x 自适应长板；若有参考截图，写参考尺寸、截图倍率和目标宽高>
 - 设计系统：<AutoDesign / 用户提供设计系统 / 截图基线 / 默认生产基线>
 - image-2 状态：<计划生成 / 已生成 / 生成失败 / 待重试 / 需要重出>
 - 依赖：<产品简报版本和来源>
@@ -120,7 +120,8 @@ For every image generation request, declare the output unit before prompting:
 - 画布模式：physical_longboard
 - 画布：线上截图物理长板
 - 参考截图尺寸：<w x h>
-- 目标输出画布：<目标宽度>px 宽，内容自适应长图，高度不得低于 <参考或换算高度>px，可随内容增长
+- 截图倍率：<例如 393pt @3x>
+- 目标输出画布：<目标宽度>px 宽，内容自适应长图，高度不得低于 <参考或换算高度>px，可随内容增长；字体、间距和组件按参考物理像素等比绘制
 ```
 
 Rules:
@@ -130,7 +131,7 @@ Rules:
 - 有线上截图 / `visual_baseline` 的输出单元必须写 `画布模式：physical_longboard`，并写 `目标输出画布：<目标宽度>px 宽，内容自适应长图，高度不得低于 <参考或换算高度>px，可随内容增长`。
 - `standard_first_screen` 和 `physical_longboard` 模板互斥；不要在同一个最终 prompt 字段里同时出现短画布锚点和物理长板字段。
 - 线上截图物理长板必须是一张连续移动端界面；不要为了塞进短画布缩小字体、压缩间距、裁切内容、遮挡底部操作区，或拆成多图 / 拼图 / 多屏故事板。
-- 有线上截图时，图片输出契约必须同时保留内部逻辑宽度和物理像素输出：逻辑宽度只写在审计或视觉基线摘要里，不能进入最终 image-2 prompt 的画布字段。汽车之家生产页默认写 `参考截图尺寸：<w x h>`、`目标输出画布：3x 移动端长板，宽度不低于参考截图 95%，优先 1179-1206px，高度不得低于参考图高度，可随内容增长`。
+- 有线上截图时，图片输出契约必须同时保留内部逻辑宽度和物理像素输出：逻辑宽度只写在审计或视觉基线摘要里，不能进入最终 image-2 prompt 的画布字段。汽车之家生产页默认写 `参考截图尺寸：<w x h>`、`识别为 <逻辑宽度>pt @<scale>x`、`目标输出画布：默认使用参考截图物理像素长板，高度不得低于参考图高度，可随内容增长；字体、间距和组件按参考物理像素等比绘制`。
 - 桌面端输出单元必须说明为什么移动端不合适。
 - 除非用户明确要展示板，否则不要创建拼贴图、三联图、并排比较图、一图多屏、一图多方案或多屏故事板。
 - 如果用户要 `3 个方向`，确认方向后生成三张独立图片。
@@ -206,7 +207,7 @@ AutoDesign production constraints:
 - Make it look like a real Autohome mobile app screen, not a marketing poster or abstract concept.
 - Visual baseline first: if a production screenshot is provided, match its typography hierarchy, spacing rhythm, component density, bottom bar height, and long-board proportions before applying generic AutoDesign tokens.
 - Canvas mode: use the standard mobile first-screen template only when there is no screenshot baseline. If a production screenshot is provided, use physical long-board mode; do not put short-canvas anchors in the final image-2 prompt canvas field.
-- Pixel output: for Autohome production-page prototypes with screenshot reference, generate a 3x mobile long board. Write the reference screenshot size, for example `参考截图尺寸：1179 x 2556`; write target output, for example `目标输出画布：1206px 宽，内容自适应长图，高度不得低于 2615px，可随内容增长`. Do not output a narrow 851px image when the reference is 1179px wide.
+- Pixel output: for Autohome production-page prototypes with screenshot reference, generate a 3x physical-pixel mobile long board. Write the reference screenshot size and scale, for example `参考截图尺寸：1179 x 2556；识别为 393pt @3x`; write target output from the visual baseline, for example `目标输出画布：1179px 宽，内容自适应长图，高度不得低于 2556px，可随内容增长；字体、间距和组件按参考物理像素等比绘制`. Do not output a narrow 851px image when the reference is 1179px wide.
 - Colors: primary blue #0088FF, blue gradient #0099FF -> #0088FF, commercial orange #FF6600 only for price/deal/subsidy emphasis, cyan #25C9FF only for IM-like emphasis, primary text #111E36, secondary text #464E64, weak text #828CA0, divider #E6E9F0, page background #F8F9FC, white cards.
 - Typography: system Chinese font; prominent numbers can use HarmonyOS Sans SC; use production-like sizes from 12/14/16/18/20/24/28/32px with clear hierarchy.
 - Layout: 8-point grid for structure and 4-point grid for details; use spacing 4/8/12/16/24/32px; align cards, fields, and CTAs to consistent margins.

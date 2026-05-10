@@ -109,6 +109,28 @@ def scaled_height(reference_width: int, reference_height: int, target_width: int
     return int(math.ceil(reference_height * (target_width / reference_width)))
 
 
+def infer_pixel_scale(reference_width: int, explicit_logical_width: int = 0, explicit_scale: int = 0) -> tuple[int, int]:
+    if explicit_scale > 0:
+        scale = explicit_scale
+        logical_width = explicit_logical_width or max(1, int(round(reference_width / scale)))
+        return scale, logical_width
+    if explicit_logical_width > 0:
+        inferred = reference_width / explicit_logical_width
+        scale = int(round(inferred)) if inferred > 0 else 1
+        if scale < 1:
+            scale = 1
+        return scale, explicit_logical_width
+    for scale in (3, 2, 1):
+        logical_width = reference_width / scale
+        if 300 <= logical_width <= 500 and abs(logical_width - round(logical_width)) < 0.01:
+            return scale, int(round(logical_width))
+    if reference_width >= 900:
+        return 3, int(round(reference_width / 3))
+    if reference_width >= 650:
+        return 2, int(round(reference_width / 2))
+    return 1, reference_width
+
+
 def fmt_px(width: int, height: int) -> str:
     return f"{width} x {height}"
 
@@ -153,23 +175,46 @@ def same_path(left: str, right: str) -> bool:
 
 
 def parse_target_size(text: str) -> tuple[Optional[int], Optional[int]]:
-    match = re.search(r"目标输出[^0-9]*(\d{3,5})\s*(?:x|X|×)\s*(?:>=\s*)?(\d{3,5})", text)
+    width_key = re.search(r"(?:target_width|目标宽度)[=：]\s*(\d{3,5})", text)
+    height_key = re.search(r"(?:target_height|目标高度)[=：]\s*(\d{3,5})", text)
+    if width_key or height_key:
+        return (
+            int(width_key.group(1)) if width_key else None,
+            int(height_key.group(1)) if height_key else None,
+        )
+    match = re.search(r"目标输出[^。\n；;]*?(\d{3,5})\s*(?:x|X|×)\s*(?:>=\s*)?(\d{3,5})", text)
     if match:
         return int(match.group(1)), int(match.group(2))
-    width_match = re.search(r"目标输出[^0-9]*(\d{3,5})\s*(?:px|像素|宽)", text)
-    height_match = re.search(r"(?:高度|高)[^0-9]*(\d{3,5})\s*(?:px|像素)?", text)
+    width_match = re.search(r"目标输出[^。\n；;]*?(\d{3,5})\s*(?:px|像素|宽)", text)
+    height_match = re.search(r"(?:高度|高)[^。\n；;]*?(\d{3,5})\s*(?:px|像素)?", text)
     return (
         int(width_match.group(1)) if width_match else None,
         int(height_match.group(1)) if height_match else None,
     )
 
 
-def register_visual_baseline(args: argparse.Namespace, reference_width: int, reference_height: int, target_width: int, target_height: int) -> int:
+def register_visual_baseline(
+    args: argparse.Namespace,
+    reference_width: int,
+    reference_height: int,
+    scale: int,
+    logical_width: int,
+    target_width: int,
+    target_height: int,
+    target_scale_ratio: float,
+    target_overridden: bool,
+) -> int:
     summary = (
         f"参考图={args.reference}；参考尺寸={fmt_px(reference_width, reference_height)}；"
-        f"逻辑宽度推断={args.logical_width}px；目标输出={fmt_px(target_width, target_height)}；"
+        f"reference_width={reference_width}；reference_height={reference_height}；"
+        f"scale={scale}；logical_width={logical_width}；"
+        f"逻辑宽度推断={logical_width}pt @ {scale}x；"
+        f"target_width={target_width}；target_height={target_height}；"
+        f"target_scale_ratio={target_scale_ratio:.4f}；"
+        f"target_overridden={'true' if target_overridden else 'false'}；"
+        f"目标输出={fmt_px(target_width, target_height)}；"
         "优先级=线上截图高于 AutoDesign 泛化 token；"
-        "字号/间距/组件密度=按参考截图的导航标题、车型标题、价格数字、CTA、标签、辅助文字和底部栏层级执行；"
+        "字号/间距/组件密度=按参考截图物理像素等比执行，3x 截图的字体、间距、卡片和底部栏必须保持 3x 物理比例；"
         "约束=高度按内容自然增长，不压缩中文字体、图表坐标轴、卡片间距或底部 CTA。"
     )
     cmd = [
@@ -200,16 +245,22 @@ def register_visual_baseline(args: argparse.Namespace, reference_width: int, ref
 
 def command_baseline(args: argparse.Namespace) -> int:
     reference_width, reference_height = read_size(args.reference)
-    target_width = args.target_width or max(reference_width, args.preferred_width, args.logical_width * 3)
+    scale, logical_width = infer_pixel_scale(reference_width, args.logical_width, args.scale)
+    target_width = args.target_width or reference_width
     target_height = args.target_height or scaled_height(reference_width, reference_height, target_width)
+    target_scale_ratio = target_width / reference_width if reference_width else 1.0
+    target_overridden = bool(args.target_width or args.target_height)
     payload = {
         "verdict": "已生成视觉基线",
         "reference": args.reference,
         "reference_width": reference_width,
         "reference_height": reference_height,
-        "logical_width": args.logical_width,
+        "scale": scale,
+        "logical_width": logical_width,
         "target_width": target_width,
         "target_height": target_height,
+        "target_scale_ratio": target_scale_ratio,
+        "target_overridden": target_overridden,
         "priority": "线上截图高于 AutoDesign 泛化 token",
     }
     if args.json:
@@ -219,13 +270,24 @@ def command_baseline(args: argparse.Namespace) -> int:
         print("")
         print(f"- 参考图：{args.reference}")
         print(f"- 参考尺寸：{fmt_px(reference_width, reference_height)}")
-        print(f"- 逻辑宽度推断：{args.logical_width}px")
+        print(f"- 截图倍率：{scale}x")
+        print(f"- 逻辑宽度推断：{logical_width}pt")
         print(f"- 目标输出：{fmt_px(target_width, target_height)}")
         print("- 参考优先级：线上截图高于 AutoDesign 泛化 token")
-        print("- 关键约束：高度按内容自然增长，不压缩中文字体、图表坐标轴、卡片间距或底部 CTA")
+        print("- 关键约束：高度按内容自然增长；字体、间距、卡片和底部 CTA 按参考截图物理像素等比执行")
         print("")
     if args.register:
-        return register_visual_baseline(args, reference_width, reference_height, target_width, target_height)
+        return register_visual_baseline(
+            args,
+            reference_width,
+            reference_height,
+            scale,
+            logical_width,
+            target_width,
+            target_height,
+            target_scale_ratio,
+            target_overridden,
+        )
     return 0
 
 
@@ -239,11 +301,14 @@ def command_audit(args: argparse.Namespace) -> int:
     else:
         baseline_target_width, baseline_target_height = None, None
     target_width = args.target_width or baseline_target_width or reference_width
-    target_height = args.target_height or (
-        scaled_height(reference_width, reference_height, target_width) if args.target_width else reference_height
-    )
-    if not args.target_height and baseline_target_height:
+    if args.target_height:
+        target_height = args.target_height
+    elif args.target_width:
+        target_height = scaled_height(reference_width, reference_height, target_width)
+    elif baseline_target_height:
         target_height = baseline_target_height
+    else:
+        target_height = reference_height
     width_threshold = max(reference_width * args.min_ratio, target_width * args.min_ratio)
     height_threshold = max(reference_height * args.min_ratio, target_height * args.min_ratio)
     failures: list[str] = []
@@ -298,8 +363,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     baseline = sub.add_parser("baseline")
     baseline.add_argument("--reference", required=True)
-    baseline.add_argument("--logical-width", type=int, default=402)
-    baseline.add_argument("--preferred-width", type=int, default=1206)
+    baseline.add_argument("--logical-width", type=int, default=0)
+    baseline.add_argument("--scale", type=int, default=0)
+    baseline.add_argument("--preferred-width", type=int, default=0, help="Deprecated; use --target-width for explicit output overrides.")
     baseline.add_argument("--target-width", type=int)
     baseline.add_argument("--target-height", type=int)
     baseline.add_argument("--title", default="线上截图视觉基线")

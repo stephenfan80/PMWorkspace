@@ -215,6 +215,43 @@ def text_has_canvas_anchor(text: str) -> bool:
     )
 
 
+def parse_key_int(text: str, key: str) -> Optional[int]:
+    match = re.search(rf"{re.escape(key)}[=：]\s*(\d{{3,5}})", text)
+    return int(match.group(1)) if match else None
+
+
+def parse_target_size(text: str) -> tuple[Optional[int], Optional[int]]:
+    key_width = parse_key_int(text, "target_width") or parse_key_int(text, "目标宽度")
+    key_height = parse_key_int(text, "target_height") or parse_key_int(text, "目标高度")
+    if key_width or key_height:
+        return key_width, key_height
+    match = re.search(r"目标输出[^。\n；;]*?(\d{3,5})\s*(?:x|X|×)\s*(?:>=\s*)?(\d{3,5})", text)
+    if match:
+        return int(match.group(1)), int(match.group(2))
+    width_match = re.search(r"目标输出[^。\n；;]*?(\d{3,5})\s*(?:px|像素|宽)", text)
+    height_match = re.search(r"(?:高度|高)[^。\n；;]*?(\d{3,5})\s*(?:px|像素)?", text)
+    return (
+        int(width_match.group(1)) if width_match else None,
+        int(height_match.group(1)) if height_match else None,
+    )
+
+
+def baseline_target_size(row: dict) -> tuple[Optional[int], Optional[int]]:
+    return parse_target_size(str(row.get("summary") or ""))
+
+
+def target_matches_baseline(target_text: str, baseline: dict) -> tuple[bool, str]:
+    baseline_width, baseline_height = baseline_target_size(baseline)
+    if not baseline_width and not baseline_height:
+        return True, ""
+    target_width, target_height = parse_target_size(f"目标输出：{target_text}")
+    if baseline_width and target_width != baseline_width:
+        return False, f"目标宽度 {target_width or '未记录'} 与 visual_baseline {baseline_width} 不一致"
+    if baseline_height and (target_height is None or target_height < baseline_height):
+        return False, f"目标高度 {target_height or '未记录'} 低于 visual_baseline {baseline_height}"
+    return True, ""
+
+
 def read_text(path_value: str) -> str:
     if not path_value:
         return ""
@@ -561,7 +598,7 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
     elif not visual_has_target:
         visual_status = "缺目标输出像素"
         visual_evidence = f"visual_baseline：{visual_baseline.get('title') or '视觉基线'}｜{visual_baseline.get('summary') or artifact_location(visual_baseline) or '未记录目标输出'}"
-        visual_action = "补齐目标输出像素；汽车之家生产页通常写 3x 长板，宽度不低于参考截图 95%，优先 1179-1206px"
+        visual_action = "补齐目标输出像素；默认使用参考截图物理像素，显式 override 时必须同步等比缩放字号、间距和组件"
         visual_passed = False
     else:
         visual_status = visual_baseline.get("status") or "已登记"
@@ -614,8 +651,10 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         for item in board:
             canvas_mode = str(item.get("canvas_mode") or "")
             target_output = str(item.get("target_output_pixels") or "")
-            if canvas_mode != "physical_longboard" or not text_has_target_pixels(f"目标输出：{target_output}") or text_has_canvas_anchor(target_output):
-                bad_canvas_rows.append(f"{item.get('scheme') or '未命名'} / {item.get('screen') or '未命名屏幕'}")
+            target_ok, target_failure = target_matches_baseline(target_output, visual_baseline)
+            if canvas_mode != "physical_longboard" or not text_has_target_pixels(f"目标输出：{target_output}") or text_has_canvas_anchor(target_output) or not target_ok:
+                suffix = f"（{target_failure}）" if target_failure else ""
+                bad_canvas_rows.append(f"{item.get('scheme') or '未命名'} / {item.get('screen') or '未命名屏幕'}{suffix}")
         canvas_ready = bool(board) and not bad_canvas_rows
         if not board:
             canvas_status = "未登记"
@@ -636,7 +675,7 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
             visual_required,
             canvas_status,
             redact_sensitive(canvas_evidence),
-            "继续" if canvas_ready else "当前 run 的每个 prototype-board 输出单元必须写 canvas_mode=physical_longboard 和 target_output_pixels，且不能含 H874 / 标准首屏锚点",
+            "继续" if canvas_ready else "当前 run 的每个 prototype-board 输出单元必须写 canvas_mode=physical_longboard，并让 target_output_pixels 与 visual_baseline 目标像素一致，且不能含 H874 / 标准首屏锚点",
             canvas_ready,
         )
     )

@@ -1,0 +1,49 @@
+{
+  "id": "prototype-image-audit-3x-narrow-blocks-delivery",
+  "title": "3x 长板窄图必须被尺寸审计拦截",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "参考图为 1179 x 2556 的 3x 长板，生成图 862 x 1825、851 x 1849、945 x 2048 都不能作为交付结果展示。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要重出",
+    "must_stop": true,
+    "gate": "3x 图片尺寸审计",
+    "required_behaviors": [
+      "默认审计目标为 1179 x 2556",
+      "862 x 1825 返回需要重出",
+      "851 x 1849 返回需要重出",
+      "945 x 2048 返回需要重出"
+    ],
+    "forbidden_behaviors": [
+      "把 851/862 宽图当作 3x 输出通过",
+      "只按逻辑宽度审计",
+      "宽度或高度任一不足仍交付"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-image-audit",
+      "contains": "target_width = args.target_width or baseline_target_width or reference_width"
+    },
+    {
+      "path": "pmworkspace-shared/references/prototype-quality-review.md",
+      "contains": "生成图宽度低于目标输出 95%"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=image-audit-3x; mkdir -p \"$PMW_HOME/projects/image-audit-3x\"; python3 - \"$tmp\" <<'PY'\nimport pathlib, struct, sys, zlib\nroot=pathlib.Path(sys.argv[1])\ndef png(path,w,h):\n    raw=b''.join(b'\\x00'+b'\\xff\\xff\\xff'*w for _ in range(h))\n    def chunk(t,d):\n        return struct.pack('>I',len(d))+t+d+struct.pack('>I',zlib.crc32(t+d)&0xffffffff)\n    path.write_bytes(b'\\x89PNG\\r\\n\\x1a\\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',w,h,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(raw,1))+chunk(b'IEND',b''))\npng(root/'ref.png',1179,2556)\nfor name,w,h in [('a.png',862,1825),('b.png',851,1849),('c.png',945,2048)]:\n    png(root/name,w,h)\nPY\nbin/pmw-image-audit baseline --reference \"$tmp/ref.png\" --register >/dev/null; for img in a.png b.png c.png; do set +e; out=$(bin/pmw-image-audit audit --reference \"$tmp/ref.png\" --image \"$tmp/$img\" --json); code=$?; set -e; printf '%s\\n' \"$out\"; test \"$code\" = 2 || exit 1; printf '%s' \"$out\" | grep '\"verdict\": \"需要重出\"' >/dev/null || exit 1; printf '%s' \"$out\" | grep '\"target_width\": 1179' >/dev/null || exit 1; printf '%s' \"$out\" | grep '\"target_height\": 2556' >/dev/null || exit 1; done; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0,
+      "contains": [
+        "\"verdict\": \"需要重出\"",
+        "\"target_width\": 1179",
+        "\"target_height\": 2556"
+      ]
+    }
+  ]
+}

@@ -48,9 +48,40 @@ if ! printf '%s' "$VERSION" | grep -qE '^[0-9]+(\.[0-9]+){1,3}$'; then
   exit 1
 fi
 
+PACKAGED_REVISION_PATHS=(
+  VERSION
+  README.md
+  README.zh-CN.md
+  pm-workspace
+  pm-autoplan
+  pm-jobs
+  pm-strategy-review
+  pm-brief
+  pm-prototype-shotgun
+  pm-prototype-review
+  pm-handoff
+  pmworkspace-shared
+  bin
+  evals
+  assets/plugin-listing
+)
+
 REVISION="unknown"
-if REVISION_FROM_GIT="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null)"; then
-  REVISION="$REVISION_FROM_GIT"
+if git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  REVISION_PATHS=()
+  for revision_path in "${PACKAGED_REVISION_PATHS[@]}"; do
+    if [ -e "$ROOT/$revision_path" ]; then
+      REVISION_PATHS+=("$revision_path")
+    fi
+  done
+
+  if [ "${#REVISION_PATHS[@]}" -gt 0 ] \
+    && REVISION_FROM_GIT="$(git -C "$ROOT" log -n 1 --format=%H -- "${REVISION_PATHS[@]}" 2>/dev/null)" \
+    && [ -n "$REVISION_FROM_GIT" ]; then
+    REVISION="$REVISION_FROM_GIT"
+  elif REVISION_FROM_GIT="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null)"; then
+    REVISION="$REVISION_FROM_GIT"
+  fi
 elif [ -f "$ROOT/REVISION" ]; then
   REVISION="$(tr -d '[:space:]' < "$ROOT/REVISION")"
 fi

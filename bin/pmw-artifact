@@ -147,6 +147,8 @@ def command_add(args: argparse.Namespace) -> int:
         "path": redact_sensitive(args.path),
         "url": redact_sensitive(args.url),
         "summary": redact_sensitive(args.summary),
+        "pm_judgment_summary": redact_sensitive(args.pm_judgment_summary),
+        "product_homework": redact_sensitive(args.product_homework),
         "upstream": split_values(args.upstream),
         "next_skill": split_values(args.next_skill),
         "run_id": run_id,
@@ -254,6 +256,8 @@ def main() -> int:
     add.add_argument("--path", default="")
     add.add_argument("--url", default="")
     add.add_argument("--summary", default="")
+    add.add_argument("--pm-judgment-summary", default="")
+    add.add_argument("--product-homework", default="")
     add.add_argument("--upstream", action="append", default=[])
     add.add_argument("--next-skill", action="append", default=[])
     add.add_argument("--run", default="")

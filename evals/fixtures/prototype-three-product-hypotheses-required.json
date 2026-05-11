@@ -1,0 +1,39 @@
+{
+  "id": "prototype-three-product-hypotheses-required",
+  "title": "三方案必须升级为三种产品假设",
+  "category": "pm-prototype-shotgun",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "基于已对齐 brief 给我三个方案。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "三种产品假设",
+    "required_behaviors": [
+      "默认最少 3 个产品假设",
+      "每个方案说明用户行为假设",
+      "每个方案说明当前损失",
+      "每个方案说明牺牲项",
+      "每个方案保护反指标"
+    ],
+    "forbidden_behaviors": [
+      "只给三种视觉风格",
+      "只换配色或圆角",
+      "缺少不可虚构边界"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "多方案不是三种视觉风格，而是三种产品假设"
+    },
+    {
+      "path": "pmworkspace-shared/references/prototype-shotgun-board.md",
+      "contains": "比较对象首先是产品假设"
+    },
+    {
+      "path": "bin/pmw-prototype-board",
+      "contains": "--behavior-assumption"
+    }
+  ]
+}

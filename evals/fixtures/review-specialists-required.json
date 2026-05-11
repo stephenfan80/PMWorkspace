@@ -3,7 +3,7 @@
   "title": "PM Review Army 必须拆成可插拔专家短结论",
   "category": "review-specialists",
   "primary_skill": "pm-prototype-review",
-  "prompt": "复审一批 image-2 原型图，需要策略、信任/风险、设计系统、数据可行性四个视角像 gstack specialist 一样各自产出短结论，再由原型复审合并。",
+  "prompt": "复审一批 image-2 原型图，需要策略、信任/风险、设计系统、数据可行性四个视角以可插拔专家短结论形式各自产出短结论，再由原型复审合并。",
   "expected": {
     "mode": "deep",
     "status": "待复审",

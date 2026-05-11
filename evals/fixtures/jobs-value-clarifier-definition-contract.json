@@ -1,6 +1,6 @@
 {
   "id": "jobs-value-clarifier-definition-contract",
-  "title": "产品追问必须定义为产品原型/方案澄清器",
+  "title": "产品追问必须定义为产品专家工作台",
   "category": "pm-jobs",
   "primary_skill": "pm-jobs",
   "prompt": "使用 $pm-jobs 判断一个原始产品想法是否值得做。",
@@ -8,9 +8,9 @@
     "mode": "deep",
     "status": "待确认",
     "must_stop": false,
-    "gate": "产品原型/方案澄清器定义",
+    "gate": "产品专家工作台定义",
     "required_behaviors": [
-      "定义产品原型/方案澄清器",
+      "定义产品专家工作台",
       "采用产品专家姿态",
       "不把功能愿望直接当成产品方案",
       "保留后续产品简述和原型门槛"
@@ -24,11 +24,11 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "# 产品原型/方案澄清器"
+      "contains": "# 产品专家工作台"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "像专业产品专家一样"
+      "contains": "专业强推理"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
@@ -36,7 +36,7 @@
     },
     {
       "path": "pm-jobs/SKILL.md",
-      "contains": "PMWorkspace 的产品原型/方案澄清器"
+      "contains": "PMWorkspace 的产品专家增强器 / 产品专家工作台"
     }
   ]
 }

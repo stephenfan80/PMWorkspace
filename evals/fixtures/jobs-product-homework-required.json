@@ -1,0 +1,37 @@
+{
+  "id": "jobs-product-homework-required",
+  "title": "每个产品发现阶段结束必须给出现实产品作业",
+  "category": "pm-jobs",
+  "primary_skill": "pm-jobs",
+  "prompt": "我们先按假设推进吧。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "产品作业",
+    "required_behaviors": [
+      "给出一个现实动作",
+      "作业能补齐证据或推进取舍",
+      "可由 Agent 协助生成提纲或口径"
+    ],
+    "forbidden_behaviors": [
+      "把继续聊聊作为作业",
+      "用空泛下一步替代产品作业",
+      "伪造现实世界证据"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "每个阶段结束必须给用户一个现实产品作业"
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "每次阶段结束必须给一个现实 `产品作业`"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "作业必须是现实动作，不能写成“继续沟通”"
+    }
+  ]
+}

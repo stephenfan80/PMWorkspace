@@ -103,6 +103,42 @@ sys.exit(0 if ok else 1)
 PY
 }
 
+extract_md_section() {
+  local file="$1"
+  shift || true
+  [ -f "$file" ] || return 0
+  python3 - "$file" "$@" <<'PY'
+import re
+import sys
+
+path = sys.argv[1]
+headings = {item.strip() for item in sys.argv[2:] if item.strip()}
+if not headings:
+    raise SystemExit(0)
+
+capturing = False
+lines = []
+with open(path, encoding="utf-8", errors="ignore") as handle:
+    for raw in handle:
+        match = re.match(r"^\s*#{2,6}\s+(.+?)\s*$", raw)
+        if match:
+            heading = match.group(1).strip()
+            if capturing:
+                break
+            capturing = heading in headings
+            continue
+        if capturing:
+            lines.append(raw.rstrip())
+
+text = "\n".join(lines).strip()
+print(text)
+PY
+}
+
+compact_text() {
+  tr '\n' ' ' | sed 's/[[:space:]][[:space:]]*/ /g; s/^[[:space:]]*//; s/[[:space:]]*$//' | redact_sensitive
+}
+
 ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 case "$EVENT" in
@@ -111,23 +147,63 @@ case "$EVENT" in
     printf '{"ts":"%s","skill":"%s","project":"%s"}\n' "$ts" "$skill" "$SLUG" >> "$STATE_DIR/analytics/usage.jsonl"
     ;;
   decision)
-    title="${2:-decision}"
-    body="${3:-}"
+    shift || true
+    title="${1:-decision}"
+    [ "$#" -gt 0 ] && shift || true
+    body="${1:-}"
+    [ "$#" -gt 0 ] && shift || true
+    pm_judgment_summary=""
+    product_homework=""
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --pm-judgment-summary)
+          pm_judgment_summary="${2:-}"; shift 2 ;;
+        --product-homework)
+          product_homework="${2:-}"; shift 2 ;;
+        *)
+          echo "unknown decision option: $1" >&2; exit 1 ;;
+      esac
+    done
     run_id="$(current_run_id || true)"
-    printf '{"ts":"%s","run_id":"%s","title":"%s","body":"%s"}\n' \
+    printf '{"ts":"%s","run_id":"%s","title":"%s","body":"%s","pm_judgment_summary":"%s","product_homework":"%s"}\n' \
       "$ts" \
       "$(printf '%s' "$run_id" | json_escape)" \
       "$(printf '%s' "$title" | json_escape)" \
-      "$(printf '%s' "$body" | json_escape)" >> "$PROJECT_DIR/decisions.jsonl"
+      "$(printf '%s' "$body" | compact_text | json_escape)" \
+      "$(printf '%s' "$pm_judgment_summary" | compact_text | json_escape)" \
+      "$(printf '%s' "$product_homework" | compact_text | json_escape)" >> "$PROJECT_DIR/decisions.jsonl"
     ;;
   brief)
-    name="${2:-brief}"
+    shift || true
+    name="brief"
+    if [ "$#" -gt 0 ] && [ "${1#--}" = "$1" ]; then
+      name="$1"
+      shift
+    fi
+    pm_judgment_summary=""
+    product_homework=""
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --pm-judgment-summary)
+          pm_judgment_summary="${2:-}"; shift 2 ;;
+        --product-homework)
+          product_homework="${2:-}"; shift 2 ;;
+        *)
+          echo "unknown brief option: $1" >&2; exit 1 ;;
+      esac
+    done
     file="$PROJECT_DIR/briefs/$(date -u +%Y%m%dT%H%M%SZ)-$(safe_fragment "$name").md"
     audit_file="$PROJECT_DIR/briefs/audit/$(date -u +%Y%m%dT%H%M%SZ)-$(safe_fragment "$name")-audit.md"
     input_file="$(mktemp "${TMPDIR:-/tmp}/pmw-brief-input.XXXXXX")"
     business_file="$(mktemp "${TMPDIR:-/tmp}/pmw-brief-business.XXXXXX")"
     trap 'rm -f "$input_file" "$business_file" 2>/dev/null || true' EXIT
     cat > "$input_file"
+    if [ -z "$pm_judgment_summary" ]; then
+      pm_judgment_summary="$(extract_md_section "$input_file" "PM 判断摘要" | compact_text)"
+    fi
+    if [ -z "$product_homework" ]; then
+      product_homework="$(extract_md_section "$input_file" "产品作业" "待验证项与产品作业" "下一步产品作业" | compact_text)"
+    fi
     if brief_declares_aligned "$input_file"; then
       run_id="$(current_run_id || true)"
       if ! run_has_brief_confirmation "$run_id"; then
@@ -224,6 +300,8 @@ case "$EVENT" in
         --path "$file" \
         --url "$zoon_url" \
         --summary "业务简报版本：${brief_version}；业务简报已保存，审计副本已保存，Zoon 同步状态：${sync_status}" \
+        --pm-judgment-summary "$pm_judgment_summary" \
+        --product-homework "$product_homework" \
         --upstream "decision,question,strategy_review" \
         --next-skill "pm-prototype-shotgun,pm-handoff" >/dev/null 2>&1 || true
     fi
@@ -237,6 +315,8 @@ case "$EVENT" in
     source="对话"
     summary=""
     confidence="confirmed"
+    pm_judgment_summary=""
+    product_homework=""
     while [ "$#" -gt 0 ]; do
       case "$1" in
         --dimension)
@@ -247,6 +327,10 @@ case "$EVENT" in
           summary="${2:-}"; shift 2 ;;
         --confidence)
           confidence="${2:-}"; shift 2 ;;
+        --pm-judgment-summary)
+          pm_judgment_summary="${2:-}"; shift 2 ;;
+        --product-homework)
+          product_homework="${2:-}"; shift 2 ;;
         *)
           echo "unknown discovery option: $1" >&2; exit 1 ;;
       esac
@@ -261,13 +345,15 @@ case "$EVENT" in
     esac
     mkdir -p "$PROJECT_DIR"
     run_id="$(current_run_id || true)"
-    printf '{"ts":"%s","run_id":"%s","dimension":"%s","source":"%s","summary":"%s","confidence":"%s"}\n' \
+    printf '{"ts":"%s","run_id":"%s","dimension":"%s","source":"%s","summary":"%s","confidence":"%s","pm_judgment_summary":"%s","product_homework":"%s"}\n' \
       "$ts" \
       "$(printf '%s' "$run_id" | json_escape)" \
       "$(printf '%s' "$dimension" | json_escape)" \
       "$(printf '%s' "$source" | json_escape)" \
-      "$(printf '%s' "$summary" | json_escape)" \
-      "$(printf '%s' "$confidence" | json_escape)" >> "$PROJECT_DIR/discovery.jsonl"
+      "$(printf '%s' "$summary" | compact_text | json_escape)" \
+      "$(printf '%s' "$confidence" | json_escape)" \
+      "$(printf '%s' "$pm_judgment_summary" | compact_text | json_escape)" \
+      "$(printf '%s' "$product_homework" | compact_text | json_escape)" >> "$PROJECT_DIR/discovery.jsonl"
     echo "$PROJECT_DIR/discovery.jsonl"
     ;;
   question)
@@ -288,7 +374,24 @@ case "$EVENT" in
     echo "$PROJECT_DIR/questions.jsonl"
     ;;
   prototype)
-    batch="${2:-batch}"
+    shift || true
+    batch="batch"
+    if [ "$#" -gt 0 ] && [ "${1#--}" = "$1" ]; then
+      batch="$1"
+      shift
+    fi
+    pm_judgment_summary=""
+    product_homework=""
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --pm-judgment-summary)
+          pm_judgment_summary="${2:-}"; shift 2 ;;
+        --product-homework)
+          product_homework="${2:-}"; shift 2 ;;
+        *)
+          echo "unknown prototype option: $1" >&2; exit 1 ;;
+      esac
+    done
     manifest="$PROJECT_DIR/prototypes/$(date -u +%Y%m%dT%H%M%SZ)-$(safe_fragment "$batch").jsonl"
     cat >> "$manifest"
     if [ -x "$SCRIPT_DIR/pmw-artifact" ]; then
@@ -299,25 +402,65 @@ case "$EVENT" in
         --source-skill pm-prototype-shotgun \
         --path "$manifest" \
         --summary "原型清单已保存，可供原型复审读取" \
+        --pm-judgment-summary "$pm_judgment_summary" \
+        --product-homework "$product_homework" \
         --upstream "product_brief,prototype_board" \
         --next-skill "pm-prototype-review" >/dev/null 2>&1 || true
     fi
     echo "$manifest"
     ;;
   handoff)
-    name="${2:-handoff}"
+    shift || true
+    name="handoff"
+    if [ "$#" -gt 0 ] && [ "${1#--}" = "$1" ]; then
+      name="$1"
+      shift
+    fi
+    artifact_kind="handoff"
+    pm_judgment_summary=""
+    product_homework=""
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --artifact-kind)
+          artifact_kind="${2:-}"; shift 2 ;;
+        --pm-judgment-summary)
+          pm_judgment_summary="${2:-}"; shift 2 ;;
+        --product-homework)
+          product_homework="${2:-}"; shift 2 ;;
+        *)
+          echo "unknown handoff option: $1" >&2; exit 1 ;;
+      esac
+    done
+    case "$artifact_kind" in
+      handoff|product_design_doc) ;;
+      *) echo "artifact kind must be handoff or product_design_doc" >&2; exit 1 ;;
+    esac
     file="$PROJECT_DIR/handoffs/$(date -u +%Y%m%dT%H%M%SZ)-$(safe_fragment "$name").md"
     cat > "$file"
+    if [ -z "$pm_judgment_summary" ]; then
+      pm_judgment_summary="$(extract_md_section "$file" "PM 判断摘要" "产品判断演进" | compact_text)"
+    fi
+    if [ -z "$product_homework" ]; then
+      product_homework="$(extract_md_section "$file" "产品作业" "下一步产品作业" "待验证项与产品作业" | compact_text)"
+    fi
     if [ -x "$SCRIPT_DIR/pmw-artifact" ]; then
+      next_skill="document-release,ship,qa"
+      summary="交付稿已保存，可供文档同步、发布准备或研发协作读取"
+      if [ "$artifact_kind" = "product_design_doc" ]; then
+        next_skill="pm-handoff,document-release"
+        summary="产品设计文档已保存，可供后续评审、研发交付或继续迭代读取"
+      fi
       "$SCRIPT_DIR/pmw-artifact" add \
-        --kind handoff \
+        --kind "$artifact_kind" \
         --title "$name" \
         --status "已保存" \
         --source-skill pm-handoff \
         --path "$file" \
-        --summary "交付稿已保存，可供文档同步、发布准备或研发协作读取" \
+        --summary "$summary" \
+        --pm-judgment-summary "$pm_judgment_summary" \
+        --product-homework "$product_homework" \
         --upstream "product_brief,prototype_review,delivery_facts" \
-        --next-skill "document-release,ship,qa" >/dev/null 2>&1 || true
+        --next-skill "$next_skill" >/dev/null 2>&1 || true
     fi
     echo "$file"
     ;;

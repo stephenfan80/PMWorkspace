@@ -1,0 +1,38 @@
+{
+  "id": "jobs-product-expert-posture-required",
+  "title": "产品专家工作台每轮必须有判断、证据边界和推荐推进",
+  "category": "pm-jobs",
+  "primary_skill": "pm-jobs",
+  "prompt": "我有一个产品想法，先帮我看看。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要补充",
+    "must_stop": true,
+    "gate": "产品专家姿态",
+    "required_behaviors": [
+      "输出当前判断",
+      "说明证据边界",
+      "给出推荐推进",
+      "输出 PM 判断摘要"
+    ],
+    "forbidden_behaviors": [
+      "只做陪聊式追问",
+      "只抛问题没有判断",
+      "把假设包装成事实"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "每轮都有判断、有证据边界、有推荐推进"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "PM 判断摘要"
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "默认采用专业强推理姿态"
+    }
+  ]
+}

@@ -3,7 +3,7 @@
   "title": "SKILL.md 共享契约必须由 pmw-gen-skill-docs 生成并检查",
   "category": "skill-doc-generator",
   "primary_skill": "pm-workspace",
-  "prompt": "维护 PMWorkspace skill 文档时，需要像 gstack 一样通过生成器统一 preamble、输出字段和共享门槛，防止 SKILL.md 手写漂移。",
+  "prompt": "维护 PMWorkspace skill 文档时，需要通过生成器统一 preamble、输出字段和共享门槛，防止 SKILL.md 手写漂移。",
   "expected": {
     "mode": "maintenance",
     "status": "可检查",

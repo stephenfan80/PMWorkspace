@@ -54,6 +54,7 @@ description: |
 - `产品设计文档`
 - `产品判断演进`
 - `精简 PRD`
+- `功能能力与研发依赖`
 - `待补充项`
 - `下一步`
 
@@ -63,6 +64,7 @@ description: |
 - `产品准备度仪表盘`
 - `交付前门槛`
 - `原型复审状态`
+- `研发可行性反问`
 - `验收写入边界`
 - `交付资产沉淀`
 - `下一技能`
@@ -108,18 +110,21 @@ done
 15. Read `../pmworkspace-shared/references/pm-eval-system.md` and preserve delivery contracts.
 16. Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-handoff` 且没有当前 run，再创建 runtime run.
 17. 如果用户要 PRD、研发交付、实验标准、埋点或接口梳理，先提示：`如果你有现成 PRD、接口文档、埋点方案、实验方案、Zoon 或截图，可以上传给我参考；没有的话，我会基于当前已对齐 brief 生成精简 PRD，并把缺失项留空待补充。`
-18. 建立交付控制器，记录 `交付目标`、`事实来源`、`Product Readiness Dashboard`、`交付前门槛`、`原型复审状态`、`未决拍板`、`交付类型`、`产品设计文档来源`、`PRD 缺口处理`、`验收写入边界`、`交付资产沉淀`、`上游产物`、`本轮产物`、`下游可读`、`产物流动`、`下一技能` 和 `证据状态`；这些默认写入审计，不能进入 PRD 正文。用户可见输出只保留交付结论、产品设计文档或精简 PRD、待补充项和下一步，不输出 `PRD 生成判断`。
-18. 如果 `pmw-project show` 中有 Zoon URL，先运行 `pmw-zoon drift`；若存在实质漂移，读取最新文档，作为交付事实来源，并退回 `$pm-brief` 或 `$pm-strategy-review`，不要沿用旧交付口径。
-19. 如果产品简报不是 `已对齐`，退回 `$pm-brief`；如果交付依赖原型但复审不是 `可通过`，退回 `$pm-prototype-review`、`$pm-prototype-shotgun` 或当前 `D`。
-20. 交付稿输出前必须运行 Product Readiness Dashboard；如果 verdict 是 `不可交付`，根据第一条阻断行退回 `$pm-brief`、线上参考门槛、`$pm-prototype-shotgun`、`$pm-prototype-review` 或当前 `D`，不写 PRD、实验口径或验收标准。默认只展示短 verdict 和第一阻断原因。
-21. 如果仍有会改变范围、用户承诺、实验口径、数据真实性、线索/交易/隐私/合规边界或验收标准的未决 D，停止在 `需要 PM 拍板`，只输出一个当前 `D`，不写研发验收标准、实验口径或对外承诺。
-22. 如果用户要求产品设计文档，或上游已经完成三条产品路径 image-2 原型图与复审，默认优先生成 `产品设计文档`；否则默认选择 `精简 PRD`。只有用户明确要求设计交付、实验验证或研发交付时，才追加对应补充，不把所有模板硬塞进一份文档。
-23. 产品设计文档必须读取 prototype-board 中每个方案的产品路径、用户行为假设、要赢过的现状替代、当前损失、删除 / 牺牲 / 后置项、验证信号、失败信号、原型思考、信息架构设计思考、用户问题解决逻辑、反指标保护和不可虚构边界，生成 `背景与现状 / 用户需求与证据 / 数据或访谈或截图或竞品启发 / 产品简述 / 三条产品路径对比 / 每个方案原型图 / 信息架构设计思考 / 产品判断演进 / 推荐方案 / 风险与待验证 / 下一步产品作业 / 下一步`。
-24. 精简 PRD 核心只保留本周期承诺。单功能默认使用 `1-2 周` 交付 / 验证口径；只有跨模块、大功能或产品线规划才使用 `1-3 个月`，并且只能进入阶段规划或下一步，不能写成本周期验收。PRD 默认只写：需求背景、需求价值、需求方案、需求功能及描述、接口以及数据来源、埋点信息、实验标准。测试计划、开发周期、排期、人力、会议纪要和长风险清单默认不写。
-25. 缺接口、数据字段、埋点属性或实验细节但不改变承诺时，保留空值并写入 `待补充项`；每项状态使用 `待补充`、`已跳过` 或 `已补充`，用户可回复 `跳过某项` 或 `全部先跳过`，普通缺口不阻断当前 PRD。不能虚构字段、口径、事件名、接口可用性或实验阈值。
-26. Keep unsupported capabilities under `不可虚构`; unsupported capabilities, unverified data, unresolved commitments, and future ideas must not appear as acceptance criteria.
-27. 从用户输入中提取可复用交付资产：接口、数据来源、指标口径、埋点事件、实验标准和数据可用性判断；平台脚本可用时，用 `pmw-memory add-delivery-fact` 写入本地脱敏资产，并标明 `scenario`、`target`、`scope`、`source`、`confidence` 和 `fact-type`。
-28. 平台脚本可用时，用 `pmw-log handoff <name>` 保存交付稿，它会登记 `handoff` 到 Product Artifact Flow；产品设计文档用 `pmw-log handoff <name> --artifact-kind product_design_doc` 保存并登记 `product_design_doc`，同时把 `PM 判断摘要` / `产品判断演进` 和 `下一步产品作业` 写入结构化字段。需要给 QA、发布或文档同步接力时，额外用 `pmw-artifact add --kind acceptance_seed` 或 `--kind release_doc_seed` 记录下游可读摘要。记录 `pmw-run event --type artifact`，并且只有交付前门槛全部通过时才 `pmw-run finish --status "可交付"`。
+18. 建立交付控制器，记录 `交付目标`、`事实来源`、`Product Readiness Dashboard`、`交付前门槛`、`原型复审状态`、`未决拍板`、`交付类型`、`产品设计文档来源`、`研发可行性反问`、`功能能力与研发依赖`、`PRD 缺口处理`、`验收写入边界`、`交付资产沉淀`、`上游产物`、`本轮产物`、`下游可读`、`产物流动`、`下一技能` 和 `证据状态`；这些默认写入审计，不能进入 PRD 正文。用户可见输出只保留交付结论、产品设计文档或精简 PRD、功能能力与研发依赖、待补充项和下一步，不输出 `PRD 生成判断`。
+19. 如果 `pmw-project show` 中有 Zoon URL，先运行 `pmw-zoon drift`；若存在实质漂移，读取最新文档，作为交付事实来源，并退回 `$pm-brief` 或 `$pm-strategy-review`，不要沿用旧交付口径。
+20. 如果产品简报不是 `已对齐`，退回 `$pm-brief`；如果交付依赖原型但复审不是 `可通过`，退回 `$pm-prototype-review`、`$pm-prototype-shotgun` 或当前 `D`。
+21. 交付稿输出前执行 `研发可行性反问`：逐项审查功能承诺背后的数据来源、接口能力、算法 / 推荐能力、规则口径、权限、后台配置、运营支持、埋点日志、异常 / 空态和合规边界；把结果落入 `产品需补齐`、`研发需评估`、`可留待补充` 或 `不可写入验收`。
+22. 如果研发可行性反问发现选中路径的成本、能力或数据前提不成立，退回 `$pm-strategy-review`，用收缩、转向或选择性扩大重新拍板；不能静默改方案。
+23. 完成研发可行性反问后，平台脚本可用时用 `pmw-run event --type gate --status "已完成" --title "研发可行性反问" --summary "<功能能力与研发依赖审查结果>"` 记录现有 run；不新增 artifact。
+24. 交付稿输出前必须运行 Product Readiness Dashboard；如果 verdict 是 `不可交付`，根据第一条阻断行退回 `$pm-brief`、线上参考门槛、`$pm-prototype-shotgun`、`$pm-prototype-review`、研发可行性反问或当前 `D`，不写 PRD、实验口径或验收标准。默认只展示短 verdict 和第一阻断原因。
+25. 如果仍有会改变范围、用户承诺、实验口径、数据真实性、算法能力、线索/交易/隐私/合规边界或验收标准的未决 D，停止在 `需要 PM 拍板`，只输出一个当前 `D`，不写研发验收标准、实验口径或对外承诺。
+26. 如果用户要求产品设计文档，或上游已经完成三条产品路径 image-2 原型图与复审，默认优先生成 `产品设计文档`；否则默认选择 `精简 PRD`。只有用户明确要求设计交付、实验验证或研发交付时，才追加对应补充，不把所有模板硬塞进一份文档。
+27. 产品设计文档必须读取 prototype-board 中每个方案的产品路径、用户行为假设、要赢过的现状替代、当前损失、删除 / 牺牲 / 后置项、验证信号、失败信号、原型思考、信息架构设计思考、用户问题解决逻辑、反指标保护和不可虚构边界，生成 `背景与现状 / 用户需求与证据 / 数据或访谈或截图或竞品启发 / 产品简述 / 三条产品路径对比 / 每个方案原型图 / 信息架构设计思考 / 产品判断演进 / 推荐方案 / 风险与待验证 / 下一步产品作业 / 下一步`。
+28. 精简 PRD 核心只保留本周期承诺。单功能默认使用 `1-2 周` 交付 / 验证口径；只有跨模块、大功能或产品线规划才使用 `1-3 个月`，并且只能进入阶段规划或下一步，不能写成本周期验收。PRD 默认只写：需求背景、需求价值、需求方案、需求功能及描述、功能能力与研发依赖、接口以及数据来源、埋点信息、实验标准。测试计划、开发周期、排期、人力、会议纪要和长风险清单默认不写。
+29. 缺接口、数据字段、埋点属性或实验细节但不改变承诺时，保留空值并写入 `待补充项`；每项状态使用 `待补充`、`已跳过` 或 `已补充`，用户可回复 `跳过某项` 或 `全部先跳过`，普通缺口不阻断当前 PRD。不能虚构字段、口径、事件名、接口可用性、算法能力或实验阈值。
+30. Keep unsupported capabilities under `不可虚构`; unsupported capabilities, unverified data, unresolved commitments, and future ideas must not appear as acceptance criteria.
+31. 从用户输入中提取可复用交付资产：接口、数据来源、指标口径、埋点事件、实验标准、功能能力依赖和数据可用性判断；平台脚本可用时，用 `pmw-memory add-delivery-fact` 写入本地脱敏资产，并标明 `scenario`、`target`、`scope`、`source`、`confidence` 和 `fact-type`。
+32. 平台脚本可用时，用 `pmw-log handoff <name>` 保存交付稿，它会登记 `handoff` 到 Product Artifact Flow；产品设计文档用 `pmw-log handoff <name> --artifact-kind product_design_doc` 保存并登记 `product_design_doc`，同时把 `PM 判断摘要` / `产品判断演进` 和 `下一步产品作业` 写入结构化字段。需要给 QA、发布或文档同步接力时，额外用 `pmw-artifact add --kind acceptance_seed` 或 `--kind release_doc_seed` 记录下游可读摘要。记录 `pmw-run event --type artifact`，并且只有交付前门槛全部通过时才 `pmw-run finish --status "可交付"`。
 
 ## 输出结构
 
@@ -191,6 +196,11 @@ done
 
 | 功能模块 | 功能描述 | 规则 / 状态 | 异常 / 空态 | 待补充 |
 |---|---|---|---|---|
+
+## 功能能力与研发依赖
+
+| 功能承诺 | 所需能力 | 当前状态 | 事实来源 | 责任归属 | 是否阻断 | 处理动作 |
+|---|---|---|---|---|---|---|
 
 ## 接口以及数据来源
 

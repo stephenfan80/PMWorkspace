@@ -26,11 +26,11 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "任务识别 -> 证据收集 -> 用户需求澄清 -> 数据/现状佐证 -> 方案机会判断 -> 产品简述确认 -> 三方案原型计划"
+      "contains": "任务识别 -> 证据收集 -> 用户需求澄清 -> 数据/现状佐证 -> 方案机会判断 -> 产品简述确认 -> 三种产品假设计划"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "## 产品发现任务流"
+      "contains": "## 产品专家任务流"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",

@@ -1,6 +1,6 @@
 # Prototype Shotgun Board
 
-Prototype Shotgun Board 用来比较多方案，但不改变 image-2 输出规则：一个方案 + 一个屏幕仍然是一张独立图片。默认最少 3 个方案；少于 3 个必须写明确豁免原因。
+Prototype Shotgun Board 用来比较多方案，但比较对象首先是产品假设，不是视觉风格。一个方案必须代表一个清晰的产品假设，同时不改变 image-2 输出规则：一个方案 + 一个屏幕仍然是一张独立图片。默认最少 3 个产品假设；少于 3 个必须写明确豁免原因。
 
 单图生成协议：一次 image-2 调用 = 一张图 = 一个方案 + 一个屏幕任务。批量生成只是顺序执行多个单图任务；`3 个方案` 必须拆成 3 个输出单元，`3 个方案 x 2 个屏幕` 必须拆成 6 个输出单元。
 
@@ -22,6 +22,10 @@ pmw-prototype-board add \
   --base-image "<screenshot_edit 时写 visual_baseline 参考截图路径>" \
   --edit-scope "<screenshot_edit 时写只修改的目标区域 / 目标模块>" \
   --preserve-regions "状态栏、顶部导航、车系头图、车型切换、tab、底部吸底 CTA" \
+  --product-hypothesis "<这个方案相信什么产品判断会成立>" \
+  --behavior-assumption "<它相信什么用户行为会发生>" \
+  --current-loss "<它主要解决什么当前损失>" \
+  --tradeoff "<它主动牺牲、后置或不做什么>" \
   --prototype-thinking "<为什么这样设计，以及产品策略取舍>" \
   --information-architecture "<信息架构如何组织>" \
   --user-problem-fit "<如何帮助用户解决问题>" \
@@ -29,6 +33,8 @@ pmw-prototype-board add \
   --image "<图片路径或 URL，可为空>" \
   --status "计划生成"
 ```
+
+`--product-hypothesis`、`--behavior-assumption`、`--current-loss` 和 `--tradeoff` 是新写入记录的必填字段；旧记录缺字段时继续可读，但新输出单元缺任一字段都不能登记为已写入。
 
 有 `visual_baseline` 时，`--canvas-mode` 必须是 `physical_longboard`，`--target-output-pixels` 必须写与当前 visual_baseline 一致的物理长板目标，例如 `1179 x >=2556` 或 `1179px 宽，高度不得低于 2556px`；不得写短画布锚点，具体禁用模式以 `pmw-prototype-prompt-check` 为准。
 
@@ -63,15 +69,16 @@ pmw-prototype-board list
 - 多方案必须在产品策略、信息架构、交互模型、信任模型或关键任务路径上不同。
 - 多方案必须能落到不同产品策略、信息架构、交互模型、信任模型或关键任务路径。
 - 不把配色、插画、圆角、卡片样式或风格皮肤包装成多方案。
-- 默认最少 3 个方案；少于 3 个必须记录 `少于 3 个方案豁免原因`，并说明为什么不影响产品判断。
-- 每个方案必须包含 `原型思考`、`信息架构设计思考`、`用户问题解决逻辑`、`反指标保护` 和 `不可虚构边界`。
+- 默认最少 3 个产品假设；少于 3 个必须记录 `少于 3 个方案豁免原因`，并说明为什么不影响产品判断。
+- 每个方案必须包含 `产品假设`、`用户行为假设`、`当前损失`、`牺牲项 / 后置项`、`原型思考`、`信息架构设计思考`、`用户问题解决逻辑`、`反指标保护` 和 `不可虚构边界`。
+- 每个方案必须说明它相信什么用户行为、解决什么当前损失、牺牲什么、保护哪个反指标，以及哪些内容不可虚构。
 - 方案质量规则不局限留资业务；社区、直播、产品库、交易、内容、工具、看板等场景也必须适用。
 - 默认输出“方案对比表 + 单图清单”，不是拼图。
 - 不允许把多个方案或多个屏幕合成一张三联图、并排比较图、一图多屏或多屏故事板。
 - 只有用户明确要求展示材料时，才可以额外做展示板。
 - 方案比较板是审计和比较记录，不是 image-2 图片的替代物。
 - 每个 board item 必须能追溯到已对齐产品简报版本、主目标、反指标和不可虚构项。
-- 每个 board item 必须能追溯到方案的产品策略、信息架构、交互模型、信任模型或关键任务路径差异，不能只有视觉风格差异。
+- 每个 board item 必须能追溯到方案的产品假设、产品策略、信息架构、交互模型、信任模型或关键任务路径差异，不能只有视觉风格差异。
 - 每个 board item 在有线上截图视觉基线时，必须能追溯到 `canvas_mode=physical_longboard`、`target_output_pixels`、`generation_mode`、`base_image`、`edit_scope` 和 `preserve_regions`。
 - 每个 board item 必须保留独立状态：`计划生成`、`已生成`、`生成失败`、`待重试` 或 `需要重出`；批量成功不能掩盖单张失败。
 - 已登记的 board item 必须绑定当前 latest brief 的 `brief_path` 和 `brief_version`；旧版本 brief 的输出单元必须重新登记，不能靠当前 run 里的旧方案确认放行。

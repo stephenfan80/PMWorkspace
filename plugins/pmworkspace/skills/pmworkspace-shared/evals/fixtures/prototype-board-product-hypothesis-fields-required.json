@@ -1,0 +1,55 @@
+{
+  "id": "prototype-board-product-hypothesis-fields-required",
+  "title": "prototype-board 新登记必须包含产品假设字段",
+  "category": "pm-prototype-shotgun",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "维护者希望脚本层强制每个方案不只是视觉方案，而是可比较的产品假设。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "产品假设字段强校验",
+    "required_behaviors": [
+      "pmw-prototype-board add 缺产品假设字段时失败",
+      "四个产品假设字段都是新登记必填项",
+      "旧记录缺字段仍可读取"
+    ],
+    "forbidden_behaviors": [
+      "允许新输出单元缺产品假设",
+      "把产品假设字段只作为展示列",
+      "用视觉方案字段替代产品假设"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-prototype-board",
+      "contains": "missing required product hypothesis fields"
+    },
+    {
+      "path": "bin/pmw-prototype-board",
+      "contains": "add.add_argument(\"--product-hypothesis\", required=True)"
+    },
+    {
+      "path": "pmworkspace-shared/references/prototype-shotgun-board.md",
+      "contains": "新输出单元缺任一字段都不能登记为已写入"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=board-required; set +e; out=$(bin/pmw-prototype-board add --scheme 方案A --screen 首屏 --brief-version v1 2>&1); code=$?; rm -rf \"$tmp\"; test $code -ne 0 && printf '%s' \"$out\" | grep -q 'required'"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=board-ok; bin/pmw-prototype-board add --scheme 方案A --screen 首屏 --brief-version v1 --product-hypothesis '假设A' --behavior-assumption '用户会完成关键任务' --current-loss '当前损失' --tradeoff '后置低优先级' >/dev/null; bin/pmw-prototype-board list | grep -q '假设A'; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0
+    }
+  ]
+}

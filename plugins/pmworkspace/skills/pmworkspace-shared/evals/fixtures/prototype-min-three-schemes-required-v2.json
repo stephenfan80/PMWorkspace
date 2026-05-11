@@ -23,15 +23,15 @@
   "contract_checks": [
     {
       "path": "pm-prototype-shotgun/SKILL.md",
-      "contains": "默认最少 3 个方案；少于 3 个必须写明确豁免原因"
+      "contains": "默认最少 3 个产品假设；少于 3 个必须写明确豁免原因"
     },
     {
       "path": "pmworkspace-shared/references/prototype-shotgun-board.md",
-      "contains": "默认最少 3 个方案；少于 3 个必须记录 `少于 3 个方案豁免原因`"
+      "contains": "默认最少 3 个产品假设；少于 3 个必须写明确豁免原因"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "多方案：默认最少 3 个方案；少于 3 个必须有明确豁免原因。"
+      "contains": "多方案：默认最少 3 个产品假设；少于 3 个必须有明确豁免原因。"
     }
   ]
 }

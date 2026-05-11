@@ -1,6 +1,6 @@
 {
   "id": "prototype-thinking-required-v2",
-  "title": "每个方案必须包含原型思考和信息架构依据",
+  "title": "每个方案必须是产品假设并包含原型思考",
   "category": "pm-prototype-shotgun",
   "primary_skill": "pm-prototype-shotgun",
   "prompt": "给我 3 个移动端方案。",
@@ -8,8 +8,11 @@
     "mode": "quick",
     "status": "待确认",
     "must_stop": true,
-    "gate": "原型思考缺失",
+    "gate": "产品假设或原型思考缺失",
     "required_behaviors": [
+      "每个方案包含产品假设",
+      "每个方案包含用户行为假设",
+      "每个方案包含当前损失和牺牲项",
       "每个方案包含原型思考",
       "每个方案包含信息架构设计思考",
       "每个方案包含用户问题解决逻辑"
@@ -23,11 +26,15 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/image-prompts.md",
-      "contains": "每个方案必须写明为什么这样设计、信息架构如何组织、如何帮助用户解决问题"
+      "contains": "每个方案必须写明它相信什么用户行为、解决什么当前损失、牺牲什么"
     },
     {
       "path": "pm-prototype-shotgun/SKILL.md",
-      "contains": "每个方案都要先写 `原型思考`"
+      "contains": "每个方案都要先写 `产品假设 / 原型思考`"
+    },
+    {
+      "path": "bin/pmw-prototype-board",
+      "contains": "--product-hypothesis"
     },
     {
       "path": "bin/pmw-prototype-board",

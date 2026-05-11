@@ -3,7 +3,7 @@
   "title": "产物必须登记为下游可读的 Product Artifact Flow",
   "category": "artifact-flow",
   "primary_skill": "pm-workspace",
-  "prompt": "用户希望 PMWorkspace 像 gstack 一样让 brief、原型复审、交付稿继续流向下游技能。",
+  "prompt": "用户希望 PMWorkspace 让 brief、原型复审、交付稿继续流向下游技能。",
   "expected": {
     "mode": "maintenance",
     "status": "可检查",
@@ -53,7 +53,7 @@
     },
     {
       "path": "bin/pmw-log",
-      "contains": "--kind handoff"
+      "contains": "--kind \"$artifact_kind\""
     },
     {
       "path": "bin/pmw-dashboard",

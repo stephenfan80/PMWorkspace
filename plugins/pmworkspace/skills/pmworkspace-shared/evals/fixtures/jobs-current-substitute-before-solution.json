@@ -24,7 +24,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "全新功能路径必须补齐"
+      "contains": "全新功能路径必须压实"
     },
     {
       "path": "pm-jobs/SKILL.md",

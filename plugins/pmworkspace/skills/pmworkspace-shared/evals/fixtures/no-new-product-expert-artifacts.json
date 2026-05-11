@@ -1,0 +1,37 @@
+{
+  "id": "no-new-product-expert-artifacts",
+  "title": "产品专家增强不得新增独立核心产物",
+  "category": "artifact-flow",
+  "primary_skill": "pm-workspace",
+  "prompt": "维护者要求增强 PMW，但不希望增加独立产品方案文档或产品思考账本。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "核心产物收敛",
+    "required_behaviors": [
+      "不新增独立核心 artifact",
+      "PM 判断摘要写入现有产物",
+      "产品作业写入现有产物"
+    ],
+    "forbidden_behaviors": [
+      "新增独立产品方案文档",
+      "新增独立产品思考账本",
+      "新增 pm-product-expert skill"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/artifact-flow.md",
+      "contains": "禁止新增独立“产品方案文档”或“产品思考账本”"
+    },
+    {
+      "path": "pmworkspace-shared/references/artifact-flow.md",
+      "not_contains": "| `$pm-product-expert` |"
+    },
+    {
+      "path": "pmworkspace-shared/skill-docs/skill-docs.manifest.json",
+      "not_contains": "产品思考账本"
+    }
+  ]
+}

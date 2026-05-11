@@ -1,6 +1,6 @@
 # PMWorkspace 路由
 
-决定下一步由哪个 PMWorkspace 专家负责时使用本文件。
+决定下一步由哪个 PMWorkspace 专家负责时使用本文件。PMWorkspace 的主定位是产品专家增强器：路由不是把用户送进更长流程，而是把用户送到最能增强当前产品判断力的专家能力。
 
 For Chinese users, use Chinese names in explanations and keep skill ids unchanged.
 
@@ -72,11 +72,11 @@ B. 深度交付：先补齐产品事实、风险、Zoon/截图/简报门槛，�
 | 用户意图 | 路由 |
 |---|---|
 | 快速成型、10 分钟轻量包、先给几个方案、产品简述 + 三方案方向 + 原型图 | `$pm-autoplan` 快速成型模式 |
-| 原始想法、模糊请求、“帮我想想”、“是否值得做” | `$pm-jobs` |
+| 原始想法、模糊请求、“帮我想想”、“是否值得做” | `$pm-jobs` 产品专家工作台 |
 | 一次自动跑完整产品评审、按推荐推进但关键点拍板、深度交付 | `$pm-autoplan` 深度交付模式 |
 | 策略、范围、野心、风险、价值交换、“想大一点” | `$pm-strategy-review` |
 | 需要可沉淀的产品简报或 Zoon 对齐资产 | `$pm-brief` |
-| 需要 image-2 原型图、多方案、截图修改 | `$pm-prototype-shotgun` |
+| 需要 image-2 原型图、多方案、截图修改 | `$pm-prototype-shotgun`，把多方案表达成多种产品假设 |
 | 已生成原型图，需要复审、重出判断、偏好沉淀 | `$pm-prototype-review` |
 | 需要产品设计文档、PRD、设计、实验验证或研发使用的交付稿 | `$pm-handoff` |
 

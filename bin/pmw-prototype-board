@@ -170,6 +170,19 @@ def audit_image(image: str, reference: str) -> tuple[int, dict, str]:
 
 
 def command_add(args: argparse.Namespace) -> int:
+    required_fields = {
+        "product_hypothesis": "product hypothesis",
+        "behavior_assumption": "behavior assumption",
+        "current_loss": "current loss",
+        "tradeoff": "tradeoff",
+    }
+    missing = [label for field, label in required_fields.items() if not str(getattr(args, field, "")).strip()]
+    if missing:
+        print(
+            "missing required product hypothesis fields: " + ", ".join(missing),
+            file=os.sys.stderr,
+        )
+        return 2
     run_id = args.run or current_run_id()
     brief_path = args.brief_path or current_brief_path()
     baseline = latest_visual_baseline(run_id)
@@ -197,6 +210,10 @@ def command_add(args: argparse.Namespace) -> int:
         "base_image": base_image,
         "edit_scope": args.edit_scope,
         "preserve_regions": preserve_regions,
+        "product_hypothesis": args.product_hypothesis,
+        "behavior_assumption": args.behavior_assumption,
+        "current_loss": args.current_loss,
+        "tradeoff": args.tradeoff,
         "prototype_thinking": args.prototype_thinking,
         "information_architecture": args.information_architecture,
         "user_problem_fit": args.user_problem_fit,
@@ -303,8 +320,8 @@ def command_list(_args: argparse.Namespace) -> int:
     if not items:
         print("暂无方案。")
         return 0
-    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 原型思考 | 信息架构 | 用户问题解决逻辑 | 反指标保护 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
-    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 产品假设 | 用户行为假设 | 当前损失 | 牺牲项 | 原型思考 | 信息架构 | 用户问题解决逻辑 | 反指标保护 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
     for item in items:
         key = (item.get("scheme", ""), item.get("screen", ""))
         scheme_key = (item.get("scheme", ""), "")
@@ -323,6 +340,10 @@ def command_list(_args: argparse.Namespace) -> int:
             item.get("main_goal", ""),
             item.get("anti_metric", ""),
             item.get("non_fiction", ""),
+            item.get("product_hypothesis", ""),
+            item.get("behavior_assumption", ""),
+            item.get("current_loss", ""),
+            item.get("tradeoff", ""),
             item.get("prototype_thinking", ""),
             item.get("information_architecture", ""),
             item.get("user_problem_fit", ""),
@@ -357,6 +378,10 @@ def build_parser() -> argparse.ArgumentParser:
     add.add_argument("--base-image", default="")
     add.add_argument("--edit-scope", default="")
     add.add_argument("--preserve-regions", default="")
+    add.add_argument("--product-hypothesis", required=True)
+    add.add_argument("--behavior-assumption", required=True)
+    add.add_argument("--current-loss", required=True)
+    add.add_argument("--tradeoff", required=True)
     add.add_argument("--prototype-thinking", default="")
     add.add_argument("--information-architecture", default="")
     add.add_argument("--user-problem-fit", default="")

@@ -12,7 +12,7 @@
     "required_behaviors": [
       "出图前运行 prototype readiness verdict",
       "交付前运行 handoff readiness verdict",
-      "仪表盘覆盖产品简报、可选 Zoon、线上参考、方案差异、不可虚构项和复审状态",
+      "仪表盘覆盖产品简报、可选 Zoon、线上参考、方案差异、不可虚构项、复审状态和交付前研发可行性反问",
       "verdict 不是可出图或可交付时退回第一条阻断门槛"
     ],
     "forbidden_behaviors": [
@@ -52,8 +52,16 @@
       "contains": "| 复审状态 | no | Required |"
     },
     {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "| 研发可行性反问 | no | Required |"
+    },
+    {
       "path": "bin/pmw-dashboard",
       "contains": "PMWorkspace 产品准备度仪表盘"
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "\"研发可行性反问\""
     },
     {
       "path": "bin/pmw-dashboard",

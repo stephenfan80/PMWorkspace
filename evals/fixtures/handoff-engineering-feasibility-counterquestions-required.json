@@ -1,0 +1,89 @@
+{
+  "id": "handoff-engineering-feasibility-counterquestions-required",
+  "title": "研发交付前必须完成能力依赖反问",
+  "category": "pm-handoff",
+  "primary_skill": "pm-handoff",
+  "prompt": "把一个包含真实数据、推荐算法、权益库存和线索提交的方案整理成研发交付稿。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要审查",
+    "must_stop": true,
+    "gate": "研发可行性反问",
+    "required_behaviors": [
+      "研发交付前输出功能能力与研发依赖表",
+      "说明数据来源、接口能力、算法或推荐能力、后台、运营、埋点和合规边界的当前状态",
+      "缺能力时区分产品需补齐、研发需评估、可留待补充和不可写入验收",
+      "会改变承诺或验收的能力缺口必须进入当前 D 或退回策略审查"
+    ],
+    "forbidden_behaviors": [
+      "把未知数据源写成已支持",
+      "把推荐算法能力包装成已具备",
+      "缺能力依赖审查仍宣称可交付",
+      "把能力依赖长清单塞进策略审查"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "## 研发可行性反问内核"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "| 功能承诺 | 所需能力 | 当前状态 | 事实来源 | 责任归属 | 是否阻断 | 处理动作 |"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "`当前状态`"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "`产品需补齐`"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "`研发需评估`"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "`不可写入验收`"
+    },
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "交付稿输出前执行 `研发可行性反问`"
+    },
+    {
+      "path": "pm-strategy-review/SKILL.md",
+      "contains": "不展开研发能力依赖长清单"
+    },
+    {
+      "path": "pmworkspace-shared/references/adversarial-review.md",
+      "contains": "详细数据 / 接口 / 算法 / 后台 / 运营依赖在 `$pm-handoff` 的研发可行性反问中处理"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=handoff-capability-missing; root=\"$PMW_HOME/projects/handoff-capability-missing\"; mkdir -p \"$root/runs\" \"$root/briefs\"; brief=\"$root/briefs/current.md\"; printf '# 产品设计简报：测试\\n产品简报版本：v2\\n确认状态：已对齐\\n\\n## 核心价值判断\\n- 一句话判断：已确认。\\n## 数据 / 能力 / 约束与不可虚构项\\n- 不可虚构项：不得虚构算法、接口或库存能力。\\n' > \"$brief\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\",\"latest_brief\":\"%s\",\"latest_brief_version\":\"v2\"}\\n' \"$brief\" > \"$root/project.json\"; printf '{\"ts\":\"2099-01-01T00:00:00Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"已对齐\",\"title\":\"产品简报确认\",\"summary\":\"用户确认\"}\\n{\"ts\":\"2099-01-01T00:00:01Z\",\"event\":\"evidence\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"线上参考\",\"summary\":\"新概念页，线上参考不适用\"}\\n{\"ts\":\"2099-01-01T00:00:02Z\",\"event\":\"decision\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"方案方向确认\",\"summary\":\"默认方向已批准\"}\\n{\"ts\":\"2099-01-01T00:00:03Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"已登记\",\"title\":\"方案差异\",\"summary\":\"方案差异已确认\"}\\n{\"ts\":\"2099-01-01T00:00:04Z\",\"event\":\"review\",\"run_id\":\"r1\",\"status\":\"可通过\",\"title\":\"原型复审\",\"summary\":\"原型复审可通过\"}\\n' > \"$root/runs/r1.jsonl\"; bin/pmw-dashboard readiness --target handoff; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0,
+      "contains": [
+        "结论：不可交付",
+        "研发可行性反问：未完成"
+      ]
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=handoff-capability-ready; root=\"$PMW_HOME/projects/handoff-capability-ready\"; mkdir -p \"$root/runs\" \"$root/briefs\"; brief=\"$root/briefs/current.md\"; printf '# 产品设计简报：测试\\n产品简报版本：v2\\n确认状态：已对齐\\n\\n## 核心价值判断\\n- 一句话判断：已确认。\\n## 数据 / 能力 / 约束与不可虚构项\\n- 不可虚构项：不得虚构算法、接口或库存能力。\\n' > \"$brief\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\",\"latest_brief\":\"%s\",\"latest_brief_version\":\"v2\"}\\n' \"$brief\" > \"$root/project.json\"; printf '{\"ts\":\"2099-01-01T00:00:00Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"已对齐\",\"title\":\"产品简报确认\",\"summary\":\"用户确认\"}\\n{\"ts\":\"2099-01-01T00:00:01Z\",\"event\":\"evidence\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"线上参考\",\"summary\":\"新概念页，线上参考不适用\"}\\n{\"ts\":\"2099-01-01T00:00:02Z\",\"event\":\"decision\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"方案方向确认\",\"summary\":\"默认方向已批准\"}\\n{\"ts\":\"2099-01-01T00:00:03Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"已登记\",\"title\":\"方案差异\",\"summary\":\"方案差异已确认\"}\\n{\"ts\":\"2099-01-01T00:00:04Z\",\"event\":\"review\",\"run_id\":\"r1\",\"status\":\"可通过\",\"title\":\"原型复审\",\"summary\":\"原型复审可通过\"}\\n{\"ts\":\"2099-01-01T00:00:05Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"已完成\",\"title\":\"研发可行性反问\",\"summary\":\"功能能力与研发依赖已审查；普通缺口可留待补充\"}\\n' > \"$root/runs/r1.jsonl\"; bin/pmw-dashboard readiness --target handoff; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0,
+      "contains": [
+        "结论：可交付",
+        "关键门槛已通过"
+      ]
+    }
+  ]
+}

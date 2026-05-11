@@ -308,6 +308,38 @@ def latest_review(events: list[dict]) -> dict:
     return {}
 
 
+def latest_capability_review(events: list[dict], root: pathlib.Path, run_id: str) -> dict:
+    event = latest_event(
+        events,
+        ["研发可行性反问", "功能能力与研发依赖", "能力依赖审查"],
+        {"gate", "decision", "artifact", "evidence"},
+    )
+    if event:
+        return event
+    for kind in ["handoff", "product_design_doc"]:
+        row = current_artifact(root, kind, run_id)
+        text = f"{row.get('status', '')} {row.get('title', '')} {row.get('summary', '')}"
+        if row and contains_any(text, ["研发可行性反问", "功能能力与研发依赖", "能力依赖审查"]):
+            return {
+                "event": "artifact",
+                "status": row.get("status") or "已登记",
+                "title": row.get("title") or kind,
+                "summary": row.get("summary") or artifact_location(row),
+            }
+    return {}
+
+
+def capability_review_ready(row: dict) -> bool:
+    if not row:
+        return False
+    text = f"{row.get('status', '')} {row.get('title', '')} {row.get('summary', '')}"
+    if contains_any(text, ["需要 PM 拍板", "退回策略审查", "未完成", "未登记", "未审查"]):
+        return False
+    if contains_any(text, ["已完成", "已审查", "已登记", "可交付", "可留待补充"]):
+        return True
+    return False
+
+
 def artifact_flow_rows(root: pathlib.Path, limit: int = 10) -> list[str]:
     rows = artifact_rows(root, limit=limit)
     rendered = []
@@ -859,6 +891,38 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
             review.get("summary") or "暂无复审记录",
             review_action,
             review_passed,
+        )
+    )
+
+    capability_review = latest_capability_review(events, root, run_id)
+    capability_review_required = effective_target == "handoff"
+    capability_review_passed = True
+    if capability_review_required:
+        capability_review_passed = capability_review_ready(capability_review)
+    if not capability_review_required:
+        capability_status = capability_review.get("status") or "出图前不阻断"
+        capability_evidence = capability_review.get("summary") or "仅交付前 required"
+        capability_action = "出图后进入 $pm-handoff 时再做能力依赖审查"
+    elif capability_review_passed:
+        capability_status = capability_review.get("status") or "已完成"
+        capability_evidence = capability_review.get("summary") or "功能能力与研发依赖已审查"
+        capability_action = "继续"
+    elif capability_review:
+        capability_status = capability_review.get("status") or "未通过"
+        capability_evidence = capability_review.get("summary") or "能力依赖审查存在未决项"
+        capability_action = "如果缺口影响承诺或验收，先完成当前 D；如果能力前提不成立，退回 $pm-strategy-review；普通缺口可留待补充"
+    else:
+        capability_status = "未完成"
+        capability_evidence = "当前 run 未记录研发可行性反问 / 功能能力与研发依赖审查"
+        capability_action = "先在 $pm-handoff 建立功能能力与研发依赖表；普通缺口可待补充，影响承诺或验收的缺口转当前 D"
+    rows.append(
+        gate_result(
+            "研发可行性反问",
+            capability_review_required,
+            capability_status,
+            capability_evidence,
+            capability_action,
+            capability_review_passed,
         )
     )
     return rows

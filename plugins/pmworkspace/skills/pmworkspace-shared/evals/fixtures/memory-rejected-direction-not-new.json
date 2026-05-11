@@ -3,7 +3,7 @@
   "title": "被拒绝过的方向不能当作新方案推荐",
   "category": "memory",
   "primary_skill": "pm-prototype-shotgun",
-  "prompt": "用户上一轮明确拒绝营销海报式首屏，本轮再次要求 3 个方案。",
+  "prompt": "用户上一轮明确拒绝营销海报式首屏，本轮再次要求 3 条产品路径。",
   "expected": {
     "mode": "deep",
     "status": "待确认",

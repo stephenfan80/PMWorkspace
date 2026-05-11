@@ -27,7 +27,7 @@
     },
     {
       "path": "pm-prototype-shotgun/SKILL.md",
-      "contains": "它不重新做 `$pm-jobs` 的产品发现"
+      "contains": "它不重新做 `$pm-jobs` 的产品方向审查"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",

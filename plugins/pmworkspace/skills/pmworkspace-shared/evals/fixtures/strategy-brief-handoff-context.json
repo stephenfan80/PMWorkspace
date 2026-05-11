@@ -10,13 +10,13 @@
     "must_stop": false,
     "gate": "策略交接产品简报",
     "required_behaviors": [
-      "交接范围模式",
+      "交接范围模式和选中路径",
       "交接策略决策",
       "交接最大策略矛盾",
       "交接范围外",
       "交接用户承诺边界",
       "交接反指标保护",
-      "交接对原型的影响"
+      "交接本周期验证和对原型的影响"
     ],
     "forbidden_behaviors": [
       "只写下一技能为 $pm-brief",
@@ -31,11 +31,11 @@
     },
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",
-      "contains": "来自 `$pm-strategy-review` 的交接必须保留 `范围模式`、`策略决策`、`最大策略矛盾`、`范围外`、`用户承诺边界`、`反指标保护` 和 `对原型的影响`。"
+      "contains": "来自 `$pm-strategy-review` 的交接必须保留 `范围模式`、`选中路径`、`策略决策`、`最大策略矛盾`、`范围外`、`用户承诺边界`、`反指标保护`、`本周期验证` 和 `对原型的影响`。"
     },
     {
       "path": "pm-strategy-review/SKILL.md",
-      "contains": "Handoff must include 范围模式、策略决策、最大策略矛盾、范围外、用户承诺边界、反指标保护、对原型的影响."
+      "contains": "Handoff must include 范围模式、选中路径、策略决策、最大策略矛盾、范围外、用户承诺边界、反指标保护、本周期验证、对原型的影响."
     }
   ]
 }

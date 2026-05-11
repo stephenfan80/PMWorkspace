@@ -8,15 +8,16 @@
     "mode": "deep",
     "status": "待确认",
     "must_stop": false,
-    "gate": "策略取舍控制器",
+    "gate": "产品方向审查控制器",
     "required_behaviors": [
       "先输出策略审查结论",
       "输出我建议",
+      "输出路径对比",
       "输出最大策略矛盾",
       "输出范围模式",
       "输出进入产品简报的写法",
-      "内部记录来源门槛、策略风险类型和使用视角",
-      "内部记录产品动作和策略取舍",
+      "内部记录前提挑战、现状替代、不做推演和路径对比",
+      "内部记录产品动作、策略取舍和本周期验证",
       "输出当前 D",
       "内部记录下一技能和证据状态"
     ],
@@ -30,11 +31,11 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/adversarial-review.md",
-      "contains": "## 策略取舍控制器"
+      "contains": "## 产品方向审查控制器"
     },
     {
       "path": "pmworkspace-shared/references/adversarial-review.md",
-      "contains": "每次默认用户输出必须先给 `策略审查结论`、推荐姿态、当前必须拍板和下一步；`策略取舍控制面板` 写入审计"
+      "contains": "每次必须输出：`我不赞成什么 / 我建议什么 / 为什么 / 本周期怎么验证 / 当前 D`"
     },
     {
       "path": "pm-strategy-review/SKILL.md",
@@ -42,11 +43,15 @@
     },
     {
       "path": "pm-strategy-review/SKILL.md",
+      "contains": "- 路径对比："
+    },
+    {
+      "path": "pm-strategy-review/SKILL.md",
       "contains": "- 最大策略矛盾："
     },
     {
       "path": "pm-strategy-review/SKILL.md",
-      "contains": "- 范围模式：扩大模式 / 保持模式 / 收缩模式 / 转向模式"
+      "contains": "- 范围模式：扩大模式 / 选择性扩大模式 / 保持模式 / 收缩模式 / 转向模式"
     },
     {
       "path": "pm-strategy-review/SKILL.md",
@@ -54,7 +59,7 @@
     },
     {
       "path": "pm-strategy-review/SKILL.md",
-      "contains": "内部策略取舍控制面板（默认不展示，写入审计）："
+      "contains": "内部产品方向审查控制面板（默认不展示，写入审计）："
     },
     {
       "path": "pm-strategy-review/SKILL.md",

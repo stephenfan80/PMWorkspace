@@ -3,7 +3,7 @@
   "title": "多方案不能只是换配色",
   "category": "prototype-shotgun",
   "primary_skill": "pm-prototype-shotgun",
-  "prompt": "给同一个报名页做 3 个方案，只要换不同颜色和插画风格。",
+  "prompt": "给同一个报名页做 3 条产品路径，只要换不同颜色和插画风格。",
   "expected": {
     "mode": "quick",
     "status": "待确认",

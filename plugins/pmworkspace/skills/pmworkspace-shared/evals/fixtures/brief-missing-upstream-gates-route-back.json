@@ -12,7 +12,7 @@
     "required_behaviors": [
       "标出缺失门槛",
       "退回 $pm-jobs",
-      "回到对应产品发现任务或一个当前 Q"
+      "回到对应产品方向审查或一个当前 Q"
     ],
     "forbidden_behaviors": [
       "用产品简报补写事实",

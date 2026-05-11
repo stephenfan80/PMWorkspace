@@ -9,17 +9,17 @@ description: |
 
 # 原型方案
 
-`$pm-prototype-shotgun` 是 image-2 原型出图导演。它不重新做 `$pm-jobs` 的产品发现、不替 `$pm-strategy-review` 拍策略取舍、也不替 `$pm-brief` 补写产品契约；它只把已对齐产品简述 / 产品简报里的产品判断拆成可生成、可比较、可复审的单张设计稿。多方案不是三种视觉风格，而是三种产品假设。
+`$pm-prototype-shotgun` 是 image-2 原型出图导演。它不重新做 `$pm-jobs` 的产品方向审查、不替 `$pm-strategy-review` 拍策略取舍、也不替 `$pm-brief` 补写产品契约；它只把已对齐产品简述 / 产品简报里的产品判断拆成可生成、可比较、可复审的单张设计稿。多方案不是三种视觉风格，而是三条产品路径。
 
 核心规则：
 
 ```text
-一次 image-2 调用 = 一张图 = 一个方案 + 一个屏幕任务
+一次 image-2 调用 = 一张图 = 一个产品路径 + 一个屏幕任务
 ```
 
-批量生成只是自动连续执行多个单图任务。`3 个方案` 表示连续执行 3 次 image-2；`3 个方案 x 2 个屏幕` 表示连续执行 6 次 image-2。每次调用都必须独立提示、独立产物、独立记录状态，不允许拼图、三联图、并排比较、一图多方案或多屏故事板。
+批量生成只是自动连续执行多个单图任务。`3 条产品路径` 表示连续执行 3 次 image-2；`3 条产品路径 x 2 个屏幕` 表示连续执行 6 次 image-2。每次调用都必须独立提示、独立产物、独立记录状态，不允许拼图、三联图、并排比较、一图多方案或多屏故事板。
 
-默认最少 3 个产品假设；少于 3 个必须写明确豁免原因。每个方案都要先写 `产品假设 / 原型思考`：相信什么用户行为、解决什么当前损失、牺牲什么、为什么这样设计、信息架构如何组织、如何帮助用户解决问题、解决哪个反指标风险、哪些内容不可虚构。
+默认最少 3 条产品路径；少于 3 条必须写明确豁免原因。每条路径都要先写清：相信什么用户行为、要赢过哪个现状替代、解决什么当前损失、主动删除 / 牺牲 / 后置什么、验证信号、失败信号、反指标保护和不可虚构边界。
 
 <!-- PMW-GENERATED-CONTRACT:START -->
 ## PMWorkspace 生成契约
@@ -29,7 +29,7 @@ description: |
 - skill：`pm-prototype-shotgun`
 - 契约版本：`2`
 - 阶段：原型方案
-- 定位：基于已对齐 brief 默认规划最少 3 个产品假设，逐张生成 image-2 原型图，并把每个方案 / 屏幕写入方案比较板。
+- 定位：基于已对齐 brief 默认规划最少 3 条产品路径，逐张生成 image-2 原型图，并把每个方案 / 屏幕写入方案比较板。
 
 ### 统一前置检查
 
@@ -61,7 +61,7 @@ description: |
 
 - `原型出图判断`
 - `方案方向`
-- `产品假设`
+- `产品路径`
 - `原型思考`
 - `输出单元清单`
 - `image-2 状态`
@@ -73,8 +73,8 @@ description: |
 - `产品准备度仪表盘`
 - `图片生成前门槛`
 - `方案差异质量`
-- `三方案数量检查`
-- `产品假设`
+- `三条路径数量检查`
+- `产品路径`
 - `原型思考`
 - `方案比较板`
 - `证据状态`
@@ -124,8 +124,8 @@ done
 - 现有功能迭代必须有当前截图或等价视觉基线；只登记线上参考不够，还必须把截图转成 `visual_baseline`，包含参考图尺寸、目标输出像素、字号层级、间距节奏、组件密度和底部栏约束。
 - 新页面如果承接线上流程、结果页、状态页或生产样式，必须先拿到线上参考，或得到用户明确确认“没有线上参考，按新页面概念稿推进”。
 - 多方案生成前先确认概念方向，除非用户明确批准使用默认方向。
-- 默认最少 3 个产品假设；少于 3 个方案必须记录 `少于 3 个方案豁免原因`，否则不能写 image-2 prompt。
-- 每个方案必须包含 `产品假设`、`用户行为假设`、`当前损失`、`牺牲项 / 后置项`、`原型思考`、`信息架构设计思考`、`用户问题解决逻辑`、`反指标保护` 和 `不可虚构边界`。
+- 默认最少 3 条产品路径；少于 3 条路径必须记录 `少于 3 条路径豁免原因`，否则不能写 image-2 prompt。
+- 每个方案必须包含 `产品路径`、`用户行为假设`、`要赢过的现状替代`、`当前损失`、`删除 / 牺牲 / 后置项`、`验证信号`、`失败信号`、`原型思考`、`信息架构设计思考`、`用户问题解决逻辑`、`反指标保护` 和 `不可虚构边界`。
 - 设计原型默认只能使用 image-2 / 图像生成输出方案图片；HTML 只在用户明确要求“HTML”“可交互网页”“前端实现”或“本地网页原型”时允许。
 - 如果当前环境无法生成 image-2 图片，停止并说明无法出图；不要用 HTML、Markdown 线框或拼图替代设计原型。
 - 默认移动端优先分两种互斥模式：无线上截图时使用 `standard_first_screen` 模板；有生产截图 / `visual_baseline` 时使用 `physical_longboard` 模板，必须以参考图物理像素和目标输出像素为 image-2 画布。
@@ -137,17 +137,17 @@ done
 ## Multi-Scheme Rules
 
 - 方向必须先在产品策略、信息架构、交互模型、信任模型或关键任务路径上不同，再讨论视觉差异。
-- 默认最少 3 个产品假设；少于 3 个方案必须有明确豁免原因。
-- 方案差异必须来自产品策略、信息架构、交互模型、信任模型或关键任务路径之一；默认三方案必须是三种产品假设。
+- 默认最少 3 条产品路径；少于 3 条路径必须有明确豁免原因。
+- 方案差异必须来自产品策略、信息架构、交互模型、信任模型或关键任务路径之一；默认多方案必须是三条产品路径。
 - 不要把配色、插画、圆角、卡片样式或风格皮肤包装成多方案。
 - 规则不局限留资业务；社区、直播、产品库、交易、内容、工具、看板等场景也必须用同一套方案质量标准。
-- 一个方案 + 一个屏幕 = 一张图片。
+- 一个产品路径 + 一个屏幕 = 一张图片。
 - 一次 image-2 调用只能生成一张独立图片。
 - `3 个方向 x 2 个屏幕` 表示六张独立图片。
 - 除非用户要求演示材料，否则不要创建拼图、三联图、并排比较图或多屏故事板。
 - 每次 prompt 都必须明确禁止拼图、并排比较、一图多屏和一图多方案。
 - 每张图独立记录状态：`计划生成`、`已生成`、`生成失败`、`待重试` 或 `需要重出`；批量成功不能掩盖单张失败。
-- 每个方案都必须输出 `产品假设 / 原型思考`：相信什么用户行为、解决什么当前损失、牺牲什么、为什么这样设计、信息架构如何组织、如何解决用户问题、解决哪个反指标风险、哪些内容不可虚构。
+- 每个方案都必须输出产品路径思考：相信什么用户行为、要赢过哪个现状替代、解决什么当前损失、主动删除 / 牺牲 / 后置什么、验证信号、失败信号、为什么这样设计、信息架构如何组织、如何解决用户问题、解决哪个反指标风险、哪些内容不可虚构。
 
 ## Workflow
 
@@ -158,17 +158,17 @@ done
 5. Read `design-heuristics.md`, `scenario-experts.md`, and `adversarial-review.md` as needed, but do not change scope or promise without writing the decision back to the product brief.
 6. Use `pmw-memory user-summary` plus `pmw-memory taste-summary` when available so rejected directions are not repeated as “new”方案 and local product cognition can improve recommendations; if memory changes the recommendation, explicitly say `基于过往偏好，我建议...` or `基于本地产品认知...`, and never let memory override the current brief, Zoon, anti-metric, non-fiction boundary, design system, or reference gate.
 7. 输出 `原型出图判断`：先说明我建议这轮出哪些单图、暂时不出哪些屏、为什么这些图能帮助 PM 做产品选择，以及图片生成前门槛。必须展示 `产品简报确认`、`方案方向确认`、`数据佐证`、`视觉基线状态` 和 `目标输出像素`；数据缺失时写明 `数据佐证：未提供，本方案存在未验证风险`。
-8. Propose concept directions with names and tradeoffs. 默认最少 3 个产品假设；少于 3 个方案必须记录豁免原因。方案差异必须通过 `方案差异质量`：至少说明每个方向在产品策略、信息架构、交互模型、信任模型或关键任务路径上的不同；如果只是视觉皮肤差异，停止并重拟方向。每个方案必须输出 `产品假设`、`用户行为假设`、`当前损失`、`牺牲项 / 后置项`、`原型思考`、`信息架构设计思考` 和 `用户问题解决逻辑`。
+8. Propose concept directions with names and tradeoffs. 默认最少 3 条产品路径；少于 3 条路径必须记录豁免原因。方案差异必须通过 `方案差异质量`：至少说明每个方向在产品策略、信息架构、交互模型、信任模型或关键任务路径上的不同；如果只是视觉皮肤差异，停止并重拟方向。每个方案必须输出 `产品路径`、`用户行为假设`、`要赢过的现状替代`、`当前损失`、`删除 / 牺牲 / 后置项`、`验证信号`、`失败信号`、`原型思考`、`信息架构设计思考` 和 `用户问题解决逻辑`。
 9. 如果用户、brief、Zoon、截图或参考材料命中汽车之家、AutoDesign、之家或 Autohome，默认载入 AutoDesign 约束。产品 UI 优先使用 AutoDesign token；品牌 VI 和字体包只作为品牌露出、活动视觉或特殊场景参考，字体授权必须保留边界，不能写成生产可用承诺。若用户提供了线上截图，截图基线优先于泛化 AutoDesign token，并且必须用 `visual_baseline` 锁定参考尺寸与目标输出像素。
 10. 多方案生成前确认方案方向；如果用户已经明确批准默认方向，记录 `方案方向确认：默认方向已批准`，否则停在方向确认，不写 image-2 提示词。
-11. For each image output unit, declare scheme, screen task, prototype thinking, information architecture rationale, user problem fit, anti-metric protection, canvas mode, canvas, main goal, anti-metric, non-fiction boundary, plus product hypothesis, behavior assumption, current loss, and tradeoff. Also declare target output pixels, 线上参考状态, 视觉基线状态, design system, image-2 status, and brief dependency. 一个输出单元等于一张图片，不能把多个方案或多个屏幕合成拼图。
+11. For each image output unit, declare scheme, screen task, prototype thinking, information architecture rationale, user problem fit, anti-metric protection, canvas mode, canvas, main goal, anti-metric, non-fiction boundary, plus product path, behavior assumption, current substitute to beat, current loss, tradeoff, validation signal, and failure signal. Also declare target output pixels, 线上参考状态, 视觉基线状态, design system, image-2 status, and brief dependency. 一个输出单元等于一张图片，不能把多个方案或多个屏幕合成拼图。
     - 无线上截图时，`画布模式` 写 `standard_first_screen`，并使用 `image-prompts.md` 的对应模板。
     - 有线上截图 / `visual_baseline` 时，`画布模式` 必须写 `physical_longboard`，`画布` 必须写 `线上截图物理长板`；`目标输出像素` 必须写明确宽高或宽度 + 最小高度，例如 `参考截图尺寸：1179 x 2556；识别为 393pt @3x；目标输出画布：1179px 宽，内容自适应长图，高度不得低于 2556px，可随内容增长；字体、间距和组件按参考物理像素等比绘制`。
     - 有线上截图且目标是视觉还原时，`生成模式` 必须写 `screenshot_edit`，`base_image` 绑定当前 `visual_baseline` 参考图，`edit_scope` 写清只改哪个模块，`preserve_regions` 默认写 `状态栏、顶部导航、车系头图、车型切换、tab、底部吸底 CTA`。
     - 有线上截图时，最终 image-2 prompt 不得包含短画布锚点；以 `pmw-prototype-prompt-check` 为准。
     - 移动长板仍是一张连续移动端界面，不得拆成多张图、拼图、多屏故事板或桌面端。
-12. 把批量请求拆成顺序单图队列：`3 个方案` -> 3 个输出单元，`3 个方案 x 2 个屏幕` -> 6 个输出单元。每个输出单元单独调用一次 image-2；不要把多个单元合成一个 prompt。
-13. 平台脚本可用时，先用 `pmw-prototype-board add` 登记每个方案/屏幕单元；`--product-hypothesis`、`--behavior-assumption`、`--current-loss` 和 `--tradeoff` 是必填字段。如果写入失败，输出 `方案比较板：未写入（原因）`，不能假装已记录。
+12. 把批量请求拆成顺序单图队列：`3 条产品路径` -> 3 个输出单元，`3 条产品路径 x 2 个屏幕` -> 6 个输出单元。每个输出单元单独调用一次 image-2；不要把多个单元合成一个 prompt。
+13. 平台脚本可用时，先用 `pmw-prototype-board add` 登记每个方案/屏幕单元；`--product-path`、`--behavior-assumption`、`--current-loss` 和 `--tradeoff` 是必填字段。如果写入失败，输出 `方案比较板：未写入（原因）`，不能假装已记录。
 14. 平台脚本可用时运行 `pmw-dashboard readiness --target prototype`；用户可见输出只包含短 verdict / 第一阻断原因。如果 verdict 是 `不可出图`，根据第一条阻断行退回 `$pm-brief`、线上参考门槛、方案方向确认或不可虚构项补齐，不写 image-2 prompt。只有用户要求看审计时才展示 `pmw-dashboard readiness --details`。
 15. 数据佐证缺失时不阻断出图，但必须把 `未验证风险` 写入用户可见输出和每个 image-2 prompt 的不可虚构项：不得展示确定性承诺、真实验证过的数值、已核验结果或无法兑现的数据能力，只能使用示例、区间、占位或明确标注假设。
 16. 在每个输出单元的图片生成前门槛通过后，先把最终 prompt 交给 `pmw-prototype-prompt-check`；有视觉基线时检查失败必须重写 prompt，不得调用 image-2。检查通过后逐个 Generate with image-2 / image generation。每次生成只服务当前一个输出单元，并在 prompt 中写明禁止拼图、并排比较、一图多屏、一图多方案。 如果当前环境无法生成 image-2，停止并说明，不用 HTML、Markdown 线框或方案比较板替代。
@@ -198,10 +198,13 @@ done
 
 方案方向：
 - 方案 A：
-  - 产品假设：
+  - 产品路径：
   - 用户行为假设：
+  - 要赢过的现状替代：
   - 当前损失：
-  - 牺牲项 / 后置项：
+  - 删除 / 牺牲 / 后置项：
+  - 验证信号：
+  - 失败信号：
   - 产品判断：
   - 原型思考：
   - 信息架构设计思考：
@@ -213,10 +216,13 @@ done
 图片输出单元：
 - 方案名：
 - 屏幕任务：
-- 产品假设：
+- 产品路径：
 - 用户行为假设：
+- 要赢过的现状替代：
 - 当前损失：
-- 牺牲项 / 后置项：
+- 删除 / 牺牲 / 后置项：
+- 验证信号：
+- 失败信号：
 - 原型思考：
 - 信息架构设计思考：
 - 用户问题解决逻辑：
@@ -259,8 +265,8 @@ done
 - prompt 检查：
 - 输出单元清单：
 - 每张图绑定：方案名 / 屏幕任务 / 主目标 / 反指标 / 不可虚构项 / 产品简报版本 / 画布模式 / 目标输出像素 / 设计系统 / 线上参考状态 / image-2 状态
-- 每个方案思考：产品假设 / 用户行为假设 / 当前损失 / 牺牲项或后置项 / 原型思考 / 信息架构设计思考 / 用户问题解决逻辑 / 反指标保护 / 不可虚构边界
-- 单图生成协议：一次 image-2 调用 = 一张图 = 一个方案 + 一个屏幕任务
+- 每个方案思考：产品路径 / 用户行为假设 / 要赢过的现状替代 / 当前损失 / 删除、牺牲或后置项 / 验证信号 / 失败信号 / 原型思考 / 信息架构设计思考 / 用户问题解决逻辑 / 反指标保护 / 不可虚构边界
+- 单图生成协议：一次 image-2 调用 = 一张图 = 一个产品路径 + 一个屏幕任务
 - image-2 状态：
 - 已生成 / 计划生成的图片：
 - 质量检查：

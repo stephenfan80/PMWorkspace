@@ -1,6 +1,6 @@
 {
-  "id": "jobs-product-discovery-task-flow-v2",
-  "title": "全新功能必须进入产品专家任务流",
+  "id": "jobs-direction-review-kernel-required",
+  "title": "全新功能必须进入产品方向审查内核",
   "category": "pm-jobs",
   "primary_skill": "pm-jobs",
   "prompt": "我有一个产品想法，帮我直接出方案。",
@@ -8,10 +8,10 @@
     "mode": "deep",
     "status": "需要补充",
     "must_stop": true,
-    "gate": "产品专家任务流",
+    "gate": "产品方向审查内核",
     "required_behaviors": [
       "识别全新功能路径",
-      "进入任务识别、证据收集、用户需求澄清、数据/现状佐证、方案机会判断、产品简述确认、三方案产品假设计划",
+      "进入前提挑战、现状替代、不做推演、路径对比、范围模式和当前拍板",
       "不得只问一个 Q 后生成 brief"
     ],
     "forbidden_behaviors": [
@@ -23,7 +23,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "任务识别 -> 证据收集 -> 用户需求澄清 -> 数据/现状佐证 -> 方案机会判断 -> 产品简述确认 -> 三种产品假设计划"
+      "contains": "前提挑战 -> 现状替代 -> 不做推演 -> 路径对比 -> 范围模式 -> 当前拍板"
     },
     {
       "path": "pmworkspace-shared/references/product-discovery-gate.md",

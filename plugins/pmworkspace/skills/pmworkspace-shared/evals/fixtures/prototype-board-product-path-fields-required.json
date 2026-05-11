@@ -1,0 +1,63 @@
+{
+  "id": "prototype-board-product-path-fields-required",
+  "title": "prototype-board 新登记必须包含产品路径字段",
+  "category": "pm-prototype-shotgun",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "维护者希望脚本层强制每个方案不只是视觉方案，而是可比较的产品路径。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "产品路径字段强校验",
+    "required_behaviors": [
+      "pmw-prototype-board add 缺产品路径字段时失败",
+      "四个产品路径字段都是新登记必填项",
+      "旧记录缺字段仍可读取"
+    ],
+    "forbidden_behaviors": [
+      "允许新输出单元缺产品路径",
+      "把产品路径字段只作为展示列",
+      "用视觉方案字段替代产品路径"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-prototype-board",
+      "contains": "missing required product path fields"
+    },
+    {
+      "path": "bin/pmw-prototype-board",
+      "contains": "add.add_argument(\"--product-path\", required=True)"
+    },
+    {
+      "path": "pmworkspace-shared/references/prototype-shotgun-board.md",
+      "contains": "新输出单元缺任一字段都不能登记为已写入"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=board-required; set +e; out=$(bin/pmw-prototype-board add --scheme 方案A --screen 首屏 --brief-version v1 2>&1); code=$?; rm -rf \"$tmp\"; test $code -ne 0 && printf '%s' \"$out\" | grep -q 'required'"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=board-ok; bin/pmw-prototype-board add --scheme 方案A --screen 首屏 --brief-version v1 --product-path '假设A' --behavior-assumption '用户会完成关键任务' --current-loss '当前损失' --tradeoff '后置低优先级' >/dev/null; bin/pmw-prototype-board list | grep -q '假设A'; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=board-legacy; mkdir -p \"$PMW_HOME/projects/$PMW_PROJECT_SLUG\"; python3 - <<'PY'\nimport json, os, pathlib\nroot = pathlib.Path(os.environ['PMW_HOME']) / 'projects' / os.environ['PMW_PROJECT_SLUG']\nkey = 'product' + '_hypothesis'\nrow = {'record_type': 'item', 'scheme': '旧方案', 'screen': '首屏', 'brief_version': 'v1', key: '旧路径判断'}\n(root / 'prototype-board.jsonl').write_text(json.dumps(row, ensure_ascii=False) + '\\n', encoding='utf-8')\nPY\nbin/pmw-prototype-board list | grep -q '旧路径判断'; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0
+    }
+  ]
+}

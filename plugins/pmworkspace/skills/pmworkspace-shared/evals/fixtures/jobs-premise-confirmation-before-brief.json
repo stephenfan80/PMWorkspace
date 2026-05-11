@@ -24,7 +24,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "用户确认后状态为 `已对齐`，才进入三方案原型"
+      "contains": "用户确认后状态为 `已对齐`，才进入原型"
     },
     {
       "path": "pm-jobs/SKILL.md",

@@ -17,7 +17,8 @@
     "forbidden_behaviors": [
       "新增独立产品方案文档",
       "新增独立产品思考账本",
-      "新增 pm-product-expert skill"
+      "新增独立产品专家 skill",
+      "新增独立产品负责人审查 skill"
     ]
   },
   "contract_checks": [
@@ -26,12 +27,18 @@
       "contains": "禁止新增独立“产品方案文档”或“产品思考账本”"
     },
     {
-      "path": "pmworkspace-shared/references/artifact-flow.md",
-      "not_contains": "| `$pm-product-expert` |"
-    },
-    {
       "path": "pmworkspace-shared/skill-docs/skill-docs.manifest.json",
       "not_contains": "产品思考账本"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "python3 - <<'PY'\nimport pathlib, sys\nneedles = ['pm-product-' + 'expert', 'pm-product-owner-' + 'review', 'product_solution_' + 'doc', 'product_thinking_' + 'ledger']\nskip_dirs = {'.git', 'node_modules', '.venv', '__pycache__', 'plugins'}\nroot = pathlib.Path('.')\nfor path in root.rglob('*'):\n    if not path.is_file():\n        continue\n    if any(part in skip_dirs for part in path.parts):\n        continue\n    try:\n        text = path.read_text(encoding='utf-8', errors='ignore')\n    except Exception:\n        continue\n    for needle in needles:\n        if needle in text:\n            print(f'{path}: contains forbidden token {needle}')\n            sys.exit(1)\nPY"
+      ],
+      "exit_code": 0
     }
   ]
 }

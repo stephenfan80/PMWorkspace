@@ -50,9 +50,11 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 ### 默认用户可见输出字段
 
 - `工作方式`
+- `本轮价值时刻`
 - `产品路径`
 - `业务判断`
 - `当前需要确认`
+- `补齐后解锁`
 - `下一步`
 
 ### 内部审计字段（默认不展示）
@@ -125,7 +127,7 @@ Use `pmw-run event` for the D0 result, current gate, evidence state, and next sk
 
 Read `../pmworkspace-shared/references/routing.md`; it is the only route table and D0 source of truth.
 
-After routing, record the full routing contract from `routing.md` in local audit: `当前模式`、`当前门槛`、`下一技能`、`为什么`、`run_id`、`证据状态`. Default user-facing output should show a short `工作方式` card plus `业务判断`、`当前需要确认` and `下一步`, so users can see whether they are in 10min 快速成型 or 深度交付 and what single action is expected now.
+After routing, record the full routing contract from `routing.md` in local audit: `当前模式`、`当前门槛`、`下一技能`、`为什么`、`run_id`、`证据状态`. Default user-facing output should show a short `工作方式` card plus `业务判断`、`当前需要确认` and `下一步`; it must now also include `本轮价值时刻` and `补齐后解锁`, so users can see whether they are in 10min 快速成型 or 深度交付, what product judgment PMW is helping them obtain now, and what single action is expected now.
 
 If platform scripts are available, read `pmw-artifact flow --details` for routing context, but do not include the flow table in default user output. A routed child skill should know the latest `上游产物`, expected `本轮产物`, and `下游可读` target from local audit instead of relying only on conversation memory.
 

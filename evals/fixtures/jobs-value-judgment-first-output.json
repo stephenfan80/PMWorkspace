@@ -12,6 +12,8 @@
     "required_behaviors": [
       "先输出产品方向审查",
       "说明当前任务和证据状态",
+      "说明为什么这个判断有价值",
+      "说明阻断影响和补齐后解锁什么",
       "说明为什么现在做这一步",
       "必要时只展开一个当前 Q 或 D",
       "产品方向审查控制面板写入审计但不默认展示"
@@ -31,6 +33,18 @@
     {
       "path": "pm-jobs/SKILL.md",
       "contains": "- 我现在判断："
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "- 判断价值："
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "- 阻断影响："
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "- 解锁动作："
     },
     {
       "path": "pm-jobs/SKILL.md",

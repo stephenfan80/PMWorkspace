@@ -12,6 +12,8 @@
     "required_behaviors": [
       "输出最大策略矛盾",
       "说明为什么这是最大矛盾",
+      "说明如果现在直接做会错在哪里",
+      "说明本周期验证价值",
       "把矛盾转成策略取舍",
       "不只列多个风险点"
     ],
@@ -27,8 +29,20 @@
       "contains": "每轮必须指出一个最大策略矛盾"
     },
     {
+      "path": "pmworkspace-shared/references/adversarial-review.md",
+      "contains": "如果现在直接做会错在哪里"
+    },
+    {
+      "path": "pm-strategy-review/SKILL.md",
+      "contains": "- 如果现在直接做会错在哪里："
+    },
+    {
       "path": "pm-strategy-review/SKILL.md",
       "contains": "- 最大策略矛盾："
+    },
+    {
+      "path": "pm-strategy-review/SKILL.md",
+      "contains": "- 本周期验证价值："
     },
     {
       "path": "pmworkspace-shared/references/pm-workbench-map.md",

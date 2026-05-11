@@ -1101,7 +1101,82 @@ def render_readiness_section(run_id: Optional[str], target: str = "auto", headin
     return "\n".join(lines)
 
 
-def readiness_verdict(project: dict, events: list[dict], target: str) -> tuple[str, str, str, str, list[dict]]:
+def blocker_guidance(row: Optional[dict], target: str) -> tuple[str, str]:
+    if not row:
+        return "无阻断；关键门槛已通过。", "继续进入下一步。"
+    name = str(row.get("name") or "")
+    action = str(row.get("action") or "")
+    default_unlock = action or ("继续进入下一步" if target == "prototype" else "继续进入交付")
+    guidance = {
+        "产品简报": (
+            "缺少已对齐产品简报会让真实问题、目标用户、主目标、反指标和不可虚构项都停留在口头假设。",
+            "回到 $pm-brief 对齐产品简报；对齐后才能把判断写入原型或交付契约。",
+        ),
+        "产品简报确认": (
+            "缺少用户确认会让 PMW 无法判断当前 brief 是否代表用户拍板，后续原型和交付承诺都不可信。",
+            "先展示关键前提并获得确认；确认后解锁 image-2 原型计划或交付准备度检查。",
+        ),
+        "Zoon": (
+            "协作文档未同步或有漂移会让本地 brief 与团队事实源不一致，后续原型可能基于旧判断。",
+            "同步或确认使用本地 brief；无漂移后继续出图或交付。",
+        ),
+        "线上参考": (
+            "线上参考未判断会让 PMW 无法确认当前方案是否承接生产流程、状态页或既有样式。",
+            "补截图、录屏、相似页面，或确认不适用；之后才能判断视觉基线和原型可信度。",
+        ),
+        "视觉基线": (
+            "缺视觉基线会影响现状替代、问题区域、保留项 / 可改项和原型可信度判断。",
+            "登记截图路径、像素尺寸和目标输出像素；之后才能进入可信的 image-2 prompt。",
+        ),
+        "输出单元绑定": (
+            "输出单元未绑定当前 brief 会让原型图基于旧版本判断，无法作为当前方案依据。",
+            "用 latest brief 重新登记输出单元；之后解锁当前版本原型计划。",
+        ),
+        "输出画布": (
+            "画布未锁定会让线上截图还原和移动端尺寸失真，影响设计评审可信度。",
+            "补齐 physical_longboard 与目标像素；之后再写 image-2 prompt。",
+        ),
+        "截图编辑模式": (
+            "截图编辑字段不完整会让既有功能迭代无法保护生产页面中的保留区域。",
+            "补齐 base_image、edit_scope 和 preserve_regions；之后才能生成可审计的截图改造原型。",
+        ),
+        "方案差异": (
+            "方案差异不足会让多方案退化成视觉换皮，无法帮助用户做产品取舍。",
+            "补齐页面结构、信息架构、交互路径、信任表达或关键任务差异；之后进入三条产品路径原型计划。",
+        ),
+        "原型设计完整度": (
+            "设计完整度缺失会让原型只像提示词草稿，无法判断信息层级、状态覆盖和反模板味风险。",
+            "补齐设计评分、10/10 标准、prompt 修正和状态覆盖；之后解锁 image-2 出图。",
+        ),
+        "设计规范目标": (
+            "缺设计规范目标会导致原型只能按假设生成，无法判断是否适合目标品牌、平台或既有设计系统。",
+            "确认用户规范、AutoDesign、平台模式库或 PMW 默认假设；之后把规范目标写入 image-2 prompt。",
+        ),
+        "方案方向确认": (
+            "方案方向未确认会让 PMW 无法判断用户是否接受当前产品路径和不可虚构边界。",
+            "确认默认方向或选择要推进的路径；之后才能写 image-2 prompt。",
+        ),
+        "不可虚构项": (
+            "缺不可虚构项会让原型和交付稿可能写入无法兑现的数据、能力或承诺。",
+            "补齐不能展示的能力、数据、承诺和动作；之后才能进入可信原型或验收边界。",
+        ),
+        "原型图片审计": (
+            "图片审计失败说明当前图不能代表已对齐方案，继续交付会传播错误设计稿。",
+            "重出失败图片并通过审计；之后才能作为交付结果展示。",
+        ),
+        "复审状态": (
+            "缺复审会让策略、风险、设计系统或数据可行性问题直接进入交付稿。",
+            "完成 $pm-prototype-review 并清掉重出 / 拍板 / 补参考项；之后才能交付。",
+        ),
+        "研发可行性反问": (
+            "缺能力依赖审查会让数据、接口、算法、后台或合规前提被误写成验收承诺。",
+            "在 $pm-handoff 建立功能能力与研发依赖表；普通缺口可待补充，关键缺口需 D 或退回策略审查。",
+        ),
+    }
+    return guidance.get(name, (f"{name} 未通过会影响当前产品判断能否继续。", default_unlock))
+
+
+def readiness_verdict(project: dict, events: list[dict], target: str) -> tuple[str, str, str, str, str, str, list[dict]]:
     effective_target = auto_readiness_target(project, events) if target == "auto" else target
     rows = product_readiness_rows(project, events, effective_target)
     blockers = [row for row in rows if row["required"] and not row["passed"]]
@@ -1109,23 +1184,27 @@ def readiness_verdict(project: dict, events: list[dict], target: str) -> tuple[s
         verdict_cn = "不可出图" if effective_target == "prototype" else "不可交付"
         next_action = blockers[0]["action"]
         reason = f"{blockers[0]['name']}：{blockers[0]['status']}"
+        impact, unlock = blocker_guidance(blockers[0], effective_target)
     else:
         verdict_cn = "可出图" if effective_target == "prototype" else "可交付"
         next_action = "继续进入下一步"
         reason = "关键门槛已通过"
-    return effective_target, verdict_cn, reason, next_action, rows
+        impact, unlock = blocker_guidance(None, effective_target)
+    return effective_target, verdict_cn, reason, impact, unlock, next_action, rows
 
 
 def render_readiness_summary(run_id: Optional[str], target: str = "auto") -> str:
     project = read_json(project_dir() / "project.json")
     chosen_run, events = read_run(run_id)
-    effective_target, verdict_cn, reason, next_action, _rows = readiness_verdict(project, events, target)
+    effective_target, verdict_cn, reason, impact, unlock, next_action, _rows = readiness_verdict(project, events, target)
     lines = [
         "# 产品准备度",
         "",
         f"- 目标：{readiness_target_label(effective_target)}",
         f"- 结论：{verdict_cn}",
         f"- 原因：{reason}",
+        f"- 阻断影响：{impact}",
+        f"- 解锁动作：{unlock}",
         f"- 下一步：{next_action}",
     ]
     if os.environ.get("PMW_DEBUG_OUTPUT") == "true":
@@ -1230,7 +1309,7 @@ def render_status_summary(run_id: Optional[str]) -> str:
     chosen_run, events = read_run(run_id)
     latest_status = project.get("latest_run_status") or (events[-1].get("status") if events else "暂无")
     brief_name, brief_meta = latest_brief_summary(str(project.get("latest_brief", "")))
-    target, verdict_cn, reason, next_action, _rows = readiness_verdict(project, events, "auto")
+    target, verdict_cn, reason, impact, unlock, next_action, _rows = readiness_verdict(project, events, "auto")
     artifact_count = len(read_jsonl(root / "artifact-flow.jsonl"))
     board_count = len(current_board_items(root, str(project.get("latest_brief", "")), str(project.get("latest_brief_version") or ""), chosen_run))
     review = latest_review(events)
@@ -1249,6 +1328,8 @@ def render_status_summary(run_id: Optional[str]) -> str:
         f"- 产品简报：{brief_name}（{brief_meta}）",
         f"- Zoon：{zoon_summary}",
         f"- 准备度：{readiness_target_label(target)}，{verdict_cn}，{reason}",
+        f"- 阻断影响：{impact}",
+        f"- 解锁动作：{unlock}",
         f"- 下一步：{next_action}",
         f"- 产物记录：{artifact_count} 条；方案单元：{board_count} 个；复审：{review.get('status') or '未记录'}",
     ]

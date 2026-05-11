@@ -53,15 +53,15 @@
 ### 5. 原型方案 — `$pm-prototype-shotgun`
 
 - 职责：作为 image-2 原型出图导演，基于已对齐 brief 默认规划最少 3 条产品路径，并逐张生成每个方案 / 屏幕独立设计稿。
-- 输入：已对齐 brief、Zoon 快照、线上参考、视觉基线、设计系统、prototype-board、Product Readiness Dashboard、`product_brief` 产物流动。
-- 硬门槛：readiness verdict 不是 `可出图`、brief 未已对齐、Zoon 实质漂移、线上参考缺失、视觉基线缺目标像素、线上截图下输出单元未锁定物理长板、产品路径少于 3 条且无豁免、方案只换皮、缺产品路径/原型思考、缺原型设计完整度判断或 image-2 不可用时，不能写提示词或替代出图；一次 image-2 调用只能生成一张图、一个产品路径和一个屏幕任务。
+- 输入：已对齐 brief、Zoon 快照、线上参考、视觉基线、设计系统、设计规范目标、prototype-board、Product Readiness Dashboard、`product_brief` 产物流动。
+- 硬门槛：readiness verdict 不是 `可出图`、brief 未已对齐、Zoon 实质漂移、线上参考缺失、视觉基线缺目标像素、线上截图下输出单元未锁定物理长板、产品路径少于 3 条且无豁免、方案只换皮、缺产品路径/原型思考、缺原型设计完整度判断、缺设计规范目标或 image-2 不可用时，不能写提示词或替代出图；一次 image-2 调用只能生成一张图、一个产品路径和一个屏幕任务。
 - 输出：`prototype_manifest` 登记到产物流动，状态 `可进入原型复审`。
 - 代表 eval：`pm-prototype-shotgun`、`prototype-shotgun`、`prototype-output-contract`、`multi-scheme`、`production-reference`、`screenshot-feedback`、`artifact-flow`。
 
 ### 6. 原型复审 — `$pm-prototype-review`
 
 - 职责：判断图片是否可通过、需要重出、需要 PM 拍板或补参考，并把用户反馈资产化。
-- 输入：原型图片、输出单元绑定、brief、Zoon、线上参考、设计系统、PM Review Army / Product Review Squad、可插拔复审专家、用户全局记忆、`prototype_manifest` 产物流动。
+- 输入：原型图片、输出单元绑定、brief、Zoon、线上参考、设计系统、设计规范目标、PM Review Army / Product Review Squad、可插拔复审专家、用户全局记忆、`prototype_manifest` 产物流动。
 - 硬门槛：缺绑定不能凭视觉通过；策略、信任 / 风险、设计系统、数据可行性四个专家必须独立输出短结论；违反 brief / 反指标 / 不可虚构 / 线上参考 / 设计系统 / 10/10 原型标准或出现明显 AI 模板味时必须重出；产品承诺未决必须拍板；深度交付、高风险、批量交付、研发交付或多角色 review 必须输出 CEO、Eng、Design、DX、安全、QA、发布工程师短结论。
 - 输出：`prototype_review` 或 `repair_brief` 登记到产物流动；专家短结论写入本地 review-specialists 资产；个人偏好、产品认知或 PMWorkspace 进化候选写入本地资产。
 - 代表 eval：`prototype-review`、`review-specialists`、`artifact-flow`。
@@ -139,7 +139,7 @@
 - `基于假设，可讨论`：快速成型轻量包可讨论，但不是最终 PRD 或已验证事实。
 - `已对齐`：产品简报、关键前提或最新 Zoon 已确认。
 - `可进入原型复审`：已生成独立原型图片，需要复审。
-- `需要补充参考`：缺少线上截图、设计系统、输出单元绑定或真实数据边界。
+- `需要补充参考`：缺少线上截图、设计系统、设计规范目标、输出单元绑定或真实数据边界。
 - `需要重出`：图片违反 brief、反指标、不可虚构项、线上参考或设计系统。
 - `可通过`：原型复审通过，可进入交付。
 - `可交付`：交付前门槛全部通过，交付稿可以保存并交给下一团队。
@@ -155,7 +155,7 @@
 | `pm-jobs` | 产品方向审查内核 | 前提挑战、现状替代、不做推演、路径对比、范围模式、PM 判断摘要、产品作业、上游门槛接力 |
 | `pm-strategy-review` | 产品方向审查 | 策略结论先行、路径对比、范围模式、最大策略矛盾、产品动作、缺事实退回、一个策略 D |
 | `pm-brief` | 产品简报 | 产品简述 / 产品简报、真实问题、证据状态、目标用户、当前替代/损失、选中路径、范围模式、本周期验证、待验证项、Zoon 漂移、已对齐门槛、进入原型/交付 |
-| `pm-prototype-shotgun`、`prototype-shotgun`、`prototype-output-contract`、`multi-scheme`、`production-reference`、`screenshot-feedback` | 原型方案 | image-2 前门槛、单图生成协议、默认最少 3 条产品路径、方案差异质量、原型思考、输出单元、线上参考、设计系统 |
+| `pm-prototype-shotgun`、`prototype-shotgun`、`prototype-output-contract`、`multi-scheme`、`production-reference`、`screenshot-feedback` | 原型方案 | image-2 前门槛、单图生成协议、默认最少 3 条产品路径、方案差异质量、原型思考、输出单元、线上参考、设计系统、设计规范目标 |
 | `prototype-review` | 原型复审 | 复审控制器、重出、PM 拍板、偏好边界 |
 | `review-specialists` | 原型复审 | 四个可插拔专家独立短结论、最高严重度合并、`pmw-review-specialist` 可追踪 |
 | `pm-handoff` | 产品交付 | 产品设计文档、精简 PRD 核心字段、现成文档入口、未复审不交付、未拍板不写验收、缺口留空、保存 handoff / product_design_doc 和交付事实 |

@@ -108,7 +108,7 @@ done
 13. Read `../pmworkspace-shared/references/pm-eval-system.md` and preserve prototype review contracts.
 14. 建立原型复审控制器，记录 `复审输入`、`输出单元绑定`、`设计完整度复审`、`可插拔专家`、`专家合并结论`、`Product Review Squad`、`角色短结论`、`判定原因`、`行动结论`、`修正方向`、`PM 拍板`、`偏好沉淀`、`反馈资产化`、`上游产物`、`本轮产物`、`下游可读`、`产物流动` 和 `证据状态`；这些默认写入审计，用户可见输出只保留复审结论、逐屏结论、需要调整和下一步。
 15. If `pmw-project show` contains a Zoon URL, run `pmw-zoon drift` when available. If drift exists, read the latest Zoon snapshot before judging the image. If drift changes product facts, route back to `$pm-brief` or `$pm-strategy-review` before accepting the image.
-16. For every image, check the bound output unit: 方案名、屏幕任务、产品路径、用户行为假设、要赢过的现状替代、当前损失、删除 / 牺牲 / 后置项、验证信号、失败信号、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、视觉基线状态、目标输出像素、设计完整度评分、10/10 原型标准、prompt 设计修正、状态覆盖、第一眼 / 第二眼 / 第三眼和反 AI 模板味约束. If an image is not bound to one output unit or prototype-board item, mark `需要补充参考` and do not pass it by visual impression.
+16. For every image, check the bound output unit: 方案名、屏幕任务、产品路径、用户行为假设、要赢过的现状替代、当前损失、删除 / 牺牲 / 后置项、验证信号、失败信号、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、视觉基线状态、目标输出像素、设计完整度评分、10/10 原型标准、prompt 设计修正、状态覆盖、第一眼 / 第二眼 / 第三眼、反 AI 模板味约束、设计规范目标、设计系统 / 平台模式、灵感来源摘要和禁止照搬项. If an image is not bound to one output unit or prototype-board item, mark `需要补充参考` and do not pass it by visual impression.
 17. If a reference screenshot and generated image path exist, run `pmw-image-audit audit --image <生成图> --reference <参考图>` before expert review. If it returns `需要重出`, the merged conclusion is at least `需要重出`; do not override a failed width / long-board audit with subjective visual approval.
 18. Score each screen on seven dimensions: 产品路径一致性、产品一致性、任务完成、信任与反指标、设计系统、设计完整度、可交付性. Scores are diagnostic only; any hard violation overrides the average. `设计完整度` 必须对照 prototype-board 中的 10/10 原型标准，检查信息层级、状态覆盖、移动端可用性和反 AI 模板味是否达标。
 19. Run PM Review Army as pluggable specialists first: `strategy`、`trust-risk`、`design-system`、`data-feasibility` must each output an independent short conclusion with status, severity, evidence, one-sentence judgment, and action. When platform scripts are available, record each with `pmw-review-specialist add`, then run `pmw-review-specialist summary`; `$pm-prototype-review` merges the four specialist outputs into `可通过`、`需要重出`、`需要 PM 拍板`, or `需要补充参考`.
@@ -127,7 +127,7 @@ done
 - `已通过`：没有实质偏离，只有轻微文字或审美调整。
 - `需要重出`：违反产品简报、反指标、不可虚构项、线上参考或设计系统。
 - `需要 PM 拍板`：问题来自产品取舍未决，不应靠改图解决。
-- `需要补充参考`：图的问题来自缺少线上截图、设计系统或真实数据边界。
+- `需要补充参考`：图的问题来自缺少线上截图、设计系统、设计规范目标或真实数据边界。
 - `可通过` 只能用于不影响产品判断或交付使用的问题；轻微审美偏好可以记录 taste，但不能覆盖当前 brief、Zoon、反指标或不可虚构项。
 
 ## 输出

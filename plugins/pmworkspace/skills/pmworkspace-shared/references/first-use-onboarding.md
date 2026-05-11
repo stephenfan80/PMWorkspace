@@ -12,7 +12,7 @@ For Chinese users, make the first response feel like a Chinese product app onboa
 - **线上参考需求：** 新页面是否承接线上流程、结果状态、活动页、表单页或生产样式。
 - **协作方式：** 使用现有 Zoon 文档、新建/更新 Zoon 产品简报，或把产品简报留在对话里。
 - **期望输出：** 只要产品简报、一个移动端原型屏、两个关联屏、多方案原型、交付稿，或截图修改。
-- **设计基线：** 默认使用 AutoDesign 生产基线；如果用户提供更强的设计系统，则以用户提供的为准。
+- **设计规范目标：** 优先识别用户提供的设计系统、Figma、截图或品牌规则；命中汽车之家 / AutoDesign 时使用 AutoDesign；非汽车之家产品可选择平台模式库或 PMW 默认移动端产品 UI 基线。
 
 ## 最小上下文
 
@@ -25,7 +25,7 @@ For Chinese users, make the first response feel like a Chinese product app onboa
 - 目标人群、触发时刻、当前替代方案。
 - 主目标 / 主指标和反指标。
 - 可以真实展示的数据、不可虚构项和运营 / 合规约束。
-- 期望输出形态、屏幕数量、设备平台和设计基线。
+- 期望输出形态、屏幕数量、设备平台和设计规范目标。
 
 ## 首轮问题
 
@@ -55,7 +55,7 @@ For Chinese users, make the first response feel like a Chinese product app onboa
 - 线上参考状态：
 - 场景路由：
 - 期望输出：
-- 设计基线：
+- 设计规范目标：
 - 阻塞项：
 ```
 
@@ -76,7 +76,7 @@ For Chinese users, make the first response feel like a Chinese product app onboa
 主目标与反指标：<指标 / 行为 + 不能变差>
 数据与不可虚构项：<可真实展示 / 估算 / 不可用>
 期望输出：<产品简报 / 原型图 / 复审 / 交付稿>
-设计基线：<AutoDesign / 用户提供系统 / 截图事实来源>
+设计规范目标：<用户提供 / AutoDesign / 平台模式库 / PMW 默认假设>
 阻塞项：<无 / 缺截图 / 缺目标 / 缺反指标 / 缺数据边界>
 ```
 
@@ -87,7 +87,7 @@ For Chinese users, make the first response feel like a Chinese product app onboa
 - 关键产品决策默认使用选择题拍板；每轮只展开一个完整 `D`，其余只提示后续标题队列。
 - 默认原型设备是移动端优先：无线上截图时使用 `standard_first_screen` 模板；有生产截图时使用 `physical_longboard` 模板和截图物理长板。
 - 只有用户明确要求桌面端，或场景是看板/内部工具且确实需要大屏密度时，才使用桌面端。
-- 默认视觉系统是 AutoDesign 生产基线。
+- 默认先确认设计规范目标；用户未提供且非汽车之家产品时，使用 PMW 默认移动端产品 UI 基线并标记 `基于假设，可讨论`。
 - 新页面默认先判断是否需要线上参考；结果页、状态页和线上流程下一步不能直接按空白新功能出图。
 - 如果用户提供 Zoon 文档，默认把 Zoon 作为协作事实来源。
 - 不要默认加入手机号、留资、付款、登录或其他高成本动作，除非产品上下文确实需要。

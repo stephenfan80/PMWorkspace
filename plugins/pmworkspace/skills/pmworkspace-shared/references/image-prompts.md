@@ -22,6 +22,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - `方案差异质量`：默认最少 3 条产品路径；每条路径差异来自产品策略、信息架构、交互模型、信任模型或关键任务路径；如果只是配色、圆角、插画、卡片皮肤不同，停止并重拟方向。少于 3 条路径必须有明确豁免原因。
 - `产品路径 / 原型思考`：每条路径必须写明它相信什么用户行为、要赢过哪个现状替代、解决什么当前损失、主动删除 / 牺牲 / 后置什么、验证信号、失败信号、为什么这样设计、信息架构如何组织、如何帮助用户解决问题、解决哪个反指标风险，以及哪些内容不可虚构。
 - `原型设计完整度`：每条产品路径在写 image-2 prompt 前必须给出 0-10 评分、为什么是这个分数、距离 10/10 的最大设计差距、10/10 原型标准、本轮 prompt 如何补齐、反 AI 模板味约束、状态覆盖策略和第一眼 / 第二眼 / 第三眼信息层级。快速成型可以低分继续，但必须标记 `基于假设，可讨论`，不能包装成设计已完成。
+- `设计规范目标`：每个输出单元必须声明目标来自用户提供规范、AutoDesign、平台模式库或 PMW 默认假设，并写清平台模式、灵感来源摘要、不可照搬项和版权边界。Dribbble / Pinterest / 平台参考只能转成抽象设计原则，不能复制图片、文案、品牌素材或专有 UI。
 - `方案方向确认`：用户已确认方向，或明确批准使用默认方向；未确认时只输出方向和取舍，不写图片提示词。
 - `输出单元清单`：把每个 `方案 + 屏幕任务` 拆成一张独立图片，并绑定主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统、image-2 状态和画布。
 - `方案比较板写入`：生成前用 `pmw-prototype-board add` 登记计划单元，生成后补充图片路径或 URL；脚本不可用时在输出中标记原因。
@@ -58,11 +59,12 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - 每张图片已经绑定方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统和 image-2 状态。
 - 每条路径已经写入 `产品路径`、`用户行为假设`、`要赢过的现状替代`、`当前损失`、`删除 / 牺牲 / 后置项`、`验证信号`、`失败信号`、`原型思考`、`信息架构设计思考`、`用户问题解决逻辑`、`反指标保护` 和 `不可虚构边界`。
 - 每条路径已经写入 `设计完整度评分`、`主要设计差距`、`10/10 原型标准`、`prompt 设计修正方向`、`反 AI 模板味约束`、`状态覆盖` 和 `第一眼 / 第二眼 / 第三眼信息层级`；如果缺失，先补原型设计完整度，不写 image-2 prompt。
+- 每个输出单元已经写入 `设计规范目标`、`设计系统 / 平台模式`、`灵感来源摘要` 和 `禁止照搬项`；如果设计规范不明确，先给用户设计规范目标卡，或得到用户确认后按 PMW 默认假设继续。
 - 每个输出单元已经登记到 Prototype Shotgun Board，或已说明脚本不可用的原因。
 - 画布决策遵循移动端优先但必须二选一：无线上截图时使用 `standard_first_screen` 模板；有线上截图 / `visual_baseline` 时使用 `physical_longboard` 模板。最终 image-2 prompt 只写当前模式的正向画布字段，不复制另一种模式的短画布锚点。
 - 汽车之家 / AutoDesign 生产页必须声明 `参考截图尺寸`、截图倍率和 `目标输出画布`；线上截图基线覆盖泛化 token。目标默认使用参考截图原始物理像素长板，例如 `1179 x 2556 = 393pt @3x`；字体、间距、卡片和底部栏按参考物理像素比例等比执行。只有显式 override 目标宽度时才允许改宽，并必须同步等比缩放字号、间距和组件。
 - 视觉还原优先的线上截图任务必须使用 `screenshot_edit`：以参考截图为底，只修改目标区域，保留状态栏、顶部导航、车系头图、车型切换、tab 和底部吸底 CTA；不得从零重绘整页。
-- 已通过 `design-system-workflow.md` 载入 AutoDesign 生产基线。
+- 已通过 `design-system-workflow.md` 确定并确认设计规范目标。
 - 产品方向审查中的实质改动已写回产品简报。
 - 已运行 Product Readiness Dashboard，且出图前 required 行的 verdict 是 `可出图`。
 
@@ -117,6 +119,11 @@ For every image generation request, declare the output unit before prompting:
 - 状态覆盖：<默认 / 加载 / 空态 / 错误 / 成功 / 部分结果如何表达；不适用也要说明>
 - 第一眼 / 第二眼 / 第三眼：<用户扫描时分别看到什么>
 - 反 AI 模板味约束：<禁止泛卡片、紫蓝渐变、装饰性图标、模板 hero 等具体模式>
+- 设计规范目标：<用户提供 / AutoDesign / 平台模式库 / PMW 默认假设>
+- 设计系统 / 平台模式：<具体系统或平台模式；不适用时写 PMW 默认移动端产品 UI 基线>
+- 灵感来源摘要：<Dribbble / Pinterest / 公开页面 / 用户截图 / 未使用；只写可复用模式>
+- 禁止照搬项：<具体图片 / 品牌素材 / 文案 / 专有 UI / 未授权资产>
+- 版权边界：<仅抽象启发 / 用户自有规范 / 已授权 / 未授权不可复制>
 - 画布模式：<standard_first_screen 或 physical_longboard，只能二选一>
 - 画布：<按下方互斥模板填写，不要把两种模式写在同一行>
 - 主目标：<这个屏幕服务的指标或行为>
@@ -129,7 +136,12 @@ For every image generation request, declare the output unit before prompting:
 - base_image：<screenshot_edit 时写当前 visual_baseline 的参考截图路径>
 - edit_scope：<screenshot_edit 时写本次只修改的目标区域 / 目标模块>
 - preserve_regions：<screenshot_edit 时默认保留：状态栏、顶部导航、车系头图、车型切换、tab、底部吸底 CTA>
-- 设计系统：<AutoDesign / 用户提供设计系统 / 截图基线 / 默认生产基线>
+- 设计系统：<用户提供设计系统 / AutoDesign / 截图基线 / 平台模式库 / PMW 默认移动端产品 UI 基线>
+- 设计规范目标：<用户提供 / AutoDesign / 平台模式库 / PMW 默认假设>
+- 平台模式：<Instagram / YouTube / TikTok / 抖音 / 大众点评 / 美团 / 不适用>
+- 灵感来源摘要：<可复用布局、信息层级、交互结构、状态表达和信任提示；不可写成复制来源>
+- 禁止照搬项：<图片、品牌素材、文案、专有 UI、未授权资产>
+- 版权边界：<仅抽象启发 / 用户自有规范 / 已授权 / 未授权不可复制>
 - image-2 状态：<计划生成 / 已生成 / 生成失败 / 待重试 / 需要重出>
 - 依赖：<产品简报版本和来源>
 ```
@@ -182,6 +194,21 @@ Rules:
 - 相关图片之间要保持产品事实、示例数据、字体层级和设计系统一致。
 - 每个输出单元必须能追溯到已对齐产品简报中的产品判断；如果追溯不到，先回到产品对齐。
 - 每个输出单元必须能追溯到自己的 10/10 原型标准；生成后复审会按该标准判断是否达标。若生成图明显出现模板味，即使产品逻辑正确，也不得直接通过。
+- 每个输出单元必须能追溯到自己的设计规范目标；设计灵感只能提升布局、状态、层级和信任表达，不能替代产品路径，也不能复制外部页面。
+
+## 设计启发 Prompt Block
+
+Use this block whenever Dribbble, Pinterest, platform references, or user-provided visual inspiration are used. Keep it abstract and safe:
+
+```text
+Design inspiration constraints:
+- Design-spec target: <用户提供 / AutoDesign / 平台模式库 / PMW 默认假设>.
+- Platform pattern: <Instagram / YouTube / TikTok / 抖音 / 大众点评 / 美团 / 不适用>.
+- Inspiration summary: only reuse layout logic, information hierarchy, interaction structure, component density, visual rhythm, state expression, trust cues, and de-noising strategy.
+- Do not copy any specific screenshot, image, illustration, logo, brand asset, proprietary UI, exact copywriting, creator content, or unlicensed visual material.
+- If the reference is Dribbble or Pinterest, treat it as mood / structure evidence only; convert it into concrete product UI decisions for the current brief.
+- If the reference is an external platform pattern, do not claim official compliance; write it as a PMW platform-pattern profile.
+```
 
 ## 基础 UI 原型模板
 
@@ -199,6 +226,11 @@ Rules:
   - 方案方向：<名称和策略>
   - 产品路径：<它相信什么用户行为、要赢过哪个现状替代、解决什么损失、主动删除 / 牺牲 / 后置什么>
   - 设计完整度目标：<当前评分、主要差距、10/10 原型标准、本轮 prompt 修正方向>
+  - 设计规范目标：<用户提供 / AutoDesign / 平台模式库 / PMW 默认假设>
+  - 平台模式：<Instagram / YouTube / TikTok / 抖音 / 大众点评 / 美团 / 不适用>
+  - 灵感来源摘要：<可复用模式，不复制来源>
+  - 禁止照搬项：<图片、品牌素材、文案、专有 UI、未授权资产>
+  - 版权边界：<仅抽象启发 / 用户自有规范 / 已授权 / 未授权不可复制>
   - 信息层级：<第一眼 / 第二眼 / 第三眼>
   - 状态策略：<默认 / 加载 / 空态 / 错误 / 成功 / 部分结果>
   - 反 AI 模板味约束：<禁止的模板模式和必须删除 / 降级的装饰项>
@@ -246,13 +278,15 @@ Rules:
 - 色彩：<品牌/参考色>
 - 布局密度：<紧凑 / 标准 / 宽松>
 - 设计系统约束：<适用时粘贴 design-system-workflow.md 的简短摘要>
-- AutoDesign 基线：除非用户提供的设计系统明确覆盖，使用接近生产的 AutoDesign token、间距、组件和反模式约束。汽车之家产品 UI 中，线上截图的字号层级、间距节奏、组件密度和长板尺寸优先于泛化 AutoDesign token；品牌 VI 色和字体包只作为品牌露出、活动视觉或特殊场景参考，不能覆盖产品 UI token，也不能写成字体已授权可生产。
+- 设计规范目标：<适用时粘贴 design-system-workflow.md 的设计规范目标卡摘要>
+- 设计启发约束：<若使用 Dribbble / Pinterest / 平台模式库，只写可复用模式和不可照搬项>
+- 设计规范目标约束：按已确认的用户规范、AutoDesign、平台模式库或 PMW 默认假设执行。汽车之家产品 UI 中，线上截图的字号层级、间距节奏、组件密度和长板尺寸优先于泛化 AutoDesign token；品牌 VI 色和字体包只作为品牌露出、活动视觉或特殊场景参考，不能覆盖产品 UI token，也不能写成字体已授权可生产。
 - 避免：不要红色标注框、不要水印、不要外部说明、不要文字重叠。
 ```
 
 ## AutoDesign Prompt Block
 
-Use this block by default as the production-quality visual baseline. If the product is not Autohome, use the visual discipline without adding Autohome-specific brand copy or domain content. Keep it in the prompt even when reference screenshots are provided, unless the screenshots clearly supersede a specific value.
+Use this block when the design-spec target is AutoDesign / Autohome, or when the user explicitly chooses AutoDesign for a non-Autohome concept. If the product is not Autohome, use only the visual discipline without adding Autohome-specific brand copy or domain content. Keep screenshot facts above generic tokens whenever reference screenshots are provided.
 
 ```text
 AutoDesign production constraints:
@@ -359,7 +393,7 @@ Constraints:
 
 After generation, use `prototype-quality-review.md`:
 
-- 对照已对齐的产品简报、场景路由、方案方向、可行性边界和 AutoDesign 基线检查图片。
+- 对照已对齐的产品简报、场景路由、方案方向、可行性边界和当前设计规范目标检查图片。
 - 有参考图时先运行 `pmw-image-audit audit --image <生成图> --reference <参考图>`；宽度低于参考截图 95%、长板高度低于参考截图 95%、底部栏遮挡或内容裁切时，结论至少是 `需要重出`。
 - 如果某个屏幕有实质问题，只修改对应提示词/屏幕。
 - 最终回答包含简短交付清单，不写长篇理由。

@@ -33,6 +33,7 @@ pmw-dashboard status
 | 输出单元绑定 | Conditional | Conditional | 已登记 prototype-board 输出单元时，`brief_path` 和 `brief_version` 必须等于当前 latest brief；旧 brief 版本的输出单元不能放行出图。 |
 | 输出画布 | Conditional | Conditional | 有 `visual_baseline` 时，当前 run 的 prototype-board 输出单元必须写 `canvas_mode=physical_longboard` 和 `target_output_pixels`，且不得含 `pmw-prototype-prompt-check` 定义的短画布锚点。 |
 | 方案差异 | Required | Required | 多方案必须在页面结构、信息架构、交互路径、信任表达或关键任务上不同；单方案也要标注不适用或已登记。 |
+| 原型设计完整度 | Required | Conditional | 出图前必须完成；交付前如存在 prototype-board 输出单元，则每个输出单元必须记录设计评分、主要设计差距、10/10 原型标准、prompt 设计修正、状态覆盖、第一眼 / 第二眼 / 第三眼和反 AI 模板味约束。缺失时不写 image-2 prompt，也不能把该原型作为交付依据。 |
 | 方案方向确认 | Required | Required | 当前 run 必须记录用户已确认或批准默认方案方向；未确认时不写 image-2 prompt。 |
 | 不可虚构项 | Required | Required | 必须明确不能展示的能力、数据、承诺或动作。 |
 | 数据佐证 | no | no | 有数据时登记 `data_evidence`；没有数据时不阻断，但必须提示 `未提供，存在未验证风险`，并把风险写入 brief 与原型不可虚构项。 |
@@ -44,7 +45,7 @@ pmw-dashboard status
 
 ## Verdict 规则
 
-- `READY_FOR_PROTOTYPE / 可出图`：产品简报、产品简报确认、线上参考、必要的视觉基线、方案差异、方案方向确认和不可虚构项都通过；Zoon 未启用时使用本地简报，已启用时必须同步且无漂移；数据佐证缺失只提示未验证风险；复审状态仅展示，不阻断出图。
+- `READY_FOR_PROTOTYPE / 可出图`：产品简报、产品简报确认、线上参考、必要的视觉基线、方案差异、原型设计完整度、方案方向确认和不可虚构项都通过；Zoon 未启用时使用本地简报，已启用时必须同步且无漂移；数据佐证缺失只提示未验证风险；复审状态仅展示，不阻断出图。
 - `READY_FOR_HANDOFF / 可交付`：出图前门槛全部通过，且原型复审为 `可通过`，研发可行性反问已完成，关键 D 已拍板，交付缺口不会改变承诺或验收。
 - `NOT_READY / 不可出图 / 不可交付`：任一 required 行未通过。输出必须给出第一条阻断行的行动建议，并路由到能补齐它的最早技能。
 
@@ -83,6 +84,7 @@ PMWorkspace 产品准备度仪表盘：
 | 输出单元绑定 | YES/no | ... | ... | ... |
 | 输出画布 | YES/no | ... | ... | ... |
 | 方案差异 | YES | ... | ... | ... |
+| 原型设计完整度 | YES | ... | ... | ... |
 | 方案方向确认 | YES | ... | ... | ... |
 | 不可虚构项 | YES | ... | ... | ... |
 | 数据佐证 | no | ... | ... | ... |

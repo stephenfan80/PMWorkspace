@@ -54,7 +54,7 @@
 
 - 职责：作为 image-2 原型出图导演，基于已对齐 brief 默认规划最少 3 条产品路径，并逐张生成每个方案 / 屏幕独立设计稿。
 - 输入：已对齐 brief、Zoon 快照、线上参考、视觉基线、设计系统、prototype-board、Product Readiness Dashboard、`product_brief` 产物流动。
-- 硬门槛：readiness verdict 不是 `可出图`、brief 未已对齐、Zoon 实质漂移、线上参考缺失、视觉基线缺目标像素、线上截图下输出单元未锁定物理长板、产品路径少于 3 条且无豁免、方案只换皮、缺产品路径/原型思考或 image-2 不可用时，不能写提示词或替代出图；一次 image-2 调用只能生成一张图、一个产品路径和一个屏幕任务。
+- 硬门槛：readiness verdict 不是 `可出图`、brief 未已对齐、Zoon 实质漂移、线上参考缺失、视觉基线缺目标像素、线上截图下输出单元未锁定物理长板、产品路径少于 3 条且无豁免、方案只换皮、缺产品路径/原型思考、缺原型设计完整度判断或 image-2 不可用时，不能写提示词或替代出图；一次 image-2 调用只能生成一张图、一个产品路径和一个屏幕任务。
 - 输出：`prototype_manifest` 登记到产物流动，状态 `可进入原型复审`。
 - 代表 eval：`pm-prototype-shotgun`、`prototype-shotgun`、`prototype-output-contract`、`multi-scheme`、`production-reference`、`screenshot-feedback`、`artifact-flow`。
 
@@ -62,7 +62,7 @@
 
 - 职责：判断图片是否可通过、需要重出、需要 PM 拍板或补参考，并把用户反馈资产化。
 - 输入：原型图片、输出单元绑定、brief、Zoon、线上参考、设计系统、PM Review Army / Product Review Squad、可插拔复审专家、用户全局记忆、`prototype_manifest` 产物流动。
-- 硬门槛：缺绑定不能凭视觉通过；策略、信任 / 风险、设计系统、数据可行性四个专家必须独立输出短结论；违反 brief / 反指标 / 不可虚构 / 线上参考 / 设计系统必须重出；产品承诺未决必须拍板；深度交付、高风险、批量交付、研发交付或多角色 review 必须输出 CEO、Eng、Design、DX、安全、QA、发布工程师短结论。
+- 硬门槛：缺绑定不能凭视觉通过；策略、信任 / 风险、设计系统、数据可行性四个专家必须独立输出短结论；违反 brief / 反指标 / 不可虚构 / 线上参考 / 设计系统 / 10/10 原型标准或出现明显 AI 模板味时必须重出；产品承诺未决必须拍板；深度交付、高风险、批量交付、研发交付或多角色 review 必须输出 CEO、Eng、Design、DX、安全、QA、发布工程师短结论。
 - 输出：`prototype_review` 或 `repair_brief` 登记到产物流动；专家短结论写入本地 review-specialists 资产；个人偏好、产品认知或 PMWorkspace 进化候选写入本地资产。
 - 代表 eval：`prototype-review`、`review-specialists`、`artifact-flow`。
 

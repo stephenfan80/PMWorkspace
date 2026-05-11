@@ -52,6 +52,7 @@ description: |
 
 - `复审结论`
 - `逐屏结论`
+- `设计完整度复审`
 - `需要重出的屏幕`
 - `需要 PM 拍板`
 - `下一步`
@@ -61,6 +62,7 @@ description: |
 - `复审输入`
 - `输出单元绑定`
 - `产品路径`
+- `设计完整度复审`
 - `PM Review Army`
 - `可插拔专家`
 - `专家合并结论`
@@ -104,14 +106,14 @@ done
 11. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-prototype-review` 且没有当前 run，再创建 runtime run.
 12. Read `../pmworkspace-shared/references/pm-decision-principles.md`; unresolved user promise, data truth, scope, experiment, lead, transaction, privacy, or compliance issues must become `需要 PM 拍板`, not visual fixes.
 13. Read `../pmworkspace-shared/references/pm-eval-system.md` and preserve prototype review contracts.
-14. 建立原型复审控制器，记录 `复审输入`、`输出单元绑定`、`可插拔专家`、`专家合并结论`、`Product Review Squad`、`角色短结论`、`判定原因`、`行动结论`、`修正方向`、`PM 拍板`、`偏好沉淀`、`反馈资产化`、`上游产物`、`本轮产物`、`下游可读`、`产物流动` 和 `证据状态`；这些默认写入审计，用户可见输出只保留复审结论、逐屏结论、需要调整和下一步。
+14. 建立原型复审控制器，记录 `复审输入`、`输出单元绑定`、`设计完整度复审`、`可插拔专家`、`专家合并结论`、`Product Review Squad`、`角色短结论`、`判定原因`、`行动结论`、`修正方向`、`PM 拍板`、`偏好沉淀`、`反馈资产化`、`上游产物`、`本轮产物`、`下游可读`、`产物流动` 和 `证据状态`；这些默认写入审计，用户可见输出只保留复审结论、逐屏结论、需要调整和下一步。
 15. If `pmw-project show` contains a Zoon URL, run `pmw-zoon drift` when available. If drift exists, read the latest Zoon snapshot before judging the image. If drift changes product facts, route back to `$pm-brief` or `$pm-strategy-review` before accepting the image.
-16. For every image, check the bound output unit: 方案名、屏幕任务、产品路径、用户行为假设、要赢过的现状替代、当前损失、删除 / 牺牲 / 后置项、验证信号、失败信号、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、视觉基线状态、目标输出像素. If an image is not bound to one output unit or prototype-board item, mark `需要补充参考` and do not pass it by visual impression.
+16. For every image, check the bound output unit: 方案名、屏幕任务、产品路径、用户行为假设、要赢过的现状替代、当前损失、删除 / 牺牲 / 后置项、验证信号、失败信号、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、视觉基线状态、目标输出像素、设计完整度评分、10/10 原型标准、prompt 设计修正、状态覆盖、第一眼 / 第二眼 / 第三眼和反 AI 模板味约束. If an image is not bound to one output unit or prototype-board item, mark `需要补充参考` and do not pass it by visual impression.
 17. If a reference screenshot and generated image path exist, run `pmw-image-audit audit --image <生成图> --reference <参考图>` before expert review. If it returns `需要重出`, the merged conclusion is at least `需要重出`; do not override a failed width / long-board audit with subjective visual approval.
-18. Score each screen on six dimensions: 产品路径一致性、产品一致性、任务完成、信任与反指标、设计系统、可交付性. Scores are diagnostic only; any hard violation overrides the average.
+18. Score each screen on seven dimensions: 产品路径一致性、产品一致性、任务完成、信任与反指标、设计系统、设计完整度、可交付性. Scores are diagnostic only; any hard violation overrides the average. `设计完整度` 必须对照 prototype-board 中的 10/10 原型标准，检查信息层级、状态覆盖、移动端可用性和反 AI 模板味是否达标。
 19. Run PM Review Army as pluggable specialists first: `strategy`、`trust-risk`、`design-system`、`data-feasibility` must each output an independent short conclusion with status, severity, evidence, one-sentence judgment, and action. When platform scripts are available, record each with `pmw-review-specialist add`, then run `pmw-review-specialist summary`; `$pm-prototype-review` merges the four specialist outputs into `可通过`、`需要重出`、`需要 PM 拍板`, or `需要补充参考`.
 20. For deep delivery, high-risk, batch handoff, engineering handoff, production flow, or explicit multi-role review requests, also run Product Review Squad roles: CEO, Eng, Design, DX, 安全, QA, 发布工程师. Each role must output a short conclusion with status, severity, evidence, one-sentence judgment, and action; merge role outputs after the pluggable specialist merge.
-21. If a screen violates the product hypothesis, product brief, anti-metric, non-fiction boundary, online reference, visual baseline, target output pixels, or design system, mark `需要重出` and produce a concise repair brief for `$pm-prototype-shotgun`; do not accept a pretty but misleading image.
+21. If a screen violates the product path, product brief, anti-metric, non-fiction boundary, online reference, visual baseline, target output pixels, design system, 10/10 原型标准, or anti-AI-slop constraints, mark `需要重出` and produce a concise repair brief for `$pm-prototype-shotgun`; do not accept a pretty but misleading image. 明显泛 SaaS 卡片堆叠、紫蓝渐变、装饰性图标圆圈、无意义 hero、拼贴感界面、占位式空态或不可读状态，也不能因为“看起来好看”而通过。
 22. If the issue is unresolved user promise, data truth, scope, experiment, lead, transaction, privacy, or compliance boundary, mark `需要 PM 拍板`, output one current D, and do not create repair prompts until the D is resolved.
 23. Log approved/rejected preferences with `pmw-log taste` only for user feedback or review-confirmed preferences; include scenario, feedback target, source, scope, and confidence. Do not save fact violations, anti-metric risks, non-fiction failures, missing references, or unresolved promises as taste. Failed image audits also cannot be saved as taste.
 24. 将复审和用户反馈做 `反馈资产化`：分类为 `个人偏好`、`产品认知`、`PMWorkspace 进化建议` 或 `不应保存`。个人偏好用 `pmw-memory add-feedback --type preference`，产品认知用 `pmw-memory add-feedback --type product-cognition`，进化建议用 `pmw-memory add-feedback --type pmworkspace-improvement`；需要回流 GitHub 时只生成本地脱敏待审稿 `pmw-memory draft-github-feedback`，不自动提交。
@@ -134,6 +136,13 @@ done
 原型复审结果：
 - 复审结论：
 - 逐屏结论：
+- 设计完整度复审：
+  - 评分：
+  - 是否达到 10/10 原型标准：
+  - 是否出现 AI 模板味：
+  - 信息层级是否符合第一眼 / 第二眼 / 第三眼：
+  - 状态覆盖是否缺失：
+  - 重出 prompt 修正方向：
 - 需要重出的屏幕：
 - 需要 PM 拍板：
 - 当前 D：
@@ -151,6 +160,13 @@ done
   - 用户行为假设：
   - 当前损失：
   - 牺牲项 / 后置项：
+- 设计完整度复审：
+  - 原始设计评分：
+  - 10/10 原型标准：
+  - 生成图评分：
+  - 反 AI 模板味检查：
+  - 状态覆盖：
+  - 第一眼 / 第二眼 / 第三眼：
 - 视觉审计：
   - visual_baseline：
   - 参考图 / 目标输出像素：

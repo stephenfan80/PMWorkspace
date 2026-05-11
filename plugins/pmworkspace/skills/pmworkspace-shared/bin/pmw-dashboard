@@ -273,6 +273,32 @@ def screenshot_edit_status(item: dict, baseline: dict) -> tuple[bool, str]:
     return True, ""
 
 
+DESIGN_COMPLETENESS_FIELDS = [
+    ("design_gap", "主要设计差距"),
+    ("ten_out_of_ten_standard", "10/10 原型标准"),
+    ("prompt_design_fix", "prompt 设计修正"),
+    ("anti_ai_slop_constraints", "反 AI 模板味约束"),
+    ("state_coverage", "状态覆盖"),
+    ("first_second_third_hierarchy", "第一眼 / 第二眼 / 第三眼"),
+]
+
+
+def design_completeness_status(item: dict) -> tuple[bool, str]:
+    score_text = str(item.get("design_score") or "").strip()
+    if not score_text:
+        return False, "缺设计评分"
+    try:
+        score = int(score_text)
+    except ValueError:
+        return False, "设计评分不是 0-10 整数"
+    if score < 0 or score > 10:
+        return False, "设计评分超出 0-10"
+    for key, label in DESIGN_COMPLETENESS_FIELDS:
+        if not str(item.get(key) or "").strip():
+            return False, f"缺{label}"
+    return True, ""
+
+
 def read_text(path_value: str) -> str:
     if not path_value:
         return ""
@@ -787,6 +813,35 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
             f"{len(board)} 个输出单元" if board else (scheme_event.get("summary") or "prototype-board 暂无方案"),
             "继续" if scheme_ready else "先说明方案在页面结构、信息架构、交互路径、信任表达或关键任务上的差异",
             scheme_ready,
+        )
+    )
+
+    design_failures = []
+    for item in board:
+        design_ok, design_failure = design_completeness_status(item)
+        if not design_ok:
+            design_failures.append(
+                f"{item.get('scheme') or '未命名'} / {item.get('screen') or '未命名屏幕'}：{design_failure}"
+            )
+    design_required = effective_target == "prototype" or bool(board)
+    design_ready = (not design_required) or (bool(board) and not design_failures)
+    if not board:
+        design_status = "未登记" if design_required else "不适用"
+        design_evidence = "prototype-board 暂无当前 run 输出单元"
+    elif design_ready:
+        design_status = "已完成"
+        design_evidence = f"{len(board)} 个输出单元已记录设计评分、10/10 标准、prompt 修正、状态覆盖和反模板味约束"
+    else:
+        design_status = "字段不完整"
+        design_evidence = "未通过：" + "；".join(design_failures[:5])
+    rows.append(
+        gate_result(
+            "原型设计完整度",
+            design_required,
+            design_status,
+            redact_sensitive(design_evidence),
+            "继续" if design_ready else "先为当前 run 的每个 prototype-board 输出单元补齐设计评分、10/10 原型标准、prompt 设计修正、状态覆盖和反 AI 模板味约束",
+            design_ready,
         )
     )
 

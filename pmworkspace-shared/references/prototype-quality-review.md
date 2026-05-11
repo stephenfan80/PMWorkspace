@@ -8,10 +8,11 @@ For Chinese users, report the final check with Chinese labels such as `质量检
 
 `$pm-prototype-review` 先建立原型复审控制器，再给出逐屏结论。控制器至少记录：
 
-- `复审输入`：图片路径或 URL、方案名、屏幕任务、产品路径、产品简报版本、Zoon 快照、线上参考、设计系统和 prototype-board item。
+- `复审输入`：图片路径或 URL、方案名、屏幕任务、产品路径、产品简报版本、Zoon 快照、线上参考、设计系统、设计规范目标和 prototype-board item。
 - `视觉审计`：有参考截图时记录 `visual_baseline`、参考图尺寸、目标输出像素、`pmw-image-audit` 结果和是否需要重出。
 - `输出单元绑定`：每张图必须能追溯到一个 `产品路径 + 屏幕任务`，并绑定产品路径、用户行为假设、要赢过的现状替代、当前损失、删除 / 牺牲 / 后置项、验证信号、失败信号、主目标、反指标、不可虚构项和产品简报版本；缺绑定时先标 `需要补充参考`，不能凭视觉印象通过。
 - `设计完整度复审`：读取 prototype-board 中的设计完整度评分、主要设计差距、10/10 原型标准、prompt 设计修正、状态覆盖、第一眼 / 第二眼 / 第三眼和反 AI 模板味约束；判断生成图是否达到目标，是否需要重出。
+- `设计规范目标复审`：读取 prototype-board 中的设计规范目标、设计系统 / 平台模式、灵感来源摘要和禁止照搬项；判断生成图是否遵守目标规范，是否出现复制外部图片、品牌素材、文案、专有 UI 或未授权资产的风险。
 - `可插拔专家`：策略、信任 / 风险、设计系统、数据可行性四个底盘专家必须分别给出短结论、最高严重度、证据、一句话判断和行动；不能合并成一段泛泛 PM 总评。
 - `专家合并结论`：由 `$pm-prototype-review` 根据四个专家的最高严重度合并为 `可通过`、`需要重出`、`需要 PM 拍板` 或 `需要补充参考`；深度交付、高风险、批量交付、研发交付、生产流程或用户要求多角色 review 时，再追加 Product Review Squad 角色短结论。
 - `Product Review Squad`：CEO、Eng、Design、DX、安全、QA、发布工程师七个角色各自输出短结论、最高严重度、证据和行动。
@@ -21,7 +22,7 @@ For Chinese users, report the final check with Chinese labels such as `质量检
 - `PM 拍板`：对用户承诺、数据真实性、范围、实验口径、线索/交易/隐私/合规边界未决的问题，输出一个当前 `D`，不能靠改图解决。
 - `偏好沉淀`：只有用户反馈或复审确认的审美/结构偏好才写入 taste；事实错误、反指标、不可虚构项和 Zoon 漂移不能写成偏好。
 - `反馈资产化`：把复审和用户反馈分成个人偏好、产品认知、PMWorkspace 进化建议和不应保存项；个人资产写入本地用户记忆，进化建议先生成本地脱敏待审稿。
-- `证据状态`：产品简报、Zoon、线上参考、设计系统、prototype-board、图片资产、待决策项和记忆更新状态。
+- `证据状态`：产品简报、Zoon、线上参考、设计系统、设计规范目标、prototype-board、图片资产、待决策项和记忆更新状态。
 
 复审控制器的优先级：事实与门槛 > 产品取舍 > 可交付质量 > 用户偏好。偏好只能影响下一轮推荐，不能让违反产品简报、反指标、不可虚构项、线上参考或设计系统的图片通过。
 
@@ -37,6 +38,7 @@ Check:
 - 有线上截图时，如果最终 prompt 或输出单元仍包含 `pmw-prototype-prompt-check` 定义的短画布锚点，结论为 `需要重出`，并禁止把该图作为交付结果展示。
 - 是否解决了声明的用户任务？
 - 屏幕是否达到出图前设定的 `10/10 原型标准`？如果没有，缺口是信息层级、状态覆盖、旅程、信任表达、设计系统还是移动端可用性？
+- 屏幕是否遵守设计规范目标？如果用了 Dribbble、Pinterest、平台模式或公开页面启发，是否只体现抽象布局 / 层级 / 交互 / 状态，而没有复制图片、文案、品牌素材或专有 UI？
 - 用户第一眼、第二眼、第三眼看到的信息是否和输出单元声明一致？是否出现主次混乱、CTA 抢占、过度解释或关键内容被挤到不可见区域？
 - 默认、加载、空态、错误、成功和部分结果状态是否有明确策略？不适用时是否说明原因？空态是否有上下文和下一步，而不是只写“暂无数据”？
 - 是否出现 AI 模板味：泛 SaaS 卡片堆叠、紫蓝渐变、装饰性图标圆圈、三栏模板、居中大字空泛 hero、无意义插画、统一大圆角、重阴影、漂浮装饰或拼贴感界面？
@@ -45,14 +47,15 @@ Check:
 - 是否避免了不支持的功能、假数据、假按钮或无法兑现的承诺？
 - 是否诚实展示了估算、不确定性、资格判断或人工跟进？
 
-## 对照 AutoDesign 检查图片
+## 对照设计规范目标检查图片
 
-AutoDesign is the default production baseline. Check:
+Use the active design-spec target as the source of visual truth. AutoDesign is primary only when the product is Autohome / AutoDesign, or when the user explicitly selected it as the target. Check:
 
 - If a production screenshot exists, run `pmw-image-audit audit --image <生成图> --reference <参考图>` before visual judgment. `需要重出` 的尺寸审计不能被“看起来还行”覆盖。
-- Autohome screenshot baseline overrides generic AutoDesign tokens for typography hierarchy, spacing rhythm, card density, chart density, and bottom toolbar height.
+- Production screenshot baseline overrides generic design-system tokens for typography hierarchy, spacing rhythm, card density, chart density, and bottom toolbar height.
 - 视觉还原优先且使用 `screenshot_edit` 时，先检查保留区域：状态栏、顶部导航、车系头图、车型切换、tab 和底部吸底 CTA 不应被无故重绘、变形、缩放或换样式；只允许 `edit_scope` 指定的目标区域发生变化。
-- Primary blue, commercial orange, text colors, dividers, and background are plausible.
+- 用户提供设计系统、平台模式库或 PMW 默认假设都必须体现在颜色、字体、栅格、组件密度和状态表达里；不能把未确认的 AutoDesign 当作默认答案。
+- 如果设计规范目标是 AutoDesign，primary blue、commercial orange、text colors、dividers and background should be plausible.
 - Typography uses production-like Chinese UI hierarchy.
 - Layout uses 8-point structure and 4-point detail rhythm.
 - Buttons, forms, NavBar, cards, tags, result modules, and bottom bars look shippable.
@@ -66,7 +69,7 @@ AutoDesign is the default production baseline. Check:
 - 方案必须在产品策略、信息架构、交互模型、信任模型或关键任务路径上不同，不能只是换颜色。
 - 三个原型方向也必须是三种设计判断：信息层级、交互模型、信任模型、状态策略或降噪策略至少一项不同，不能只换视觉皮肤。
 - 每个方案都要有清楚的产品路径、用户行为假设、要赢过的现状替代、当前损失、删除 / 牺牲 / 后置项、验证信号、失败信号和取舍。
-- 每个方案都要有清楚的设计完整度评分、10/10 原型标准、prompt 设计修正和反模板味约束。
+- 每个方案都要有清楚的设计完整度评分、10/10 原型标准、prompt 设计修正、反模板味约束、设计规范目标、平台模式、灵感来源和禁止照搬项。
 - 每个方案/屏幕必须单独交付一张图，不能合成拼贴图或比较板。
 - 可以把每张独立图片登记到 Prototype Shotgun Board，用表格比较方案；这不是把图片合成一张图。
 - 表单/结果页组合必须共享一致的数据、语气和视觉系统。

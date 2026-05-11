@@ -131,9 +131,9 @@ Output: <brief only / one screen / three directions / handoff>
 The Chinese README is the primary user guide. This section keeps the runtime anchors for deeper usage and maintenance.
 
 - **End-to-end workbench map:** the canonical map lives in `pmworkspace-shared/references/pm-workbench-map.md`; README should not maintain a second route table.
-- **Product Readiness Dashboard:** `pmw-dashboard readiness --target prototype|handoff` gives a concise verdict before image generation or handoff; use `--details` for the full audit table.
+- **Product Readiness Dashboard:** `pmw-dashboard readiness --target prototype|handoff` gives a concise verdict before image generation or handoff, including the design-spec target gate; use `--details` for the full audit table.
 - **Product Artifact Flow:** `pmw-artifact` makes product summaries, prototype manifests, review results, handoff docs, and browser evidence readable by downstream skills; `pmw-artifact flow --details` shows the full chain.
-- **Browser Evidence Lite:** online screenshots, status pages, competitor references, and collaboration-doc drift evidence are recorded as `browser_evidence` artifacts through `pmw-artifact`.
+- **Browser Evidence Lite:** online screenshots, status pages, competitor references, design inspiration, and collaboration-doc drift evidence are recorded as `browser_evidence` artifacts through `pmw-artifact`.
 - **PM Review Army / Product Review Squad:** strategy, trust/risk, design-system, and data-feasibility specialists review first; high-risk delivery can add CEO, Eng, Design, DX, security, QA, and release-engineering roles.
 - **Skill Doc Generator:** `pmw-gen-skill-docs` generates and checks shared SKILL.md contract blocks.
 

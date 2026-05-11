@@ -34,6 +34,7 @@ pmw-dashboard status
 | 输出画布 | Conditional | Conditional | 有 `visual_baseline` 时，当前 run 的 prototype-board 输出单元必须写 `canvas_mode=physical_longboard` 和 `target_output_pixels`，且不得含 `pmw-prototype-prompt-check` 定义的短画布锚点。 |
 | 方案差异 | Required | Required | 多方案必须在页面结构、信息架构、交互路径、信任表达或关键任务上不同；单方案也要标注不适用或已登记。 |
 | 原型设计完整度 | Required | Conditional | 出图前必须完成；交付前如存在 prototype-board 输出单元，则每个输出单元必须记录设计评分、主要设计差距、10/10 原型标准、prompt 设计修正、状态覆盖、第一眼 / 第二眼 / 第三眼和反 AI 模板味约束。缺失时不写 image-2 prompt，也不能把该原型作为交付依据。 |
+| 设计规范目标 | Required | Conditional | 出图前必须明确并确认设计规范目标：用户提供、AutoDesign、平台模式库或 PMW 默认假设；每个输出单元必须写入设计系统 / 平台模式、灵感来源摘要和禁止照搬项。缺失或未确认时先给用户设计规范目标卡，或确认默认假设。 |
 | 方案方向确认 | Required | Required | 当前 run 必须记录用户已确认或批准默认方案方向；未确认时不写 image-2 prompt。 |
 | 不可虚构项 | Required | Required | 必须明确不能展示的能力、数据、承诺或动作。 |
 | 数据佐证 | no | no | 有数据时登记 `data_evidence`；没有数据时不阻断，但必须提示 `未提供，存在未验证风险`，并把风险写入 brief 与原型不可虚构项。 |
@@ -45,7 +46,7 @@ pmw-dashboard status
 
 ## Verdict 规则
 
-- `READY_FOR_PROTOTYPE / 可出图`：产品简报、产品简报确认、线上参考、必要的视觉基线、方案差异、原型设计完整度、方案方向确认和不可虚构项都通过；Zoon 未启用时使用本地简报，已启用时必须同步且无漂移；数据佐证缺失只提示未验证风险；复审状态仅展示，不阻断出图。
+- `READY_FOR_PROTOTYPE / 可出图`：产品简报、产品简报确认、线上参考、必要的视觉基线、方案差异、原型设计完整度、设计规范目标及确认、方案方向确认和不可虚构项都通过；Zoon 未启用时使用本地简报，已启用时必须同步且无漂移；数据佐证缺失只提示未验证风险；复审状态仅展示，不阻断出图。
 - `READY_FOR_HANDOFF / 可交付`：出图前门槛全部通过，且原型复审为 `可通过`，研发可行性反问已完成，关键 D 已拍板，交付缺口不会改变承诺或验收。
 - `NOT_READY / 不可出图 / 不可交付`：任一 required 行未通过。输出必须给出第一条阻断行的行动建议，并路由到能补齐它的最早技能。
 
@@ -85,6 +86,7 @@ PMWorkspace 产品准备度仪表盘：
 | 输出画布 | YES/no | ... | ... | ... |
 | 方案差异 | YES | ... | ... | ... |
 | 原型设计完整度 | YES | ... | ... | ... |
+| 设计规范目标 | YES | ... | ... | ... |
 | 方案方向确认 | YES | ... | ... | ... |
 | 不可虚构项 | YES | ... | ... | ... |
 | 数据佐证 | no | ... | ... | ... |
@@ -101,6 +103,6 @@ PMWorkspace 产品准备度仪表盘：
 
 Evidence Dashboard 回答“现在有哪些证据”；Product Readiness Dashboard 回答“基于这些证据，现在能不能出图或交付”。前者是证据页，后者是 gate verdict。两者可以同屏展示，但 Product Readiness Dashboard 必须放在出图 / 交付判断之前。
 
-浏览器证据属于 Product Artifact Flow 的轻量产物：用 `pmw-artifact add --kind browser_evidence` 登记线上流程截图、状态页、竞品参考或 Zoon 漂移证据。仪表盘只读取它的状态、URL / 路径和摘要，不引入新的证据库或浏览器自动化命令。
+浏览器证据属于 Product Artifact Flow 的轻量产物：用 `pmw-artifact add --kind browser_evidence` 登记线上流程截图、状态页、竞品参考、设计启发或 Zoon 漂移证据。仪表盘只读取它的状态、URL / 路径和摘要，不引入新的证据库或浏览器自动化命令。设计启发场景必须在摘要中标明可复用模式、不可照搬项和版权边界，不能把外部图片、文案、品牌素材或专有 UI 当作可复制资产。
 
 视觉基线属于出图控制产物：用 `pmw-artifact add --kind visual_baseline` 或 `pmw-image-audit baseline --reference <截图路径> --register` 登记参考图尺寸、截图倍率、逻辑点宽、目标输出像素、字号层级、页面边距、模块间距、底部栏高度和参考优先级。汽车之家 / AutoDesign 生产页中，线上截图基线高于泛化 AutoDesign token；默认使用参考截图原始物理像素和 3x 字体 / 间距比例，生成后还要用 `pmw-image-audit audit` 做尺寸 / 长板审计。视觉还原优先时，Product Readiness Dashboard 还会要求 prototype-board 输出单元使用 `generation_mode=screenshot_edit`，并绑定 `base_image`、`edit_scope` 和 `preserve_regions`。

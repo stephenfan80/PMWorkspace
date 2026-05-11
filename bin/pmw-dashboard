@@ -283,6 +283,16 @@ DESIGN_COMPLETENESS_FIELDS = [
 ]
 
 
+DESIGN_SPEC_FIELDS = [
+    ("design_spec_target", "设计规范目标"),
+    ("design_system_profile", "设计系统 / 平台配置"),
+    ("platform_pattern", "平台模式"),
+    ("inspiration_sources", "灵感来源"),
+    ("inspiration_patterns", "灵感模式摘要"),
+    ("no_copy_boundary", "禁止照搬项"),
+]
+
+
 def design_completeness_status(item: dict) -> tuple[bool, str]:
     score_text = str(item.get("design_score") or "").strip()
     if not score_text:
@@ -296,6 +306,19 @@ def design_completeness_status(item: dict) -> tuple[bool, str]:
     for key, label in DESIGN_COMPLETENESS_FIELDS:
         if not str(item.get(key) or "").strip():
             return False, f"缺{label}"
+    return True, ""
+
+
+def design_spec_status(item: dict) -> tuple[bool, str]:
+    for key, label in DESIGN_SPEC_FIELDS:
+        value = str(item.get(key) or "").strip()
+        if not value:
+            return False, f"缺{label}"
+        if contains_any(value, ["待补充", "未定义", "不明确", "TBD"]):
+            return False, f"{label}待补充"
+    copied_text = " ".join(str(item.get(key) or "") for key, _label in DESIGN_SPEC_FIELDS)
+    if contains_any(copied_text, ["照抄", "复制截图", "复制图片", "复制文案", "直接复制", "完全复刻"]):
+        return False, "灵感来源存在照搬风险"
     return True, ""
 
 
@@ -842,6 +865,57 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
             redact_sensitive(design_evidence),
             "继续" if design_ready else "先为当前 run 的每个 prototype-board 输出单元补齐设计评分、10/10 原型标准、prompt 设计修正、状态覆盖和反 AI 模板味约束",
             design_ready,
+        )
+    )
+
+    design_spec_failures = []
+    for item in board:
+        spec_ok, spec_failure = design_spec_status(item)
+        if not spec_ok:
+            design_spec_failures.append(
+                f"{item.get('scheme') or '未命名'} / {item.get('screen') or '未命名屏幕'}：{spec_failure}"
+            )
+    design_spec_required = effective_target == "prototype" or bool(board)
+    design_spec_fields_ready = (not design_spec_required) or (bool(board) and not design_spec_failures)
+    design_spec_confirm = latest_event(events, ["设计规范目标确认", "设计规范目标卡", "设计规范目标"], {"gate", "decision"})
+    design_spec_confirm_text = f"{design_spec_confirm.get('status', '')} {design_spec_confirm.get('summary', '')}"
+    design_spec_confirm_fresh = event_after_file(design_spec_confirm, brief_path) if design_spec_confirm else False
+    design_spec_confirm_ready = (not design_spec_required) or (
+        bool(design_spec_confirm)
+        and design_spec_confirm_fresh
+        and contains_any(design_spec_confirm_text, ["已确认", "已批准", "默认假设已批准", "按默认假设继续", "可出图", "已对齐"])
+        and not contains_any(design_spec_confirm_text, ["待确认", "需要补充", "不可出图", "缺失", "未批准", "未确认"])
+    )
+    design_spec_ready = design_spec_fields_ready and design_spec_confirm_ready
+    if not board:
+        design_spec_status_text = "未登记" if design_spec_required else "不适用"
+        design_spec_evidence = "prototype-board 暂无当前 run 输出单元"
+    elif design_spec_ready:
+        targets = sorted({str(item.get("design_spec_target") or "未记录") for item in board})
+        profiles = sorted({str(item.get("design_system_profile") or "未记录") for item in board})
+        design_spec_status_text = "已确认"
+        design_spec_evidence = f"{len(board)} 个输出单元；目标：{', '.join(targets[:3])}；配置：{', '.join(profiles[:3])}；确认：{design_spec_confirm.get('summary') or design_spec_confirm.get('status')}"
+    else:
+        confirm_failure = ""
+        if not design_spec_confirm:
+            confirm_failure = "缺设计规范目标确认"
+        elif not design_spec_confirm_fresh:
+            confirm_failure = "设计规范目标确认已过期"
+        elif not design_spec_confirm_ready:
+            confirm_failure = "设计规范目标未确认"
+        failures = design_spec_failures[:5]
+        if confirm_failure:
+            failures.append(confirm_failure)
+        design_spec_status_text = "字段不完整" if design_spec_failures else "待确认"
+        design_spec_evidence = "未通过：" + "；".join(failures)
+    rows.append(
+        gate_result(
+            "设计规范目标",
+            design_spec_required,
+            design_spec_status_text,
+            redact_sensitive(design_spec_evidence),
+            "继续" if design_spec_ready else "先给用户设计规范目标卡，或确认使用 AutoDesign / 平台模式库 / PMW 默认假设；确认后写入设计系统、灵感来源、禁止照搬项和版权边界",
+            design_spec_ready,
         )
     )
 

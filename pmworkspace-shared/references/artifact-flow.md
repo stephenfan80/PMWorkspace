@@ -14,7 +14,7 @@ PMWorkspace 产物流动层让每一步产物都能被下游技能读取，而�
 |---|---|---|---|
 | `$pm-jobs` / `$pm-strategy-review` | `decision`、`strategy_review` | `$pm-brief` | 把事实、范围、策略取舍、PM 判断摘要和产品作业写进产品契约。 |
 | `$pm-brief` | `product_brief` | `$pm-prototype-shotgun`、`$pm-handoff` | 作为出图前短版产品简述 / 产品简报真源，并保留真实问题、证据边界、PM 判断摘要和下一步产品作业。 |
-| 浏览器 / 截图 / Zoon 检查 | `browser_evidence` | `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` | 记录线上流程截图、状态页、竞品参考或 Zoon 漂移证据，支撑线上参考门槛。 |
+| 浏览器 / 截图 / Zoon 检查 | `browser_evidence` | `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` | 记录线上流程截图、状态页、竞品参考、设计启发或 Zoon 漂移证据，支撑线上参考和设计规范目标门槛。 |
 | 视觉基线 | `visual_baseline` | `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` | 记录参考图路径、像素尺寸、逻辑宽度推断、目标输出像素、核心字号层级、页面边距、模块间距、底部栏高度和参考优先级。 |
 | `$pm-prototype-shotgun` | `prototype_manifest` | `$pm-prototype-review` | 绑定三条产品路径、方案、屏幕、主目标、反指标、不可虚构项和 brief 版本。 |
 | `$pm-prototype-review` | `prototype_review`、`repair_brief` | `$pm-prototype-shotgun`、`$pm-handoff` | 决定可通过、需要重出、需要 PM 拍板或补参考。 |
@@ -47,6 +47,8 @@ pmw-dashboard status --details
 ```
 
 `visual_baseline` 的最小摘要包含：参考图路径、参考像素尺寸、逻辑宽度推断、目标输出像素、核心字号层级、页面边距、模块间距、底部栏高度、参考优先级和不可压缩项。有线上截图时，视觉基线优先级高于泛化 AutoDesign token；缺视觉基线时，现有功能迭代不能写 image-2 prompt。
+
+设计启发不新增 artifact 类型：Dribbble、Pinterest、公开参考页、平台模式或用户自有截图的启发统一登记为 `browser_evidence`，摘要必须写清 `设计启发`、可复用模式、不可照搬项和版权边界。它只能帮助确定设计规范目标和 prompt 约束，不能覆盖产品简报、线上截图、反指标或不可虚构项。
 
 `PM 判断摘要` 和 `产品作业` 不新增独立 artifact 类型：它们写入 `decision`、`strategy_review`、`product_brief`、`prototype_manifest`、`prototype_review` 或 `product_design_doc` 的 `pm_judgment_summary` / `product_homework` 字段、摘要字段和本地审计。`pmw-artifact add` 支持 `--pm-judgment-summary` 和 `--product-homework`；`pmw-log brief` / `pmw-log handoff` 会优先使用显式参数，缺省时从 Markdown 的对应章节提取。禁止新增独立“产品方案文档”或“产品思考账本”作为核心产物，避免产物流膨胀。
 

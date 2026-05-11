@@ -232,13 +232,16 @@
         "product-plan-handoff.md",
         "product-readiness-dashboard.md",
         "image-prompts.md",
-        "prototype-shotgun-board.md"
+        "prototype-shotgun-board.md",
+        "design-system-workflow.md",
+        "browser-evidence.md"
       ],
       "output_fields": [
         "原型出图判断",
         "方案方向",
         "产品路径",
         "原型设计完整度",
+        "设计规范目标",
         "原型思考",
         "输出单元清单",
         "image-2 状态",
@@ -252,6 +255,10 @@
         "三条路径数量检查",
         "产品路径",
         "原型设计完整度",
+        "设计规范目标",
+        "设计启发",
+        "平台模式",
+        "禁止照搬项",
         "10/10 原型标准",
         "反 AI 模板味约束",
         "原型思考",

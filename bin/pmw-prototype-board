@@ -236,6 +236,12 @@ def command_add(args: argparse.Namespace) -> int:
         "state_coverage": args.state_coverage,
         "first_second_third_hierarchy": args.first_second_third_hierarchy,
         "unresolved_design_decision": args.unresolved_design_decision,
+        "design_spec_target": args.design_spec_target,
+        "design_system_profile": args.design_system_profile,
+        "platform_pattern": args.platform_pattern,
+        "inspiration_sources": args.inspiration_sources,
+        "inspiration_patterns": args.inspiration_patterns,
+        "no_copy_boundary": args.no_copy_boundary,
         "image": args.image,
         "status": args.status,
     }
@@ -338,8 +344,8 @@ def command_list(_args: argparse.Namespace) -> int:
     if not items:
         print("暂无方案。")
         return 0
-    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 产品路径 | 设计评分 | 主要设计差距 | 10/10 原型标准 | prompt 设计修正 | 状态覆盖 | 第一眼 / 第二眼 / 第三眼 | 反 AI 模板味约束 | 未决设计选择 | 用户行为假设 | 当前损失 | 牺牲项 | 原型思考 | 信息架构 | 用户问题解决逻辑 | 反指标保护 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
-    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 产品路径 | 设计评分 | 主要设计差距 | 10/10 原型标准 | prompt 设计修正 | 状态覆盖 | 第一眼 / 第二眼 / 第三眼 | 反 AI 模板味约束 | 未决设计选择 | 设计规范目标 | 设计系统 / 平台配置 | 平台模式 | 灵感来源 | 灵感模式 | 禁止照搬项 | 用户行为假设 | 当前损失 | 牺牲项 | 原型思考 | 信息架构 | 用户问题解决逻辑 | 反指标保护 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
     for item in items:
         key = (item.get("scheme", ""), item.get("screen", ""))
         scheme_key = (item.get("scheme", ""), "")
@@ -367,6 +373,12 @@ def command_list(_args: argparse.Namespace) -> int:
             item.get("first_second_third_hierarchy") or "未记录",
             item.get("anti_ai_slop_constraints") or "未记录",
             item.get("unresolved_design_decision") or "未记录",
+            item.get("design_spec_target") or "未记录",
+            item.get("design_system_profile") or "未记录",
+            item.get("platform_pattern") or "未记录",
+            item.get("inspiration_sources") or "未记录",
+            item.get("inspiration_patterns") or "未记录",
+            item.get("no_copy_boundary") or "未记录",
             item.get("behavior_assumption", ""),
             item.get("current_loss", ""),
             item.get("tradeoff", ""),
@@ -420,6 +432,12 @@ def build_parser() -> argparse.ArgumentParser:
     add.add_argument("--state-coverage", default="")
     add.add_argument("--first-second-third-hierarchy", default="")
     add.add_argument("--unresolved-design-decision", default="")
+    add.add_argument("--design-spec-target", default="")
+    add.add_argument("--design-system-profile", default="")
+    add.add_argument("--platform-pattern", default="")
+    add.add_argument("--inspiration-sources", default="")
+    add.add_argument("--inspiration-patterns", default="")
+    add.add_argument("--no-copy-boundary", default="")
     add.add_argument("--image", default="")
     add.add_argument("--status", default="计划生成")
     add.add_argument("--run")

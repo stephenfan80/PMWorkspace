@@ -12,22 +12,28 @@
     "required_behaviors": [
       "命中汽车之家时默认载入 AutoDesign",
       "产品 UI 使用 AutoDesign token",
+      "平台灵感不能覆盖 AutoDesign",
       "prompt 写入 AutoDesign 颜色、字体、栅格、组件和反模式约束"
     ],
     "forbidden_behaviors": [
       "只写汽车之家风格",
       "忽略 AutoDesign token",
+      "用平台模式库覆盖 AutoDesign",
       "把品牌视觉当作产品 UI 规范"
     ]
   },
   "contract_checks": [
     {
       "path": "pm-prototype-shotgun/SKILL.md",
-      "contains": "命中汽车之家、AutoDesign、之家或 Autohome，默认载入 AutoDesign 约束"
+      "contains": "命中汽车之家、AutoDesign、之家或 Autohome 时默认载入 AutoDesign 约束"
     },
     {
       "path": "pmworkspace-shared/references/design-system-workflow.md",
       "contains": "命中汽车之家、AutoDesign、之家或 Autohome 时，产品 UI 优先使用 AutoDesign token"
+    },
+    {
+      "path": "pmworkspace-shared/references/design-system-workflow.md",
+      "contains": "平台灵感只能辅助，不得覆盖 AutoDesign 产品 UI token"
     },
     {
       "path": "pmworkspace-shared/references/autohome-auto-design.md",

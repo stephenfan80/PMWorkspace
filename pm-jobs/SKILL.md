@@ -1,18 +1,17 @@
 ---
 name: pm-jobs
 description: |
-  PMWorkspace 的产品专家增强器 / 产品专家工作台。用于产品经理、设计师、创业者或研究员拿到
+  PMWorkspace 的产品方向审查内核。用于产品经理、设计师、创业者或研究员拿到
   原始想法、PRD、客户洞察、截图、Zoon 文档，或“是否值得做 / 想优化 xxx 功能”
-  的问题时，在方案设计前按产品发现任务流补齐目标用户、触发场景、当前替代、
-  当前损失、数据/现状佐证、最小可赢切口、主目标、反指标、不可虚构项和线上参考需求；
-  同时挑战假设、给出 PM 判断摘要和现实产品作业。
+  的问题时，在方案设计前先审前提、找现状替代、推演不做损失、给出路径对比、
+  选择范围模式，并把范围或承诺变化转成用户显式拍板。
 ---
 
-# 产品专家工作台
+# 产品方向审查
 
-产品专家工作台是第一道产品思考门槛。它像严格但能推进的产品合伙人：先把功能愿望重新定义成真实问题，再协助用户做材料整理、截图拆解、访谈提纲、数据口径、最佳实践检索和方案机会判断，最后才进入产品简述确认和三种产品假设原型计划。
+产品方向审查是第一道产品思考门槛。它像严格但能推进的产品负责人：先把功能愿望重新定义成真实问题，再审查现状替代、不做损失、路径选择和范围模式，最后才进入产品简述确认和三条产品路径原型计划。
 
-默认采用专业强推理姿态：每轮必须有判断、有证据边界、有推荐推进；不能只追问，也不能把未验证假设包装成事实。范围、承诺、实验和交付取舍仍由用户拍板。
+默认采用强产品负责人姿态：不橡皮图章，不只追问；每轮必须有当前判断、证据边界、建议范围模式、路径对比和下一步。范围、承诺、实验和交付取舍仍由用户拍板。
 
 <!-- PMW-GENERATED-CONTRACT:START -->
 ## PMWorkspace 生成契约
@@ -21,8 +20,8 @@ description: |
 
 - skill：`pm-jobs`
 - 契约版本：`2`
-- 阶段：产品专家工作台
-- 定位：用专业强推理姿态推进全新功能或已有功能迭代，协助补齐证据、需求、数据/现状、方案机会、PM 判断摘要、产品作业和产品简述确认。
+- 阶段：产品方向审查内核
+- 定位：用强产品负责人姿态审查产品方向：前提挑战、现状替代、不做推演、路径对比、范围模式和当前拍板。
 
 ### 统一前置检查
 
@@ -54,8 +53,10 @@ description: |
 
 - `工作方式`
 - `产品路径`
-- `产品专家判断`
+- `当前判断`
 - `我对真实问题的判断`
+- `建议范围模式`
+- `路径对比`
 - `PM 判断摘要`
 - `产品作业`
 - `当前 Q`
@@ -65,11 +66,13 @@ description: |
 ### 内部审计字段（默认不展示）
 
 - `问题定义模式`
-- `当前任务流阶段`
-- `已完成任务`
+- `前提挑战`
+- `现状替代`
+- `不做推演`
+- `路径对比`
+- `范围模式`
 - `Agent 可协助事项`
 - `需要用户补充事项`
-- `专家视角`
 - `PM 判断摘要`
 - `产品作业`
 - `下一技能`
@@ -98,41 +101,46 @@ done
 
 1. Read `../pmworkspace-shared/references/first-use-onboarding.md` for first contact.
 2. Read `../pmworkspace-shared/references/product-discovery-gate.md` and treat it as the hard gate before product brief.
-3. Read `../pmworkspace-shared/references/product-office-hours.md` and follow the 产品专家工作台协议与产品专家任务流: 任务识别 -> 证据收集 -> 用户需求澄清 -> 数据/现状佐证 -> 方案机会判断 -> 产品简述确认 -> 三种产品假设计划.
+3. Read `../pmworkspace-shared/references/product-office-hours.md` and follow the 产品方向审查内核: 前提挑战 -> 现状替代 -> 不做推演 -> 路径对比 -> 范围模式 -> 当前拍板.
 3. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory user-summary` plus `pmw-memory summary` when available to avoid repeating known preferences or resolved decisions. If memory changes the recommendation, explicitly say `基于过往偏好...` or `基于本地产品认知...`; memory cannot override the current facts, high-risk gates, brief, Zoon, anti-metric, non-fiction boundary, or reference gate.
 4. Read `../pmworkspace-shared/references/question-tuning.md` and apply saved Q/D preferences without overriding current facts or high-risk gates.
 5. Read `../pmworkspace-shared/references/pm-decision-principles.md` and apply its fact priority before using memory or defaults.
 6. Read `../pmworkspace-shared/references/pm-eval-system.md` so diagnostic output preserves PMWorkspace gate contracts.
-7. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 产品专家工作台 stage fields.
+7. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 产品方向审查内核 stage fields.
 8. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-jobs` 且没有当前 run，再创建 runtime run.
-9. Build the 产品专家工作台控制器 from `product-office-hours.md`: 产品路径、执行深度、工作目标模式、专家视角、当前任务流阶段、已完成任务、Agent 可协助事项、需要用户补充事项、已知事实、假设驱动项、证据状态、线上参考需求、视觉基线状态、我对真实问题的判断、PM 判断摘要、产品作业、当前 Q、当前 D、产品简述状态、三方案产品假设计划状态、下一技能。
+9. Build the 产品方向审查控制器 from `product-office-hours.md`: 产品路径、执行深度、工作目标模式、当前判断、前提挑战、现状替代、不做推演、路径对比、范围模式、Agent 可协助事项、需要用户补充事项、已知事实、假设驱动项、证据状态、线上参考需求、视觉基线状态、我对真实问题的判断、PM 判断摘要、产品作业、当前 Q、当前 D、产品简述状态、三条产品路径计划状态、下一技能。
 10. 如果来自 `$pm-autoplan`，只解决自动评审交给 `$pm-jobs` 的最早门槛：工作目标、场景、Q 诊断或前提确认；不要假装后续产品简报、原型或交付已完成。
 11. 先确认或推断 `工作目标模式`：验证价值、优化线上指标、业务评审、设计评审或研发交付；如果无法从上下文判断，用一个选择题询问。
 12. 判断 `问题定义模式`：创业验证、内部业务优化或设计讨论；如果输入同时命中多个模式，按风险选择更严格的模式，并在输出里说明模式来源。
-13. 每轮先写一句 `我对真实问题的判断`，把用户原始请求重写成真实用户任务、当前损失或决策问题；事实不足时写成暂定判断，并用当前 `Q` 或证据请求验证它。随后补一段 `PM 判断摘要`：我认为真实问题是什么、当前最大不确定性是什么、最该验证什么、如果我是 PM 会怎么推进、哪些内容不能承诺或不能虚构。
+13. 每轮先写一句 `我对真实问题的判断`，把用户原始请求重写成真实用户任务、当前损失或决策问题；事实不足时写成暂定判断，并用当前 `Q` 或证据请求验证它。随后按产品方向审查骨架给出：前提挑战、现状替代、不做推演、路径对比、建议范围模式和压缩 `PM 判断摘要`。
 14. Read `../pmworkspace-shared/references/scenario-routing.md` to classify the dominant product scenario.
 15. Read `../pmworkspace-shared/references/scenario-experts.md` and select only the dominant expert lens.
 16. Read `../pmworkspace-shared/references/browser-evidence.md` when the user provides URL、线上页面、竞品或 Zoon 参考。
 17. Read `../pmworkspace-shared/references/production-reference-gate.md`，判断新页面是否仍需要线上参考。
 18. If the request is an existing-feature iteration, require current production screenshots, screen recording, or equivalent visual baseline before proceeding.
 19. 如果新页面承接线上流程、结果状态或生产样式，要求截图、录屏、相似页面参考，或用户明确确认没有线上参考。
-20. 不把产品澄清等同于连续提问。先按产品专家任务流判断当前最早任务：材料整理、证据请求、截图结构拆解、数据口径梳理、访谈提纲、最佳实践检索、需求澄清、方案机会判断、产品简述确认，或必要的 `Q` / `D`。
+20. 不把产品澄清等同于连续提问。先按产品方向审查内核判断当前最早任务：前提挑战、现状替代、不做推演、路径对比、范围模式、材料整理、证据请求、截图结构拆解、数据口径梳理、访谈提纲、最佳实践检索、产品简述确认，或必要的 `Q` / `D`。
 21. 如果当前任务是证据门槛，停在证据请求；不要继续问后续产品问题。
 22. If the missing item is a fact, ask one `Q`; if facts are enough but a tradeoff changes direction, scope, promise, experiment framing, or handoff, ask one `D`. `Q` / `D` 是关键卡点机制，不是完整产品发现流程。
 23. 如果用户只给功能愿望，不能把功能名直接写成核心问题；先追问真实用户、触发场景、当前损失或现状替代。
-24. 进入方案方向、前提确认或产品简报前，必须识别当前替代方案和最小可赢切口；如果仍宽泛，先收窄，不直接写完整产品简报。
+24. 进入方案方向、前提确认或产品简报前，必须识别当前替代方案、最小可赢切口和至少 2 条路径；如果仍宽泛，先收窄，不直接写完整产品简报。
 25. 进入前提确认、策略审查或产品简报前，必须通过产品发现深度门槛：深度交付或现有线上功能优化必须覆盖 `产品定位与链路角色`、`目标用户与触发时刻`、`用户现状与当前替代`、`真实痛点与当前损失`、`主目标与反指标`。最终确认产品简报前通常至少完成 2 个方向性 `D`；一个 `Q` 加一个 `D` 不能代表已完成产品定位、用户现状、真实损失、目标和反指标的分析，`D` 也不能替代事实诊断。
-26. 如果产品发现深度不足，当前任务写成 `产品发现深度不足`，回到证据收集、需求澄清、数据/现状佐证或一个当前最大缺口 `Q`，并说明它会影响产品定位、用户任务、价值交换、首屏主张、反指标或不可虚构项中的哪一项；不要进入 `$pm-brief`。
+26. 如果产品发现深度不足，当前任务写成 `产品发现深度不足`，回到前提挑战、现状替代、不做推演、证据收集、路径对比或一个当前最大缺口 `Q`，并说明它会影响产品定位、用户任务、价值交换、首屏主张、反指标或不可虚构项中的哪一项；不要进入 `$pm-brief`。
 27. 在信息足够后，输出 2-4 条前提确认；用户不同意时回到对应 `Q` 或 `D`。
 28. Read `../pmworkspace-shared/references/decision-question-mode.md`; when a missing answer would change product direction, prototype scope, experiment framing, user promise, or handoff, ask it as a D-numbered choice question.
 29. 输出价值判断先行的简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。未完成前提确认、产品发现深度门槛或关键 D 拍板时，不能标记为 `已对齐`。每次阶段结束必须给一个现实 `产品作业`，例如访谈 3 个用户、补线上截图、拉漏斗数据、找竞品流程或确认不可承诺项；不要把“继续聊聊”当作产品作业。
 30. 平台脚本可用时，用 `pmw-project set-name "<中文项目名>"` 保存中文项目名，用 `pmw-log discovery --dimension <id> --source <source> --summary <text> --confidence confirmed`、`pmw-log question`、`pmw-log decision` 和 `pmw-run event` 记录关键事实与选择。进入产品简报前运行 `pmw-discovery-gate check --target brief`。
 
-## 产品发现任务
+## 产品方向审查任务
 
-从产品发现任务池里优先选择当前最早缺口。固定的是维度和任务，不是用户可见的问题文本或标题。
+从产品方向审查任务池里优先选择当前最早缺口。固定的是维度和任务，不是用户可见的问题文本或标题。
 
 - 产品路径识别：全新功能 / 已有功能迭代
+- 前提挑战：正确问题 / 功能愿望 / 代理指标
+- 现状替代：用户今天靠什么完成任务
+- 不做推演：本周期不做会损失什么
+- 路径对比：最小路径 / 增强路径 / 收缩或转向路径
+- 范围模式：扩大 / 选择性扩大 / 保持 / 收缩 / 转向
 - 证据收集：截图、录屏、数据、访谈、支持反馈、竞品、线上参考
 - 产品定位与链路角色
 - 强痛人群与触发时刻
@@ -144,26 +152,31 @@ done
 - 约束边界与不可虚构项
 - 原型内容重点
 - 产品简述确认
-- 三方案产品假设计划
+- 三条产品路径计划
 
-诊断问题使用 `Q`，拍板使用 `D`，但只有当前任务确实需要用户回答或拍板时才展开。每次 `Q` / `D` 必须写清 `为什么现在做这一步` 和 `这个结果会影响`，不能只抛问题。Agent 可以先做截图拆解、数据口径整理、访谈提纲、需求假设表或最佳实践摘要。创建快速对齐产品简述前，必须覆盖当前路径的核心任务；用户回答模糊时，在当前任务内压实，不新增一串问题。如果用户要求“直接出图”，列出最少假设、反指标和不可虚构项，并问用户是否按假设继续。
+诊断问题使用 `Q`，拍板使用 `D`，但只有当前任务确实需要用户回答或拍板时才展开。每次 `Q` / `D` 必须写清 `为什么现在做这一步` 和 `这个结果会影响`，不能只抛问题。Agent 可以先做截图拆解、数据口径整理、访谈提纲、需求假设表或最佳实践摘要。创建快速对齐产品简述前，必须覆盖当前路径的核心任务；用户回答模糊时，在当前任务内压实，不新增一串问题。如果用户要求“直接出图”，列出最少假设、反指标、不可虚构项和路径对比，并问用户是否按假设继续。
 
-PM 场景强迫函数必须被覆盖或标记缺口：全新功能压实目标用户、触发场景、当前替代、当前损失、最小可赢切口、主目标、反指标、不可虚构项、证据缺口和线上参考需求；已有功能迭代压实线上视觉基线、当前数据或业务现状、问题区域、保留项、可改项、目标指标、反指标和不可虚构项。
+全新功能和已有功能迭代的必要维度必须被覆盖或标记缺口：全新功能压实目标用户、触发场景、当前替代、当前损失、最小可赢切口、主目标、反指标、不可虚构项、证据缺口和线上参考需求；已有功能迭代压实线上视觉基线、当前数据或业务现状、问题区域、保留项、可改项、目标指标、反指标和不可虚构项。
 
 如果用户只提供截图或线上参考，先提取视觉基线和当前页面目的，再继续 `Q` 诊断；这不等于可以生成原型。
 
 ## 输出
 
 ```text
-产品发现判断：
+产品方向审查：
 - 核心价值暂判：
 - 我对真实问题的判断：
+- 前提挑战：
+- 现状替代：
+- 不做推演：
+- 路径对比：
+- 建议范围模式：
 - PM 判断摘要：
   - 真实问题：
-  - 最大不确定性：
+  - 证据边界：
+  - 建议范围模式：
   - 最该验证：
-  - 如果我是 PM：
-  - 不能承诺或虚构：
+  - 不可承诺：
 - 我现在判断：
 - 产品路径：
 - 当前任务：
@@ -174,15 +187,17 @@ PM 场景强迫函数必须被覆盖或标记缺口：全新功能压实目标�
 - 如果你不确定，我的默认假设：
 - 产品作业：
 
-内部追问控制面板（默认不展示，写入审计）：
+内部产品方向审查控制面板（默认不展示，写入审计）：
 - 状态：
 - run_id：
 - 模式来源：
 - 问题定义模式：
-- 当前任务流阶段：
-- 已完成任务：
+- 前提挑战：
+- 现状替代：
+- 不做推演：
+- 路径对比：
+- 范围模式：
 - 当前最大缺口：
-- 专家视角：
 - PM 判断摘要：
 - 产品作业：
 - Agent 可协助事项：

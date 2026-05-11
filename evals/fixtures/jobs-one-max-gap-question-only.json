@@ -1,6 +1,6 @@
 {
   "id": "jobs-one-max-gap-question-only",
-  "title": "产品追问不再等同于单 Q，而是任务流卡点",
+  "title": "产品追问不再等同于单 Q，而是方向审查卡点",
   "category": "pm-jobs",
   "primary_skill": "pm-jobs",
   "prompt": "帮我提升转化率，直接给方案。",
@@ -8,9 +8,9 @@
     "mode": "deep",
     "status": "需要补充",
     "must_stop": true,
-    "gate": "产品发现任务流卡点",
+    "gate": "产品方向审查卡点",
     "required_behaviors": [
-      "识别当前任务流阶段",
+      "识别当前产品方向审查动作",
       "必要时只展开一个 Q 或 D",
       "等待用户回答或补证据",
       "先协助完成整理、分析和证据归纳"

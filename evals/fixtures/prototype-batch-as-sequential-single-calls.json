@@ -3,20 +3,20 @@
   "title": "批量原型必须拆成连续单图调用",
   "category": "pm-prototype-shotgun",
   "primary_skill": "pm-prototype-shotgun",
-  "prompt": "产品简报已对齐，请生成 3 个方案。",
+  "prompt": "产品简报已对齐，请生成 3 条产品路径。",
   "expected": {
     "mode": "deep",
     "status": "可生成",
     "must_stop": false,
     "gate": "批量单图队列",
     "required_behaviors": [
-      "3 个方案拆成 3 个输出单元",
+      "3 条产品路径拆成 3 个输出单元",
       "批量生成只是顺序执行多个单图任务",
       "每个输出单元单独调用一次 image-2"
     ],
     "forbidden_behaviors": [
       "生成一张三联图",
-      "把 3 个方案合成一个 prompt",
+      "把 3 条产品路径合成一个 prompt",
       "用一张比较图代替 3 次出图"
     ]
   },
@@ -27,11 +27,11 @@
     },
     {
       "path": "pmworkspace-shared/references/image-prompts.md",
-      "contains": "`3 个方案` 必须拆成 3 个输出单元"
+      "contains": "`3 条产品路径` 必须拆成 3 个输出单元"
     },
     {
       "path": "pmworkspace-shared/references/prototype-shotgun-board.md",
-      "contains": "`3 个方案` 必须拆成 3 个输出单元"
+      "contains": "`3 条产品路径` 必须拆成 3 个输出单元"
     }
   ]
 }

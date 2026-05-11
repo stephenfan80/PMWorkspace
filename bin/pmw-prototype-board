@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
 DEFAULT_PRESERVE_REGIONS = "状态栏、顶部导航、车系头图、车型切换、tab、底部吸底 CTA"
+LEGACY_PRODUCT_PATH_KEY = "product" + "_hypothesis"
 
 
 def now() -> str:
@@ -171,7 +172,7 @@ def audit_image(image: str, reference: str) -> tuple[int, dict, str]:
 
 def command_add(args: argparse.Namespace) -> int:
     required_fields = {
-        "product_hypothesis": "product hypothesis",
+        "product_path": "product path",
         "behavior_assumption": "behavior assumption",
         "current_loss": "current loss",
         "tradeoff": "tradeoff",
@@ -179,7 +180,7 @@ def command_add(args: argparse.Namespace) -> int:
     missing = [label for field, label in required_fields.items() if not str(getattr(args, field, "")).strip()]
     if missing:
         print(
-            "missing required product hypothesis fields: " + ", ".join(missing),
+            "missing required product path fields: " + ", ".join(missing),
             file=os.sys.stderr,
         )
         return 2
@@ -210,7 +211,7 @@ def command_add(args: argparse.Namespace) -> int:
         "base_image": base_image,
         "edit_scope": args.edit_scope,
         "preserve_regions": preserve_regions,
-        "product_hypothesis": args.product_hypothesis,
+        "product_path": args.product_path,
         "behavior_assumption": args.behavior_assumption,
         "current_loss": args.current_loss,
         "tradeoff": args.tradeoff,
@@ -320,7 +321,7 @@ def command_list(_args: argparse.Namespace) -> int:
     if not items:
         print("暂无方案。")
         return 0
-    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 产品假设 | 用户行为假设 | 当前损失 | 牺牲项 | 原型思考 | 信息架构 | 用户问题解决逻辑 | 反指标保护 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
+    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 产品路径 | 用户行为假设 | 当前损失 | 牺牲项 | 原型思考 | 信息架构 | 用户问题解决逻辑 | 反指标保护 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
     print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
     for item in items:
         key = (item.get("scheme", ""), item.get("screen", ""))
@@ -340,7 +341,7 @@ def command_list(_args: argparse.Namespace) -> int:
             item.get("main_goal", ""),
             item.get("anti_metric", ""),
             item.get("non_fiction", ""),
-            item.get("product_hypothesis", ""),
+            item.get("product_path") or item.get(LEGACY_PRODUCT_PATH_KEY, ""),
             item.get("behavior_assumption", ""),
             item.get("current_loss", ""),
             item.get("tradeoff", ""),
@@ -378,7 +379,7 @@ def build_parser() -> argparse.ArgumentParser:
     add.add_argument("--base-image", default="")
     add.add_argument("--edit-scope", default="")
     add.add_argument("--preserve-regions", default="")
-    add.add_argument("--product-hypothesis", required=True)
+    add.add_argument("--product-path", required=True)
     add.add_argument("--behavior-assumption", required=True)
     add.add_argument("--current-loss", required=True)
     add.add_argument("--tradeoff", required=True)

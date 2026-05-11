@@ -3,7 +3,7 @@
   "title": "快速成型遇到高风险或生产信号必须升级深度交付",
   "category": "autoplan",
   "primary_skill": "pm-autoplan",
-  "prompt": "快速给我出 3 个方案图：这是线上交易页改版，要展示真实最低价并收集手机号线索。",
+  "prompt": "快速给我出 3 条产品路径图：这是线上交易页改版，要展示真实最低价并收集手机号线索。",
   "expected": {
     "mode": "deep",
     "status": "待确认",

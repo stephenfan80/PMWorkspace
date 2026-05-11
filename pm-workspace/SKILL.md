@@ -4,7 +4,7 @@ description: |
   PMWorkspace 主入口，面向产品经理和设计师。用于把产品想法、PRD、Zoon 文档、
   截图、客户洞察或原型请求，先路由到全新功能或已有功能迭代，再由 Agent 判定
   快速成型或深度交付：快速成型在 10 分钟内产出产品简述、至少 3 个方案方向和
-  移动端优先 image-2 原型图轻量包；深度交付继续推进产品发现任务流、策略审查、
+  移动端优先 image-2 原型图轻量包；深度交付继续推进产品方向审查内核、策略审查、
   Zoon 对齐、原型复审、产品设计文档、PRD 或交付稿。负责首次引导、更新检查、
   本地使用记录，并路由到 pm-jobs、pm-strategy-review、pm-brief、
   pm-prototype-shotgun、pm-prototype-review、pm-autoplan 或 pm-handoff。
@@ -89,7 +89,7 @@ PMWorkspace is not a prototype shortcut. In deep delivery mode, it must first cl
 Use this state machine for prototype-related work:
 
 ```text
-产品路径 -> 工作目标模式 -> 产品发现任务流 -> 前提确认 -> 必要 Q/D -> 产品简述 / 产品简报 -> 三方案 image-2 原型 -> 原型复审 -> 产品设计文档 / 产品交付
+产品路径 -> 工作目标模式 -> 产品方向审查内核 -> 前提确认 -> 必要 Q/D -> 产品简述 / 产品简报 -> 三条产品路径 image-2 原型 -> 原型复审 -> 产品设计文档 / 产品交付
 ```
 
 If any required step is incomplete in deep delivery mode, route to `$pm-jobs` or `$pm-brief` instead of generating prototypes.
@@ -143,7 +143,7 @@ If the user provides a product task in the same message, skip the welcome menu a
 - 深度交付模式中，产品简报不是 `已对齐` 时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
 - 快速成型模式中，出图前必须列出关键假设、反指标和不可虚构项，并获得用户确认“按这些假设继续”；输出状态写成 `基于假设，可讨论`，不能写成最终 PRD 或已验证事实。
 - 用户提供截图或线上参考时，只更新视觉基线和线上参考状态；不要自动产出完整 md 方案、HTML 或原型图。
-- `Q` / `D` 只作为关键卡点的交互方式，不是完整产品发现流程；Agent 可以先协助整理材料、拆解截图、生成访谈提纲、梳理数据口径、检索最佳实践和归纳方案机会。拍板问题使用 `D`，一次只展开一个，问完必须等待用户回答。
+- `Q` / `D` 只作为关键卡点的交互方式，不是完整产品发现流程；Agent 可以先协助整理材料、拆解截图、生成访谈提纲、梳理数据口径、检索最佳实践和归纳路径机会。拍板问题使用 `D`，一次只展开一个，问完必须等待用户回答。
 - 产品简报前必须完成前提确认；未确认前只能保持 `待确认`。
 - 关键产品决策默认使用选择题拍板；读取 `decision-question-mode.md`。
 - 新页面也要判断线上参考需求；承接线上流程、结果页、状态页或生产样式时，缺截图/录屏/相似页面参考要先问。

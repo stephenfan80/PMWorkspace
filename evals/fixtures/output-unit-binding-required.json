@@ -3,7 +3,7 @@
   "title": "每张图必须绑定输出契约",
   "category": "prototype-output-contract",
   "primary_skill": "pm-prototype-shotgun",
-  "prompt": "产品简报已对齐，为 3 个方案各生成一个首屏。",
+  "prompt": "产品简报已对齐，为 3 条产品路径各生成一个首屏。",
   "expected": {
     "mode": "deep",
     "status": "可进入原型复审",
@@ -12,7 +12,7 @@
     "required_behaviors": [
       "每张图绑定方案名",
       "每张图绑定屏幕任务、主目标、反指标、不可虚构项、产品简报版本、画布模式、目标输出像素、线上参考状态、设计系统和 image-2 状态",
-      "一个方案加一个屏幕等于一张图片"
+      "一个产品路径加一个屏幕等于一张图片"
     ],
     "forbidden_behaviors": [
       "把两个方案合成一张图",

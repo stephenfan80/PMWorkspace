@@ -1,6 +1,6 @@
 {
   "id": "jobs-product-value-judgment-multi-turn-required",
-  "title": "产品发现任务必须覆盖关键维度后才能进入简述",
+  "title": "产品方向审查必须覆盖关键维度后才能进入简述",
   "category": "pm-jobs",
   "primary_skill": "pm-jobs",
   "prompt": "用户只回答了一个产品对象 Q，并选择了一个方向 D，助手准备生成已对齐简报。",
@@ -8,10 +8,10 @@
     "mode": "deep",
     "status": "需要补充",
     "must_stop": true,
-    "gate": "产品发现任务不足",
+    "gate": "产品方向审查不足",
     "required_behaviors": [
-      "先输出产品发现判断",
-      "覆盖产品发现任务流",
+      "先输出产品方向审查",
+      "覆盖产品方向审查内核",
       "D 不能替代事实诊断",
       "回到当前最大缺口任务"
     ],

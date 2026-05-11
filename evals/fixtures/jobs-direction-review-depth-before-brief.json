@@ -1,6 +1,6 @@
 {
-  "id": "jobs-discovery-depth-before-brief",
-  "title": "产品发现深度不足时不能用一个 Q 和一个 D 直接进入简报",
+  "id": "jobs-direction-review-depth-before-brief",
+  "title": "方向审查深度不足时不能用一个 Q 和一个 D 直接进入简报",
   "category": "pm-jobs",
   "primary_skill": "pm-jobs",
   "prompt": "用户只确认了产品对象，并选择了一个产品重心 D，但目标用户、用户现状、真实损失、主目标和反指标还没有被挖清，助手想直接生成产品简报。",
@@ -26,11 +26,11 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "## 产品专家任务流"
+      "contains": "## 产品方向审查骨架"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "用户确认后状态为 `已对齐`，才进入三方案原型"
+      "contains": "用户确认后状态为 `已对齐`，才进入原型"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",

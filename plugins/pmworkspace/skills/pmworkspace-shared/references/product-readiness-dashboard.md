@@ -1,6 +1,6 @@
 # Product Readiness Dashboard
 
-Product Readiness Dashboard 是 PMWorkspace 的出图 / 交付前总控面板。它采用证据化准备度面板的做法：不是把证据散列成清单，而是用 `Required`、`状态`、`证据`、`行动` 和 `Verdict` 统一判断现在能不能继续。
+Product Readiness Dashboard 是 PMWorkspace 的出图 / 交付前总控面板。它采用证据化准备度面板的做法：不是把证据散列成清单，而是用 `Required`、`状态`、`证据`、`行动` 和 `Verdict` 统一判断现在能不能继续。默认短 verdict 还必须把第一阻断翻译成产品判断影响，告诉用户补齐后会解锁什么。
 
 ## 使用时机
 
@@ -59,6 +59,8 @@ pmw-dashboard status
 - 目标：<出图前 / 交付前>
 - 结论：<可出图 / 不可出图 / 可交付 / 不可交付>
 - 原因：<关键门槛已通过 / 第一条阻断门槛的人话原因>
+- 阻断影响：<该缺口影响真实问题 / 现状替代 / 当前损失 / 范围模式 / 不可虚构项 / 原型可信度 / 交付承诺中的哪一项>
+- 解锁动作：<用户或 Agent 补齐什么后能进入 image-2 原型计划 / 原型复审 / PRD 或交付稿>
 - 下一步：<继续 / 补截图 / 回到产品简报 / 先复审>
 ```
 
@@ -95,7 +97,7 @@ PMWorkspace 产品准备度仪表盘：
 | 研发可行性反问 | YES/no | ... | ... | ... |
 ```
 
-如果仪表盘显示缺口，不要用图片、PRD 或“后续补充”绕过。默认输出只说第一条阻断原因和下一步；内部审计记录完整表格。把缺口转成一个 `Q`、一个 `D`，或退回 `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` 中最早能修复的技能。
+如果仪表盘显示缺口，不要用图片、PRD 或“后续补充”绕过。默认输出只说第一条阻断原因、阻断影响、解锁动作和下一步；内部审计记录完整表格。把缺口转成一个 `Q`、一个 `D`，或退回 `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` 中最早能修复的技能。
 
 仪表盘可以展示 Zoon URL 的存在和同步状态，但不得暴露 `token`、`ownerSecret`、Authorization header 或 API 原始响应内部信息。
 

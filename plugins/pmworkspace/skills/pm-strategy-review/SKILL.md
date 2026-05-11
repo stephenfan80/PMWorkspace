@@ -47,9 +47,11 @@ description: |
 - `策略审查结论`
 - `路径对比`
 - `最大策略矛盾`
+- `如果现在直接做会错在哪里`
 - `范围模式`
 - `建议姿态`
 - `本周期怎么验证`
+- `本周期验证价值`
 - `当前 D`
 - `下一步`
 
@@ -89,17 +91,17 @@ done
 5. Read `../pmworkspace-shared/references/product-memory.md`; use memory only as preference signal, not as fact source.
 6. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 策略审查 stage fields.
 7. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-strategy-review` 且没有当前 run，再创建 runtime run.
-8. Build the 产品方向审查控制器 from `adversarial-review.md`: 来源门槛、已确认事实、前提挑战、现状替代、不做推演、路径对比、最大策略矛盾、范围模式、建议姿态、本周期验证、产品动作、策略取舍、当前 D / 后续 D 队列、下一技能.
+8. Build the 产品方向审查控制器 from `adversarial-review.md`: 来源门槛、已确认事实、前提挑战、现状替代、不做推演、路径对比、最大策略矛盾、如果现在直接做会错在哪里、范围模式、建议姿态、本周期验证、本周期验证价值、产品动作、策略取舍、当前 D / 后续 D 队列、下一技能.
 9. 如果来自 `$pm-jobs`，只接住产品追问交出的策略门槛：范围、价值交换、信任/风险、反指标、可行性、定位或业务冲突；不要重新展开 Q 诊断全流程。
 10. `$pm-strategy-review` 不展开研发能力依赖长清单；只判断能力前提是否改变方向、范围或承诺。详细数据 / 接口 / 算法 / 后台 / 运营依赖交给 `$pm-handoff` 的研发可行性反问。
 11. If basic facts such as user, problem, main goal, anti-metric, or non-fiction boundary are missing, route back to `$pm-jobs` with one focused `Q`; do not use strategy review to invent missing facts.
-12. Select 3-5 challenge lenses relevant to the strategy risk type and scenario, then identify one 最大策略矛盾. 如果某个审查项无明显问题，明确写 `无明显问题` 或在审计标记已覆盖，不能跳过。
+12. Select 3-5 challenge lenses relevant to the strategy risk type and scenario, then identify one 最大策略矛盾. 把最大策略矛盾翻译成 `如果现在直接做会错在哪里`，说明直接进入 brief、原型或交付会误伤真实问题、价值交换、反指标、不可虚构边界或本周期承诺中的哪一项。如果某个审查项无明显问题，明确写 `无明显问题` 或在审计标记已覆盖，不能跳过。
 13. Before choosing a mode, present 2-3 paths from adversarial-review.md: 最小路径、增强路径、收缩 / 转向路径. Each path must state current loss, tradeoff, validation signal, failure signal, and non-fiction boundary.
 14. Select one 范围模式 from adversarial-review.md: 扩大模式、选择性扩大模式、保持模式、收缩模式 or 转向模式. Explain why this mode fits the 最大策略矛盾 and how it changes scope, value exchange, anti-metric protection, and non-fiction boundaries.
 15. Present concrete strategy choices. Do not silently change scope, add promises, move anti-metrics, or include unsupported capabilities.
 16. Convert every selected review lens into a product action: 删除、前置、后置、标注、禁止 or 实验验证.
 17. 把“需要 PM 拍板”的点转成选择题；每轮只展开一个完整 `D`，其余只提示后续标题队列。策略 `D` 必须包含推荐项、选项、风险、会影响什么、进入产品简报的写法。
-18. Add 时间推演: 单功能默认 `1-2 周`，大规划默认 `1-3 个月`; write what must be verified in this cycle and what cannot become this-cycle commitment.
+18. Add 时间推演: 单功能默认 `1-2 周`，大规划默认 `1-3 个月`; write what must be verified in this cycle, what cannot become this-cycle commitment, and `本周期验证价值`: 验证后 PM 能决定继续、收缩、删除、转向、进入原型还是进入交付。
 19. If strategy review resolves the tradeoff, route next to `$pm-brief` by default so the decision becomes part of the product contract. Handoff must include 范围模式、选中路径、策略决策、最大策略矛盾、范围外、用户承诺边界、反指标保护、本周期验证、对原型的影响. If the brief is already aligned and only direction review was requested, route next to `$pm-prototype-shotgun` or `$pm-handoff`.
 20. Log accepted strategy decisions with `pmw-log question` and `pmw-log decision` when platform scripts are available.
 
@@ -124,11 +126,13 @@ done
 - 我不赞成：
 - 我建议：
 - 最大策略矛盾：
+- 如果现在直接做会错在哪里：
 - 路径对比：
 - 范围模式：扩大模式 / 选择性扩大模式 / 保持模式 / 收缩模式 / 转向模式
 - 建议姿态：扩大 / 选择性扩大 / 保持 / 收缩 / 转向
 - 为什么：
 - 本周期怎么验证：
+- 本周期验证价值：
 - 当前必须拍板：
 - 进入产品简报的写法：
 
@@ -142,11 +146,13 @@ done
 - 不做推演：
 - 路径对比：
 - 范围模式：
+- 如果现在直接做会错在哪里：
 - 使用视角：
 - 证据状态：
 - 最强前提：
 - 最弱假设：
 - 本周期验证：
+- 本周期验证价值：
 - 产品动作：
 - 策略取舍：
 - 范围外：

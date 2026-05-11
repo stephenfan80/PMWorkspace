@@ -1,0 +1,62 @@
+{
+  "id": "value-judgment-perceptible-layer-required",
+  "title": "价值判断必须让用户理解卡点价值和解锁结果",
+  "category": "pm-workspace",
+  "primary_skill": "pm-workspace",
+  "prompt": "我第一次用 PMWorkspace，有一个产品想法，也可能想直接出原型。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要补充",
+    "must_stop": true,
+    "gate": "价值判断可感知层",
+    "required_behaviors": [
+      "工作方式卡片说明本轮价值时刻",
+      "价值判断说明证据边界和当前卡点为什么重要",
+      "说明用户补齐后会解锁什么产物",
+      "README 说明 idea / 功能优化 / 原型 / PRD 四类入口如何获得价值"
+    ],
+    "forbidden_behaviors": [
+      "只写流程阻断而不说明产品判断影响",
+      "把更快画图作为 PMW 的核心价值",
+      "新增独立价值判断 dashboard"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "本轮价值时刻"
+    },
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "补齐后会解锁什么"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "价值判断可感知层"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "为什么当前卡点重要"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "PMWorkspace 第一次给你的价值不是“更快画图”"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "**一句 idea：**"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "**已有功能优化：**"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "**要原型：**"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "**要 PRD / 交付稿：**"
+    }
+  ]
+}

@@ -53,10 +53,12 @@ description: |
 ### 默认用户可见输出字段
 
 - `工作方式`
+- `本轮价值时刻`
 - `自动评审结论`
 - `我建议`
 - `理由`
 - `当前需要确认`
+- `补齐后解锁`
 - `下一步`
 
 ### 内部审计字段（默认不展示）
@@ -117,7 +119,7 @@ done
 20. 快速成型模式：确认后输出轻量包：标注假设的产品简述、至少 3 个方案方向、每个方案 1 张移动端 image-2 原型图计划，并把状态写成 `基于假设，可讨论`。少于 3 个方案必须写豁免原因。
 21. 深度交付模式：按最早门槛顺序推进：工作目标模式、产品路径、产品方向审查内核、证据收集、用户需求澄清、数据/现状佐证、路径机会判断、必要 Q/D、前提确认、策略审查、产品简述 / 产品简报、本地简报保存、Zoon A/B 推荐、已启用 Zoon 的漂移检查、线上参考和设计系统基线、Product Readiness Dashboard 的原型准备度或交付准备度。
 22. 深度交付模式：Use `pm-decision-principles.md` to auto-decide only low-risk defaults that do not change product direction; surface any direction-changing item as a single `D` choice question and stop.
-23. Give the user a conclusion-first review: first output `自动评审结论` with `我建议` and `理由`, include a short `工作方式` / progress card, then write the full `评审控制面板` to audit.
+23. Give the user a conclusion-first review: first output `自动评审结论` with `我建议` and `理由`, include a short `工作方式` / progress card, and include `本轮价值时刻` plus `补齐后解锁`; then write the full `评审控制面板` to audit.
 24. For the earliest gate, always declare `门槛等级` as `阻断`、`高风险`、`可自动采用` or `可延后`, and declare `门槛来源`.
 25. Every item in `已自动采用` must include source and why no PM decision is needed, for example `默认移动端优先。来源：PMWorkspace 默认规则。原因：不改变产品方向或用户承诺。`
 26. When enough information exists, create the smallest useful product brief and save it with `pmw-log brief <name>`. This saves the local business brief and audit copy, registers `product_brief` in Product Artifact Flow, and syncs to Zoon only when `PMW_ZOON_SYNC_ON_BRIEF=true` / `zoon_sync_on_brief: true` or the user has explicitly chosen online collaboration.
@@ -128,7 +130,7 @@ done
     - 推荐必须说明 Zoon 的好处：多人协作、事实源统一、后续 image-2 原型 / PRD 防漂移；同时说明 `不自动同步，不作为出图或交付阻断`。
     - 必须让用户用一个轻量 `D` 选择：`D：是否同步到在线协作文档（Zoon）？A. 先不需要，使用本地 Markdown 继续；B. 需要，同步到 Zoon 供团队在线修改。`
 27. If a Zoon URL exists before prototype preparation, run `pmw-zoon drift --url <url>` when available. If it returns `DRIFT`, read the latest Zoon snapshot and update the product brief version before continuing.
-28. Before routing to `$pm-prototype-shotgun` or `$pm-handoff`, run `pmw-dashboard readiness --target prototype` or `pmw-dashboard readiness --target handoff` when available and use the short verdict in the user-facing conclusion. If the verdict is `不可出图` or `不可交付`, route to the first blocking gate instead of continuing. Only show `--details` when the user asks for audit/debug output.
+28. Before routing to `$pm-prototype-shotgun` or `$pm-handoff`, run `pmw-dashboard readiness --target prototype` or `pmw-dashboard readiness --target handoff` when available and use the short verdict in the user-facing conclusion, including its `阻断影响` and `解锁动作`. If the verdict is `不可出图` or `不可交付`, route to the first blocking gate instead of continuing. Only show `--details` when the user asks for audit/debug output.
 29. Map the earliest blocking gate to one next skill: `$pm-jobs`, `$pm-strategy-review`, `$pm-brief`, `$pm-prototype-shotgun`, `$pm-prototype-review`, or `$pm-handoff`. Do not pretend all downstream skills have completed when only the next gate is ready.
 30. `下一技能` cannot be only a skill id in audit; record `交接上下文` with 来源门槛、已确认事实、未决 Q/D、证据状态 and 交给它的原因. 交接上下文还必须追加上游产物、本轮产物、下游可读和产物流动，但默认不展示给用户。
 31. At each gate, record evidence, decisions, artifacts, or reviews with `pmw-run event`; before final output, run `pmw-dashboard status` when available and only surface its short business summary.
@@ -165,6 +167,7 @@ done
 
 工作方式：
 - 当前模式：
+- 本轮价值时刻：
 - 当前一步：
 - 已完成：
 - 下一步：
@@ -174,6 +177,7 @@ done
 - 我建议：
 - 理由：
 - 当前需要确认：
+- 补齐后解锁：
 - 下一步：
 
 内部评审控制面板（默认不展示，写入审计）：

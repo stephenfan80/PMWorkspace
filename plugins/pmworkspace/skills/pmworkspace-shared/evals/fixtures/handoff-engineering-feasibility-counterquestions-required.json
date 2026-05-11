@@ -77,6 +77,21 @@
       "command": [
         "bash",
         "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=handoff-capability-artifact-only; root=\"$PMW_HOME/projects/handoff-capability-artifact-only\"; mkdir -p \"$root/runs\" \"$root/briefs\"; brief=\"$root/briefs/current.md\"; printf '# 产品设计简报：测试\\n产品简报版本：v2\\n确认状态：已对齐\\n\\n## 核心价值判断\\n- 一句话判断：已确认。\\n## 数据 / 能力 / 约束与不可虚构项\\n- 不可虚构项：不得虚构算法、接口或库存能力。\\n' > \"$brief\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\",\"latest_brief\":\"%s\",\"latest_brief_version\":\"v2\"}\\n' \"$brief\" > \"$root/project.json\"; printf '{\"ts\":\"2099-01-01T00:00:00Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"已对齐\",\"title\":\"产品简报确认\",\"summary\":\"用户确认\"}\\n{\"ts\":\"2099-01-01T00:00:01Z\",\"event\":\"evidence\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"线上参考\",\"summary\":\"新概念页，线上参考不适用\"}\\n{\"ts\":\"2099-01-01T00:00:02Z\",\"event\":\"decision\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"方案方向确认\",\"summary\":\"默认方向已批准\"}\\n{\"ts\":\"2099-01-01T00:00:03Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"已登记\",\"title\":\"方案差异\",\"summary\":\"方案差异已确认\"}\\n{\"ts\":\"2099-01-01T00:00:04Z\",\"event\":\"review\",\"run_id\":\"r1\",\"status\":\"可通过\",\"title\":\"原型复审\",\"summary\":\"原型复审可通过\"}\\n' > \"$root/runs/r1.jsonl\"; printf '{\"ts\":\"2099-01-01T00:00:05Z\",\"kind\":\"handoff\",\"run_id\":\"r1\",\"status\":\"已登记\",\"title\":\"PRD\",\"summary\":\"功能能力与研发依赖表待补充；接口和算法状态仍需补齐\"}\\n' > \"$root/artifact-flow.jsonl\"; bin/pmw-dashboard readiness --target handoff; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0,
+      "contains": [
+        "结论：不可交付",
+        "研发可行性反问：已登记"
+      ],
+      "not_contains": [
+        "结论：可交付"
+      ]
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
         "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=handoff-capability-ready; root=\"$PMW_HOME/projects/handoff-capability-ready\"; mkdir -p \"$root/runs\" \"$root/briefs\"; brief=\"$root/briefs/current.md\"; printf '# 产品设计简报：测试\\n产品简报版本：v2\\n确认状态：已对齐\\n\\n## 核心价值判断\\n- 一句话判断：已确认。\\n## 数据 / 能力 / 约束与不可虚构项\\n- 不可虚构项：不得虚构算法、接口或库存能力。\\n' > \"$brief\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\",\"latest_brief\":\"%s\",\"latest_brief_version\":\"v2\"}\\n' \"$brief\" > \"$root/project.json\"; printf '{\"ts\":\"2099-01-01T00:00:00Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"已对齐\",\"title\":\"产品简报确认\",\"summary\":\"用户确认\"}\\n{\"ts\":\"2099-01-01T00:00:01Z\",\"event\":\"evidence\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"线上参考\",\"summary\":\"新概念页，线上参考不适用\"}\\n{\"ts\":\"2099-01-01T00:00:02Z\",\"event\":\"decision\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"方案方向确认\",\"summary\":\"默认方向已批准\"}\\n{\"ts\":\"2099-01-01T00:00:03Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"已登记\",\"title\":\"方案差异\",\"summary\":\"方案差异已确认\"}\\n{\"ts\":\"2099-01-01T00:00:04Z\",\"event\":\"review\",\"run_id\":\"r1\",\"status\":\"可通过\",\"title\":\"原型复审\",\"summary\":\"原型复审可通过\"}\\n{\"ts\":\"2099-01-01T00:00:05Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"已完成\",\"title\":\"研发可行性反问\",\"summary\":\"功能能力与研发依赖已审查；普通缺口可留待补充\"}\\n' > \"$root/runs/r1.jsonl\"; bin/pmw-dashboard readiness --target handoff; rm -rf \"$tmp\""
       ],
       "exit_code": 0,

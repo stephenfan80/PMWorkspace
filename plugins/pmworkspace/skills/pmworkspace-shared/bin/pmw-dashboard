@@ -312,7 +312,14 @@ def latest_capability_review(events: list[dict], root: pathlib.Path, run_id: str
     event = latest_event(
         events,
         ["研发可行性反问", "功能能力与研发依赖", "能力依赖审查"],
-        {"gate", "decision", "artifact", "evidence"},
+        {"gate", "decision"},
+    )
+    if event:
+        return event
+    event = latest_event(
+        events,
+        ["研发可行性反问", "功能能力与研发依赖", "能力依赖审查"],
+        {"artifact", "evidence"},
     )
     if event:
         return event
@@ -332,10 +339,13 @@ def latest_capability_review(events: list[dict], root: pathlib.Path, run_id: str
 def capability_review_ready(row: dict) -> bool:
     if not row:
         return False
+    if row.get("event") not in {"gate", "decision"}:
+        return False
     text = f"{row.get('status', '')} {row.get('title', '')} {row.get('summary', '')}"
     if contains_any(text, ["需要 PM 拍板", "退回策略审查", "未完成", "未登记", "未审查"]):
         return False
-    if contains_any(text, ["已完成", "已审查", "已登记", "可交付", "可留待补充"]):
+    status = str(row.get("status") or "")
+    if contains_any(status, ["已完成", "已审查", "可交付", "可留待补充"]):
         return True
     return False
 

@@ -30,11 +30,21 @@ pmw-prototype-board add \
   --information-architecture "<信息架构如何组织>" \
   --user-problem-fit "<如何帮助用户解决问题>" \
   --anti-metric-protection "<解决或保护哪个反指标风险>" \
+  --design-score "<0-10 设计完整度评分>" \
+  --design-gap "<距离 10/10 最大设计差距>" \
+  --ten-out-of-ten-standard "<这张图达到 10/10 的具体标准>" \
+  --prompt-design-fix "<本轮 image-2 prompt 如何补齐设计差距>" \
+  --anti-ai-slop-constraints "<禁止的模板味 / 泛化视觉模式>" \
+  --state-coverage "<默认 / 加载 / 空态 / 错误 / 成功 / 部分结果策略>" \
+  --first-second-third-hierarchy "<用户第一眼 / 第二眼 / 第三眼看到什么>" \
+  --unresolved-design-decision "<仍需 PM 拍板的设计选择，可空>" \
   --image "<图片路径或 URL，可为空>" \
   --status "计划生成"
 ```
 
 `--product-path`、`--behavior-assumption`、`--current-loss` 和 `--tradeoff` 是新写入记录的必填字段；这里的 product path 记录产品路径判断。旧记录缺字段时继续可读，但新输出单元缺任一字段都不能登记为已写入。
+
+设计完整度字段第一阶段为可选字段，旧记录缺失时展示为 `未记录`。但 `$pm-prototype-shotgun` 的新输出必须写入 `--design-score`、`--design-gap`、`--ten-out-of-ten-standard`、`--prompt-design-fix`、`--anti-ai-slop-constraints`、`--state-coverage` 和 `--first-second-third-hierarchy`；否则只能标记 `方案比较板：设计完整度未写入`，不能声称已完成设计完整度判断。
 
 有 `visual_baseline` 时，`--canvas-mode` 必须是 `physical_longboard`，`--target-output-pixels` 必须写与当前 visual_baseline 一致的物理长板目标，例如 `1179 x >=2556` 或 `1179px 宽，高度不得低于 2556px`；不得写短画布锚点，具体禁用模式以 `pmw-prototype-prompt-check` 为准。
 
@@ -72,6 +82,8 @@ pmw-prototype-board list
 - 默认最少 3 条产品路径；少于 3 条必须记录 `少于 3 条路径豁免原因`，并说明为什么不影响产品判断。
 - 每个方案必须包含 `产品路径`、`用户行为假设`、`要赢过的现状替代`、`当前损失`、`删除 / 牺牲 / 后置项`、`验证信号`、`失败信号`、`原型思考`、`信息架构设计思考`、`用户问题解决逻辑`、`反指标保护` 和 `不可虚构边界`。
 - 每个方案必须说明它相信什么用户行为、要赢过哪个现状替代、解决什么当前损失、牺牲什么、保护哪个反指标，以及哪些内容不可虚构。
+- 每个方案必须包含 `设计完整度评分`、`为什么是这个分数`、`距离 10/10 的最大差距`、`10/10 原型标准`、`本轮 prompt 如何补齐`、`反 AI 模板味约束`、`状态覆盖策略` 和 `第一眼 / 第二眼 / 第三眼信息层级`。
+- 三条产品路径必须同时是三种设计判断：信息架构、交互模型、信任模型、状态策略或降噪策略至少一项不同。不能只是在同一产品路径下替换配色、圆角、插画、卡片密度或文案语气。
 - 方案质量规则不局限留资业务；社区、直播、产品库、交易、内容、工具、看板等场景也必须适用。
 - 默认输出“方案对比表 + 单图清单”，不是拼图。
 - 不允许把多个方案或多个屏幕合成一张三联图、并排比较图、一图多屏或多屏故事板。
@@ -79,6 +91,7 @@ pmw-prototype-board list
 - 方案比较板是审计和比较记录，不是 image-2 图片的替代物。
 - 每个 board item 必须能追溯到已对齐产品简报版本、主目标、反指标和不可虚构项。
 - 每个 board item 必须能追溯到方案的产品路径、产品策略、信息架构、交互模型、信任模型或关键任务路径差异，不能只有视觉风格差异。
+- 每个 board item 应能追溯到设计完整度目标：当前评分、10/10 标准、prompt 修正方向和反模板味约束。生成图复审时 `$pm-prototype-review` 要读取这些字段判断是否达标。
 - 每个 board item 在有线上截图视觉基线时，必须能追溯到 `canvas_mode=physical_longboard`、`target_output_pixels`、`generation_mode`、`base_image`、`edit_scope` 和 `preserve_regions`。
 - 每个 board item 必须保留独立状态：`计划生成`、`已生成`、`生成失败`、`待重试` 或 `需要重出`；批量成功不能掩盖单张失败。
 - 已登记的 board item 必须绑定当前 latest brief 的 `brief_path` 和 `brief_version`；旧版本 brief 的输出单元必须重新登记，不能靠当前 run 里的旧方案确认放行。

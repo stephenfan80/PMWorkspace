@@ -184,6 +184,15 @@ def command_add(args: argparse.Namespace) -> int:
             file=os.sys.stderr,
         )
         return 2
+    if str(args.design_score).strip():
+        try:
+            score_value = int(str(args.design_score).strip())
+        except ValueError:
+            print("design score must be an integer from 0 to 10", file=os.sys.stderr)
+            return 2
+        if score_value < 0 or score_value > 10:
+            print("design score must be an integer from 0 to 10", file=os.sys.stderr)
+            return 2
     run_id = args.run or current_run_id()
     brief_path = args.brief_path or current_brief_path()
     baseline = latest_visual_baseline(run_id)
@@ -219,6 +228,14 @@ def command_add(args: argparse.Namespace) -> int:
         "information_architecture": args.information_architecture,
         "user_problem_fit": args.user_problem_fit,
         "anti_metric_protection": args.anti_metric_protection,
+        "design_score": args.design_score,
+        "design_gap": args.design_gap,
+        "ten_out_of_ten_standard": args.ten_out_of_ten_standard,
+        "prompt_design_fix": args.prompt_design_fix,
+        "anti_ai_slop_constraints": args.anti_ai_slop_constraints,
+        "state_coverage": args.state_coverage,
+        "first_second_third_hierarchy": args.first_second_third_hierarchy,
+        "unresolved_design_decision": args.unresolved_design_decision,
         "image": args.image,
         "status": args.status,
     }
@@ -321,8 +338,8 @@ def command_list(_args: argparse.Namespace) -> int:
     if not items:
         print("暂无方案。")
         return 0
-    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 产品路径 | 用户行为假设 | 当前损失 | 牺牲项 | 原型思考 | 信息架构 | 用户问题解决逻辑 | 反指标保护 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
-    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 产品路径 | 设计评分 | 主要设计差距 | 10/10 原型标准 | 反 AI 模板味约束 | 用户行为假设 | 当前损失 | 牺牲项 | 原型思考 | 信息架构 | 用户问题解决逻辑 | 反指标保护 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
     for item in items:
         key = (item.get("scheme", ""), item.get("screen", ""))
         scheme_key = (item.get("scheme", ""), "")
@@ -342,6 +359,10 @@ def command_list(_args: argparse.Namespace) -> int:
             item.get("anti_metric", ""),
             item.get("non_fiction", ""),
             item.get("product_path") or item.get(LEGACY_PRODUCT_PATH_KEY, ""),
+            item.get("design_score") or "未记录",
+            item.get("design_gap") or "未记录",
+            item.get("ten_out_of_ten_standard") or "未记录",
+            item.get("anti_ai_slop_constraints") or "未记录",
             item.get("behavior_assumption", ""),
             item.get("current_loss", ""),
             item.get("tradeoff", ""),
@@ -387,6 +408,14 @@ def build_parser() -> argparse.ArgumentParser:
     add.add_argument("--information-architecture", default="")
     add.add_argument("--user-problem-fit", default="")
     add.add_argument("--anti-metric-protection", default="")
+    add.add_argument("--design-score", default="")
+    add.add_argument("--design-gap", default="")
+    add.add_argument("--ten-out-of-ten-standard", default="")
+    add.add_argument("--prompt-design-fix", default="")
+    add.add_argument("--anti-ai-slop-constraints", default="")
+    add.add_argument("--state-coverage", default="")
+    add.add_argument("--first-second-third-hierarchy", default="")
+    add.add_argument("--unresolved-design-decision", default="")
     add.add_argument("--image", default="")
     add.add_argument("--status", default="计划生成")
     add.add_argument("--run")

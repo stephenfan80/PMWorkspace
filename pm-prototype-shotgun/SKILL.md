@@ -21,6 +21,8 @@ description: |
 
 默认最少 3 条产品路径；少于 3 条必须写明确豁免原因。每条路径都要先写清：相信什么用户行为、要赢过哪个现状替代、解决什么当前损失、主动删除 / 牺牲 / 后置什么、验证信号、失败信号、反指标保护和不可虚构边界。
 
+出图前增加 `原型设计完整度内核`：每条产品路径必须先判断当前设计完整度 0-10，说明为什么不是 10/10，定义本屏的 10/10 原型标准，再把 image-2 prompt 写成设计修正指令。PMW 不接受只写“现代、简洁、高级”的氛围 prompt；必须把设计判断落到信息层级、状态覆盖、用户旅程、反 AI 模板味、设计系统 / 线上基线、移动端可用性和未决设计选择。
+
 <!-- PMW-GENERATED-CONTRACT:START -->
 ## PMWorkspace 生成契约
 
@@ -62,6 +64,7 @@ description: |
 - `原型出图判断`
 - `方案方向`
 - `产品路径`
+- `原型设计完整度`
 - `原型思考`
 - `输出单元清单`
 - `image-2 状态`
@@ -75,6 +78,9 @@ description: |
 - `方案差异质量`
 - `三条路径数量检查`
 - `产品路径`
+- `原型设计完整度`
+- `10/10 原型标准`
+- `反 AI 模板味约束`
 - `原型思考`
 - `方案比较板`
 - `证据状态`
@@ -126,6 +132,8 @@ done
 - 多方案生成前先确认概念方向，除非用户明确批准使用默认方向。
 - 默认最少 3 条产品路径；少于 3 条路径必须记录 `少于 3 条路径豁免原因`，否则不能写 image-2 prompt。
 - 每个方案必须包含 `产品路径`、`用户行为假设`、`要赢过的现状替代`、`当前损失`、`删除 / 牺牲 / 后置项`、`验证信号`、`失败信号`、`原型思考`、`信息架构设计思考`、`用户问题解决逻辑`、`反指标保护` 和 `不可虚构边界`。
+- 每个方案必须包含 `设计完整度评分`、`为什么是这个分数`、`主要设计差距`、`10/10 原型标准`、`本轮 prompt 设计修正`、`反 AI 模板味约束`、`状态覆盖`、`第一眼 / 第二眼 / 第三眼信息层级` 和 `未决设计选择`。
+- 三条产品路径也必须是三种设计判断，至少在信息架构、交互模型、信任模型、状态策略或降噪策略上有实质差异；不能只换配色、圆角、插画、卡片密度或文案语气。
 - 设计原型默认只能使用 image-2 / 图像生成输出方案图片；HTML 只在用户明确要求“HTML”“可交互网页”“前端实现”或“本地网页原型”时允许。
 - 如果当前环境无法生成 image-2 图片，停止并说明无法出图；不要用 HTML、Markdown 线框或拼图替代设计原型。
 - 默认移动端优先分两种互斥模式：无线上截图时使用 `standard_first_screen` 模板；有生产截图 / `visual_baseline` 时使用 `physical_longboard` 模板，必须以参考图物理像素和目标输出像素为 image-2 画布。
@@ -159,25 +167,26 @@ done
 6. Use `pmw-memory user-summary` plus `pmw-memory taste-summary` when available so rejected directions are not repeated as “new”方案 and local product cognition can improve recommendations; if memory changes the recommendation, explicitly say `基于过往偏好，我建议...` or `基于本地产品认知...`, and never let memory override the current brief, Zoon, anti-metric, non-fiction boundary, design system, or reference gate.
 7. 输出 `原型出图判断`：先说明我建议这轮出哪些单图、暂时不出哪些屏、为什么这些图能帮助 PM 做产品选择，以及图片生成前门槛。必须展示 `产品简报确认`、`方案方向确认`、`数据佐证`、`视觉基线状态` 和 `目标输出像素`；数据缺失时写明 `数据佐证：未提供，本方案存在未验证风险`。
 8. Propose concept directions with names and tradeoffs. 默认最少 3 条产品路径；少于 3 条路径必须记录豁免原因。方案差异必须通过 `方案差异质量`：至少说明每个方向在产品策略、信息架构、交互模型、信任模型或关键任务路径上的不同；如果只是视觉皮肤差异，停止并重拟方向。每个方案必须输出 `产品路径`、`用户行为假设`、`要赢过的现状替代`、`当前损失`、`删除 / 牺牲 / 后置项`、`验证信号`、`失败信号`、`原型思考`、`信息架构设计思考` 和 `用户问题解决逻辑`。
-9. 如果用户、brief、Zoon、截图或参考材料命中汽车之家、AutoDesign、之家或 Autohome，默认载入 AutoDesign 约束。产品 UI 优先使用 AutoDesign token；品牌 VI 和字体包只作为品牌露出、活动视觉或特殊场景参考，字体授权必须保留边界，不能写成生产可用承诺。若用户提供了线上截图，截图基线优先于泛化 AutoDesign token，并且必须用 `visual_baseline` 锁定参考尺寸与目标输出像素。
-10. 多方案生成前确认方案方向；如果用户已经明确批准默认方向，记录 `方案方向确认：默认方向已批准`，否则停在方向确认，不写 image-2 提示词。
-11. For each image output unit, declare scheme, screen task, prototype thinking, information architecture rationale, user problem fit, anti-metric protection, canvas mode, canvas, main goal, anti-metric, non-fiction boundary, plus product path, behavior assumption, current substitute to beat, current loss, tradeoff, validation signal, and failure signal. Also declare target output pixels, 线上参考状态, 视觉基线状态, design system, image-2 status, and brief dependency. 一个输出单元等于一张图片，不能把多个方案或多个屏幕合成拼图。
+9. 对每条产品路径运行 `原型设计完整度内核`：给出 0-10 评分，说明当前差距，定义本屏 10/10 原型标准，并判断是否存在 AI 模板味风险。检查维度包括信息架构、状态覆盖、用户旅程、反 AI 模板味、设计系统 / 线上基线、移动端可用性和未决设计选择。快速成型可以低分继续，但用户可见状态必须写 `基于假设，可讨论`；深度交付中缺 10/10 标准或反模板味约束时不写 image-2 prompt。
+10. 如果用户、brief、Zoon、截图或参考材料命中汽车之家、AutoDesign、之家或 Autohome，默认载入 AutoDesign 约束。产品 UI 优先使用 AutoDesign token；品牌 VI 和字体包只作为品牌露出、活动视觉或特殊场景参考，字体授权必须保留边界，不能写成生产可用承诺。若用户提供了线上截图，截图基线优先于泛化 AutoDesign token，并且必须用 `visual_baseline` 锁定参考尺寸与目标输出像素。
+11. 多方案生成前确认方案方向；如果用户已经明确批准默认方向，记录 `方案方向确认：默认方向已批准`，否则停在方向确认，不写 image-2 提示词。
+12. For each image output unit, declare scheme, screen task, prototype thinking, information architecture rationale, user problem fit, anti-metric protection, canvas mode, canvas, main goal, anti-metric, non-fiction boundary, plus design completeness score, design gap, 10/10 prototype standard, prompt design fix, state coverage, first/second/third hierarchy, anti-AI-slop constraints, product path, behavior assumption, current substitute to beat, current loss, tradeoff, validation signal, and failure signal. Also declare target output pixels, 线上参考状态, 视觉基线状态, design system, image-2 status, and brief dependency. 一个输出单元等于一张图片，不能把多个方案或多个屏幕合成拼图。
     - 无线上截图时，`画布模式` 写 `standard_first_screen`，并使用 `image-prompts.md` 的对应模板。
     - 有线上截图 / `visual_baseline` 时，`画布模式` 必须写 `physical_longboard`，`画布` 必须写 `线上截图物理长板`；`目标输出像素` 必须写明确宽高或宽度 + 最小高度，例如 `参考截图尺寸：1179 x 2556；识别为 393pt @3x；目标输出画布：1179px 宽，内容自适应长图，高度不得低于 2556px，可随内容增长；字体、间距和组件按参考物理像素等比绘制`。
     - 有线上截图且目标是视觉还原时，`生成模式` 必须写 `screenshot_edit`，`base_image` 绑定当前 `visual_baseline` 参考图，`edit_scope` 写清只改哪个模块，`preserve_regions` 默认写 `状态栏、顶部导航、车系头图、车型切换、tab、底部吸底 CTA`。
     - 有线上截图时，最终 image-2 prompt 不得包含短画布锚点；以 `pmw-prototype-prompt-check` 为准。
     - 移动长板仍是一张连续移动端界面，不得拆成多张图、拼图、多屏故事板或桌面端。
-12. 把批量请求拆成顺序单图队列：`3 条产品路径` -> 3 个输出单元，`3 条产品路径 x 2 个屏幕` -> 6 个输出单元。每个输出单元单独调用一次 image-2；不要把多个单元合成一个 prompt。
-13. 平台脚本可用时，先用 `pmw-prototype-board add` 登记每个方案/屏幕单元；`--product-path`、`--behavior-assumption`、`--current-loss` 和 `--tradeoff` 是必填字段。如果写入失败，输出 `方案比较板：未写入（原因）`，不能假装已记录。
-14. 平台脚本可用时运行 `pmw-dashboard readiness --target prototype`；用户可见输出只包含短 verdict / 第一阻断原因。如果 verdict 是 `不可出图`，根据第一条阻断行退回 `$pm-brief`、线上参考门槛、方案方向确认或不可虚构项补齐，不写 image-2 prompt。只有用户要求看审计时才展示 `pmw-dashboard readiness --details`。
-15. 数据佐证缺失时不阻断出图，但必须把 `未验证风险` 写入用户可见输出和每个 image-2 prompt 的不可虚构项：不得展示确定性承诺、真实验证过的数值、已核验结果或无法兑现的数据能力，只能使用示例、区间、占位或明确标注假设。
-16. 在每个输出单元的图片生成前门槛通过后，先把最终 prompt 交给 `pmw-prototype-prompt-check`；有视觉基线时检查失败必须重写 prompt，不得调用 image-2。检查通过后逐个 Generate with image-2 / image generation。每次生成只服务当前一个输出单元，并在 prompt 中写明禁止拼图、并排比较、一图多屏、一图多方案。 如果当前环境无法生成 image-2，停止并说明，不用 HTML、Markdown 线框或方案比较板替代。
-17. 每张图出图后用 `pmw-prototype-board image` 补充图片路径或 URL；当当前 run 有 `visual_baseline` 且输出单元是 `physical_longboard` 时，脚本会自动调用 `pmw-image-audit`。如果返回 `需要重出` 或命令非 0，必须把该图标为 `需要重出`，不能展示为交付结果，也不能把批次写成全成功。
-18. Run `prototype-quality-review.md`; if a reference screenshot exists, first trust the `pmw-prototype-board image` audit result or run `pmw-image-audit audit --image <生成图> --reference <参考图>` again for复核，并 expose `视觉审计：通过 / 需要重出`. Then route substantial post-image review to `$pm-prototype-review`.
-19. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单，它会登记 `prototype_manifest` 到 Product Artifact Flow；再用 `pmw-run event --type artifact` 记录产物。
-20. Record approved/rejected design feedback with `pmw-log taste`, including scenario, feedback target, source, scope, and confidence when available.
-21. 批量输出后运行 `pmw-dashboard status`，最终说明只给每张图的业务状态和下一步；方案比较板、产物流动和证据状态默认留在审计中。
-22. 出图后必须给出反馈入口，不要停在“已生成图片”。至少提供：选定一个方案继续、指出要改的区域 / 字段、继续探索新方案、补充截图 / 数据参考、进入 `$pm-handoff` 生成精简 PRD / 交付稿。若用户反馈只影响单屏视觉或表单字段，可重出受影响单图；若反馈改变用户承诺、范围、数据真实性或交付责任，先回到 `$pm-brief` 更新产品简报并确认。
+13. 把批量请求拆成顺序单图队列：`3 条产品路径` -> 3 个输出单元，`3 条产品路径 x 2 个屏幕` -> 6 个输出单元。每个输出单元单独调用一次 image-2；不要把多个单元合成一个 prompt。
+14. 平台脚本可用时，先用 `pmw-prototype-board add` 登记每个方案/屏幕单元；`--product-path`、`--behavior-assumption`、`--current-loss` 和 `--tradeoff` 是必填字段；新输出必须同时写入 `--design-score`、`--design-gap`、`--ten-out-of-ten-standard`、`--prompt-design-fix`、`--anti-ai-slop-constraints`、`--state-coverage` 和 `--first-second-third-hierarchy`。如果写入失败，输出 `方案比较板：未写入（原因）`，不能假装已记录。
+15. 平台脚本可用时运行 `pmw-dashboard readiness --target prototype`；用户可见输出只包含短 verdict / 第一阻断原因。如果 verdict 是 `不可出图`，根据第一条阻断行退回 `$pm-brief`、线上参考门槛、方案方向确认或不可虚构项补齐，不写 image-2 prompt。只有用户要求看审计时才展示 `pmw-dashboard readiness --details`。
+16. 数据佐证缺失时不阻断出图，但必须把 `未验证风险` 写入用户可见输出和每个 image-2 prompt 的不可虚构项：不得展示确定性承诺、真实验证过的数值、已核验结果或无法兑现的数据能力，只能使用示例、区间、占位或明确标注假设。
+17. 在每个输出单元的图片生成前门槛通过后，先把最终 prompt 交给 `pmw-prototype-prompt-check`；有视觉基线时检查失败必须重写 prompt，不得调用 image-2。检查通过后逐个 Generate with image-2 / image generation。每次生成只服务当前一个输出单元，并在 prompt 中写明 10/10 原型标准、第一眼 / 第二眼 / 第三眼信息层级、必须出现的状态、必须删除 / 降级的内容、反 AI 模板味约束，以及禁止拼图、并排比较、一图多屏、一图多方案。 如果当前环境无法生成 image-2，停止并说明，不用 HTML、Markdown 线框或方案比较板替代。
+18. 每张图出图后用 `pmw-prototype-board image` 补充图片路径或 URL；当当前 run 有 `visual_baseline` 且输出单元是 `physical_longboard` 时，脚本会自动调用 `pmw-image-audit`。如果返回 `需要重出` 或命令非 0，必须把该图标为 `需要重出`，不能展示为交付结果，也不能把批次写成全成功。
+19. Run `prototype-quality-review.md`; if a reference screenshot exists, first trust the `pmw-prototype-board image` audit result or run `pmw-image-audit audit --image <生成图> --reference <参考图>` again for复核，并 expose `视觉审计：通过 / 需要重出`. Then route substantial post-image review to `$pm-prototype-review`.
+20. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单，它会登记 `prototype_manifest` 到 Product Artifact Flow；再用 `pmw-run event --type artifact` 记录产物。
+21. Record approved/rejected design feedback with `pmw-log taste`, including scenario, feedback target, source, scope, and confidence when available.
+22. 批量输出后运行 `pmw-dashboard status`，最终说明只给每张图的业务状态和下一步；方案比较板、产物流动和证据状态默认留在审计中。
+23. 出图后必须给出结构化反馈入口，不要停在“已生成图片”。至少提供：选定一个方案继续、保留某个信息架构、保留某种信任表达、删除某个模板化视觉元素、指出要重出的区域 / 字段、继续探索新方案、补充截图 / 数据参考、进入 `$pm-handoff` 生成精简 PRD / 交付稿。若用户反馈只影响单屏视觉、信息层级或表单字段，可重出受影响单图；若反馈改变用户承诺、范围、数据真实性或交付责任，先回到 `$pm-brief` 更新产品简报并确认。
 
 ## 输出
 
@@ -196,6 +205,17 @@ done
 - 保留区域：<screenshot_edit 时必须保留的原截图区域>
 - 下一步：
 
+原型设计完整度：
+- 当前评分：
+- 为什么是这个分数：
+- 主要差距：
+- 10/10 原型标准：
+- 本轮出图修正：
+- 状态覆盖：
+- 第一眼 / 第二眼 / 第三眼：
+- 反 AI 模板味约束：
+- 需要 PM 拍板：
+
 方案方向：
 - 方案 A：
   - 产品路径：
@@ -211,6 +231,14 @@ done
   - 用户问题解决逻辑：
   - 反指标保护：
   - 不可虚构边界：
+  - 设计完整度评分：
+  - 主要设计差距：
+  - 10/10 原型标准：
+  - 本轮 prompt 设计修正：
+  - 状态覆盖：
+  - 第一眼 / 第二眼 / 第三眼：
+  - 反 AI 模板味约束：
+  - 未决设计选择：
   - 最大风险：
 
 图片输出单元：
@@ -227,6 +255,14 @@ done
 - 信息架构设计思考：
 - 用户问题解决逻辑：
 - 反指标保护：
+- 设计完整度评分：
+- 主要设计差距：
+- 10/10 原型标准：
+- 本轮 prompt 设计修正：
+- 状态覆盖：
+- 第一眼 / 第二眼 / 第三眼：
+- 反 AI 模板味约束：
+- 未决设计选择：
 - 画布模式：
 - 画布：
 - 主目标：

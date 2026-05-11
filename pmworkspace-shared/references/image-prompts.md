@@ -21,6 +21,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - `生成模式`：视觉还原优先、现有生产截图或截图修改任务默认使用 `screenshot_edit`；产品探索、大幅重构或明确需要重新组织页面时才显式使用 `redraw`。
 - `方案差异质量`：默认最少 3 条产品路径；每条路径差异来自产品策略、信息架构、交互模型、信任模型或关键任务路径；如果只是配色、圆角、插画、卡片皮肤不同，停止并重拟方向。少于 3 条路径必须有明确豁免原因。
 - `产品路径 / 原型思考`：每条路径必须写明它相信什么用户行为、要赢过哪个现状替代、解决什么当前损失、主动删除 / 牺牲 / 后置什么、验证信号、失败信号、为什么这样设计、信息架构如何组织、如何帮助用户解决问题、解决哪个反指标风险，以及哪些内容不可虚构。
+- `原型设计完整度`：每条产品路径在写 image-2 prompt 前必须给出 0-10 评分、为什么是这个分数、距离 10/10 的最大设计差距、10/10 原型标准、本轮 prompt 如何补齐、反 AI 模板味约束、状态覆盖策略和第一眼 / 第二眼 / 第三眼信息层级。快速成型可以低分继续，但必须标记 `基于假设，可讨论`，不能包装成设计已完成。
 - `方案方向确认`：用户已确认方向，或明确批准使用默认方向；未确认时只输出方向和取舍，不写图片提示词。
 - `输出单元清单`：把每个 `方案 + 屏幕任务` 拆成一张独立图片，并绑定主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统、image-2 状态和画布。
 - `方案比较板写入`：生成前用 `pmw-prototype-board add` 登记计划单元，生成后补充图片路径或 URL；脚本不可用时在输出中标记原因。
@@ -56,6 +57,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - 输出计划已经把每个方案/屏幕映射为一张独立图片，不把多个方案合成一张比较图。
 - 每张图片已经绑定方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统和 image-2 状态。
 - 每条路径已经写入 `产品路径`、`用户行为假设`、`要赢过的现状替代`、`当前损失`、`删除 / 牺牲 / 后置项`、`验证信号`、`失败信号`、`原型思考`、`信息架构设计思考`、`用户问题解决逻辑`、`反指标保护` 和 `不可虚构边界`。
+- 每条路径已经写入 `设计完整度评分`、`主要设计差距`、`10/10 原型标准`、`prompt 设计修正方向`、`反 AI 模板味约束`、`状态覆盖` 和 `第一眼 / 第二眼 / 第三眼信息层级`；如果缺失，先补原型设计完整度，不写 image-2 prompt。
 - 每个输出单元已经登记到 Prototype Shotgun Board，或已说明脚本不可用的原因。
 - 画布决策遵循移动端优先但必须二选一：无线上截图时使用 `standard_first_screen` 模板；有线上截图 / `visual_baseline` 时使用 `physical_longboard` 模板。最终 image-2 prompt 只写当前模式的正向画布字段，不复制另一种模式的短画布锚点。
 - 汽车之家 / AutoDesign 生产页必须声明 `参考截图尺寸`、截图倍率和 `目标输出画布`；线上截图基线覆盖泛化 token。目标默认使用参考截图原始物理像素长板，例如 `1179 x 2556 = 393pt @3x`；字体、间距、卡片和底部栏按参考物理像素比例等比执行。只有显式 override 目标宽度时才允许改宽，并必须同步等比缩放字号、间距和组件。
@@ -83,6 +85,8 @@ C. <名称> - <产品路径；相信的用户行为；要赢过的现状替代�
 
 Directions must include at least 3 product paths by default and differ by product strategy, information architecture, interaction model, trust model, or key task path. Do not offer three visual skins of the same idea. After confirmation, generate each direction/screen as a separate image, even when several images are generated in one batch.
 
+Each direction must also be a different design judgment. At least one of these must differ materially: information hierarchy, interaction model, trust model, state strategy, or subtraction / de-noising strategy. Do not treat three color palettes, three illustration styles, or three card treatments as three directions.
+
 The scheme quality rule is business-agnostic: it applies to lead forms, community, live streaming, product libraries, transaction flows, content screens, tools, and dashboards. Visual style is only the expression inside an approved scheme; it is not the scheme itself.
 
 方案差异质量不通过时，不要降级成“先出几张看看”。先重拟方向，直到差异能映射到产品判断；视觉风格只能作为已确认方案内的表达，不是方案本身。
@@ -106,6 +110,13 @@ For every image generation request, declare the output unit before prompting:
 - 信息架构设计思考：<信息如何组织，优先级如何排序>
 - 用户问题解决逻辑：<如何帮助用户解决当前替代/损失>
 - 反指标保护：<保护哪个信任、质量或体验风险>
+- 设计完整度评分：<0-10，并说明为什么是这个分数>
+- 主要设计差距：<距离 10/10 最大的 1-2 个设计缺口>
+- 10/10 原型标准：<这张图做到什么才算设计完整>
+- 本轮 prompt 设计修正：<prompt 将如何补齐信息架构、状态、旅程或信任表达>
+- 状态覆盖：<默认 / 加载 / 空态 / 错误 / 成功 / 部分结果如何表达；不适用也要说明>
+- 第一眼 / 第二眼 / 第三眼：<用户扫描时分别看到什么>
+- 反 AI 模板味约束：<禁止泛卡片、紫蓝渐变、装饰性图标、模板 hero 等具体模式>
 - 画布模式：<standard_first_screen 或 physical_longboard，只能二选一>
 - 画布：<按下方互斥模板填写，不要把两种模式写在同一行>
 - 主目标：<这个屏幕服务的指标或行为>
@@ -121,6 +132,14 @@ For every image generation request, declare the output unit before prompting:
 - 设计系统：<AutoDesign / 用户提供设计系统 / 截图基线 / 默认生产基线>
 - image-2 状态：<计划生成 / 已生成 / 生成失败 / 待重试 / 需要重出>
 - 依赖：<产品简报版本和来源>
+```
+
+image-2 prompt 必须是设计修正指令，不是界面氛围描述。禁止只写 `现代`、`简洁`、`高级`、`清爽`、`卡片式`、`科技感` 这类泛化词；如果需要表达这些方向，必须替换成具体决策：信息优先级、组件密度、状态呈现、主 CTA 数量、降噪项、字体层级、间距节奏和信任提示。每个 prompt 都要写清哪些内容必须删除或降级，而不只是新增元素。
+
+默认反 AI 模板味约束：
+
+```text
+不要生成泛 SaaS 卡片堆叠、紫蓝渐变、装饰性图标圆圈、三栏模板、居中大字空泛 hero、无意义插画、统一大圆角、重阴影、漂浮装饰图形或拼贴感界面。若界面是工具 / 看板 / 交易 / 表单 / 结果页，优先使用任务驱动的信息层级，而不是营销海报式布局。
 ```
 
 无线上截图时追加当前模板：
@@ -162,6 +181,7 @@ Rules:
 - 如果用户要 `3 个方向 x 2 个屏幕`，生成六张独立图片；按方案或按屏幕排序，取决于用户的评审方式。
 - 相关图片之间要保持产品事实、示例数据、字体层级和设计系统一致。
 - 每个输出单元必须能追溯到已对齐产品简报中的产品判断；如果追溯不到，先回到产品对齐。
+- 每个输出单元必须能追溯到自己的 10/10 原型标准；生成后复审会按该标准判断是否达标。若生成图明显出现模板味，即使产品逻辑正确，也不得直接通过。
 
 ## 基础 UI 原型模板
 
@@ -178,6 +198,10 @@ Rules:
   - 场景路由：<主场景>
   - 方案方向：<名称和策略>
   - 产品路径：<它相信什么用户行为、要赢过哪个现状替代、解决什么损失、主动删除 / 牺牲 / 后置什么>
+  - 设计完整度目标：<当前评分、主要差距、10/10 原型标准、本轮 prompt 修正方向>
+  - 信息层级：<第一眼 / 第二眼 / 第三眼>
+  - 状态策略：<默认 / 加载 / 空态 / 错误 / 成功 / 部分结果>
+  - 反 AI 模板味约束：<禁止的模板模式和必须删除 / 降级的装饰项>
   - 原型思考：<为什么这个方案成立>
   - 信息架构设计思考：<信息组织与优先级>
   - 用户问题解决逻辑：<如何解决当前替代/损失>

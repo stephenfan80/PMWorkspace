@@ -1,0 +1,96 @@
+{
+  "id": "prototype-design-completeness-required",
+  "title": "原型出图前必须完成设计完整度判断",
+  "category": "pm-prototype-shotgun",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "基于已对齐 brief 给我三条产品路径并生成 image-2 原型。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "原型设计完整度",
+    "required_behaviors": [
+      "每条产品路径出图前输出 0-10 设计完整度评分",
+      "每条产品路径说明距离 10/10 的主要设计差距",
+      "每个 image-2 输出单元包含 10/10 原型标准",
+      "prompt 必须包含反 AI 模板味约束",
+      "三条路径必须同时是三种设计判断"
+    ],
+    "forbidden_behaviors": [
+      "只写现代、简洁、高级等氛围词",
+      "只靠视觉风格区分三个方案",
+      "缺设计完整度判断就写 image-2 prompt"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "原型设计完整度内核"
+    },
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "10/10 原型标准"
+    },
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "contains": "image-2 prompt 必须是设计修正指令"
+    },
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "contains": "默认反 AI 模板味约束"
+    },
+    {
+      "path": "pmworkspace-shared/references/prototype-shotgun-board.md",
+      "contains": "--design-score"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "原型方案：每条产品路径出图前必须运行原型设计完整度判断"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "| 原型设计完整度 | Required | Conditional |"
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "\"原型设计完整度\""
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=design-completeness-board; bin/pmw-prototype-board add --scheme 方案A --screen 首页首屏 --brief-version v1 --goal 提升理解效率 --anti-metric 不制造虚假确定性 --non-fiction 不得虚构真实数据 --canvas-mode standard_first_screen --generation-mode redraw --product-path '先让用户判断是否值得继续' --behavior-assumption '用户愿意先看关键结论再展开细节' --current-loss '当前信息堆叠导致用户无法判断重点' --tradeoff '牺牲完整字段展示，优先保留判断路径' --design-score 7 --design-gap '缺少空态和错误状态表达' --ten-out-of-ten-standard '首屏三层信息清晰，状态完整，CTA 单一明确' --prompt-design-fix '压缩首屏信息，补空态和错误态，弱化次级入口' --anti-ai-slop-constraints '禁止泛卡片堆叠、紫蓝渐变、装饰性图标圆圈' --state-coverage '默认、空态、错误、成功均有明确表达' --first-second-third-hierarchy '第一眼结论，第二眼依据，第三眼行动' >/dev/null; bin/pmw-prototype-board list; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0,
+      "contains": [
+        "设计评分",
+        "首屏三层信息清晰",
+        "禁止泛卡片堆叠"
+      ]
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=design-score-invalid; set +e; out=$(bin/pmw-prototype-board add --scheme 方案A --screen 首页首屏 --brief-version v1 --product-path '路径' --behavior-assumption '行为' --current-loss '损失' --tradeoff '牺牲' --design-score 11 2>&1); code=$?; rm -rf \"$tmp\"; test $code -ne 0 && printf '%s' \"$out\" | grep -q 'design score must be an integer from 0 to 10'"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=design-completeness-readiness; root=\"$PMW_HOME/projects/$PMW_PROJECT_SLUG\"; mkdir -p \"$root/runs\" \"$root/briefs\"; brief=\"$root/briefs/current.md\"; printf '# 产品设计简报：测试\\n产品简报版本：v2\\n确认状态：已对齐\\n\\n## 核心价值判断\\n- 一句话判断：已确认。\\n## 数据 / 能力 / 约束与不可虚构项\\n- 不可虚构项：不得虚构。\\n' > \"$brief\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\",\"latest_brief\":\"%s\",\"latest_brief_version\":\"v2\"}\\n' \"$brief\" > \"$root/project.json\"; printf '{\"ts\":\"2099-01-01T00:00:00Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"产品简报确认\",\"summary\":\"用户确认产品简报\"}\\n{\"ts\":\"2099-01-01T00:00:01Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"线上参考\",\"summary\":\"新功能，无线上参考，不适用\"}\\n{\"ts\":\"2099-01-01T00:00:02Z\",\"event\":\"decision\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"方案方向确认\",\"summary\":\"默认方向已批准\"}\\n' > \"$root/runs/r1.jsonl\"; bin/pmw-prototype-board add --scheme 方案A --screen 首页首屏 --brief-path \"$brief\" --brief-version v2 --goal 提升理解效率 --anti-metric 不制造虚假确定性 --non-fiction 不得虚构真实数据 --canvas-mode standard_first_screen --generation-mode redraw --product-path '先让用户判断是否值得继续' --behavior-assumption '用户愿意先看关键结论再展开细节' --current-loss '当前信息堆叠导致用户无法判断重点' --tradeoff '牺牲完整字段展示，优先保留判断路径' >/dev/null; bin/pmw-dashboard readiness --target prototype --details; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0,
+      "contains": [
+        "不可出图",
+        "原型设计完整度",
+        "字段不完整",
+        "缺设计评分"
+      ]
+    }
+  ]
+}

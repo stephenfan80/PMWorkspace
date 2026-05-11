@@ -12,6 +12,7 @@
     "required_behaviors": [
       "输出产品设计文档",
       "包含三条产品路径对比和每个方案原型图",
+      "包含原型设计完整度与重出依据",
       "包含产品判断演进",
       "登记 product_design_doc"
     ],
@@ -29,6 +30,14 @@
     {
       "path": "pm-handoff/SKILL.md",
       "contains": "产品设计文档必须读取 prototype-board"
+    },
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "原型设计完整度与重出依据"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "设计完整度评分、10/10 原型标准、prompt 修正方向、状态覆盖、信息层级和反 AI 模板味约束"
     },
     {
       "path": "pm-handoff/SKILL.md",

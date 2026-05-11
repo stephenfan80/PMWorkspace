@@ -338,8 +338,8 @@ def command_list(_args: argparse.Namespace) -> int:
     if not items:
         print("暂无方案。")
         return 0
-    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 产品路径 | 设计评分 | 主要设计差距 | 10/10 原型标准 | 反 AI 模板味约束 | 用户行为假设 | 当前损失 | 牺牲项 | 原型思考 | 信息架构 | 用户问题解决逻辑 | 反指标保护 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
-    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 产品路径 | 设计评分 | 主要设计差距 | 10/10 原型标准 | prompt 设计修正 | 状态覆盖 | 第一眼 / 第二眼 / 第三眼 | 反 AI 模板味约束 | 未决设计选择 | 用户行为假设 | 当前损失 | 牺牲项 | 原型思考 | 信息架构 | 用户问题解决逻辑 | 反指标保护 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
     for item in items:
         key = (item.get("scheme", ""), item.get("screen", ""))
         scheme_key = (item.get("scheme", ""), "")
@@ -362,7 +362,11 @@ def command_list(_args: argparse.Namespace) -> int:
             item.get("design_score") or "未记录",
             item.get("design_gap") or "未记录",
             item.get("ten_out_of_ten_standard") or "未记录",
+            item.get("prompt_design_fix") or "未记录",
+            item.get("state_coverage") or "未记录",
+            item.get("first_second_third_hierarchy") or "未记录",
             item.get("anti_ai_slop_constraints") or "未记录",
+            item.get("unresolved_design_decision") or "未记录",
             item.get("behavior_assumption", ""),
             item.get("current_loss", ""),
             item.get("tradeoff", ""),

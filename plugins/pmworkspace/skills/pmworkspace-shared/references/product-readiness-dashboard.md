@@ -1,6 +1,6 @@
 # Product Readiness Dashboard
 
-Product Readiness Dashboard 是 PMWorkspace 的出图 / 交付前总控面板。它借鉴 gstack Review Readiness Dashboard 的做法：不是把证据散列成清单，而是用 `Required`、`状态`、`证据`、`行动` 和 `Verdict` 统一判断现在能不能继续。
+Product Readiness Dashboard 是 PMWorkspace 的出图 / 交付前总控面板。它采用证据化准备度面板的做法：不是把证据散列成清单，而是用 `Required`、`状态`、`证据`、`行动` 和 `Verdict` 统一判断现在能不能继续。
 
 ## 使用时机
 

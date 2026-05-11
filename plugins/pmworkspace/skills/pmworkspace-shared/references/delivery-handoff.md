@@ -2,7 +2,7 @@
 
 `$pm-handoff` 使用本文件把已对齐产品简述 / 产品简报、已选原型方向、三方案原型图和复审结论整理成产品设计文档、PRD、设计交付、实验验证或研发交付稿。交付稿是下一团队的执行契约，不是讨论稿，也不是把未解决问题包装成验收标准。
 
-`$pm-handoff` 默认是 **精简 PRD 交付官**；当上游已经完成 image-2 原型图和复审，或用户要求“产品设计文档 / 设计方案文档 / 原型方案说明”时，它切换为 **产品设计文档交付官**，把产品判断、三方案对比、原型图和设计思考整理成最终产品设计文档。
+`$pm-handoff` 默认是 **精简 PRD 交付官**；当上游已经完成 image-2 原型图和复审，或用户要求“产品设计文档 / 设计方案文档 / 原型方案说明”时，它切换为 **产品设计文档交付官**，把产品判断、三种产品假设、原型图、设计思考和产品判断演进整理成最终产品设计文档。
 
 默认 PRD 的目标是少而准：只写会影响执行的核心信息，缺口清楚留空，风险门槛不虚构。
 
@@ -74,22 +74,28 @@
 
 ## 产品简述
 
-## 三方案对比
-| 方案 | 产品策略 | 信息架构设计思考 | 用户问题解决逻辑 | 反指标保护 | 风险 |
-|---|---|---|---|---|---|
+## 三方案产品假设对比
+| 方案 | 产品假设 | 用户行为假设 | 当前损失 | 牺牲项 / 后置项 | 产品策略 | 信息架构设计思考 | 用户问题解决逻辑 | 反指标保护 | 风险 |
+|---|---|---|---|---|---|---|---|---|---|
 
 ## 每个方案原型图
-| 方案 | 屏幕任务 | image-2 原型图 | 原型思考 | 不可虚构项 |
-|---|---|---|---|---|
+| 方案 | 屏幕任务 | image-2 原型图 | 产品假设 | 原型思考 | 不可虚构项 |
+|---|---|---|---|---|---|
 
 ## 推荐方案
 
+## 产品判断演进
+| 判断项 | 保留 / 放弃 / 调整 | 原因 | 证据状态 | 对后续的影响 |
+|---|---|---|---|---|
+
 ## 风险与待验证
+
+## 下一步产品作业
 
 ## 下一步
 ```
 
-平台脚本可用时，把产品设计文档登记为 `product_design_doc`，并在摘要里写清来源：产品简述版本、prototype-board 版本、复审结论和未验证风险。
+平台脚本可用时，用 `pmw-log handoff "<功能名>" --artifact-kind product_design_doc` 把产品设计文档登记为 `product_design_doc`，并在摘要和结构化字段里写清来源：产品简述版本、prototype-board 版本、复审结论、被保留 / 放弃的产品假设、PM 判断摘要、下一步产品作业和未验证风险。
 
 ### PRD 交付
 
@@ -211,7 +217,7 @@
 pmw-log handoff "<功能名>"
 pmw-memory add-delivery-fact --fact-type tracking --note "<脱敏埋点事件或指标口径>" --scenario "<场景>" --target "<对象>" --scope "本项目" --source "产品交付" --confidence 0.5
 pmw-memory add-delivery-fact --fact-type experiment --note "<脱敏实验标准>" --scenario "<场景>" --target "<实验对象>" --scope "同类场景可复用" --source "产品交付" --confidence 0.5
-pmw-artifact add --kind product_design_doc --title "<产品设计文档标题>" --status "可交付" --source-skill pm-handoff --path "<本地文件>" --upstream "product_brief,prototype_manifest,prototype_review" --next-skill "pm-handoff,document-release"
+pmw-log handoff "<产品设计文档标题>" --artifact-kind product_design_doc
 pmw-run event --type artifact --status "可交付" --title "产品交付稿" --summary "<交付类型与版本>"
 pmw-run finish --status "可交付" --next "<下一步>"
 ```

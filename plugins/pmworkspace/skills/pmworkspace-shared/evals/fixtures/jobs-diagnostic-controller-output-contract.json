@@ -1,6 +1,6 @@
 {
   "id": "jobs-diagnostic-controller-output-contract",
-  "title": "产品原型/方案澄清必须任务流先行并把控制器写入审计",
+  "title": "产品专家工作台必须任务流先行并把控制器写入审计",
   "category": "pm-jobs",
   "primary_skill": "pm-jobs",
   "prompt": "使用 $pm-jobs 帮我判断这个产品想法是否值得做。",
@@ -8,7 +8,7 @@
     "mode": "deep",
     "status": "待确认",
     "must_stop": false,
-    "gate": "产品原型/方案澄清控制器",
+    "gate": "产品专家工作台控制器",
     "required_behaviors": [
       "输出工作方式卡片",
       "输出产品发现任务",

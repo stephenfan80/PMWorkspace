@@ -1,6 +1,6 @@
 {
   "id": "jobs-product-value-judgment-multi-turn-required",
-  "title": "产品价值判断必须累计多轮 Q/D 后才能进入简报",
+  "title": "产品发现任务必须覆盖关键维度后才能进入简述",
   "category": "pm-jobs",
   "primary_skill": "pm-jobs",
   "prompt": "用户只回答了一个产品对象 Q，并选择了一个方向 D，助手准备生成已对齐简报。",
@@ -8,15 +8,15 @@
     "mode": "deep",
     "status": "需要补充",
     "must_stop": true,
-    "gate": "产品价值判断不足",
+    "gate": "产品发现任务不足",
     "required_behaviors": [
-      "先输出产品价值判断",
-      "累计多个 Q/D",
+      "先输出产品发现判断",
+      "覆盖产品发现任务流",
       "D 不能替代事实诊断",
-      "继续问一个当前最大缺口 Q"
+      "回到当前最大缺口任务"
     ],
     "forbidden_behaviors": [
-      "总共只问一个 Q 或一个 D",
+      "只问一个 Q 或一个 D 就进入简述",
       "直接生成已对齐产品简报",
       "用选择题替代用户现状和当前替代诊断"
     ]
@@ -32,7 +32,7 @@
     },
     {
       "path": "pm-jobs/SKILL.md",
-      "contains": "深度交付或现有线上功能优化通常累计 3-5 个动态 Q"
+      "contains": "不把产品澄清等同于连续提问"
     },
     {
       "path": "pm-jobs/SKILL.md",

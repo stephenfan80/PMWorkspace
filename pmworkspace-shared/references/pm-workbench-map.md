@@ -10,11 +10,11 @@
 
 ## 端到端链路
 
-### 0. 欢迎与 D0 路由 — `$pm-workspace`
+### 0. 欢迎与产品路径路由 — `$pm-workspace`
 
-- 职责：判断快速成型或深度交付，并创建 / 复用 run。
+- 职责：先判断 `全新功能` 或 `已有功能迭代`，再由 Agent 根据风险、证据和交付目标判定快速成型或深度交付，并创建 / 复用 run。
 - 输入：用户任务、输入材料、风险信号、当前 run。
-- 硬门槛：模式不清、风险冲突或输入不足时必须问一个 `D0`；用户必须看见当前模式和只需完成的一步。
+- 硬门槛：产品路径不清、风险冲突或输入不足时必须停在路径/证据卡点；用户必须看见产品路径、执行深度、当前任务和只需完成的一步。
 - 输出：路由结果，进入最早缺失技能。
 - 代表 eval：`pm-workspace-entry`、`pm-workspace-routing`、`pm-workspace-runtime`。
 
@@ -26,12 +26,12 @@
 - 输出：轻量包假设确认，或带交接上下文交给下一个技能。
 - 代表 eval：`autoplan`、`quick-shaping`、`deep-delivery`。
 
-### 2. 产品价值澄清 — `$pm-jobs`
+### 2. 产品原型/方案澄清 — `$pm-jobs`
 
-- 职责：先重新定义真实问题，再把功能愿望澄清成产品价值判断；每轮只问一个最有价值的 Q / D。
+- 职责：按产品发现任务流推进：任务识别、证据收集、用户需求澄清、数据/现状佐证、方案机会判断、产品简述确认和三方案原型计划。
 - 输入：产品定位、用户、触发时刻、现状替代、当前损失、目标、反指标、价值交换、约束、线上参考状态。
-- 硬门槛：缺事实先问 `Q`；事实足够但取舍会改方向时才问 `D`；不能用一个 Q + 一个 D 直接进入产品简报；功能愿望不能直接当成核心问题；不能省略真实问题重定义。
-- 输出：前提确认，或交给策略审查 / 产品简报。
+- 硬门槛：全新功能必须补齐目标用户、触发场景、当前替代、当前损失、最小可赢切口、主目标、反指标、不可虚构项和线上参考需求；已有功能迭代缺截图/录屏或等价视觉基线时不能进入原型计划；不能用一个 Q + 一个 D 直接进入产品简述确认。
+- 输出：材料整理、证据请求、访谈/数据建议、前提确认，或交给策略审查 / 产品简报。
 - 代表 eval：`pm-jobs`。
 
 ### 3. 策略审查 — `$pm-strategy-review`
@@ -44,17 +44,17 @@
 
 ### 4. 产品简报 — `$pm-brief`
 
-- 职责：写成产品经理简报并固化门槛，先讲清核心价值、现状、目标用户、痛点、当前替代、竞品 / 行业做法、解决思路和指标。
+- 职责：写成短版产品简述 / 产品简报并固化出图前门槛，先讲清真实问题、证据状态、目标用户、当前替代/损失、主目标、反指标、不可虚构项、方案机会、原型范围和待验证项。
 - 输入：上游 Q/D、产品发现深度、已确认前提、策略决策、Zoon 最新内容、线上参考 / `browser_evidence`、轻量检索。
 - 硬门槛：未完成产品发现深度、前提确认、关键 D、线上参考或 Zoon 漂移时不能标为 `已对齐`；缺事实不能用简报补写。
-- 输出：`product_brief` 登记到产物流动，进入原型或交付。
+- 输出：`product_brief` 登记到产物流动，确认后进入三方案原型或交付。
 - 代表 eval：`pm-brief`、`artifact-flow`。
 
 ### 5. 原型方案 — `$pm-prototype-shotgun`
 
-- 职责：作为 image-2 原型出图导演，基于已对齐 brief 逐张生成每个方案 / 屏幕独立设计稿。
+- 职责：作为 image-2 原型出图导演，基于已对齐 brief 默认规划最少 3 个方案，并逐张生成每个方案 / 屏幕独立设计稿。
 - 输入：已对齐 brief、Zoon 快照、线上参考、视觉基线、设计系统、prototype-board、Product Readiness Dashboard、`product_brief` 产物流动。
-- 硬门槛：readiness verdict 不是 `可出图`、brief 未已对齐、Zoon 实质漂移、线上参考缺失、视觉基线缺目标像素、线上截图下输出单元未锁定物理长板、方案只换皮或 image-2 不可用时，不能写提示词或替代出图；一次 image-2 调用只能生成一张图、一个方案和一个屏幕任务。
+- 硬门槛：readiness verdict 不是 `可出图`、brief 未已对齐、Zoon 实质漂移、线上参考缺失、视觉基线缺目标像素、线上截图下输出单元未锁定物理长板、方案少于 3 个且无豁免、方案只换皮、缺原型思考或 image-2 不可用时，不能写提示词或替代出图；一次 image-2 调用只能生成一张图、一个方案和一个屏幕任务。
 - 输出：`prototype_manifest` 登记到产物流动，状态 `可进入原型复审`。
 - 代表 eval：`pm-prototype-shotgun`、`prototype-shotgun`、`prototype-output-contract`、`multi-scheme`、`production-reference`、`screenshot-feedback`、`artifact-flow`。
 
@@ -68,10 +68,10 @@
 
 ### 7. 产品交付 — `$pm-handoff`
 
-- 职责：作为精简 PRD 交付官，把已通过复审的方向压缩成最小交付契约，并沉淀接口 / 数据 / 埋点 / 实验资产。
+- 职责：作为产品设计文档 / 精简 PRD 交付官，把已通过复审的方向整理成最终产品设计文档或最小交付契约，并沉淀接口 / 数据 / 埋点 / 实验资产。
 - 输入：已对齐 brief、已选原型、复审结论、D 决策、线上参考、Product Readiness Dashboard、现成 PRD / 接口 / 埋点 / 实验文档、本地交付资产、`product_brief` / `prototype_review` 产物流动。
 - 硬门槛：readiness verdict 不是 `可交付`、未复审、关键 D 未拍板时不交付；不可虚构项和未验证数据不能写成验收；普通接口 / 数据 / 埋点 / 实验缺口可留空为待补充，不能虚构。
-- 输出：`handoff`、`acceptance_seed` 或 `release_doc_seed` 登记到产物流动，状态 `可交付`；接口、数据、埋点和实验标准写入本地脱敏交付资产。
+- 输出：`product_design_doc`、`handoff`、`acceptance_seed` 或 `release_doc_seed` 登记到产物流动，状态 `可交付`；接口、数据、埋点和实验标准写入本地脱敏交付资产。
 - 代表 eval：`pm-handoff`、`artifact-flow`。
 
 ### 8. 运行、产物流动与记忆 — 共享脚本
@@ -91,6 +91,9 @@
 - 模式 / 当前模式：
 - 状态：
 - 当前门槛 / 最早门槛：
+- 产品路径：
+- 执行深度：
+- 当前任务流阶段：
 - 当前价值缺口 / 当前最大缺口：
 - 下一技能：
 - 证据状态：
@@ -143,15 +146,15 @@
 |---|---|---|
 | `pm-workspace-entry`、`pm-workspace-routing`、`pm-workspace-runtime` | 欢迎与 D0 路由 | 欢迎页、D0、路由输出契约、run owner |
 | `autoplan`、`quick-shaping`、`deep-delivery` | 自动产品评审 | 自动推进、风险升级、最早门槛、终态 finish |
-| `pm-jobs` | 产品价值澄清 | 价值澄清器、价值判断先行、一个 Q / D、产品发现深度、前提确认、上游门槛接力 |
+| `pm-jobs` | 产品原型/方案澄清 | 产品发现任务流、两条产品路径、证据收集、用户需求澄清、数据/现状佐证、方案机会判断、产品简述确认、上游门槛接力 |
 | `pm-strategy-review` | 策略审查 | 策略结论先行、范围模式、最大策略矛盾、产品动作、缺事实退回、一个策略 D |
-| `pm-brief` | 产品简报 | 产品经理简报、核心价值判断、现状证据、用户痛点、当前替代、竞品 / 行业做法、支持信息分层、Zoon 漂移、已对齐门槛、进入原型/交付 |
-| `pm-prototype-shotgun`、`prototype-shotgun`、`prototype-output-contract`、`multi-scheme`、`production-reference`、`screenshot-feedback` | 原型方案 | image-2 前门槛、单图生成协议、方案差异质量、输出单元、线上参考、设计系统 |
+| `pm-brief` | 产品简报 | 产品简述 / 产品简报、真实问题、证据状态、目标用户、当前替代/损失、方案机会、待验证项、Zoon 漂移、已对齐门槛、进入原型/交付 |
+| `pm-prototype-shotgun`、`prototype-shotgun`、`prototype-output-contract`、`multi-scheme`、`production-reference`、`screenshot-feedback` | 原型方案 | image-2 前门槛、单图生成协议、默认最少 3 个方案、方案差异质量、原型思考、输出单元、线上参考、设计系统 |
 | `prototype-review` | 原型复审 | 复审控制器、重出、PM 拍板、偏好边界 |
 | `review-specialists` | 原型复审 | 四个可插拔专家独立短结论、最高严重度合并、`pmw-review-specialist` 可追踪 |
-| `pm-handoff` | 产品交付 | 精简 PRD 核心字段、现成文档入口、未复审不交付、未拍板不写验收、缺口留空、保存 handoff 和交付事实 |
+| `pm-handoff` | 产品交付 | 产品设计文档、精简 PRD 核心字段、现成文档入口、未复审不交付、未拍板不写验收、缺口留空、保存 handoff / product_design_doc 和交付事实 |
 | `readiness-dashboard` | 原型方案 / 产品交付 / 运行与记忆 | 出图 / 交付前 Product Readiness Dashboard 和 verdict |
-| `artifact-flow` | 产品简报 / 原型方案 / 原型复审 / 产品交付 / 运行与记忆 | 上游产物可被下游读取，brief、prototype manifest、review、handoff 和 `browser_evidence` 不在对话中断流 |
+| `artifact-flow` | 产品简报 / 原型方案 / 原型复审 / 产品交付 / 运行与记忆 | 上游产物可被下游读取，brief、prototype manifest、review、product_design_doc、handoff 和 `browser_evidence` 不在对话中断流 |
 | `skill-doc-generator` | 运行与记忆 | `pmw-gen-skill-docs` 用 manifest 生成并检查 SKILL.md 共享契约，防止 preamble、输出字段和共享门槛漂移 |
 | `memory`、`decision-principles`、`eval-system` | 运行与记忆 | 偏好不覆盖事实、eval runner 可用、维护契约 |
 

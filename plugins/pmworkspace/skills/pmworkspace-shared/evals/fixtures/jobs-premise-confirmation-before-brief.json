@@ -24,7 +24,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "如果已经覆盖足够诊断维度，输出 2-4 条前提确认；不要为了凑数继续问 Q。"
+      "contains": "用户确认后状态为 `已对齐`，才进入三方案原型"
     },
     {
       "path": "pm-jobs/SKILL.md",
@@ -32,7 +32,7 @@
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "未完成前提确认时，产品简报不能标记为 `已对齐`。"
+      "contains": "未确认时只能写 `待确认`"
     }
   ]
 }

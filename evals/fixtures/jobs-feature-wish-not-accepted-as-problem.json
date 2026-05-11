@@ -24,7 +24,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "用户只给功能愿望时，不能把功能名直接写成核心问题"
+      "contains": "如果用户只给功能愿望，不能把功能名直接写成核心问题"
     },
     {
       "path": "pm-jobs/SKILL.md",

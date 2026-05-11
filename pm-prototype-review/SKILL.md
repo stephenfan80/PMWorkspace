@@ -117,7 +117,7 @@ done
 25. Log scheme scores with `pmw-prototype-board score --screen <屏幕任务>` when applicable.
 26. If repeated preferences emerge, save a learning with `pmw-memory add-learning`, but keep it脱敏 and scoped.
 27. 复审结束时用 `pmw-run event --type review` 记录结论；如果输出修复 brief 或可交付复审结论，使用 `pmw-artifact add --kind prototype_review` 或 `--kind repair_brief` 登记到 Product Artifact Flow，并运行 `pmw-dashboard status` 获取短摘要；完整状态只在审计 / 调试时展开。
-28. 复审结束必须给出明确下一步引导。`可通过` 时引导用户选择：选定方案进入 `$pm-handoff`、继续改某一张图、继续探索新方案、补充截图/数据参考；`需要重出` 时只让用户确认修复方向或直接重出受影响单图；`需要 PM 拍板` 时只展开一个当前 `D`。
+28. 复审结束必须给出明确下一步引导。`可通过` 时引导用户选择：选定方案进入 `$pm-handoff` 生成产品设计文档、继续改某一张图、继续探索新方案、补充截图/数据参考；`需要重出` 时只让用户确认修复方向或直接重出受影响单图；`需要 PM 拍板` 时只展开一个当前 `D`。
 
 ## 复审标准
 
@@ -138,7 +138,7 @@ done
 - 当前 D：
 - 下一步：
   - 我建议：
-  - 你可以直接回复：选定方案 / 修改某区域 / 继续探索 / 补充参考 / 进入交付稿
+  - 你可以直接回复：选定方案生成产品设计文档 / 修改某区域 / 继续探索 / 补充参考 / 进入交付稿
 
 内部复审审计（默认不展示）：
 - 产品简报 / Zoon 来源：

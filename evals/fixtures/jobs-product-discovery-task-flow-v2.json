@@ -1,0 +1,37 @@
+{
+  "id": "jobs-product-discovery-task-flow-v2",
+  "title": "全新功能必须进入产品发现任务流",
+  "category": "pm-jobs",
+  "primary_skill": "pm-jobs",
+  "prompt": "我有一个产品想法，帮我直接出方案。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要补充",
+    "must_stop": true,
+    "gate": "产品发现任务流",
+    "required_behaviors": [
+      "识别全新功能路径",
+      "进入任务识别、证据收集、用户需求澄清、数据/现状佐证、方案机会判断、产品简述确认、三方案原型计划",
+      "不得只问一个 Q 后生成 brief"
+    ],
+    "forbidden_behaviors": [
+      "只问一个 Q 后生成产品简报",
+      "跳过证据和当前替代",
+      "直接写 image-2 prompt"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "任务识别 -> 证据收集 -> 用户需求澄清 -> 数据/现状佐证 -> 方案机会判断 -> 产品简述确认 -> 三方案原型计划"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-discovery-gate.md",
+      "contains": "不得把“只问一个 Q 或一个 D”写成产品发现的完整流程"
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "不把产品澄清等同于连续提问"
+    }
+  ]
+}

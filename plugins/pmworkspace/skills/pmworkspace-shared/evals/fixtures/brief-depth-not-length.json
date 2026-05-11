@@ -10,7 +10,7 @@
     "must_stop": true,
     "gate": "深度不等于长度",
     "required_behaviors": [
-      "快速版可以压缩，标准版和深度版使用产品经理简报结构",
+      "快速版可以压缩，标准版和深度版使用产品简述必填字段",
       "深度只代表证据和风险处理深度",
       "审计日志不写进正文"
     ],
@@ -27,7 +27,7 @@
     },
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",
-      "contains": "快速版可以压缩，标准版和深度版都使用产品经理简报结构"
+      "contains": "快速版可以压缩，标准版和深度版都使用产品简述必填字段"
     },
     {
       "path": "pm-brief/SKILL.md",

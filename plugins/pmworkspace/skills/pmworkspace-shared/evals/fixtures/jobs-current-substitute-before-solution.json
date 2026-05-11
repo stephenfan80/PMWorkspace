@@ -24,7 +24,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "进入方案方向、前提确认或产品简报前，必须识别现状替代方案"
+      "contains": "全新功能路径必须补齐"
     },
     {
       "path": "pm-jobs/SKILL.md",

@@ -1,8 +1,8 @@
 # 产品交付控制器
 
-`$pm-handoff` 使用本文件把已对齐产品简报、已选原型方向和复审结论整理成 PRD、设计交付、实验验证或研发交付稿。交付稿是下一团队的执行契约，不是讨论稿，也不是把未解决问题包装成验收标准。
+`$pm-handoff` 使用本文件把已对齐产品简述 / 产品简报、已选原型方向、三方案原型图和复审结论整理成产品设计文档、PRD、设计交付、实验验证或研发交付稿。交付稿是下一团队的执行契约，不是讨论稿，也不是把未解决问题包装成验收标准。
 
-`$pm-handoff` 默认是 **精简 PRD 交付官**：把已对齐的产品判断压缩成研发、设计和实验能接住的最小交付契约。它不是项目管理计划、测试计划、开发周期排期或会议纪要生成器。
+`$pm-handoff` 默认是 **精简 PRD 交付官**；当上游已经完成 image-2 原型图和复审，或用户要求“产品设计文档 / 设计方案文档 / 原型方案说明”时，它切换为 **产品设计文档交付官**，把产品判断、三方案对比、原型图和设计思考整理成最终产品设计文档。
 
 默认 PRD 的目标是少而准：只写会影响执行的核心信息，缺口清楚留空，风险门槛不虚构。
 
@@ -10,7 +10,7 @@
 
 生成交付稿前，先建立交付控制器。控制器至少记录：
 
-- `交付目标`：PRD、设计交付、实验验证、研发交付，或它们的组合。
+- `交付目标`：产品设计文档、PRD、设计交付、实验验证、研发交付，或它们的组合。
 - `事实来源`：已对齐产品简报版本、最新 Zoon 快照、策略决策、prototype-board 选定方向、原型复审结论。
 - `Product Readiness Dashboard`：用 `pmw-dashboard readiness --target handoff` 在交付前统一检查产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态；verdict 不是 `可交付` 时不能继续写 PRD 或验收。默认只展示短 verdict 和第一阻断原因，完整表格只在审计 / 调试时展开。
 - `交付前门槛`：产品简报已对齐、Zoon 无实质漂移、线上参考门槛通过、原型复审通过、关键 D 已拍板、不可虚构项完整。
@@ -56,6 +56,40 @@
 - 不可虚构项、数据真实性和合规边界不能用“后续确认”糊进验收标准；它们必须作为范围外、风险或待决策。
 
 ## 交付类型模板
+
+### 产品设计文档
+
+在原型图和复审后生成，作为最终交付物。它必须读取 `product_brief`、`prototype_manifest`、prototype-board、`prototype_review`、线上参考、视觉基线和数据 / 访谈 / 截图 / 竞品启发；不能在产品简述未确认或原型复审未通过时生成最终版。
+
+推荐结构：
+
+```markdown
+# 产品设计文档：<功能名>
+
+## 背景与现状
+
+## 用户需求与证据
+
+## 数据 / 访谈 / 截图 / 竞品启发
+
+## 产品简述
+
+## 三方案对比
+| 方案 | 产品策略 | 信息架构设计思考 | 用户问题解决逻辑 | 反指标保护 | 风险 |
+|---|---|---|---|---|---|
+
+## 每个方案原型图
+| 方案 | 屏幕任务 | image-2 原型图 | 原型思考 | 不可虚构项 |
+|---|---|---|---|---|
+
+## 推荐方案
+
+## 风险与待验证
+
+## 下一步
+```
+
+平台脚本可用时，把产品设计文档登记为 `product_design_doc`，并在摘要里写清来源：产品简述版本、prototype-board 版本、复审结论和未验证风险。
 
 ### PRD 交付
 
@@ -177,6 +211,7 @@
 pmw-log handoff "<功能名>"
 pmw-memory add-delivery-fact --fact-type tracking --note "<脱敏埋点事件或指标口径>" --scenario "<场景>" --target "<对象>" --scope "本项目" --source "产品交付" --confidence 0.5
 pmw-memory add-delivery-fact --fact-type experiment --note "<脱敏实验标准>" --scenario "<场景>" --target "<实验对象>" --scope "同类场景可复用" --source "产品交付" --confidence 0.5
+pmw-artifact add --kind product_design_doc --title "<产品设计文档标题>" --status "可交付" --source-skill pm-handoff --path "<本地文件>" --upstream "product_brief,prototype_manifest,prototype_review" --next-skill "pm-handoff,document-release"
 pmw-run event --type artifact --status "可交付" --title "产品交付稿" --summary "<交付类型与版本>"
 pmw-run finish --status "可交付" --next "<下一步>"
 ```

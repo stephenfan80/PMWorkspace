@@ -1,18 +1,18 @@
 {
   "id": "brief-core-contract-definition",
-  "title": "产品简报必须定义产品经理简报契约",
+  "title": "产品简报必须定义产品简述契约",
   "category": "pm-brief",
   "primary_skill": "pm-brief",
-  "prompt": "把已经完成价值澄清和策略取舍的材料整理成产品简报。",
+  "prompt": "把已经完成产品发现和策略取舍的材料整理成产品简报。",
   "expected": {
     "mode": "deep",
     "status": "待确认",
     "must_stop": true,
-    "gate": "产品经理简报契约",
+    "gate": "产品简述契约",
     "required_behaviors": [
-      "定义产品经理简报契约",
-      "说明产品简报不是 PRD、会议纪要或信息仓库",
-      "先回答为什么值得做、为谁做、现状为什么不够好、如何解决痛点"
+      "定义产品简述 / 产品简报契约",
+      "说明产品简述不是最终产品设计文档",
+      "先回答真实问题、证据状态、目标用户、当前替代和损失"
     ],
     "forbidden_behaviors": [
       "把产品简报写成信息仓库",
@@ -23,23 +23,23 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",
-      "contains": "## 产品经理简报契约"
+      "contains": "## 产品简述 / 产品简报契约"
     },
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",
-      "contains": "产品简报不是 PRD、会议纪要或信息仓库"
+      "contains": "产品简述不是 PRD、会议纪要、信息仓库或最终设计文档"
     },
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",
-      "contains": "它必须先回答“为什么值得做、为谁做、现状为什么不够好、这个产品如何解决痛点”"
+      "contains": "它必须先回答“真实问题是什么、证据可靠吗、为谁做、现状为什么不够好、这个产品机会如何成立”"
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "产品经理简报"
+      "contains": "产品简述 / 产品简报"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "产品简报：必须定义“产品经理简报契约”"
+      "contains": "产品简报：必须定义“产品简述 / 产品简报契约”"
     }
   ]
 }

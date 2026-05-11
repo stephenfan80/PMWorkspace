@@ -197,6 +197,10 @@ def command_add(args: argparse.Namespace) -> int:
         "base_image": base_image,
         "edit_scope": args.edit_scope,
         "preserve_regions": preserve_regions,
+        "prototype_thinking": args.prototype_thinking,
+        "information_architecture": args.information_architecture,
+        "user_problem_fit": args.user_problem_fit,
+        "anti_metric_protection": args.anti_metric_protection,
         "image": args.image,
         "status": args.status,
     }
@@ -299,8 +303,8 @@ def command_list(_args: argparse.Namespace) -> int:
     if not items:
         print("暂无方案。")
         return 0
-    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
-    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 原型思考 | 信息架构 | 用户问题解决逻辑 | 反指标保护 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
     for item in items:
         key = (item.get("scheme", ""), item.get("screen", ""))
         scheme_key = (item.get("scheme", ""), "")
@@ -319,6 +323,10 @@ def command_list(_args: argparse.Namespace) -> int:
             item.get("main_goal", ""),
             item.get("anti_metric", ""),
             item.get("non_fiction", ""),
+            item.get("prototype_thinking", ""),
+            item.get("information_architecture", ""),
+            item.get("user_problem_fit", ""),
+            item.get("anti_metric_protection", ""),
             item.get("canvas_mode", ""),
             item.get("generation_mode", ""),
             item.get("edit_scope", ""),
@@ -349,6 +357,10 @@ def build_parser() -> argparse.ArgumentParser:
     add.add_argument("--base-image", default="")
     add.add_argument("--edit-scope", default="")
     add.add_argument("--preserve-regions", default="")
+    add.add_argument("--prototype-thinking", default="")
+    add.add_argument("--information-architecture", default="")
+    add.add_argument("--user-problem-fit", default="")
+    add.add_argument("--anti-metric-protection", default="")
     add.add_argument("--image", default="")
     add.add_argument("--status", default="计划生成")
     add.add_argument("--run")

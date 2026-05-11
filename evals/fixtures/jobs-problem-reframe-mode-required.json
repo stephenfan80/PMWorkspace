@@ -26,27 +26,27 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "工作目标模式 -> 问题定义模式 -> 场景路由 -> 真实问题重定义 -> Q 诊断"
+      "contains": "任务识别 -> 证据收集 -> 用户需求澄清 -> 数据/现状佐证 -> 方案机会判断 -> 产品简述确认 -> 三方案原型计划"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "## 问题定义模式"
+      "contains": "## 产品发现任务流"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "创业验证模式"
+      "contains": "全新功能"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "内部业务优化模式"
+      "contains": "已有功能迭代"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "设计讨论模式"
+      "contains": "工作目标模式"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "## 真实问题重定义"
+      "contains": "我对真实问题的判断"
     },
     {
       "path": "pm-jobs/SKILL.md",
@@ -62,7 +62,7 @@
     },
     {
       "path": "pmworkspace-shared/references/pm-workbench-map.md",
-      "contains": "不能省略真实问题重定义"
+      "contains": "用户需求澄清"
     }
   ]
 }

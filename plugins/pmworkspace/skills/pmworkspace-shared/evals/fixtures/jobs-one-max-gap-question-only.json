@@ -1,6 +1,6 @@
 {
   "id": "jobs-one-max-gap-question-only",
-  "title": "产品追问每轮只展开当前最大缺口的一个 Q",
+  "title": "产品追问不再等同于单 Q，而是任务流卡点",
   "category": "pm-jobs",
   "primary_skill": "pm-jobs",
   "prompt": "帮我提升转化率，直接给方案。",
@@ -8,15 +8,15 @@
     "mode": "deep",
     "status": "需要补充",
     "must_stop": true,
-    "gate": "当前最大缺口 Q",
+    "gate": "产品发现任务流卡点",
     "required_behaviors": [
-      "识别当前最大缺口",
-      "只展开一个 Q",
-      "等待用户回答",
-      "不输出长开放问题清单"
+      "识别当前任务流阶段",
+      "必要时只展开一个 Q 或 D",
+      "等待用户回答或补证据",
+      "先协助完成整理、分析和证据归纳"
     ],
     "forbidden_behaviors": [
-      "一次问多个 Q",
+      "把产品发现等同于只问一个 Q",
       "批量输出开放问题",
       "直接生成方案或原型"
     ]
@@ -24,15 +24,15 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "用户可见输出只能展开一个 `Q` 或一个 `D`"
+      "contains": "`Q` / `D` 仍然保留，但只作为关键卡点的交互方式"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "每轮只选择当前最大缺口生成一个 Q。"
+      "contains": "Agent 可以先做材料整理、最佳实践检索、截图分析、数据口径梳理和访谈提纲生成"
     },
     {
       "path": "pm-jobs/SKILL.md",
-      "contains": "Stop after each `Q` and wait for the user; do not batch open questions"
+      "contains": "不把产品澄清等同于连续提问"
     }
   ]
 }

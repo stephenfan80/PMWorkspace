@@ -1,0 +1,37 @@
+{
+  "id": "handoff-product-design-doc-required-v2",
+  "title": "原型复审后必须能生成最终产品设计文档",
+  "category": "pm-handoff",
+  "primary_skill": "pm-handoff",
+  "prompt": "原型已经复审通过，帮我整理最终设计文档。",
+  "expected": {
+    "mode": "deep",
+    "status": "可交付",
+    "must_stop": false,
+    "gate": "产品设计文档",
+    "required_behaviors": [
+      "输出产品设计文档",
+      "包含三方案对比和每个方案原型图",
+      "登记 product_design_doc"
+    ],
+    "forbidden_behaviors": [
+      "只输出精简 PRD",
+      "缺少信息架构设计思考",
+      "不读取 prototype-board"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "### 产品设计文档"
+    },
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "产品设计文档必须读取 prototype-board"
+    },
+    {
+      "path": "pmworkspace-shared/references/artifact-flow.md",
+      "contains": "product_design_doc"
+    }
+  ]
+}

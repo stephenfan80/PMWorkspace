@@ -10,7 +10,7 @@
     "must_stop": true,
     "gate": "业务简报先行",
     "required_behaviors": [
-      "先输出产品经理简报",
+      "先输出产品简述 / 产品简报",
       "只输出业务简报、当前需要确认和下一步",
       "产品简报门槛和支持信息写入内部审计"
     ],
@@ -28,7 +28,7 @@
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "产品简报："
+      "contains": "产品简述 / 产品简报："
     },
     {
       "path": "pm-brief/SKILL.md",

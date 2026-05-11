@@ -24,7 +24,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "如果缺的是事实，问 `Q`；如果事实足够但取舍会改变方向、范围、承诺、实验口径或交付，问 `D`。"
+      "contains": "缺事实时用 `Q`"
     },
     {
       "path": "pm-jobs/SKILL.md",
@@ -32,7 +32,7 @@
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "缺事实先问 Q，事实足够但取舍改变方向时才问 D。"
+      "contains": "`Q` / `D` 只作为关键卡点的交互方式"
     }
   ]
 }

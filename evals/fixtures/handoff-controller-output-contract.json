@@ -35,7 +35,7 @@
     },
     {
       "path": "pm-handoff/SKILL.md",
-      "contains": "这些默认写入审计，不能进入 PRD 正文。用户可见输出只保留交付结论、精简 PRD、待补充项和下一步"
+      "contains": "这些默认写入审计，不能进入 PRD 正文。用户可见输出只保留交付结论、产品设计文档或精简 PRD、待补充项和下一步"
     },
     {
       "path": "pmworkspace-shared/references/delivery-handoff.md",

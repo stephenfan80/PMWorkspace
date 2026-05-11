@@ -23,7 +23,7 @@ Offer exactly these practical starts. The menu should feel like product home-pag
 你可以这样开始：
 
 A. 我要快速成型
-   发一句话 idea。我会先问 2-3 个关键问题，确认假设后输出“产品简报 + 方案方向 + 原型图”轻量包。
+   发一句话 idea。我会按产品发现任务流补齐关键假设，确认后输出“产品简述 + 至少 3 个方案方向 + 原型图”轻量包。
 
 B. 我要深度交付
    发 PRD、Zoon、访谈、支持洞察或业务背景。我会补齐产品事实、D 拍板、本地产品简报和原型准备度；需要团队在线协作时再同步 Zoon。
@@ -66,7 +66,7 @@ When welcoming a user, also set expectation that future routed outputs will show
 ```
 
 ```text
-使用 $pm-workspace 快速成型这个产品想法，输出一套轻量包：产品简报、2-3 个方案方向、每个方向 1 张移动端原型图。产品想法：<一句话想法>
+使用 $pm-workspace 快速成型这个产品想法，输出一套轻量包：产品简述、至少 3 个方案方向、每个方向 1 张移动端原型图。产品想法：<一句话想法>
 ```
 
 ```text

@@ -24,7 +24,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "如果来自 `$pm-autoplan` 的最早门槛是工作目标、场景、Q 诊断或前提确认，只解决这个最早门槛"
+      "contains": "如果来自 `$pm-autoplan`，只解决自动评审交给 `$pm-jobs` 的最早门槛"
     },
     {
       "path": "pm-jobs/SKILL.md",

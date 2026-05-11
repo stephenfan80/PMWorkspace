@@ -3,7 +3,7 @@
   "title": "每张图必须绑定输出契约",
   "category": "prototype-output-contract",
   "primary_skill": "pm-prototype-shotgun",
-  "prompt": "产品简报已对齐，为 2 个方案各生成一个首屏。",
+  "prompt": "产品简报已对齐，为 3 个方案各生成一个首屏。",
   "expected": {
     "mode": "deep",
     "status": "可进入原型复审",
@@ -23,7 +23,7 @@
   "contract_checks": [
     {
       "path": "pm-prototype-shotgun/SKILL.md",
-      "contains": "For each image output unit, declare scheme, screen task, canvas mode, canvas, main goal, anti-metric, non-fiction boundary"
+      "contains": "For each image output unit, declare scheme, screen task, prototype thinking, information architecture rationale, user problem fit, anti-metric protection, canvas mode, canvas, main goal, anti-metric, non-fiction boundary"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",

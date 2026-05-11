@@ -1,6 +1,6 @@
 # Product Artifact Flow
 
-PMWorkspace 产物流动层让每一步产物都能被下游技能读取，而不是只存在于对话里。产品简报、原型清单、复审结论和交付稿必须登记为下游可读产物。浏览器证据也以 `browser_evidence` 产物进入同一条 Product Artifact Flow。浏览器证据和视觉基线也进入同一条 Product Artifact Flow：`browser_evidence` 说明线上参考在哪里，`visual_baseline` 说明参考图如何转成可执行的尺寸、字号、间距和密度约束。
+PMWorkspace 产物流动层让每一步产物都能被下游技能读取，而不是只存在于对话里。产品简述 / 产品简报、原型清单、复审结论、最终产品设计文档和交付稿必须登记为下游可读产物。浏览器证据也以 `browser_evidence` 产物进入同一条 Product Artifact Flow。浏览器证据和视觉基线也进入同一条 Product Artifact Flow：`browser_evidence` 说明线上参考在哪里，`visual_baseline` 说明参考图如何转成可执行的尺寸、字号、间距和密度约束。
 
 ## 目标
 
@@ -13,11 +13,12 @@ PMWorkspace 产物流动层让每一步产物都能被下游技能读取，而�
 | 上游技能 | 登记产物 | 下游读取 | 用途 |
 |---|---|---|---|
 | `$pm-jobs` / `$pm-strategy-review` | `decision`、`strategy_review` | `$pm-brief` | 把事实、范围、策略取舍写进产品契约。 |
-| `$pm-brief` | `product_brief` | `$pm-prototype-shotgun`、`$pm-handoff` | 作为原型、复审和交付的产品真源。 |
+| `$pm-brief` | `product_brief` | `$pm-prototype-shotgun`、`$pm-handoff` | 作为出图前短版产品简述 / 产品简报真源。 |
 | 浏览器 / 截图 / Zoon 检查 | `browser_evidence` | `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` | 记录线上流程截图、状态页、竞品参考或 Zoon 漂移证据，支撑线上参考门槛。 |
 | 视觉基线 | `visual_baseline` | `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` | 记录参考图路径、像素尺寸、逻辑宽度推断、目标输出像素、核心字号层级、页面边距、模块间距、底部栏高度和参考优先级。 |
 | `$pm-prototype-shotgun` | `prototype_manifest` | `$pm-prototype-review` | 绑定方案、屏幕、主目标、反指标、不可虚构项和 brief 版本。 |
 | `$pm-prototype-review` | `prototype_review`、`repair_brief` | `$pm-prototype-shotgun`、`$pm-handoff` | 决定可通过、需要重出、需要 PM 拍板或补参考。 |
+| `$pm-handoff` | `product_design_doc` | `$pm-handoff`、后续评审、研发交付 | 汇总产品简述、三方案原型、信息架构思考、推荐方案、风险和下一步，作为最终产品设计文档。 |
 | `$pm-handoff` | `handoff`、`acceptance_seed`、`release_doc_seed` | `document-release`、`ship`、`qa` | 让文档同步、发布准备和 QA 不重新猜验收口径。 |
 
 ## 命令
@@ -34,6 +35,7 @@ pmw-artifact add \
   --next-skill "pm-prototype-shotgun,pm-handoff"
 
 pmw-artifact latest --kind product_brief
+pmw-artifact latest --kind product_design_doc
 pmw-artifact latest --kind browser_evidence
 pmw-artifact latest --kind visual_baseline
 pmw-artifact flow

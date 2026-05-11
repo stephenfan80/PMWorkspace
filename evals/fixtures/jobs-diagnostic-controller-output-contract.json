@@ -1,6 +1,6 @@
 {
   "id": "jobs-diagnostic-controller-output-contract",
-  "title": "产品价值澄清必须价值判断先行并把控制面板写入审计",
+  "title": "产品原型/方案澄清必须任务流先行并把控制器写入审计",
   "category": "pm-jobs",
   "primary_skill": "pm-jobs",
   "prompt": "使用 $pm-jobs 帮我判断这个产品想法是否值得做。",
@@ -8,39 +8,39 @@
     "mode": "deep",
     "status": "待确认",
     "must_stop": false,
-    "gate": "产品价值澄清控制器",
+    "gate": "产品原型/方案澄清控制器",
     "required_behaviors": [
-      "输出产品价值判断",
-      "输出当前价值缺口",
-      "说明为什么这是最该问的一刀",
-      "说明这个答案会影响什么",
-      "只展开一个当前 Q 或 D",
-      "内部记录诊断阶段、当前最大缺口和 Q 预算",
+      "输出工作方式卡片",
+      "输出产品发现任务",
+      "说明为什么现在做这一步",
+      "说明这个结果会影响什么",
+      "必要时只展开一个当前 Q 或 D",
+      "内部记录当前任务流阶段和已完成任务",
       "内部记录停止原因、下一技能和证据状态"
     ],
     "forbidden_behaviors": [
       "只输出一串开放问题",
       "默认展开追问控制面板",
       "省略内部当前最大缺口",
-      "省略内部 Q 预算"
+      "省略内部证据状态"
     ]
   },
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "## 产品价值澄清控制器"
+      "contains": "## 控制器"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "用户可见输出先给 `产品价值判断`"
+      "contains": "默认用户输出只展示工作方式卡片、业务判断、当前任务和下一步"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "每轮都在审计中记录 `诊断阶段`、`当前价值缺口`、`当前最大缺口`、`Q 预算`、`停止原因`、`下一技能` 和 `证据状态`；默认用户输出只展开价值判断和一个当前 `Q` / `D`。"
+      "contains": "每轮都建立产品原型/方案澄清控制器"
     },
     {
       "path": "pm-jobs/SKILL.md",
-      "contains": "产品价值判断："
+      "contains": "产品发现判断："
     },
     {
       "path": "pm-jobs/SKILL.md",
@@ -48,7 +48,7 @@
     },
     {
       "path": "pm-jobs/SKILL.md",
-      "contains": "- Q 预算："
+      "contains": "- 当前任务流阶段："
     }
   ]
 }

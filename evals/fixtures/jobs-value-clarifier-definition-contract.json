@@ -1,6 +1,6 @@
 {
   "id": "jobs-value-clarifier-definition-contract",
-  "title": "产品追问必须定义为产品价值澄清器",
+  "title": "产品追问必须定义为产品原型/方案澄清器",
   "category": "pm-jobs",
   "primary_skill": "pm-jobs",
   "prompt": "使用 $pm-jobs 判断一个原始产品想法是否值得做。",
@@ -8,12 +8,12 @@
     "mode": "deep",
     "status": "待确认",
     "must_stop": false,
-    "gate": "产品价值澄清器定义",
+    "gate": "产品原型/方案澄清器定义",
     "required_behaviors": [
-      "定义产品价值澄清器",
-      "采用平衡型姿态",
-      "不把功能愿望直接当成产品价值",
-      "保留后续产品简报和原型门槛"
+      "定义产品原型/方案澄清器",
+      "采用产品专家姿态",
+      "不把功能愿望直接当成产品方案",
+      "保留后续产品简述和原型门槛"
     ],
     "forbidden_behaviors": [
       "只把 pm-jobs 当成问题清单",
@@ -24,19 +24,19 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "## 产品价值澄清器"
+      "contains": "# 产品原型/方案澄清器"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "默认采用平衡型姿态"
+      "contains": "像专业产品专家一样"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "不把功能愿望直接当成产品价值"
+      "contains": "不能把功能名直接写成核心问题"
     },
     {
       "path": "pm-jobs/SKILL.md",
-      "contains": "PMWorkspace 的产品价值澄清器"
+      "contains": "PMWorkspace 的产品原型/方案澄清器"
     }
   ]
 }

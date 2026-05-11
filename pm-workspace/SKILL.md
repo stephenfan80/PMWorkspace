@@ -2,9 +2,10 @@
 name: pm-workspace
 description: |
   PMWorkspace 主入口，面向产品经理和设计师。用于把产品想法、PRD、Zoon 文档、
-  截图、客户洞察或原型请求，路由到快速成型或深度交付：快速成型在 10 分钟内
-  产出产品简报、方案方向和移动端优先 image-2 原型图轻量包；深度交付继续推进
-  问题定义、策略审查、Zoon 对齐、原型复审、PRD 或交付稿。负责首次引导、更新检查、
+  截图、客户洞察或原型请求，先路由到全新功能或已有功能迭代，再由 Agent 判定
+  快速成型或深度交付：快速成型在 10 分钟内产出产品简述、至少 3 个方案方向和
+  移动端优先 image-2 原型图轻量包；深度交付继续推进产品发现任务流、策略审查、
+  Zoon 对齐、原型复审、产品设计文档、PRD 或交付稿。负责首次引导、更新检查、
   本地使用记录，并路由到 pm-jobs、pm-strategy-review、pm-brief、
   pm-prototype-shotgun、pm-prototype-review、pm-autoplan 或 pm-handoff。
   也用于用户刚安装 PMWorkspace 后需要欢迎引导、启动话术或选择第一步。v0.2 起
@@ -13,7 +14,7 @@ description: |
 
 # PMWorkspace
 
-PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于把原始产品上下文沉淀成可复用资产：产品简介、产品简报、方案方向、原型提示词、image-2 屏幕、PRD 和交付稿。
+PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于把原始产品上下文沉淀成可复用资产：产品简述、方案方向、原型提示词、image-2 屏幕、产品设计文档、PRD 和交付稿。
 
 <!-- PMW-GENERATED-CONTRACT:START -->
 ## PMWorkspace 生成契约
@@ -23,7 +24,7 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 - skill：`pm-workspace`
 - 契约版本：`2`
 - 阶段：主入口路由
-- 定位：判断快速成型 / 深度交付，创建或衔接 run，并把用户任务路由到最小可用的下一技能。
+- 定位：先判断全新功能 / 已有功能迭代，再由 Agent 判定执行深度，创建或衔接 run，并路由到最小可用的下一技能。
 
 ### 统一前置检查
 
@@ -49,6 +50,7 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 ### 默认用户可见输出字段
 
 - `工作方式`
+- `产品路径`
 - `业务判断`
 - `当前需要确认`
 - `下一步`
@@ -56,6 +58,8 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 ### 内部审计字段（默认不展示）
 
 - `当前模式`
+- `产品路径`
+- `执行深度`
 - `当前门槛`
 - `下一技能`
 - `为什么`
@@ -85,7 +89,7 @@ PMWorkspace is not a prototype shortcut. In deep delivery mode, it must first cl
 Use this state machine for prototype-related work:
 
 ```text
-工作目标模式 -> 场景路由 -> Q 诊断 -> 前提确认 -> D 拍板 -> 产品简报 -> image-2 原型 -> 原型复审 -> 产品交付
+产品路径 -> 工作目标模式 -> 产品发现任务流 -> 前提确认 -> 必要 Q/D -> 产品简述 / 产品简报 -> 三方案 image-2 原型 -> 原型复审 -> 产品设计文档 / 产品交付
 ```
 
 If any required step is incomplete in deep delivery mode, route to `$pm-jobs` or `$pm-brief` instead of generating prototypes.
@@ -139,7 +143,7 @@ If the user provides a product task in the same message, skip the welcome menu a
 - 深度交付模式中，产品简报不是 `已对齐` 时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
 - 快速成型模式中，出图前必须列出关键假设、反指标和不可虚构项，并获得用户确认“按这些假设继续”；输出状态写成 `基于假设，可讨论`，不能写成最终 PRD 或已验证事实。
 - 用户提供截图或线上参考时，只更新视觉基线和线上参考状态；不要自动产出完整 md 方案、HTML 或原型图。
-- 诊断问题使用 `Q`，一次只问一个；固定的是诊断维度，不是问题文本，每轮根据当前最大缺口动态生成 Q，通常 2-3 个，最多 5 个。拍板问题使用 `D`，一次只展开一个，问完必须等待用户回答。
+- `Q` / `D` 只作为关键卡点的交互方式，不是完整产品发现流程；Agent 可以先协助整理材料、拆解截图、生成访谈提纲、梳理数据口径、检索最佳实践和归纳方案机会。拍板问题使用 `D`，一次只展开一个，问完必须等待用户回答。
 - 产品简报前必须完成前提确认；未确认前只能保持 `待确认`。
 - 关键产品决策默认使用选择题拍板；读取 `decision-question-mode.md`。
 - 新页面也要判断线上参考需求；承接线上流程、结果页、状态页或生产样式时，缺截图/录屏/相似页面参考要先问。
@@ -154,6 +158,8 @@ If the user provides a product task in the same message, skip the welcome menu a
 - 只有用户明确要求桌面端，或看板/内部工具明显需要大屏工作区，才使用桌面端。
 - 设计原型默认只能使用 image-2 / 图像生成；HTML 只在用户明确要求可交互网页、HTML 原型或前端实现时允许。
 - 一个方案 + 一个屏幕 = 一张图片。除非用户要求展示板，否则不要创建比较拼图。
+- 默认最少 3 个方案；少于 3 个必须有明确豁免原因。
+- 每个方案必须包含原型思考、信息架构设计思考、用户问题解决逻辑、反指标保护和不可虚构边界。
 - 每张图片必须绑定方案名、屏幕任务、主目标、反指标、不可虚构项和产品简报版本。
 - 平台脚本可用时，保存可沉淀资产：使用日志、决策、产品简报 Markdown、原型清单和偏好反馈。
 - 平台脚本可用时，使用 `pmw-dashboard status` / `pmw-dashboard readiness --target prototype|handoff` 获取简洁 verdict；需要完整审计时才运行或展示 `--details` 表格。

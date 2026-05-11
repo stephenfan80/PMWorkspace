@@ -1,0 +1,42 @@
+{
+  "id": "prototype-missing-data-hypothesis-risk-v2",
+  "title": "缺数据时允许假设原型但必须标记未验证风险",
+  "category": "pm-prototype-shotgun",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "产品简述已对齐，但当前功能数据还没提供，先出原型方向。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": false,
+    "gate": "数据佐证缺失",
+    "required_behaviors": [
+      "缺数据不绝对阻断出图",
+      "标记数据佐证未提供",
+      "写明本方案存在未验证风险",
+      "把未验证风险写入不可虚构项"
+    ],
+    "forbidden_behaviors": [
+      "把未提供数据包装成已验证",
+      "展示确定性承诺或真实验证过的数值",
+      "缺数据时静默继续"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "数据佐证：未提供，本方案存在未验证风险"
+    },
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "数据佐证缺失时不阻断出图，但必须把 `未验证风险` 写入用户可见输出和每个 image-2 prompt 的不可虚构项"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "没有数据时允许继续进入原型，但必须向用户明确说明：`数据佐证：未提供，本方案存在未验证风险`"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "数据佐证缺失只提示未验证风险；复审状态仅展示，不阻断出图"
+    }
+  ]
+}

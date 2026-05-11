@@ -1,6 +1,6 @@
 {
   "id": "prototype-scheme-difference-structure-required",
-  "title": "方案差异必须落到产品结构和任务",
+  "title": "方案差异必须落到产品策略、信息架构和任务路径",
   "category": "prototype-shotgun",
   "primary_skill": "pm-prototype-shotgun",
   "prompt": "产品简报已对齐，请给三个不同视觉风格的方案。",
@@ -10,8 +10,8 @@
     "must_stop": true,
     "gate": "方案差异质量",
     "required_behaviors": [
-      "要求差异落到页面结构",
-      "要求差异落到信息架构、交互路径、信任表达或关键任务",
+      "要求差异落到产品策略",
+      "要求差异落到信息架构、交互模型、信任模型或关键任务路径",
       "拒绝只换视觉风格"
     ],
     "forbidden_behaviors": [
@@ -23,15 +23,15 @@
   "contract_checks": [
     {
       "path": "pm-prototype-shotgun/SKILL.md",
-      "contains": "页面结构、信息架构、交互路径、信任表达或关键任务"
+      "contains": "产品策略、信息架构、交互模型、信任模型或关键任务路径"
     },
     {
       "path": "pmworkspace-shared/references/image-prompts.md",
-      "contains": "Directions must differ by page structure, information architecture, interaction path, trust expression, or key task."
+      "contains": "Directions must include at least 3 schemes by default and differ by product strategy, information architecture, interaction model, trust model, or key task path."
     },
     {
       "path": "pmworkspace-shared/references/prototype-shotgun-board.md",
-      "contains": "不同页面结构、信息架构、交互路径、信任表达或关键任务"
+      "contains": "不同产品策略、信息架构、交互模型、信任模型或关键任务路径"
     }
   ]
 }

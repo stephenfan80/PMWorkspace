@@ -15,7 +15,7 @@
       "只负责出图计划、单图生成、prototype-board 写入和生成后复审"
     ],
     "forbidden_behaviors": [
-      "接管 $pm-jobs 的价值澄清",
+      "接管 $pm-jobs 的产品发现",
       "接管 $pm-strategy-review 的策略拍板",
       "接管 $pm-brief 的产品契约写作"
     ]
@@ -27,7 +27,7 @@
     },
     {
       "path": "pm-prototype-shotgun/SKILL.md",
-      "contains": "它不重新做 `$pm-jobs` 的价值澄清"
+      "contains": "它不重新做 `$pm-jobs` 的产品发现"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",

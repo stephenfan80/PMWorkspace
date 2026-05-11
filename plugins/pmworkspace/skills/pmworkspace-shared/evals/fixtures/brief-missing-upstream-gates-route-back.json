@@ -12,7 +12,7 @@
     "required_behaviors": [
       "标出缺失门槛",
       "退回 $pm-jobs",
-      "只展开一个当前 Q"
+      "回到对应产品发现任务或一个当前 Q"
     ],
     "forbidden_behaviors": [
       "用产品简报补写事实",
@@ -27,11 +27,11 @@
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "如果基础事实仍缺失，退回 `$pm-jobs`，只展开一个当前 Q"
+      "contains": "如果基础事实仍缺失，退回 `$pm-jobs`"
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "如果这些门槛仍未解决，`$pm-brief` 只能把它们写成缺失门槛并退回对应技能"
+      "contains": "等待用户回答、补证据或确认时必须停住"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",

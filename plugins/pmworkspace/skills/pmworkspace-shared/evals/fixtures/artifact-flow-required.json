@@ -29,7 +29,7 @@
     },
     {
       "path": "pmworkspace-shared/references/artifact-flow.md",
-      "contains": "产品简报、原型清单、复审结论和交付稿必须登记为下游可读产物。"
+      "contains": "产品简述 / 产品简报、原型清单、复审结论、最终产品设计文档和交付稿必须登记为下游可读产物。"
     },
     {
       "path": "bin/pmw-artifact",

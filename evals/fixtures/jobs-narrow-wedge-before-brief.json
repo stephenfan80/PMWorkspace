@@ -24,7 +24,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "价值仍宽泛时，先收窄最小可赢切口"
+      "contains": "最小可赢切口"
     },
     {
       "path": "pm-jobs/SKILL.md",

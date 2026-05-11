@@ -10,9 +10,9 @@
     "must_stop": true,
     "gate": "Q/D 理由与影响",
     "required_behaviors": [
-      "只展开一个 Q 或 D",
-      "说明为什么这是最该问的一刀",
-      "说明这个答案会影响什么",
+      "必要时只展开一个 Q 或 D",
+      "说明为什么现在做这一步",
+      "说明这个结果会影响什么",
       "等待用户回答"
     ],
     "forbidden_behaviors": [
@@ -24,15 +24,15 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "每个用户可见 `Q` / `D` 必须说明为什么现在问和这个答案会影响什么。"
+      "contains": "每次 `Q` / `D` 必须写清 `为什么现在做这一步` 和 `这个结果会影响`"
     },
     {
       "path": "pm-jobs/SKILL.md",
-      "contains": "- 为什么这是最该问的一刀："
+      "contains": "- 为什么现在做这一步："
     },
     {
       "path": "pm-jobs/SKILL.md",
-      "contains": "- 这个答案会影响："
+      "contains": "- 这个结果会影响："
     }
   ]
 }

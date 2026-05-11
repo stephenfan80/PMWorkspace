@@ -1,6 +1,6 @@
 {
   "id": "pmworkspace-d0-work-mode-scoring",
-  "title": "D0 工作方式判定覆盖五个核心维度",
+  "title": "产品路径与执行深度判定覆盖核心维度",
   "category": "pm-workspace-routing",
   "primary_skill": "pm-workspace",
   "prompt": "用户目标模糊，只说想把一个功能想清楚，可能要出原型也可能要交付。",
@@ -8,9 +8,9 @@
     "mode": "deep",
     "status": "待确认",
     "must_stop": true,
-    "gate": "D0 工作方式",
+    "gate": "产品路径与执行深度",
     "required_behaviors": [
-      "先内部评分",
+      "先判断产品路径",
       "覆盖输出目标",
       "覆盖输入材料",
       "覆盖风险等级",
@@ -26,7 +26,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/routing.md",
-      "contains": "## D0 工作方式判定"
+      "contains": "## 产品路径与执行深度判定"
     },
     {
       "path": "pmworkspace-shared/references/routing.md",
@@ -38,7 +38,7 @@
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "D0 工作方式必须覆盖输出目标、输入材料、风险等级、是否生产流程、是否要交付。"
+      "contains": "前台入口必须先判断全新功能或已有功能迭代；执行深度由 Agent 根据风险、证据和交付目标判定。"
     }
   ]
 }

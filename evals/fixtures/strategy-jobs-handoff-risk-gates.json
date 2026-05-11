@@ -24,7 +24,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "如果事实已经足够，但当前价值缺口是范围、价值交换、信任/风险、反指标、可行性、定位或业务冲突，把下一技能标为 `$pm-strategy-review`"
+      "contains": "事实足够但取舍会改变方向时用 `D`"
     },
     {
       "path": "pmworkspace-shared/references/adversarial-review.md",

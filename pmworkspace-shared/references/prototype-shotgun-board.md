@@ -74,6 +74,8 @@ pmw-prototype-board score --scheme "<方案名>" --score 4 --note "<用户评论
 pmw-prototype-board list
 ```
 
+比较板列表必须展示完整出图判断：产品路径字段、设计评分、主要设计差距、10/10 原型标准、prompt 设计修正、状态覆盖、第一眼 / 第二眼 / 第三眼、反 AI 模板味约束和未决设计选择。缺字段时显示 `未记录`，方便 `$pm-prototype-review` 和 `$pm-handoff` 判断哪些内容不能作为最终交付依据。
+
 ## 方案要求
 
 - 多方案必须在产品策略、信息架构、交互模型、信任模型或关键任务路径上不同。

@@ -1,7 +1,7 @@
 {
   "id": "value-judgment-perceptible-layer-required",
   "title": "价值判断必须让用户理解卡点价值和解锁结果",
-  "category": "pm-workspace",
+  "category": "pm-workspace-entry",
   "primary_skill": "pm-workspace",
   "prompt": "我第一次用 PMWorkspace，有一个产品想法，也可能想直接出原型。",
   "expected": {

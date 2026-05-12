@@ -1,7 +1,7 @@
 {
   "id": "data-promise-decision-required",
   "title": "数据真实性和承诺口径必须拍板",
-  "category": "decision-principles",
+  "category": "pm-brief",
   "primary_skill": "pm-brief",
   "prompt": "用户想在结果页展示“真实最低价”和“智能推荐”，但当前数据只有估算和人工确认。",
   "expected": {

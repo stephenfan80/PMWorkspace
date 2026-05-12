@@ -1,7 +1,7 @@
 {
   "id": "quick-assumption-confirmation-required",
   "title": "快速成型出图前必须确认假设",
-  "category": "quick-shaping",
+  "category": "autoplan",
   "primary_skill": "pm-autoplan",
   "prompt": "使用 $pm-workspace 快速成型一个新 idea，先给 3 条产品路径并直接出图。",
   "expected": {

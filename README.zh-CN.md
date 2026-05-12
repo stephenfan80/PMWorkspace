@@ -9,7 +9,7 @@
 选择一条主路径即可：
 
 - **公开插件：** 在 Codex `Plugins` 中安装 **AI 产品工作站**，后续公开版本从 Codex 插件页更新。
-- **GitHub 本地 plugin / Beta 测试：** 公开上架审批前，先把本仓库作为本地 marketplace 加进 Codex。
+- **GitHub 本地 plugin / 团队测试：** 用于测试未发布版本、团队内测或本地开发版本时，把本仓库作为本地 marketplace 加进 Codex。
 - **开发者本地仓库：** clone 仓库后运行 plugin 升级脚本。
 
 GitHub 本地 plugin：
@@ -78,34 +78,30 @@ PMWorkspace 接住的就是这种混乱时刻：不是替你跳过思考，而�
 - **多角色复审结论：** 从策略、信任 / 风险、设计系统、数据可行性等角度指出能不能通过、要不要重出、哪里需要拍板。
 - **产品设计文档 / 交付稿：** 把通过复审的方向整理成产品设计文档、精简 PRD、设计交付、实验验证或研发交付材料。
 
-## 两种工作方式
+## 两类产品路径
 
-### 快速成型
+PMWorkspace 入口第一步先判断产品路径：这是 **全新功能**，还是 **已有功能迭代**。之后再由 Agent 根据风险、证据和交付目标判断执行深度：10 分钟快速成型，或深度交付。
 
-适合新想法、拍脑袋方案、组内讨论、领导预览或创业验证。
+### 全新功能
 
-PMWorkspace 会按产品方向审查内核给出产品作业卡，必要时协助整理材料、生成访谈提纲、梳理数据口径或做最佳实践摘要。你确认“按这些假设继续”后，它会输出一套轻量包：
+适合一句 idea、新能力、从 0 到 1、MVP、创业验证、组内讨论或领导预览。
 
-- 产品简述 / 产品简报。
-- 至少 3 个方案方向。
-- 每个方向 1 张移动端 image-2 原型图。
-- 下一步建议：继续验证、进入复审，或升级为交付稿。
+PMWorkspace 会先按产品方向审查内核挑战前提：目标用户是谁、触发场景是什么、用户现在怎么替代、真实损失是否成立、最小可赢切口在哪里。它会给出产品作业卡，必要时协助整理材料、生成访谈提纲、梳理数据口径或做最佳实践摘要。
 
-这类产物会明确标注“基于假设，可讨论”，不会包装成已经验证过的最终结论。
+如果风险低、目标是先拿出去讨论，可以进入快速成型：你确认“按这些假设继续”后，它会输出产品简述 / 产品简报、至少 3 个方案方向、每个方向 1 张移动端 image-2 原型图，并明确标注“基于假设，可讨论”。如果涉及 PRD、评审、研发交付、真实数据或高风险承诺，则升级为深度交付，先补齐关键事实再继续。
 
-### 深度交付
+### 已有功能迭代
 
-适合 PRD、设计评审、研发交付、生产流程优化、高风险业务或需要协作文档同步的项目。
+适合线上页面优化、已有流程改版、数据下降、用户反馈集中、截图反馈、生产样式继承或承接现有业务链路。
 
-PMWorkspace 会先判断工作目标，再做关键澄清和拍板选择题。只有产品简报达到“已对齐”，才进入 image-2 原型或交付稿。这样做的目的不是拖慢速度，而是避免在错误问题上快速出图。
+PMWorkspace 会先建立当前线上事实：需要生产截图、关键节点截图、线上 URL、Figma / 设计稿或等价视觉基线；再判断问题区域、必须保留项、可挑战项、当前数据 / 业务现状、用户承诺边界和不可虚构项。缺少线上基线时，不会直接进入原型计划，因为它无法判断哪些结构不能乱改、问题是否真实存在、原型是否可信。
 
-深度交付更适合这些任务：
+如果只是低风险局部探索，可以在明确假设后快速成型；如果要做生产流程优化、设计评审、研发交付、实验验证或精简 PRD，则走深度交付。只有产品简报达到“已对齐”，准备度检查通过后，才进入 image-2 原型或交付稿。
 
-- 把现有 PRD 或协作文档转成可出图的产品简报。
-- 基于生产截图优化线上页面。
-- 为设计评审准备多方案原型。
-- 为研发交付整理精简 PRD。
-- 在出图前确认线上参考、不可虚构项和复审状态。
+### 执行深度
+
+- **快速成型：** 适合低风险探索和讨论材料。产物可以快速形成，但必须带着假设、反指标和不可虚构项，不能包装成已验证结论。
+- **深度交付：** 适合 PRD、设计评审、研发交付、生产流程、高风险业务或需要协作文档同步的项目。PMWorkspace 会先对齐事实、风险、Zoon / 截图 / 简报门槛，再进入原型或交付。
 
 ## 它如何工作
 
@@ -237,6 +233,7 @@ $pm-workspace
 - **Prototype Shotgun Board：** `pmw-prototype-board` 登记每个独立 image-2 图片单元，并用表格比较方案。
 - **PM Review Army / Product Review Squad：** 原型复审先运行策略、信任 / 风险、设计系统、数据可行性四个可插拔专家独立检查；高风险或深度交付时，可追加 CEO、Eng、Design、DX、安全、QA、发布工程师短结论。
 - **Skill Doc Generator：** `pmw-gen-skill-docs` 从 manifest 生成并检查 SKILL.md 共享契约区块，统一 preamble、共享门槛、必读协议和输出字段。
+- **Eval 分类地图：** 新增或调整 fixture 时，以 `pm-workbench-map.md`、`pm-eval-system.md` 和 `evals/README.md` 为准；快速成型 / 深度交付归入 `autoplan`，版本、升级和插件打包归入 `release-maintenance`。
 
 ### 常用命令
 
@@ -261,6 +258,9 @@ bin/pmw-question-tuning add --dimension "反指标" --policy high_risk_only --re
 bin/pmw-question-tuning summary
 bin/pmw-eval list
 bin/pmw-eval run
+bin/pmw-version --json
+bin/pmw-update-check --quick
+bin/pmw-build-plugin
 bin/pmw-gen-skill-docs write
 bin/pmw-gen-skill-docs check
 ```
@@ -317,6 +317,8 @@ PMWorkspace 默认把资产保存在本地：
 
 每个 skill 使用前都会执行快速更新检查：`pmw-update-check --quick` 会优先复用短缓存，并用短超时比较 `VERSION` 和远端插件包 `REVISION`。`REVISION` 指向最近一次影响插件打包内容的源码提交，不会因为单独的插件同步提交而误报升级。
 
+维护者视角下，版本、升级和插件打包相关 fixture 统一归入 `release-maintenance` 分类；不要继续新增旧的 `versioning` 或 `plugin-release` 分类。
+
 查看本地 PMW 产品 / 插件版本：
 
 ```bash
@@ -360,6 +362,8 @@ bin/pmw-config set update_check false
 ### 发布与旧版迁移
 
 发布新版本、插件提交检查、旧版 `product-prototype-designer` / `~/.codex/skills` 迁移说明统一维护在 `docs/codex-plugin-submission.md` 和 `pmworkspace-shared/references/update-workflow.md`。README 不再维护第二套发布清单。
+
+改动 source skill、`pmworkspace-shared/references`、`bin`、`evals`、README 或插件 assets 后，必须运行 `bin/pmw-build-plugin`，并把插件副本变化一起提交。
 
 ## 隐私
 

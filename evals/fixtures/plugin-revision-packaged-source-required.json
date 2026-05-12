@@ -1,7 +1,7 @@
 {
   "id": "plugin-revision-packaged-source-required",
   "title": "插件 REVISION 必须指向最近一次打包内容提交",
-  "category": "plugin-release",
+  "category": "release-maintenance",
   "primary_skill": "pm-workspace",
   "prompt": "维护者在 artifact-only 或 revision-only 提交后重新构建 Codex plugin，要求插件 REVISION 不被维护性 HEAD 污染。",
   "expected": {

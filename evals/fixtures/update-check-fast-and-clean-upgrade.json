@@ -1,7 +1,7 @@
 {
   "id": "update-check-fast-and-clean-upgrade",
   "title": "运行前必须快速检查更新，升级时清理旧版本目录",
-  "category": "versioning",
+  "category": "release-maintenance",
   "primary_skill": "pm-workspace",
   "prompt": "每次运行前快速检查 PMWorkspace 是否有新版本；如果有，先询问用户是否更新。执行更新时删除本地旧版本内容，只保留最新版本。",
   "expected": {

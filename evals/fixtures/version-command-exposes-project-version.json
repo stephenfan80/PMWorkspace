@@ -1,7 +1,7 @@
 {
   "id": "version-command-exposes-project-version",
   "title": "PMW 必须暴露项目版本和插件版本身份",
-  "category": "versioning",
+  "category": "release-maintenance",
   "primary_skill": "pm-workspace",
   "prompt": "检查本地 PMWorkspace / pmworkspace 插件当前版本，并说明如何和 GitHub 更新源对比。",
   "expected": {

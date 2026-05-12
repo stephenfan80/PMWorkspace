@@ -48,18 +48,18 @@ fixture 的 `category` 必须能映射回 `pm-workbench-map.md` 的链路阶段�
 | 分类 | 链路阶段 | 代表 fixture |
 |---|---|---|
 | `pm-workspace-entry`、`pm-workspace-routing`、`pm-workspace-runtime` | 欢迎与 D0 路由 | 欢迎页、D0、路由输出、run 复用 |
-| `autoplan`、`quick-shaping`、`deep-delivery` | 自动产品评审 | 自动推进、快速成型确认、深度交付门槛 |
+| `autoplan` | 自动产品评审 | 自动推进、快速成型确认、深度交付门槛 |
 | `pm-jobs` | 产品方向审查内核 | 前提挑战、现状替代、不做推演、路径对比、范围模式、PM 判断摘要、产品作业、产品简述确认 |
 | `pm-strategy-review` | 产品方向审查 | 路径对比、范围模式、最大策略矛盾、产品动作、策略 D |
 | `pm-brief` | 产品简报 | 产品简述 / 产品简报、真实问题、证据状态、目标用户、当前替代/损失、选中路径、范围模式、本周期验证、待验证项、待确认信息与偏差风险、Zoon 漂移、已对齐门槛 |
-| `pm-prototype-shotgun`、`prototype-shotgun`、`prototype-output-contract`、`multi-scheme`、`production-reference`、`screenshot-feedback` | 原型方案 | image-2 前门槛、单图协议、默认最少 3 条产品路径、原型思考、输出单元、线上参考、设计系统、设计规范目标 |
+| `pm-prototype-shotgun`、`prototype-output-contract`、`production-reference`、`screenshot-feedback` | 原型方案 | image-2 前门槛、单图协议、默认最少 3 条产品路径、原型思考、输出单元、线上参考、设计系统、设计规范目标 |
 | `prototype-review` | 原型复审 | 复审控制器、重出、拍板、偏好边界 |
 | `review-specialists` | 原型复审 | 可插拔专家、短结论、最高严重度合并、dashboard 专家汇总 |
 | `pm-handoff` | 产品交付 | 产品设计文档、精简 PRD、现成文档入口、未复审不交付、未拍板不写验收、交付资产沉淀 |
 | `readiness-dashboard` | 原型方案 / 产品交付 / 运行与记忆 | 出图 / 交付前 Product Readiness Dashboard 和 verdict |
 | `artifact-flow` | 产品简报 / 原型方案 / 原型复审 / 产品交付 / 运行与记忆 | Product Artifact Flow、`pmw-artifact`、`browser_evidence`、上游产物下游可读 |
 | `skill-doc-generator` | 运行与记忆 | `pmw-gen-skill-docs`、manifest、生成契约区块、共享字段防漂移 |
-| `memory`、`decision-principles`、`eval-system` | 运行与记忆 | 偏好边界、个人全局记忆、GitHub 待审稿、自动决策、eval runner |
+| `memory`、`eval-system`、`release-maintenance` | 运行与记忆 | 偏好边界、个人全局记忆、GitHub 待审稿、eval runner、版本 / 升级 / 插件打包 |
 
 ## Fixture 结构
 
@@ -69,7 +69,7 @@ fixture 使用 JSON，保存在 `evals/fixtures/`：
 {
   "id": "quick-assumption-confirmation-required",
   "title": "快速成型出图前必须确认假设",
-  "category": "quick-shaping",
+  "category": "autoplan",
   "primary_skill": "pm-autoplan",
   "prompt": "用户请求示例",
   "expected": {

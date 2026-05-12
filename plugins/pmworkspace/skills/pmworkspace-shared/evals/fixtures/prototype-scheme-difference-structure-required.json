@@ -1,7 +1,7 @@
 {
   "id": "prototype-scheme-difference-structure-required",
   "title": "方案差异必须落到产品策略、信息架构和任务路径",
-  "category": "prototype-shotgun",
+  "category": "pm-prototype-shotgun",
   "primary_skill": "pm-prototype-shotgun",
   "prompt": "产品简报已对齐，请给三个不同视觉风格的方案。",
   "expected": {

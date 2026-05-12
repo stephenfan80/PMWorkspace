@@ -1,7 +1,7 @@
 {
   "id": "prototype-production-baseline-change-proof-required",
   "title": "有视觉基线时必须证明新方案优于当前线上",
-  "category": "prototype-readiness",
+  "category": "readiness-dashboard",
   "primary_skill": "pm-prototype-shotgun",
   "prompt": "已有功能迭代已上传线上截图，产品简报已对齐，但 prototype-board 输出单元没有说明为什么新方案比当前线上更好。",
   "expected": {

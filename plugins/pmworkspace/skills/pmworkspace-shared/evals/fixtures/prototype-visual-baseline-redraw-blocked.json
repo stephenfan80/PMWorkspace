@@ -1,7 +1,7 @@
 {
   "id": "prototype-visual-baseline-redraw-blocked",
   "title": "视觉基线下不能默认从零重画整页",
-  "category": "prototype-readiness",
+  "category": "readiness-dashboard",
   "primary_skill": "pm-prototype-shotgun",
   "prompt": "已有线上截图 visual_baseline，但输出单元声明 generation_mode=redraw，准备度必须阻断。",
   "expected": {

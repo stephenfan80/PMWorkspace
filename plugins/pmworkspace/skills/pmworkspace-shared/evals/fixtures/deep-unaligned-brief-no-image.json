@@ -1,7 +1,7 @@
 {
   "id": "deep-unaligned-brief-no-image",
   "title": "深度交付未对齐时禁止出图",
-  "category": "deep-delivery",
+  "category": "pm-prototype-shotgun",
   "primary_skill": "pm-prototype-shotgun",
   "prompt": "使用 $pm-prototype-shotgun 直接为这个高风险交易结果页生成 image-2 原型，但当前只有草稿产品简报。",
   "expected": {

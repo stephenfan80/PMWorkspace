@@ -137,7 +137,9 @@ done
 - 原型出图前必须运行 Product Readiness Dashboard；`产品简报`、`产品简报确认`、`Zoon`、`线上参考`、必要的 `视觉基线`、`方案差异`、`方案方向确认`、`不可虚构项` 未通过时，停止在第一条阻断门槛，不写 image-2 prompt。默认只向用户展示短 verdict 和第一条阻断原因，完整表格只在审计 / 调试输出中展示。`数据佐证` 和 `复审状态` 出图前展示但不阻断，出图后再进入复审。
 - 原型出图前必须有 `设计规范目标`：用户提供、AutoDesign、平台模式库或 PMW 默认假设。设计规范不明确时，先给用户可编辑的设计规范目标卡，或取得“按默认假设继续”的确认；未声明设计规范目标时不写 image-2 prompt。
 - 产品简报未“已对齐”时，不写提示词，不生成图片，不生成 HTML，不输出交付稿。
+- 用户选择一个方案方向、回复“使用方案 A”，或上传线上截图，都不能替代 `产品简报确认：已对齐`。如果截图是在方向选择之后才提供，必须先退回 `$pm-brief` 把新证据写入 brief 并重新确认；不得把对话里的口头方向直接当作 image-2 输入。
 - 现有功能迭代必须有当前截图或等价视觉基线；只登记线上参考不够，还必须把截图转成 `visual_baseline`，包含参考图尺寸、目标输出像素、字号层级、间距节奏、组件密度和底部栏约束。
+- 有 `visual_baseline` 的已有功能迭代，必须先完成 `生产基线改动证明`：当前线上问题、改动区域、为什么优于当前线上、保留 / 删除边界。证明不成立时，建议保留 / 微调当前线上方案，不写 image-2 prompt。
 - 新页面如果承接线上流程、结果页、状态页或生产样式，必须先拿到线上参考，或得到用户明确确认“没有线上参考，按新页面概念稿推进”。
 - 多方案生成前先确认概念方向，除非用户明确批准使用默认方向。
 - 默认最少 3 条产品路径；少于 3 条路径必须记录 `少于 3 条路径豁免原因`，否则不能写 image-2 prompt。
@@ -182,15 +184,16 @@ done
 10. 确定并确认 `设计规范目标`：用户提供规范优先；命中汽车之家、AutoDesign、之家或 Autohome 时默认载入 AutoDesign 约束，产品 UI 优先使用 AutoDesign token；非汽车之家产品按用户指定或产品形态选择 Instagram（Ins）、YouTube、TikTok、抖音、大众点评、美团等平台模式库；都没有时使用 PMW 默认移动端产品 UI 基线并标记 `基于假设，可讨论`。如果设计规范不明确，先输出设计规范目标卡并等待用户修改 / 确认，或得到按默认假设继续的批准；平台脚本可用时记录 `设计规范目标确认` gate / decision。
 11. 如果使用 Dribbble、Pinterest、公开页面、平台模式库或用户截图做设计启发，登记为 `browser_evidence`，摘要必须写清可复用布局、信息层级、交互结构、状态表达、信任提示、不可照搬项和版权边界。不得把外部参考写成可复制图片、品牌素材、文案、专有 UI 或官方规范合规承诺。
 12. 若用户提供线上截图或等价视觉基线，截图基线优先于泛化设计 token，并且必须用 `visual_baseline` 锁定参考尺寸与目标输出像素；品牌 VI 和字体包只作为品牌露出、活动视觉或特殊场景参考，字体授权必须保留边界，不能写成生产可用承诺。
-13. 多方案生成前确认方案方向；如果用户已经明确批准默认方向，记录 `方案方向确认：默认方向已批准`，否则停在方向确认，不写 image-2 提示词。
+13. 多方案生成前确认方案方向；如果用户已经明确批准默认方向，记录 `方案方向确认：默认方向已批准`，否则停在方向确认，不写 image-2 提示词。注意：方案方向确认不是产品简报确认；已有功能迭代在方向确认后如果新增截图 / 数据 / 线上参考，必须重新进入 `$pm-brief` 确认最新 brief。
 14. For each image output unit, declare scheme, screen task, prototype thinking, information architecture rationale, user problem fit, anti-metric protection, canvas mode, canvas, main goal, anti-metric, non-fiction boundary, plus design completeness score, design gap, 10/10 prototype standard, prompt design fix, state coverage, first/second/third hierarchy, anti-AI-slop constraints, design spec target, design system profile, platform pattern, inspiration sources, inspiration patterns, no-copy boundary, product path, behavior assumption, current substitute to beat, current loss, tradeoff, validation signal, and failure signal. Also declare target output pixels, 线上参考状态, 视觉基线状态, design system, image-2 status, and brief dependency. 一个输出单元等于一张图片，不能把多个方案或多个屏幕合成拼图。
     - 无线上截图时，`画布模式` 写 `standard_first_screen`，并使用 `image-prompts.md` 的对应模板。
     - 有线上截图 / `visual_baseline` 时，`画布模式` 必须写 `physical_longboard`，`画布` 必须写 `线上截图物理长板`；`目标输出像素` 必须写明确宽高或宽度 + 最小高度，例如 `参考截图尺寸：1179 x 2556；识别为 393pt @3x；目标输出画布：1179px 宽，内容自适应长图，高度不得低于 2556px，可随内容增长；字体、间距和组件按参考物理像素等比绘制`。
     - 有线上截图且目标是视觉还原时，`生成模式` 必须写 `screenshot_edit`，`base_image` 绑定当前 `visual_baseline` 参考图，`edit_scope` 写清只改哪个模块，`preserve_regions` 默认写 `状态栏、顶部导航、车系头图、车型切换、tab、底部吸底 CTA`。
+    - 有线上截图时，还必须写 `生产基线问题`、`改动区域`、`为什么优于当前线上`、`保留 / 删除边界`；这些不能只写“更现代 / 更清爽 / 更好看”。
     - 有线上截图时，最终 image-2 prompt 不得包含短画布锚点；以 `pmw-prototype-prompt-check` 为准。
     - 移动长板仍是一张连续移动端界面，不得拆成多张图、拼图、多屏故事板或桌面端。
 15. 把批量请求拆成顺序单图队列：`3 条产品路径` -> 3 个输出单元，`3 条产品路径 x 2 个屏幕` -> 6 个输出单元。每个输出单元单独调用一次 image-2；不要把多个单元合成一个 prompt。
-16. 平台脚本可用时，先用 `pmw-prototype-board add` 登记每个方案/屏幕单元；`--product-path`、`--behavior-assumption`、`--current-loss` 和 `--tradeoff` 是必填字段；新输出必须同时写入 `--design-score`、`--design-gap`、`--ten-out-of-ten-standard`、`--prompt-design-fix`、`--anti-ai-slop-constraints`、`--state-coverage`、`--first-second-third-hierarchy`、`--design-spec-target`、`--design-system-profile`、`--platform-pattern`、`--inspiration-sources`、`--inspiration-patterns` 和 `--no-copy-boundary`。如果写入失败，输出 `方案比较板：未写入（原因）`，不能假装已记录。
+16. 平台脚本可用时，先用 `pmw-prototype-board add` 登记每个方案/屏幕单元；`--product-path`、`--behavior-assumption`、`--current-loss` 和 `--tradeoff` 是必填字段；有 `visual_baseline` 时还必须写入 `--baseline-problem`、`--changed-regions`、`--why-better-than-current` 和 `--baseline-preservation`；新输出必须同时写入 `--design-score`、`--design-gap`、`--ten-out-of-ten-standard`、`--prompt-design-fix`、`--anti-ai-slop-constraints`、`--state-coverage`、`--first-second-third-hierarchy`、`--design-spec-target`、`--design-system-profile`、`--platform-pattern`、`--inspiration-sources`、`--inspiration-patterns` 和 `--no-copy-boundary`。如果写入失败，输出 `方案比较板：未写入（原因）`，不能假装已记录。
 17. 平台脚本可用时运行 `pmw-dashboard readiness --target prototype`；用户可见输出只包含短 verdict / 第一阻断原因。如果 verdict 是 `不可出图`，根据第一条阻断行退回 `$pm-brief`、线上参考门槛、设计规范目标卡、方案方向确认或不可虚构项补齐，不写 image-2 prompt。只有用户要求看审计时才展示 `pmw-dashboard readiness --details`。
 18. 数据佐证缺失时不阻断出图，但必须把 `未验证风险` 写入用户可见输出和每个 image-2 prompt 的不可虚构项：不得展示确定性承诺、真实验证过的数值、已核验结果或无法兑现的数据能力，只能使用示例、区间、占位或明确标注假设。
 19. 在每个输出单元的图片生成前门槛通过后，先把最终 prompt 交给 `pmw-prototype-prompt-check`；有视觉基线时检查失败必须重写 prompt，不得调用 image-2。检查通过后逐个 Generate with image-2 / image generation。每次生成只服务当前一个输出单元，并在 prompt 中写明 10/10 原型标准、设计规范目标、平台模式、灵感来源摘要、禁止照搬项、第一眼 / 第二眼 / 第三眼信息层级、必须出现的状态、必须删除 / 降级的内容、反 AI 模板味约束，以及禁止拼图、并排比较、一图多屏、一图多方案。 如果当前环境无法生成 image-2，停止并说明，不用 HTML、Markdown 线框或方案比较板替代。

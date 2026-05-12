@@ -228,6 +228,10 @@ def command_add(args: argparse.Namespace) -> int:
         "information_architecture": args.information_architecture,
         "user_problem_fit": args.user_problem_fit,
         "anti_metric_protection": args.anti_metric_protection,
+        "baseline_problem": args.baseline_problem,
+        "changed_regions": args.changed_regions,
+        "why_better_than_current": args.why_better_than_current,
+        "baseline_preservation": args.baseline_preservation,
         "design_score": args.design_score,
         "design_gap": args.design_gap,
         "ten_out_of_ten_standard": args.ten_out_of_ten_standard,
@@ -344,8 +348,8 @@ def command_list(_args: argparse.Namespace) -> int:
     if not items:
         print("暂无方案。")
         return 0
-    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 产品路径 | 设计评分 | 主要设计差距 | 10/10 原型标准 | prompt 设计修正 | 状态覆盖 | 第一眼 / 第二眼 / 第三眼 | 反 AI 模板味约束 | 未决设计选择 | 设计规范目标 | 设计系统 / 平台配置 | 平台模式 | 灵感来源 | 灵感模式 | 禁止照搬项 | 用户行为假设 | 当前损失 | 牺牲项 | 原型思考 | 信息架构 | 用户问题解决逻辑 | 反指标保护 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
-    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 产品路径 | 设计评分 | 主要设计差距 | 10/10 原型标准 | prompt 设计修正 | 状态覆盖 | 第一眼 / 第二眼 / 第三眼 | 反 AI 模板味约束 | 未决设计选择 | 设计规范目标 | 设计系统 / 平台配置 | 平台模式 | 灵感来源 | 灵感模式 | 禁止照搬项 | 用户行为假设 | 当前损失 | 牺牲项 | 原型思考 | 信息架构 | 用户问题解决逻辑 | 反指标保护 | 生产基线问题 | 改动区域 | 为什么优于当前线上 | 保留 / 删除边界 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
     for item in items:
         key = (item.get("scheme", ""), item.get("screen", ""))
         scheme_key = (item.get("scheme", ""), "")
@@ -386,6 +390,10 @@ def command_list(_args: argparse.Namespace) -> int:
             item.get("information_architecture", ""),
             item.get("user_problem_fit", ""),
             item.get("anti_metric_protection", ""),
+            item.get("baseline_problem") or "未记录",
+            item.get("changed_regions") or "未记录",
+            item.get("why_better_than_current") or "未记录",
+            item.get("baseline_preservation") or "未记录",
             item.get("canvas_mode", ""),
             item.get("generation_mode", ""),
             item.get("edit_scope", ""),
@@ -424,6 +432,10 @@ def build_parser() -> argparse.ArgumentParser:
     add.add_argument("--information-architecture", default="")
     add.add_argument("--user-problem-fit", default="")
     add.add_argument("--anti-metric-protection", default="")
+    add.add_argument("--baseline-problem", default="")
+    add.add_argument("--changed-regions", default="")
+    add.add_argument("--why-better-than-current", default="")
+    add.add_argument("--baseline-preservation", default="")
     add.add_argument("--design-score", default="")
     add.add_argument("--design-gap", default="")
     add.add_argument("--ten-out-of-ten-standard", default="")

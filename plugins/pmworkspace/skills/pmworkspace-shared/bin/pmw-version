@@ -1,0 +1,276 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import pathlib
+import subprocess
+import sys
+from typing import Any
+
+
+SCRIPT_PATH = pathlib.Path(__file__).resolve()
+SCRIPT_DIR = SCRIPT_PATH.parent
+DEFAULT_REMOTE_VERSION_URL = "https://raw.githubusercontent.com/stephenfan80/PMWorkspace/main/VERSION"
+DEFAULT_REPO_URL = "https://github.com/stephenfan80/PMWorkspace.git"
+
+
+def read_text(path: pathlib.Path | None) -> str:
+    if not path or not path.exists():
+        return ""
+    try:
+        return path.read_text(encoding="utf-8").strip()
+    except Exception:
+        return ""
+
+
+def candidate_parents() -> list[pathlib.Path]:
+    parents: list[pathlib.Path] = []
+    env_dir = os.environ.get("PMW_DIR")
+    if env_dir:
+        parents.append(pathlib.Path(env_dir).expanduser())
+    parents.append(SCRIPT_DIR)
+    parents.extend(SCRIPT_DIR.parents)
+    seen: set[pathlib.Path] = set()
+    unique: list[pathlib.Path] = []
+    for parent in parents:
+        try:
+            resolved = parent.resolve()
+        except Exception:
+            resolved = parent
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        unique.append(resolved)
+    return unique
+
+
+def find_first_file(names: list[str]) -> pathlib.Path | None:
+    candidates: list[pathlib.Path] = []
+    for parent in candidate_parents():
+        for name in names:
+            candidates.append(parent / name)
+    home = pathlib.Path.home()
+    candidates.extend(
+        [
+            home / ".codex/skills/pmworkspace-shared" / names[0],
+            home / ".agents/plugins/plugins/pmworkspace/skills/pmworkspace-shared" / names[0],
+        ]
+    )
+    try:
+        candidates.extend(
+            sorted(
+                home.glob(f".codex/plugins/cache/*/pmworkspace/*/skills/pmworkspace-shared/{names[0]}"),
+                reverse=True,
+            )
+        )
+    except Exception:
+        pass
+    for candidate in candidates:
+        if candidate.exists() and candidate.is_file() and read_text(candidate):
+            return candidate
+    return None
+
+
+def find_plugin_json() -> pathlib.Path | None:
+    candidates: list[pathlib.Path] = []
+    for parent in candidate_parents():
+        candidates.extend(
+            [
+                parent / ".codex-plugin/plugin.json",
+                parent / "plugins/pmworkspace/.codex-plugin/plugin.json",
+            ]
+        )
+    home = pathlib.Path.home()
+    candidates.append(home / ".agents/plugins/plugins/pmworkspace/.codex-plugin/plugin.json")
+    try:
+        candidates.extend(
+            sorted(home.glob(".codex/plugins/cache/*/pmworkspace/*/.codex-plugin/plugin.json"), reverse=True)
+        )
+    except Exception:
+        pass
+    for candidate in candidates:
+        if candidate.exists() and candidate.is_file():
+            return candidate
+    return None
+
+
+def plugin_version(path: pathlib.Path | None) -> str:
+    if not path:
+        return ""
+    try:
+        return str(json.loads(path.read_text(encoding="utf-8")).get("version") or "").strip()
+    except Exception:
+        return ""
+
+
+def short_revision(revision: str) -> str:
+    if not revision or revision == "unknown":
+        return ""
+    return revision[:7]
+
+
+def display_id(version: str, revision: str) -> str:
+    short = short_revision(revision)
+    return f"{version}@{short}" if short else version
+
+
+def install_host() -> str:
+    text = str(SCRIPT_DIR)
+    if "/plugins/pmworkspace/skills/pmworkspace-shared/bin" in text:
+        return "codex-plugin"
+    if "/.codex/plugins/cache/" in text and "/pmworkspace/" in text:
+        return "codex-plugin"
+    if "/.agents/plugins/plugins/pmworkspace/" in text:
+        return "codex-plugin"
+    if (SCRIPT_DIR.parent / "pm-workspace").exists() and (SCRIPT_DIR.parent / "VERSION").exists():
+        return "source"
+    return "codex"
+
+
+def git_revision_fallback() -> str:
+    for parent in candidate_parents():
+        try:
+            result = subprocess.run(
+                ["git", "-C", str(parent), "rev-parse", "HEAD"],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=5,
+            )
+        except Exception:
+            continue
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+    return ""
+
+
+def source_revision() -> str:
+    revision_bin = SCRIPT_DIR / "pmw-revision"
+    if revision_bin.exists() and os.access(revision_bin, os.X_OK):
+        try:
+            result = subprocess.run(
+                [str(revision_bin), str(SCRIPT_DIR.parent)],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=5,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                return result.stdout.strip()
+        except Exception:
+            pass
+    return git_revision_fallback()
+
+
+def config_value(key: str, default: str) -> str:
+    config_bin = os.environ.get("PMW_CONFIG_BIN") or str(SCRIPT_DIR / "pmw-config")
+    if pathlib.Path(config_bin).exists() and os.access(config_bin, os.X_OK):
+        try:
+            result = subprocess.run(
+                [config_bin, "get", key],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=5,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                return result.stdout.strip()
+        except Exception:
+            pass
+    return default
+
+
+def update_check() -> str:
+    checker = SCRIPT_DIR / "pmw-update-check"
+    if not checker.exists() or not os.access(checker, os.X_OK):
+        return ""
+    try:
+        result = subprocess.run(
+            [str(checker), "--force"],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=12,
+        )
+    except Exception as exc:
+        return f"ERROR {exc}"
+    return (result.stdout + result.stderr).strip()
+
+
+def build_info(run_check: bool = False) -> dict[str, Any]:
+    version_file = find_first_file(["VERSION"])
+    revision_file = find_first_file(["REVISION"])
+    version = read_text(version_file) or "unknown"
+    host = install_host()
+    if host == "source":
+        revision = source_revision() or "unknown"
+        revision_file_for_output = ""
+    else:
+        revision = read_text(revision_file) or git_revision_fallback() or "unknown"
+        revision_file_for_output = str(revision_file) if revision_file else ""
+    plugin_json = find_plugin_json()
+    remote_version_url = os.environ.get("PMW_REMOTE_VERSION_URL") or config_value(
+        "remote_version_url", DEFAULT_REMOTE_VERSION_URL
+    )
+    repo_url = os.environ.get("PMW_REPO_URL") or config_value("repo_url", DEFAULT_REPO_URL)
+    info: dict[str, Any] = {
+        "product": "PMWorkspace",
+        "version": version,
+        "revision": revision,
+        "display": display_id(version, revision),
+        "install_host": host,
+        "version_file": str(version_file) if version_file else "",
+        "revision_file": revision_file_for_output,
+        "plugin_version": plugin_version(plugin_json),
+        "plugin_json": str(plugin_json) if plugin_json else "",
+        "remote_version_url": remote_version_url,
+        "repo_url": repo_url,
+    }
+    if run_check:
+        info["update_check"] = update_check()
+    return info
+
+
+def print_text(info: dict[str, Any], short: bool = False) -> None:
+    if short:
+        print(info["display"])
+        return
+    rows = [
+        ("PMW_PRODUCT", info["product"]),
+        ("PMW_VERSION", info["version"]),
+        ("PMW_REVISION", info["revision"]),
+        ("PMW_DISPLAY", info["display"]),
+        ("PMW_INSTALL_HOST", info["install_host"]),
+        ("PMW_VERSION_FILE", info["version_file"]),
+        ("PMW_REVISION_FILE", info["revision_file"]),
+        ("PMW_PLUGIN_VERSION", info["plugin_version"]),
+        ("PMW_PLUGIN_FILE", info["plugin_json"]),
+        ("PMW_REMOTE_VERSION_URL", info["remote_version_url"]),
+        ("PMW_REPO_URL", info["repo_url"]),
+    ]
+    for key, value in rows:
+        print(f"{key} {value}")
+    if "update_check" in info:
+        check = str(info["update_check"] or "NO_OUTPUT")
+        for line in check.splitlines():
+            print(f"PMW_UPDATE_CHECK {line}")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Show PMWorkspace product/plugin version identity.")
+    parser.add_argument("--json", action="store_true", help="Output machine-readable JSON.")
+    parser.add_argument("--short", action="store_true", help="Output only VERSION@revision7.")
+    parser.add_argument("--check", action="store_true", help="Also run pmw-update-check --force.")
+    args = parser.parse_args()
+    info = build_info(run_check=args.check)
+    if args.json:
+        print(json.dumps(info, ensure_ascii=False, indent=2))
+    else:
+        print_text(info, short=args.short)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -316,6 +316,21 @@ PMWorkspace 默认把资产保存在本地：
 
 每个 skill 使用前都会检查 GitHub：同时比较 `VERSION` 和 `main` 分支最新提交。因此即使没有正式升版本号，只要技能规则或文档有新提交，也会提示：
 
+查看本地 PMW 产品 / 插件版本：
+
+```bash
+bin/pmw-version
+bin/pmw-version --json
+```
+
+PMW 的工具版本由根目录 `VERSION` 定义，plugin 的 `plugin.json` version 必须与它一致；`REVISION` 表示插件包对应的源码提交。展示身份使用 `VERSION@revision7`。产品简报里的 `v1 / v2` 是用户业务资产版本，不是 PMW 工具版本。
+
+需要立刻和 GitHub 更新源对比时：
+
+```bash
+bin/pmw-version --check
+```
+
 ```text
 UPGRADE_AVAILABLE <local> <remote> <host>
 UPGRADE_COMMAND pmw-upgrade --host <codex|codex-plugin>

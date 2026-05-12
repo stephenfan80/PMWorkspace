@@ -155,7 +155,7 @@ bin/pmw-gen-skill-docs write
 bin/pmw-gen-skill-docs check
 ```
 
-For plugin packaging, release submission, upgrade routing, and legacy skill migration, use `docs/codex-plugin-submission.md` and `pmworkspace-shared/references/update-workflow.md`. When `pmw-update-check` reports `UPGRADE_COMMAND`, run that exact command.
+For plugin packaging, release submission, upgrade routing, and legacy skill migration, use `docs/codex-plugin-submission.md` and `pmworkspace-shared/references/update-workflow.md`. Run `bin/pmw-version` to inspect the local PMWorkspace `VERSION@REVISION` identity. When `pmw-update-check` reports `UPGRADE_COMMAND`, run that exact command.
 
 AI collaboration document helpers:
 

@@ -1,0 +1,60 @@
+{
+  "id": "version-command-exposes-project-version",
+  "title": "PMW 必须暴露项目版本和插件版本身份",
+  "category": "versioning",
+  "primary_skill": "pm-workspace",
+  "prompt": "检查本地 PMWorkspace / pmworkspace 插件当前版本，并说明如何和 GitHub 更新源对比。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "PMW 版本身份",
+    "required_behaviors": [
+      "提供 pmw-version 命令",
+      "输出 VERSION、REVISION 和 VERSION@revision 的展示身份",
+      "说明 plugin.json version 必须等于根目录 VERSION",
+      "说明远端更新对比仍由 pmw-update-check 负责"
+    ],
+    "forbidden_behaviors": [
+      "要求用户手动去插件缓存里找版本",
+      "把业务产品简报版本当成 PMW 工具版本",
+      "只看 plugin.json 而忽略 REVISION"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-version",
+      "contains": "PMW_VERSION"
+    },
+    {
+      "path": "pmworkspace-shared/references/update-workflow.md",
+      "contains": "PMW 版本身份"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "bin/pmw-version"
+    },
+    {
+      "path": "docs/codex-plugin-submission.md",
+      "contains": "bin/pmw-version"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "v=\"$(tr -d '[:space:]' < VERSION)\"; out=\"$(bin/pmw-version)\"; printf '%s\\n' \"$out\"; grep -q \"PMW_VERSION $v\" <<< \"$out\"; grep -q 'PMW_DISPLAY ' <<< \"$out\"; grep -q 'PMW_INSTALL_HOST ' <<< \"$out\""
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "v=\"$(tr -d '[:space:]' < VERSION)\"; bin/pmw-version --json | PMW_EXPECTED_VERSION=\"$v\" python3 -c 'import json,sys,os; data=json.load(sys.stdin); assert data[\"product\"] == \"PMWorkspace\"; assert data[\"version\"] == os.environ[\"PMW_EXPECTED_VERSION\"]; assert data[\"display\"]'"
+      ],
+      "exit_code": 0
+    }
+  ]
+}

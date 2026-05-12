@@ -1,6 +1,6 @@
 # 更新工作流
 
-Every PMWorkspace skill should check for updates before doing product work when platform scripts are available.
+Every PMWorkspace skill should run a fast update check before doing product work when platform scripts are available.
 
 ## PMW 版本身份
 
@@ -23,7 +23,14 @@ bin/pmw-version --check
 
 ## Check
 
-Use `pmw-update-check`. It checks GitHub on every run when `update_check` is enabled:
+Use `pmw-update-check --quick` in every skill preamble. Quick mode is intentionally fast:
+
+- It reuses a fresh cached result for `update_check_quick_ttl_seconds` seconds, default 300.
+- It uses `PMW_UPDATE_CHECK_QUICK_TIMEOUT`, default 1.5 seconds, for each remote metadata request.
+- It checks the remote `VERSION` and packaged `REVISION`; full branch checks remain available through `pmw-update-check --force` or `pmw-version --check`.
+- It never blocks product work when offline, disabled, snoozed, or current.
+
+Use `pmw-update-check --force` only when the user explicitly asks to verify against remote now. It checks GitHub when `update_check` is enabled:
 
 - `VERSION` via the configured remote version URL.
 - `main` branch commit via the configured repository URL.
@@ -55,6 +62,18 @@ Offer:
 - Continue this time: proceed without changing config.
 
 If `auto_upgrade: true`, upgrade automatically and report the result.
+
+Do not upgrade silently when `auto_upgrade` is not true. Ask the user first, and only execute the emitted `UPGRADE_COMMAND` after the user confirms.
+
+## Upgrade Cleanup
+
+`pmw-upgrade` installs the latest PMWorkspace package into the selected host and deletes the old PMWorkspace-owned install directory before copying new files, so stale files removed in the new release cannot remain active locally.
+
+- `--host codex`: removes the old `pm-*` skills and `pmworkspace-shared` under `CODEX_SKILLS_DIR` / `~/.codex/skills`, then installs the latest files.
+- `--host codex-plugin`: removes the old local plugin package under `CODEX_PLUGINS_DIR/plugins/pmworkspace` / `~/.agents/plugins/plugins/pmworkspace`, then writes the latest plugin package and marketplace entry.
+- Optional cache purge: set `PMW_PURGE_CODEX_PLUGIN_CACHE=true` to remove the PMWorkspace Codex plugin cache directory before reinstalling. Public Codex plugin users should normally update from the Codex Plugins UI, which manages its own cache.
+
+`pmw-upgrade` never deletes `~/.pmworkspace` project state, product briefs, prototypes, handoff assets, Zoon links, or local audit history.
 
 ## Install Hosts
 

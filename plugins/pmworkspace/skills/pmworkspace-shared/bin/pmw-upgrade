@@ -20,6 +20,62 @@ Hosts:
 EOF
 }
 
+SKILL_NAMES=(
+  pm-workspace
+  pm-jobs
+  pm-strategy-review
+  pm-brief
+  pm-prototype-shotgun
+  pm-prototype-review
+  pm-autoplan
+  pm-handoff
+  pmworkspace-shared
+)
+
+real_path() {
+  python3 - "$1" <<'PY'
+import os
+import sys
+
+print(os.path.realpath(os.path.expanduser(sys.argv[1])))
+PY
+}
+
+safe_remove_dir() {
+  local path="$1"
+  local label="${2:-install}"
+  [ -n "${path:-}" ] || return 0
+  [ -e "$path" ] || return 0
+  local resolved home state tmp_resolved
+  resolved="$(real_path "$path")"
+  home="$(real_path "$HOME")"
+  state="$(real_path "$STATE_DIR")"
+  tmp_resolved="$(real_path "$tmp")"
+  case "$resolved" in
+    ""|"/"|"$home"|"$state"|"$tmp_resolved"|"$tmp_resolved"/*)
+      echo "Refusing to remove unsafe PMWorkspace path: $resolved" >&2
+      return 1
+      ;;
+  esac
+  rm -rf "$path"
+  echo "PMW_REMOVED_OLD_VERSION $label $resolved" >&2
+}
+
+cleanup_legacy_skills() {
+  local dest="${CODEX_SKILLS_DIR:-$HOME/.codex/skills}"
+  for skill in "${SKILL_NAMES[@]}"; do
+    safe_remove_dir "$dest/$skill" "codex-skill"
+  done
+}
+
+cleanup_plugin_installs() {
+  local plugin_root="${CODEX_PLUGINS_DIR:-$HOME/.agents/plugins}"
+  safe_remove_dir "$plugin_root/plugins/pmworkspace" "codex-plugin"
+  if [ "${PMW_PURGE_CODEX_PLUGIN_CACHE:-false}" = "true" ]; then
+    safe_remove_dir "${CODEX_PLUGIN_CACHE_DIR:-$HOME/.codex/plugins/cache/pmworkspace}" "codex-plugin-cache"
+  fi
+}
+
 if [ "$HOST" != "--host" ]; then
   if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     usage
@@ -83,6 +139,7 @@ if [ "$HOST_VALUE" = "codex-plugin" ]; then
   MARKETPLACE_PATH="${CODEX_MARKETPLACE_PATH:-$PLUGIN_ROOT/marketplace.json}"
   INSTALLED_REVISION_FILE="$PLUGIN_DEST/skills/pmworkspace-shared/REVISION"
 
+  cleanup_plugin_installs
   "$tmp/PMWorkspace/bin/pmw-build-plugin" --dest "$PLUGIN_DEST"
   mkdir -p "$(dirname "$MARKETPLACE_PATH")"
   python3 - "$MARKETPLACE_PATH" <<'PY'
@@ -128,6 +185,7 @@ PY
 else
   CODEX_DEST="${CODEX_SKILLS_DIR:-$HOME/.codex/skills}"
   INSTALLED_REVISION_FILE="$CODEX_DEST/pmworkspace-shared/REVISION"
+  cleanup_legacy_skills
   "$tmp/PMWorkspace/setup" "$HOST" "$HOST_VALUE"
 fi
 

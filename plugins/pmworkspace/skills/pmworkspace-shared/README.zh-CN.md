@@ -315,7 +315,7 @@ PMWorkspace 默认把资产保存在本地：
 
 ### 更新
 
-每个 skill 使用前都会检查 GitHub：同时比较 `VERSION` 和远端插件包 `REVISION`。`REVISION` 指向最近一次影响插件打包内容的源码提交，不会因为单独的插件同步提交而误报升级。
+每个 skill 使用前都会执行快速更新检查：`pmw-update-check --quick` 会优先复用短缓存，并用短超时比较 `VERSION` 和远端插件包 `REVISION`。`REVISION` 指向最近一次影响插件打包内容的源码提交，不会因为单独的插件同步提交而误报升级。
 
 查看本地 PMW 产品 / 插件版本：
 
@@ -338,6 +338,10 @@ UPGRADE_COMMAND pmw-upgrade --host <codex|codex-plugin>
 ```
 
 升级时优先使用提示里的 `UPGRADE_COMMAND`。
+
+如果快速检查输出 `UPGRADE_AVAILABLE`，Agent 会先询问是否现在更新；只有用户确认，或本地配置 `auto_upgrade=true`，才会执行升级命令。
+
+执行 `pmw-upgrade` 时，会先删除所选安装目标里 PMWorkspace 旧版本目录，再写入最新版本，避免旧文件残留影响运行；不会删除 `~/.pmworkspace` 中的项目状态、产品简报、原型、交付稿或审计记录。
 
 公开插件用户从 Codex `Plugins` 页面更新；GitHub 本地 plugin、开发仓库和旧版 skill 的详细升级路径见 `pmworkspace-shared/references/update-workflow.md`。
 

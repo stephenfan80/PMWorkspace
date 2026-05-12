@@ -66,6 +66,7 @@ description: |
 ### 默认用户可见输出字段
 
 - `原型出图判断`
+- `产品信息对齐状态`
 - `方案方向`
 - `产品路径`
 - `原型设计完整度`
@@ -79,6 +80,7 @@ description: |
 ### 内部审计字段（默认不展示）
 
 - `产品准备度仪表盘`
+- `产品信息对齐包`
 - `图片生成前门槛`
 - `方案差异质量`
 - `三条路径数量检查`
@@ -133,6 +135,7 @@ done
 - Read `../pmworkspace-shared/references/design-system-workflow.md`.
 - Read `../pmworkspace-shared/references/prototype-quality-review.md`.
 - Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-prototype-shotgun` 且没有当前 run，再创建 runtime run.
+- 原型方案阶段必须先读取统一 `产品信息对齐包`：脚本可用时用 `pmw-dashboard status` 的产品信息对齐和当前产品缺口；脚本不可用时从最新 brief / artifact-flow / run 手动整理。若对齐包显示核心事实维度缺失、最新截图/数据未写回 brief、或产品判断对抗校验缺失，退回 `$pm-jobs` / `$pm-brief`，不能只靠当前对话继续写 prompt。
 - 原型出图前必须先输出 `原型出图判断`，说明我建议出哪些图、暂时不出哪些图、为什么，以及图片生成前门槛；不能直接写 image-2 prompt。
 - 原型出图前必须运行 Product Readiness Dashboard；`产品简报`、`产品简报确认`、`Zoon`、`线上参考`、必要的 `视觉基线`、`方案差异`、`方案方向确认`、`不可虚构项` 未通过时，停止在第一条阻断门槛，不写 image-2 prompt。默认只向用户展示短 verdict 和第一条阻断原因，完整表格只在审计 / 调试输出中展示。`数据佐证` 和 `复审状态` 出图前展示但不阻断，出图后再进入复审。
 - 原型出图前必须有 `设计规范目标`：用户提供、AutoDesign、平台模式库或 PMW 默认假设。设计规范不明确时，先给用户可编辑的设计规范目标卡，或取得“按默认假设继续”的确认；未声明设计规范目标时不写 image-2 prompt。

@@ -45,6 +45,7 @@ description: |
 ### 默认用户可见输出字段
 
 - `策略审查结论`
+- `产品信息对齐状态`
 - `路径对比`
 - `最大策略矛盾`
 - `如果现在直接做会错在哪里`
@@ -58,6 +59,7 @@ description: |
 
 ### 内部审计字段（默认不展示）
 
+- `产品信息对齐包`
 - `前提挑战`
 - `现状替代`
 - `不做推演`
@@ -82,6 +84,7 @@ for _CANDIDATE in "$PWD/bin" "$PWD/pmworkspace-shared/bin" "$HOME/.codex/skills/
 done
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-update-check" 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-strategy-review >/dev/null 2>&1 || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
 ```
 
 ## Workflow
@@ -93,7 +96,7 @@ done
 5. Read `../pmworkspace-shared/references/product-memory.md`; use memory only as preference signal, not as fact source.
 6. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 策略审查 stage fields.
 7. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-strategy-review` 且没有当前 run，再创建 runtime run.
-8. Build the 产品方向审查控制器 from `adversarial-review.md`: 来源门槛、已确认事实、前提挑战、现状替代、不做推演、路径对比、最大策略矛盾、如果现在直接做会错在哪里、产品判断对抗校验、范围模式、建议姿态、本周期验证、本周期验证价值、产品动作、策略取舍、当前 D / 后续 D 队列、下一技能.
+8. 先读取或建立 `产品信息对齐包`，再 Build the 产品方向审查控制器 from `adversarial-review.md`: 来源门槛、已确认事实、产品信息对齐状态、前提挑战、现状替代、不做推演、路径对比、最大策略矛盾、如果现在直接做会错在哪里、产品判断对抗校验、范围模式、建议姿态、本周期验证、本周期验证价值、产品动作、策略取舍、当前 D / 后续 D 队列、下一技能.
 9. 如果来自 `$pm-jobs`，只接住产品追问交出的策略门槛：范围、价值交换、信任/风险、反指标、可行性、定位或业务冲突；不要重新展开 Q 诊断全流程。
 10. `$pm-strategy-review` 不展开研发能力依赖长清单；只判断能力前提是否改变方向、范围或承诺。详细数据 / 接口 / 算法 / 后台 / 运营依赖交给 `$pm-handoff` 的研发可行性反问。
 11. If basic facts such as user, problem, main goal, anti-metric, or non-fiction boundary are missing, route back to `$pm-jobs` with one focused `Q`; do not use strategy review to invent missing facts.
@@ -125,6 +128,7 @@ done
 
 ```text
 策略审查结论：
+- 产品信息对齐状态：
 - 我不赞成：
 - 我建议：
 - 最大策略矛盾：

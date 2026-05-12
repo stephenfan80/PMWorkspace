@@ -51,6 +51,7 @@ description: |
 ### 默认用户可见输出字段
 
 - `复审结论`
+- `产品信息对齐状态`
 - `逐屏结论`
 - `设计完整度复审`
 - `原型可信度对抗复审`
@@ -61,6 +62,7 @@ description: |
 ### 内部审计字段（默认不展示）
 
 - `复审输入`
+- `产品信息对齐包`
 - `输出单元绑定`
 - `产品路径`
 - `设计完整度复审`
@@ -85,6 +87,7 @@ for _CANDIDATE in "$PWD/bin" "$PWD/pmworkspace-shared/bin" "$HOME/.codex/skills/
 done
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-update-check" 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-prototype-review >/dev/null 2>&1 || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" user-summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" taste-summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
@@ -108,7 +111,7 @@ done
 11. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-prototype-review` 且没有当前 run，再创建 runtime run.
 12. Read `../pmworkspace-shared/references/pm-decision-principles.md`; unresolved user promise, data truth, scope, experiment, lead, transaction, privacy, or compliance issues must become `需要 PM 拍板`, not visual fixes.
 13. Read `../pmworkspace-shared/references/pm-eval-system.md` and preserve prototype review contracts.
-14. 建立原型复审控制器，记录 `复审输入`、`输出单元绑定`、`设计完整度复审`、`原型可信度对抗复审`、`可插拔专家`、`专家合并结论`、`Product Review Squad`、`角色短结论`、`判定原因`、`行动结论`、`修正方向`、`PM 拍板`、`偏好沉淀`、`反馈资产化`、`上游产物`、`本轮产物`、`下游可读`、`产物流动` 和 `证据状态`；这些默认写入审计，用户可见输出只保留复审结论、逐屏结论、需要调整和下一步。
+14. 先读取统一 `产品信息对齐包`，再建立原型复审控制器，记录 `复审输入`、`输出单元绑定`、`产品信息对齐状态`、`设计完整度复审`、`原型可信度对抗复审`、`可插拔专家`、`专家合并结论`、`Product Review Squad`、`角色短结论`、`判定原因`、`行动结论`、`修正方向`、`PM 拍板`、`偏好沉淀`、`反馈资产化`、`上游产物`、`本轮产物`、`下游可读`、`产物流动` 和 `证据状态`；这些默认写入审计，用户可见输出只保留复审结论、逐屏结论、需要调整和下一步。
 15. If `pmw-project show` contains a Zoon URL, run `pmw-zoon drift` when available. If drift exists, read the latest Zoon snapshot before judging the image. If drift changes product facts, route back to `$pm-brief` or `$pm-strategy-review` before accepting the image.
 16. For every image, check the bound output unit: 方案名、屏幕任务、产品路径、用户行为假设、要赢过的现状替代、当前损失、删除 / 牺牲 / 后置项、验证信号、失败信号、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、视觉基线状态、目标输出像素、设计完整度评分、10/10 原型标准、prompt 设计修正、状态覆盖、第一眼 / 第二眼 / 第三眼、反 AI 模板味约束、设计规范目标、设计系统 / 平台模式、灵感来源摘要和禁止照搬项. If an image is not bound to one output unit or prototype-board item, mark `需要补充参考` and do not pass it by visual impression.
 17. If a reference screenshot and generated image path exist, run `pmw-image-audit audit --image <生成图> --reference <参考图>` before expert review. If it returns `需要重出`, the merged conclusion is at least `需要重出`; do not override a failed width / long-board audit with subjective visual approval.

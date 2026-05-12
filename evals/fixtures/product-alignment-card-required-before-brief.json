@@ -1,0 +1,37 @@
+{
+  "id": "product-alignment-card-required-before-brief",
+  "title": "进入产品简报前必须先收束产品信息对齐卡",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "用户给了一段模糊产品想法，助手准备直接生成产品简报。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "产品信息对齐卡",
+    "required_behaviors": [
+      "产品简报包含产品信息对齐卡",
+      "展示已知事实、暂定判断、证据边界和当前最大缺口",
+      "当前最大缺口未补齐时不能标为已对齐"
+    ],
+    "forbidden_behaviors": [
+      "直接把模糊想法写成已对齐产品简报",
+      "把产品信息对齐只写进内部审计",
+      "跳过产品判断对抗校验"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "产品信息对齐卡"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-manager-brief.md",
+      "contains": "## 产品信息对齐卡"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "用户可见输出必须先给业务版 `产品简述 / 产品简报`，默认包含 `产品信息对齐卡`"
+    }
+  ]
+}

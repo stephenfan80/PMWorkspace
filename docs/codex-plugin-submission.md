@@ -17,7 +17,7 @@ bin/pmw-eval run
 - Repository: `https://github.com/stephenfan80/PMWorkspace`
 - Homepage: `https://github.com/stephenfan80/PMWorkspace`
 - License: `MIT`
-- Version source: 根目录 `VERSION` 与 `plugins/pmworkspace/.codex-plugin/plugin.json` 保持一致
+- Version source: 根目录 `VERSION` 是 PMW 产品 / plugin 版本真源，`plugins/pmworkspace/.codex-plugin/plugin.json` 必须保持一致；用 `bin/pmw-version` 检查本地 `VERSION@REVISION`
 - Package path: `plugins/pmworkspace`
 
 ## 一句话介绍

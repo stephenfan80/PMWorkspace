@@ -204,6 +204,7 @@ case "$EVENT" in
     if [ -z "$product_homework" ]; then
       product_homework="$(extract_md_section "$input_file" "产品作业" "待验证项与产品作业" "下一步产品作业" | compact_text)"
     fi
+    brief_aligned="false"
     if brief_declares_aligned "$input_file"; then
       run_id="$(current_run_id || true)"
       if ! run_has_brief_confirmation "$run_id"; then
@@ -222,6 +223,7 @@ case "$EVENT" in
         exit 2
       fi
       rm -f "$discovery_report" 2>/dev/null || true
+      brief_aligned="true"
     fi
     previous_version_number="$(latest_project_brief_version_number || true)"
     input_version_number="$(version_number_from_file "$input_file" || true)"
@@ -241,14 +243,18 @@ case "$EVENT" in
     normalize_existing_version_line "$business_file" "$brief_version"
 
     # Local-first, Zoon-optional: always keep the business brief and full audit
-    # copy locally. Publish to Zoon only when the user or config explicitly opts in.
+    # copy locally. Publish to Zoon only after alignment and explicit opt-in/config.
     sync_on_brief="${PMW_ZOON_SYNC_ON_BRIEF:-$("$SCRIPT_DIR/pmw-config" get zoon_sync_on_brief 2>/dev/null || echo false)}"
     sync_status=""
     sync_detail=""
     zoon_url=""
     join_status=""
     join_detail=""
-    if [ "$sync_on_brief" != "false" ] && [ -x "$SCRIPT_DIR/pmw-zoon" ]; then
+    if [ "$sync_on_brief" != "false" ] && [ "$brief_aligned" != "true" ]; then
+      sync_status="disabled"
+      sync_detail="Zoon sync deferred until product brief is aligned"
+      printf 'ZOON_SYNC_DEFERRED_UNTIL_ALIGNED=true\n' >&2
+    elif [ "$sync_on_brief" != "false" ] && [ -x "$SCRIPT_DIR/pmw-zoon" ]; then
       sync_err="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-sync.XXXXXX")"
       if zoon_url="$(PMW_ZOON_DEFER_PROJECT_UPDATE=1 "$SCRIPT_DIR/pmw-zoon" sync --title "产品设计简报：$name" --brief "$business_file" 2>"$sync_err")"; then
         sync_status="synced"

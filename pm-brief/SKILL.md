@@ -18,7 +18,7 @@ description: |
 - skill：`pm-brief`
 - 契约版本：`2`
 - 阶段：产品简报
-- 定位：把已完成的产品方向审查、价值判断、PM 判断摘要、产品作业和策略取舍写成出图前短版产品简述 / 产品简报，默认本地保存，并按用户选择同步到 Zoon。
+- 定位：把已完成的产品方向审查、价值判断、PM 判断摘要、产品作业和策略取舍写成出图前短版产品简述 / 产品简报，默认本地保存候选简报；确认已对齐后再按用户选择同步到 Zoon。
 
 ### 统一前置检查
 
@@ -59,6 +59,8 @@ description: |
 - `产品判断对抗校验`
 - `确认状态`
 - `当前需要确认`
+- `待确认信息与偏差风险`
+- `Zoon 同步选择`
 - `下一步`
 
 ### 内部审计字段（默认不展示）
@@ -110,7 +112,7 @@ done
 7. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-brief` 且没有当前 run，再创建 runtime run.
 8. Read `../pmworkspace-shared/references/decision-question-mode.md` and turn PM decision items into choice questions.
 9. Read `../pmworkspace-shared/references/internet-best-practice-research.md` and run lightweight internet best-practice research for the dominant scenario when tools are available.
-10. Read `../pmworkspace-shared/references/zoon-workflow.md`; Zoon is optional by default. Save the local brief first, then ask whether to sync to Zoon unless the user already provided a Zoon URL or explicitly requested online collaboration.
+10. Read `../pmworkspace-shared/references/zoon-workflow.md`; Zoon is optional by default. Save the local candidate brief first, expose pending information and bias risk, then ask whether to sync to Zoon only after the brief is confirmed as `已对齐` unless the user already provided a Zoon URL or explicitly requested online collaboration.
 11. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
 12. Read `../pmworkspace-shared/references/product-readiness-dashboard.md`; if the next skill will be `$pm-prototype-shotgun` or `$pm-handoff`, run `pmw-dashboard readiness --target prototype|handoff` when available, use the verdict for gating, and only show the short verdict / first blocker by default.
 13. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory user-summary` plus `pmw-memory summary` when available. If memory changes phrasing or recommendation, explicitly say `基于过往偏好...` or `基于本地产品认知...`; memory cannot override the current brief, Zoon, anti-metric, non-fiction boundary, online reference gate, or missing gate.
@@ -132,12 +134,14 @@ done
     - 把本阶段 `产品作业` 写入待验证问题与下一步；作业必须是现实动作，不能写成“继续沟通”。
 23. 已对齐且用户要原型时，下一技能是 `$pm-prototype-shotgun`；已对齐且用户要交付时，下一技能是 `$pm-handoff`；未对齐时停在 `$pm-brief` 或回到上游缺失门槛。
 24. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
-25. 产品简报生成后必须先停在 `产品简报确认`：把 2-4 条关键前提、方案方向、反指标、不可虚构项和 `风险 / 待验证` 展示给用户。已有功能迭代还必须展示线上基线判断：当前线上优势、问题区域、必须保留、可以改、暂不应改、为什么新方案优于当前线上。只有用户明确确认产品简报或关键前提后，当前 run 才能记录 `产品简报确认：已对齐`，并且产品简报确认状态才能写成 `已对齐`；未确认时保存为 `待确认`，不能把下一技能指向 `$pm-prototype-shotgun`。
+25. 产品简报生成后必须先停在 `产品简报确认`：把 2-4 条关键前提、方案方向、反指标、不可虚构项、`风险 / 待验证` 和 `待确认信息与偏差风险` 展示给用户。`待确认信息与偏差风险` 必须逐项说明：还缺什么、为什么会影响产品判断、不补齐可能导致哪类产品方案偏差、用户现在该补材料 / 回答 Q / 拍板 D / 确认按假设推进。已有功能迭代还必须展示线上基线判断：当前线上优势、问题区域、必须保留、可以改、暂不应改、为什么新方案优于当前线上。只有用户明确确认产品简报、补齐关键待确认信息或批准按已标注假设继续后，当前 run 才能记录 `产品简报确认：已对齐`，并且产品简报确认状态才能写成 `已对齐`；未确认时保存为 `待确认`，不能把下一技能指向 `$pm-prototype-shotgun`，也不能询问 Zoon 同步。
 26. Save the brief with `pmw-log brief <name>` when platform scripts are available. It uses local-first, Zoon-optional publishing: save the business brief as latest brief, save the full input as a local audit copy, and automatically register `product_brief` in Product Artifact Flow. 完整审计副本保存在本地. It syncs to Zoon only when `PMW_ZOON_SYNC_ON_BRIEF=true` / `zoon_sync_on_brief: true` or the user explicitly chose online collaboration. 如果输入简报声明 `确认状态：已对齐`，但当前 run 没有 `产品简报确认 / 前提确认：已对齐` 记录，或 `pmw-discovery-gate check --target brief` 未通过，平台脚本会拒绝保存为已对齐。`pmw-log brief` 会把 `PM 判断摘要` 和 `产品作业` 写入 artifact-flow 的结构化字段；显式传入 `--pm-judgment-summary` / `--product-homework` 时优先使用参数，否则从 Markdown 章节提取。
-    - 本地 Markdown 保存成功后，用户可见 `下一步` 必须默认推荐 Zoon，但不能自动同步：`Zoon 协作建议：这次简报适合多人评审 / 后续原型或 PRD 复用，建议同步到 Zoon；不同步也不影响继续使用本地 Markdown。`
+    - 如果保存的是 `待确认` 产品简报，用户可见 `下一步` 必须要求补齐待确认信息或确认假设偏差风险，不能默认推荐 Zoon。
+    - 产品简报确认状态已对齐并且本地 Markdown 保存成功后，用户可见 `下一步` 必须默认推荐 Zoon，但不能自动同步：`Zoon 协作建议：这次已对齐简报适合多人评审 / 后续原型或 PRD 复用，建议同步到 Zoon；不同步也不影响继续使用本地 Markdown。`
     - 推荐必须说明 Zoon 的好处：多人协作、事实源统一、后续 image-2 原型 / PRD 防漂移；同时说明 `不自动同步，不作为出图或交付阻断`。
     - 推荐后必须让用户用一个轻量 `D` 选择：`D：是否同步到在线协作文档（Zoon）？A. 先不需要，使用本地 Markdown 继续；B. 需要，同步到 Zoon 供团队在线修改。`
 27. Ask before creating or updating a Zoon online brief:
+    - 只有产品简报确认状态已对齐后，才询问或执行 Zoon 同步；如果仍有待确认信息，先让用户补齐或确认假设偏差风险。
     - If a Zoon URL is already available, ask whether to append this brief to that document before calling `pmw-zoon sync` / `pmw-zoon append --url <url>`.
     - If no Zoon URL exists, do not auto-create one. Ask `是否同步到在线协作文档（Zoon）？A. 先不需要，使用本地 Markdown 继续；B. 需要，同步到 Zoon 供团队在线修改。`
     - If the user chooses B, use `PMW_ZOON_SYNC_ON_BRIEF=true PMW_ZOON_AUTO_CREATE=true pmw-log brief <name>` or `pmw-zoon create --title "产品设计简报：<功能名>"`, then store the local audit copy and Zoon URL.
@@ -160,7 +164,7 @@ done
 
 ## 输出
 
-Return the smallest useful product-manager brief. 用户可见第一屏只放业务简报，不放工作流字段、仪表盘表格、产物流动或本地路径；默认输出 `产品简报`、`当前需要确认` 和必要的 `下一步`，不得输出 `产品简报门槛`、`支持信息`、run_id、Zoon 状态、产物流动或已保存资产：
+Return the smallest useful product-manager brief. 用户可见第一屏只放业务简报，不放工作流字段、仪表盘表格、产物流动或本地路径；默认输出 `产品简报`、`当前需要确认`、`待确认信息与偏差风险` 和必要的 `下一步`，不得输出 `产品简报门槛`、`支持信息`、run_id、Zoon 状态、产物流动或已保存资产：
 
 ```text
 产品简述 / 产品简报：
@@ -195,7 +199,13 @@ Return the smallest useful product-manager brief. 用户可见第一屏只放业
 - 待验证项与产品作业：
 
 当前需要确认：
-- 无 / Q：... / D：...
+- 待确认信息：无 / 1. ...
+- 不补齐的偏差风险：无 / 可能导致 ...
+- 用户现在补齐：回答 Q / 拍板 D / 上传材料 / 确认按假设推进
+
+下一步：
+- 若仍有待确认信息：先补齐或确认偏差风险，产品简报保持 `待确认`。
+- 若已对齐：D：是否同步到在线协作文档（Zoon）？A. 先不需要，使用本地 Markdown 继续；B. 需要，同步到 Zoon 供团队在线修改。
 ```
 
 内部审计必须继续记录产品简报门槛、事实/假设边界、Zoon 同步、漂移检查、准备度 verdict、产物流动和已保存资产；只有用户要求看状态或调试时才展开。

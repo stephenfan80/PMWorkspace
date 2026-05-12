@@ -122,7 +122,7 @@ done
 18. 快速成型模式：按产品方向审查内核检测会影响轻量包结构的缺口：产品路径、证据收集、核心用户/场景、核心问题、当前替代/损失、主目标/反指标、不可虚构项、原型屏幕范围、三条产品路径差异、假设确认。Agent 可先整理材料、拆解截图、生成访谈提纲、梳理数据口径或做最佳实践摘要；只有卡在用户事实或取舍时才问 `Q` / `D`。已有功能迭代缺线上基线时，即使用户要求快速成型，也不能先给三条方案方向；先停在产品作业卡和截图 / 关键节点截图证据请求。
 19. 快速成型模式：列出关键假设、方案方向和每张图的不可虚构项，请用户确认“按这些假设继续”。确认前不生成图片，并用 `pmw-run event --type gate` 记录当前门槛。
 20. 快速成型模式：确认后输出轻量包：标注假设的产品简述、至少 3 个方案方向、每个方案 1 张移动端 image-2 原型图计划，并把状态写成 `基于假设，可讨论`。少于 3 个方案必须写豁免原因。
-21. 深度交付模式：按最早门槛顺序推进：工作目标模式、产品路径、产品方向审查内核、证据收集、用户需求澄清、数据/现状佐证、路径机会判断、必要 Q/D、前提确认、策略审查、产品简述 / 产品简报、本地简报保存、Zoon A/B 推荐、已启用 Zoon 的漂移检查、线上参考和设计系统基线、Product Readiness Dashboard 的原型准备度或交付准备度。
+21. 深度交付模式：按最早门槛顺序推进：工作目标模式、产品路径、产品方向审查内核、证据收集、用户需求澄清、数据/现状佐证、路径机会判断、必要 Q/D、前提确认、策略审查、产品简述 / 产品简报、待确认信息与偏差风险、本地简报保存、产品简报确认、已对齐后 Zoon A/B 推荐、已启用 Zoon 的漂移检查、线上参考和设计系统基线、Product Readiness Dashboard 的原型准备度或交付准备度。
 22. 深度交付模式：Use `pm-decision-principles.md` to auto-decide only low-risk defaults that do not change product direction; surface any direction-changing item as a single `D` choice question and stop.
 23. Give the user a conclusion-first review: first output `自动评审结论` with `我建议` and `理由`, include a short `工作方式` / progress card, and include `本轮价值时刻` plus `补齐后解锁`; then write the full `评审控制面板` to audit.
 24. For the earliest gate, always declare `门槛等级` as `阻断`、`高风险`、`可自动采用` or `可延后`, and declare `门槛来源`.
@@ -130,8 +130,9 @@ done
 26. When enough information exists, create the smallest useful product brief and save it with `pmw-log brief <name>`. This saves the local business brief and audit copy, registers `product_brief` in Product Artifact Flow, and syncs to Zoon only when `PMW_ZOON_SYNC_ON_BRIEF=true` / `zoon_sync_on_brief: true` or the user has explicitly chosen online collaboration.
     - `enough information` 必须先通过 `pmw-discovery-gate check --target brief`：深度交付或现有线上功能优化必须覆盖产品定位与链路角色、目标用户与触发时刻、用户现状与当前替代、真实痛点与当前损失、主目标与反指标，并且最终确认产品简报前通常至少完成 2 个方向性 `D`。一个 `Q` 加一个 `D` 不能代表产品发现完成。
     - 如果产品发现深度不足，最早门槛是 `产品发现深度不足`，下一技能必须是 `$pm-jobs`，回到证据收集、需求澄清、数据/现状佐证或产品作业卡里的当前主阻断；不要直接写产品简报或进入原型。
-    - 本地 Markdown 保存成功后，自动评审的用户可见 `下一步` 必须走 `$pm-brief` 同一段 Zoon 推荐选择，不能只提示“确认后进入原型 / 交付”。
-    - 固定推荐文案：`Zoon 协作建议：这次简报适合多人评审 / 后续原型或 PRD 复用，建议同步到 Zoon；不同步也不影响继续使用本地 Markdown。`
+    - 如果产品简报仍有待确认信息，自动评审的用户可见 `下一步` 必须先让用户补齐或确认偏差风险，不能推荐 Zoon，也不能只提示“确认后进入原型 / 交付”。
+    - 产品简报确认状态已对齐并且本地 Markdown 保存成功后，自动评审的用户可见 `下一步` 必须走 `$pm-brief` 同一段 Zoon 推荐选择。
+    - 固定推荐文案：`Zoon 协作建议：这次已对齐简报适合多人评审 / 后续原型或 PRD 复用，建议同步到 Zoon；不同步也不影响继续使用本地 Markdown。`
     - 推荐必须说明 Zoon 的好处：多人协作、事实源统一、后续 image-2 原型 / PRD 防漂移；同时说明 `不自动同步，不作为出图或交付阻断`。
     - 必须让用户用一个轻量 `D` 选择：`D：是否同步到在线协作文档（Zoon）？A. 先不需要，使用本地 Markdown 继续；B. 需要，同步到 Zoon 供团队在线修改。`
 27. If a Zoon URL exists before prototype preparation, run `pmw-zoon drift --url <url>` when available. If it returns `DRIFT`, read the latest Zoon snapshot and update the product brief version before continuing.

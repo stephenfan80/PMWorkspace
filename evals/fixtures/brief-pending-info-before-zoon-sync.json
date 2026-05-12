@@ -1,0 +1,81 @@
+{
+  "id": "brief-pending-info-before-zoon-sync",
+  "title": "产品简报生成后必须先暴露待确认信息和偏差风险",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "生成产品简报后，如果还有待确认信息，需要先让用户补齐；没补齐可能导致产品方案偏差。简报对齐后再提醒是否同步到 Zoon。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "简报确认与 Zoon 顺序",
+    "required_behaviors": [
+      "产品简报生成后输出待确认信息与偏差风险",
+      "逐项说明不补齐会导致哪类产品方案偏差",
+      "要求用户补材料、回答 Q、拍板 D 或确认按假设推进",
+      "未对齐时不询问 Zoon 同步",
+      "产品简报确认状态已对齐后再询问是否同步到 Zoon"
+    ],
+    "forbidden_behaviors": [
+      "产品简报刚生成且待确认时直接推荐 Zoon",
+      "只写待验证项但不说明方案偏差风险",
+      "把 Zoon 同步当成补齐待确认信息的替代动作"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "待确认信息与偏差风险"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "不补齐可能导致哪类产品方案偏差"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "未确认时保存为 `待确认`，不能把下一技能指向 `$pm-prototype-shotgun`，也不能询问 Zoon 同步"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "只有产品简报确认状态已对齐后，才询问或执行 Zoon 同步"
+    },
+    {
+      "path": "bin/pmw-log",
+      "contains": "ZOON_SYNC_DEFERRED_UNTIL_ALIGNED=true"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-manager-brief.md",
+      "contains": "产品简报生成后如果还有待确认信息，必须告诉用户不补齐可能导致哪些产品方案偏差"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "状态不是 `已对齐` 时，不询问 Zoon 同步"
+    },
+    {
+      "path": "pmworkspace-shared/references/zoon-workflow.md",
+      "contains": "若确认状态仍是 `待确认`，下一步只展示待确认信息、偏差风险和用户补齐动作，不询问 Zoon 同步"
+    },
+    {
+      "path": "pmworkspace-shared/references/zoon-workflow.md",
+      "contains": "产品简报未 `已对齐` 时也必须输出 `ZOON_SYNC_DEFERRED_UNTIL_ALIGNED=true` 并延后同步"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "只有产品简报确认状态已对齐后，才在用户可见 `下一步` 推荐 Zoon"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=brief-pending-zoon-test PMW_ZOON_SYNC_ON_BRIEF=true; out=$(printf '# 产品简述：测试\\n确认状态：待确认\\n\\n## 待确认信息与偏差风险\\n- 待确认信息：目标用户未确认\\n- 不补齐可能导致的产品方案偏差：首屏任务错位\\n' | bin/pmw-log brief 测试 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
+      ],
+      "exit_code": 0,
+      "contains": [
+        "ZOON_SYNC_DEFERRED_UNTIL_ALIGNED=true",
+        "/briefs/"
+      ]
+    }
+  ]
+}

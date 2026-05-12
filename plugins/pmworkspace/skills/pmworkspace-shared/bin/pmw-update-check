@@ -120,7 +120,11 @@ mkdir -p "$STATE_DIR"
 REVISION_FILE="$(find_revision_file || true)"
 LOCAL_REV=""
 LOCAL_REV_FROM_GIT="false"
-if [ -n "$REVISION_FILE" ]; then
+SOURCE_ROOT="$(cd "$SCRIPT_DIR/.." 2>/dev/null && pwd || true)"
+if [ -n "$SOURCE_ROOT" ] && [ -x "$SCRIPT_DIR/pmw-revision" ] && [ -e "$SOURCE_ROOT/VERSION" ] && [ -e "$SOURCE_ROOT/pm-workspace" ]; then
+  LOCAL_REV="$("$SCRIPT_DIR/pmw-revision" "$SOURCE_ROOT" 2>/dev/null || true)"
+  [ -n "$LOCAL_REV" ] && LOCAL_REV_FROM_GIT="true"
+elif [ -n "$REVISION_FILE" ]; then
   LOCAL_REV="$(tr -d '[:space:]' < "$REVISION_FILE" 2>/dev/null || true)"
 fi
 if [ -z "$LOCAL_REV" ] || [ "$LOCAL_REV" = "unknown" ]; then
@@ -136,6 +140,8 @@ fi
 
 REMOTE_URL="${PMW_REMOTE_VERSION_URL:-$("$CONFIG_BIN" get remote_version_url 2>/dev/null || true)}"
 [ -n "$REMOTE_URL" ] || REMOTE_URL="https://raw.githubusercontent.com/stephenfan80/PMWorkspace/main/VERSION"
+REMOTE_REVISION_URL="${PMW_REMOTE_REVISION_URL:-$("$CONFIG_BIN" get remote_revision_url 2>/dev/null || true)}"
+[ -n "$REMOTE_REVISION_URL" ] || REMOTE_REVISION_URL="https://raw.githubusercontent.com/stephenfan80/PMWorkspace/main/plugins/pmworkspace/skills/pmworkspace-shared/REVISION"
 REPO_URL="${PMW_REPO_URL:-$("$CONFIG_BIN" get repo_url 2>/dev/null || true)}"
 [ -n "$REPO_URL" ] || REPO_URL="https://github.com/stephenfan80/PMWorkspace.git"
 
@@ -154,7 +160,13 @@ if ! printf '%s' "$REMOTE" | grep -qE '^[0-9]+(\.[0-9]+){1,3}$'; then
   REMOTE=""
 fi
 
-REMOTE_REV="$(GIT_TERMINAL_PROMPT=0 git ls-remote "$REPO_URL" refs/heads/main 2>/dev/null | awk 'NR==1 {print $1}' || true)"
+REMOTE_PACKAGED_REV="$(curl -sf --max-time 5 "$REMOTE_REVISION_URL" 2>/dev/null | tr -d '[:space:]' || true)"
+if ! printf '%s' "$REMOTE_PACKAGED_REV" | grep -qE '^[0-9a-fA-F]{7,40}$'; then
+  REMOTE_PACKAGED_REV=""
+fi
+
+REMOTE_HEAD_REV="$(GIT_TERMINAL_PROMPT=0 git ls-remote "$REPO_URL" refs/heads/main 2>/dev/null | awk 'NR==1 {print $1}' || true)"
+REMOTE_REV="${REMOTE_PACKAGED_REV:-$REMOTE_HEAD_REV}"
 
 REMOTE_FOR_DISPLAY="${REMOTE:-unknown}"
 LOCAL_DISPLAY="$(display_id "$LOCAL" "$LOCAL_REV")"
@@ -162,7 +174,9 @@ REMOTE_DISPLAY="$(display_id "$REMOTE_FOR_DISPLAY" "$REMOTE_REV")"
 
 REMOTE_REV_IS_NEWER="false"
 if [ -n "$REMOTE_REV" ] && [ -n "$LOCAL_REV" ] && [ "$LOCAL_REV" != "unknown" ] && [ "$LOCAL_REV" != "$REMOTE_REV" ]; then
-  if [ "$LOCAL_REV_FROM_GIT" = "true" ]; then
+  if [ -n "$REMOTE_PACKAGED_REV" ]; then
+    REMOTE_REV_IS_NEWER="true"
+  elif [ "$LOCAL_REV_FROM_GIT" = "true" ]; then
     if git -C "$SCRIPT_DIR/.." merge-base --is-ancestor "$LOCAL_REV" "$REMOTE_REV" 2>/dev/null; then
       REMOTE_REV_IS_NEWER="true"
     fi

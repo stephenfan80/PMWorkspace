@@ -27,8 +27,16 @@
       "contains": "PMW_VERSION"
     },
     {
+      "path": "bin/pmw-version",
+      "contains": "PMW_REMOTE_REVISION_URL"
+    },
+    {
+      "path": "bin/pmw-update-check",
+      "contains": "REMOTE_PACKAGED_REV"
+    },
+    {
       "path": "pmworkspace-shared/references/update-workflow.md",
-      "contains": "PMW 版本身份"
+      "contains": "PMW_REMOTE_REVISION_URL"
     },
     {
       "path": "README.zh-CN.md",
@@ -53,6 +61,14 @@
         "bash",
         "-lc",
         "v=\"$(tr -d '[:space:]' < VERSION)\"; bin/pmw-version --json | PMW_EXPECTED_VERSION=\"$v\" python3 -c 'import json,sys,os; data=json.load(sys.stdin); assert data[\"product\"] == \"PMWorkspace\"; assert data[\"version\"] == os.environ[\"PMW_EXPECTED_VERSION\"]; assert data[\"display\"]'"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=\"$(mktemp -d)\"; trap 'rm -rf \"$tmp\"' EXIT; v=\"$(tr -d '[:space:]' < VERSION)\"; rev=\"$(bin/pmw-revision)\"; printf '%s\\n' \"$v\" > \"$tmp/VERSION\"; printf '%s\\n' \"$rev\" > \"$tmp/REVISION\"; out=\"$(PMW_HOME=\"$tmp/state\" PMW_REMOTE_VERSION_URL=\"file://$tmp/VERSION\" PMW_REMOTE_REVISION_URL=\"file://$tmp/REVISION\" PMW_REPO_URL=\"https://invalid.local/PMWorkspace.git\" bin/pmw-update-check --force || true)\"; printf '%s\\n' \"$out\"; ! grep -q 'UPGRADE_AVAILABLE' <<< \"$out\""
       ],
       "exit_code": 0
     }

@@ -257,7 +257,7 @@ def screenshot_edit_status(item: dict, baseline: dict) -> tuple[bool, str]:
     if not mode:
         return False, "缺 generation_mode"
     if mode == "redraw":
-        return True, ""
+        return False, "视觉基线下默认禁止 redraw；先回到产品简报确认整页重构范围"
     if mode != "screenshot_edit":
         return False, f"generation_mode={mode} 不支持"
     base_image = str(item.get("base_image") or "")
@@ -270,6 +270,27 @@ def screenshot_edit_status(item: dict, baseline: dict) -> tuple[bool, str]:
         return False, "缺 edit_scope"
     if not str(item.get("preserve_regions") or "").strip():
         return False, "缺 preserve_regions"
+    return True, ""
+
+
+BASELINE_CHANGE_FIELDS = [
+    ("baseline_problem", "生产基线问题"),
+    ("changed_regions", "改动区域"),
+    ("why_better_than_current", "为什么优于当前线上"),
+    ("baseline_preservation", "保留 / 删除边界"),
+]
+
+
+def baseline_change_status(item: dict) -> tuple[bool, str]:
+    for key, label in BASELINE_CHANGE_FIELDS:
+        value = str(item.get(key) or "").strip()
+        if not value:
+            return False, f"缺{label}"
+        if contains_any(value, ["待补充", "未定义", "不明确", "TBD", "未判断"]):
+            return False, f"{label}待补充"
+    proof_text = " ".join(str(item.get(key) or "") for key, _label in BASELINE_CHANGE_FIELDS)
+    if contains_any(proof_text, ["感觉更好", "更高级", "更现代", "更好看", "换个风格"]):
+        return False, "改动证明不能只写审美判断"
     return True, ""
 
 
@@ -825,6 +846,39 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         )
     )
 
+    if visual_required:
+        baseline_change_failures = []
+        for item in board:
+            change_ok, change_failure = baseline_change_status(item)
+            if not change_ok:
+                baseline_change_failures.append(
+                    f"{item.get('scheme') or '未命名'} / {item.get('screen') or '未命名屏幕'}：{change_failure}"
+                )
+        baseline_change_ready = bool(board) and not baseline_change_failures
+        if not board:
+            baseline_change_status_text = "未登记"
+            baseline_change_evidence = "prototype-board 暂无当前 run 输出单元"
+        elif baseline_change_ready:
+            baseline_change_status_text = "已证明"
+            baseline_change_evidence = f"{len(board)} 个输出单元已记录生产基线问题、改动区域、为什么优于当前线上和保留 / 删除边界"
+        else:
+            baseline_change_status_text = "缺改动证明"
+            baseline_change_evidence = "未通过：" + "；".join(baseline_change_failures[:5])
+    else:
+        baseline_change_ready = True
+        baseline_change_status_text = "不适用"
+        baseline_change_evidence = "无线上截图视觉基线；新概念页按产品简报和设计规范目标判断"
+    rows.append(
+        gate_result(
+            "生产基线改动证明",
+            visual_required,
+            baseline_change_status_text,
+            redact_sensitive(baseline_change_evidence),
+            "继续" if baseline_change_ready else "先拆解当前线上方案：哪里真的有问题、只改哪些区域、为什么新方案会优于当前线上、哪些区域必须保留；证明不成立就不出图",
+            baseline_change_ready,
+        )
+    )
+
     scheme_event = latest_event(events, ["方案差异", "方案方向", "方案比较板"], {"evidence", "gate", "artifact", "decision"})
     scheme_text = f"{scheme_event.get('status', '')} {scheme_event.get('summary', '')}"
     scheme_ready = bool(board or scheme_event) and not contains_any(scheme_text, ["只换皮", "未通过", "缺失", "待确认"])
@@ -1133,6 +1187,10 @@ READINESS_GATE_GUIDANCE: dict[str, tuple[str, str]] = {
     "截图编辑模式": (
         "截图编辑字段不完整会让既有功能迭代无法保护生产页面中的保留区域。",
         "补齐 base_image、edit_scope 和 preserve_regions；之后才能生成可审计的截图改造原型。",
+    ),
+    "生产基线改动证明": (
+        "缺少生产基线改动证明会让 PMW 把 Agent 想象的新方案画出来，却不知道它是否真的比当前线上方案更好。",
+        "先说明当前线上问题、改动区域、为什么优于当前线上、保留 / 删除边界；证明成立后才解锁 image-2 prompt。",
     ),
     "方案差异": (
         "方案差异不足会让多方案退化成视觉换皮，无法帮助用户做产品取舍。",

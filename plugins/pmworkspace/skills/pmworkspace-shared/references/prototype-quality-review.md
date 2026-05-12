@@ -10,6 +10,7 @@ For Chinese users, report the final check with Chinese labels such as `质量检
 
 - `复审输入`：图片路径或 URL、方案名、屏幕任务、产品路径、产品简报版本、Zoon 快照、线上参考、设计系统、设计规范目标和 prototype-board item。
 - `视觉审计`：有参考截图时记录 `visual_baseline`、参考图尺寸、目标输出像素、`pmw-image-audit` 结果和是否需要重出。
+- `生产基线对照`：有 `visual_baseline` 时，检查 prototype-board 中的生产基线问题、改动区域、为什么优于当前线上、保留 / 删除边界；新图必须证明自己比当前线上更适合本轮目标，而不是只换一种视觉风格。
 - `输出单元绑定`：每张图必须能追溯到一个 `产品路径 + 屏幕任务`，并绑定产品路径、用户行为假设、要赢过的现状替代、当前损失、删除 / 牺牲 / 后置项、验证信号、失败信号、主目标、反指标、不可虚构项和产品简报版本；缺绑定时先标 `需要补充参考`，不能凭视觉印象通过。
 - `设计完整度复审`：读取 prototype-board 中的设计完整度评分、主要设计差距、10/10 原型标准、prompt 设计修正、状态覆盖、第一眼 / 第二眼 / 第三眼和反 AI 模板味约束；判断生成图是否达到目标，是否需要重出。
 - `设计规范目标复审`：读取 prototype-board 中的设计规范目标、设计系统 / 平台模式、灵感来源摘要和禁止照搬项；判断生成图是否遵守目标规范，是否出现复制外部图片、品牌素材、文案、专有 UI 或未授权资产的风险。
@@ -48,6 +49,7 @@ Check:
 - 是否出现 AI 模板味：泛 SaaS 卡片堆叠、紫蓝渐变、装饰性图标圆圈、三栏模板、居中大字空泛 hero、无意义插画、统一大圆角、重阴影、漂浮装饰或拼贴感界面？
 - 是否优化主目标，同时没有违反反指标？
 - 现有功能迭代中，是否保留了当前基线里必须保留的元素？
+- 现有功能迭代中，生成图是否真的优于当前线上方案？如果新图更高、更重、更难扫、更像概念稿，或破坏了线上已经有效的信息密度 / 入口效率 / 信任表达，不能因为“看起来新”而通过。
 - 是否避免了不支持的功能、假数据、假按钮或无法兑现的承诺？
 - 是否诚实展示了估算、不确定性、资格判断或人工跟进？
 
@@ -78,6 +80,7 @@ Use the active design-spec target as the source of visual truth. AutoDesign is p
 - If a production screenshot exists, run `pmw-image-audit audit --image <生成图> --reference <参考图>` before visual judgment. `需要重出` 的尺寸审计不能被“看起来还行”覆盖。
 - Production screenshot baseline overrides generic design-system tokens for typography hierarchy, spacing rhythm, card density, chart density, and bottom toolbar height.
 - 视觉还原优先且使用 `screenshot_edit` 时，先检查保留区域：状态栏、顶部导航、车系头图、车型切换、tab 和底部吸底 CTA 不应被无故重绘、变形、缩放或换样式；只允许 `edit_scope` 指定的目标区域发生变化。
+- 如果 prototype-board 没有 `生产基线改动证明`，或证明只写“更现代 / 更清爽 / 更好看”，结论至少是 `需要补充参考`；如果生成图明显不如线上基线，结论是 `需要重出` 或 `需要 PM 拍板`。
 - 用户提供设计系统、平台模式库或 PMW 默认假设都必须体现在颜色、字体、栅格、组件密度和状态表达里；不能把未确认的 AutoDesign 当作默认答案。
 - 如果设计规范目标是 AutoDesign，primary blue、commercial orange、text colors、dividers and background should be plausible.
 - Typography uses production-like Chinese UI hierarchy.

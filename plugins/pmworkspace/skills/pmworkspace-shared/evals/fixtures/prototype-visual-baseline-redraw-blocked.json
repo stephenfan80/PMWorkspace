@@ -1,0 +1,43 @@
+{
+  "id": "prototype-visual-baseline-redraw-blocked",
+  "title": "视觉基线下不能默认从零重画整页",
+  "category": "prototype-readiness",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "已有线上截图 visual_baseline，但输出单元声明 generation_mode=redraw，准备度必须阻断。",
+  "expected": {
+    "mode": "deep",
+    "status": "不可出图",
+    "must_stop": true,
+    "gate": "截图编辑模式",
+    "required_behaviors": [
+      "视觉基线下默认使用 screenshot_edit",
+      "redraw 必须先回到产品简报或策略审查确认整页重构范围",
+      "不能把生产页从零重画当作默认原型生成"
+    ],
+    "forbidden_behaviors": [
+      "有线上截图时默认 redraw",
+      "redraw 仍通过出图准备度",
+      "重画整页但不保护线上保留区域"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "视觉基线下默认禁止 redraw"
+    },
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "contains": "视觉基线下不要默认 `redraw`"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=baseline-redraw-block; root=\"$PMW_HOME/projects/$PMW_PROJECT_SLUG\"; mkdir -p \"$root/runs\" \"$root/briefs\"; brief=\"$root/briefs/current.md\"; printf '# 产品设计简报：测试\\n产品简报版本：v2\\n确认状态：已对齐\\n\\n## 核心价值判断\\n- 一句话判断：已确认。\\n## 数据 / 能力 / 约束与不可虚构项\\n- 不可虚构项：不得虚构。\\n' > \"$brief\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\",\"latest_brief\":\"%s\",\"latest_brief_version\":\"v2\"}\\n' \"$brief\" > \"$root/project.json\"; printf '{\"ts\":\"2099-01-01T00:00:00Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"产品简报确认\",\"summary\":\"用户确认产品简报\"}\\n{\"ts\":\"2099-01-01T00:00:01Z\",\"event\":\"decision\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"设计规范目标确认\",\"summary\":\"用户确认 AutoDesign 作为设计规范目标\"}\\n{\"ts\":\"2099-01-01T00:00:02Z\",\"event\":\"decision\",\"run_id\":\"r1\",\"status\":\"已确认\",\"title\":\"方案方向确认\",\"summary\":\"方案 A 已确认\"}\\n' > \"$root/runs/r1.jsonl\"; python3 - \"$tmp/ref.png\" 1179 2556 <<'PY'\nimport struct, sys, zlib\npath,w,h=sys.argv[1],int(sys.argv[2]),int(sys.argv[3])\nraw=b''.join(b'\\x00'+b'\\xff\\xff\\xff'*w for _ in range(h))\ndef chunk(t,d): return struct.pack('>I',len(d))+t+d+struct.pack('>I',zlib.crc32(t+d)&0xffffffff)\nopen(path,'wb').write(b'\\x89PNG\\r\\n\\x1a\\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',w,h,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(raw,1))+chunk(b'IEND',b''))\nPY\nbin/pmw-artifact add --kind browser_evidence --title 当前截图 --status 已采集 --source-skill pm-brief --path \"$tmp/ref.png\" --summary '当前截图 生产基线' --run r1 >/dev/null; bin/pmw-image-audit baseline --reference \"$tmp/ref.png\" --register --run r1 >/dev/null; bin/pmw-prototype-board add --scheme 方案A --screen 起购价入口 --brief-path \"$brief\" --brief-version v2 --goal 提升价格理解 --anti-metric 不增加首屏噪音 --non-fiction 不得虚构成交价 --canvas-mode physical_longboard --target-output-pixels '目标输出 1179 x >=2556' --generation-mode redraw --product-path '低高度可信解释' --behavior-assumption '用户愿意先理解价格口径再进入详情' --current-loss '当前起购价口径不清导致信任不足' --tradeoff '不在入口放留资按钮，详情页承担转化' --baseline-problem '当前入口缺少价格口径解释' --changed-regions '只改起购价入口模块' --why-better-than-current '在不增加入口高度前提下补充口径' --baseline-preservation '保留车系头图、导航、车型 tab 和底部 CTA' --design-score 8 --design-gap '需要保护线上密度' --ten-out-of-ten-standard '入口低高度、可信说明清楚、线上结构不被破坏' --prompt-design-fix '只改价格入口模块，压缩可信说明' --anti-ai-slop-constraints '禁止重画整页和泛卡片堆叠' --state-coverage '默认态和点击态' --first-second-third-hierarchy '第一眼价格，第二眼口径，第三眼可进入详情' --design-spec-target 'AutoDesign' --design-system-profile 'AutoDesign + 线上截图基线' --platform-pattern '不适用' --inspiration-sources '用户线上截图' --inspiration-patterns '低高度价格条和密集车系页信息结构' --no-copy-boundary '不得复制未授权外部素材' >/dev/null; out=$(bin/pmw-dashboard readiness --target prototype --details); printf '%s\\n' \"$out\"; grep -q '不可出图' <<< \"$out\"; grep -q '视觉基线下默认禁止 redraw' <<< \"$out\"; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0
+    }
+  ]
+}

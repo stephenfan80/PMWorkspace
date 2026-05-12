@@ -23,6 +23,7 @@ default_value() {
     project_display_name) echo "auto" ;;
     update_snooze_hours) echo "24" ;;
     remote_version_url) echo "https://raw.githubusercontent.com/stephenfan80/PMWorkspace/main/VERSION" ;;
+    remote_revision_url) echo "https://raw.githubusercontent.com/stephenfan80/PMWorkspace/main/plugins/pmworkspace/skills/pmworkspace-shared/REVISION" ;;
     repo_url) echo "https://github.com/stephenfan80/PMWorkspace.git" ;;
     *) echo "" ;;
   esac
@@ -91,12 +92,12 @@ case "${1:-}" in
     cat "$CONFIG_FILE"
     echo ""
     echo "# Active values"
-    for key in update_check auto_upgrade telemetry remote_telemetry memory_scope default_canvas mobile_first question_mode zoon_auto_create zoon_sync_on_brief zoon_protocol_cache_ttl zoon_protocol_mode zoon_host zoon_store_url project_display_name update_snooze_hours remote_version_url repo_url; do
+    for key in update_check auto_upgrade telemetry remote_telemetry memory_scope default_canvas mobile_first question_mode zoon_auto_create zoon_sync_on_brief zoon_protocol_cache_ttl zoon_protocol_mode zoon_host zoon_store_url project_display_name update_snooze_hours remote_version_url remote_revision_url repo_url; do
       printf '%-22s %s\n' "${key}:" "$(read_value "$key")"
     done
     ;;
   defaults)
-    for key in update_check auto_upgrade telemetry remote_telemetry memory_scope default_canvas mobile_first question_mode zoon_auto_create zoon_sync_on_brief zoon_protocol_cache_ttl zoon_protocol_mode zoon_host zoon_store_url project_display_name update_snooze_hours remote_version_url repo_url; do
+    for key in update_check auto_upgrade telemetry remote_telemetry memory_scope default_canvas mobile_first question_mode zoon_auto_create zoon_sync_on_brief zoon_protocol_cache_ttl zoon_protocol_mode zoon_host zoon_store_url project_display_name update_snooze_hours remote_version_url remote_revision_url repo_url; do
       printf '%-22s %s\n' "${key}:" "$(default_value "$key")"
     done
     ;;

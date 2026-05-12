@@ -13,6 +13,7 @@ from typing import Any
 SCRIPT_PATH = pathlib.Path(__file__).resolve()
 SCRIPT_DIR = SCRIPT_PATH.parent
 DEFAULT_REMOTE_VERSION_URL = "https://raw.githubusercontent.com/stephenfan80/PMWorkspace/main/VERSION"
+DEFAULT_REMOTE_REVISION_URL = "https://raw.githubusercontent.com/stephenfan80/PMWorkspace/main/plugins/pmworkspace/skills/pmworkspace-shared/REVISION"
 DEFAULT_REPO_URL = "https://github.com/stephenfan80/PMWorkspace.git"
 
 
@@ -214,6 +215,9 @@ def build_info(run_check: bool = False) -> dict[str, Any]:
     remote_version_url = os.environ.get("PMW_REMOTE_VERSION_URL") or config_value(
         "remote_version_url", DEFAULT_REMOTE_VERSION_URL
     )
+    remote_revision_url = os.environ.get("PMW_REMOTE_REVISION_URL") or config_value(
+        "remote_revision_url", DEFAULT_REMOTE_REVISION_URL
+    )
     repo_url = os.environ.get("PMW_REPO_URL") or config_value("repo_url", DEFAULT_REPO_URL)
     info: dict[str, Any] = {
         "product": "PMWorkspace",
@@ -226,6 +230,7 @@ def build_info(run_check: bool = False) -> dict[str, Any]:
         "plugin_version": plugin_version(plugin_json),
         "plugin_json": str(plugin_json) if plugin_json else "",
         "remote_version_url": remote_version_url,
+        "remote_revision_url": remote_revision_url,
         "repo_url": repo_url,
     }
     if run_check:
@@ -248,6 +253,7 @@ def print_text(info: dict[str, Any], short: bool = False) -> None:
         ("PMW_PLUGIN_VERSION", info["plugin_version"]),
         ("PMW_PLUGIN_FILE", info["plugin_json"]),
         ("PMW_REMOTE_VERSION_URL", info["remote_version_url"]),
+        ("PMW_REMOTE_REVISION_URL", info["remote_revision_url"]),
         ("PMW_REPO_URL", info["repo_url"]),
     ]
     for key, value in rows:

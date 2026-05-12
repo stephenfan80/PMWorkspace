@@ -81,12 +81,14 @@ Users can override with:
 
 ```bash
 PMW_REMOTE_VERSION_URL=<url>
+PMW_REMOTE_REVISION_URL=<url>
 ```
 
 or:
 
 ```bash
 bin/pmw-config set remote_version_url <url>
+bin/pmw-config set remote_revision_url <url>
 ```
 
 For repository checks:

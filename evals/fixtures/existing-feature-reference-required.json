@@ -10,7 +10,7 @@
     "must_stop": true,
     "gate": "线上参考缺失",
     "required_behaviors": [
-      "要求当前生产截图或录屏",
+      "要求当前生产截图、关键节点截图或等价视觉基线",
       "不进入原型提示词",
       "标记线上参考状态为缺失待补充"
     ],
@@ -27,7 +27,7 @@
     },
     {
       "path": "pmworkspace-shared/references/production-reference-gate.md",
-      "contains": "`现有功能迭代` 必须先拿到当前线上截图、录屏或等价视觉基线。"
+      "contains": "`现有功能迭代` 必须先拿到当前线上截图、关键节点截图、线上页面 URL、Figma / 设计稿或等价视觉基线。"
     }
   ]
 }

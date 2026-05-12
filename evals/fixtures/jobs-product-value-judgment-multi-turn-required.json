@@ -13,7 +13,7 @@
       "先输出产品方向审查",
       "覆盖产品方向审查内核",
       "D 不能替代事实诊断",
-      "回到当前最大缺口任务"
+      "回到产品作业卡里的当前主阻断"
     ],
     "forbidden_behaviors": [
       "只问一个 Q 或一个 D 就进入简述",
@@ -25,6 +25,10 @@
     {
       "path": "pmworkspace-shared/references/product-discovery-gate.md",
       "contains": "一个 `Q` 加一个 `D` 不能代表产品发现完成"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-discovery-gate.md",
+      "contains": "产品作业卡"
     },
     {
       "path": "pmworkspace-shared/references/product-discovery-gate.md",

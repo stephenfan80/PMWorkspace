@@ -1,6 +1,6 @@
 {
   "id": "product-alignment-card-required-before-brief",
-  "title": "进入产品简报前必须先收束产品信息对齐卡",
+  "title": "进入产品简报前必须先收束产品作业卡",
   "category": "pm-brief",
   "primary_skill": "pm-brief",
   "prompt": "用户给了一段模糊产品想法，助手准备直接生成产品简报。",
@@ -8,11 +8,12 @@
     "mode": "deep",
     "status": "待确认",
     "must_stop": true,
-    "gate": "产品信息对齐卡",
+    "gate": "产品作业卡",
     "required_behaviors": [
-      "产品简报包含产品信息对齐卡",
-      "展示已知事实、暂定判断、证据边界和当前最大缺口",
-      "当前最大缺口未补齐时不能标为已对齐"
+      "产品简报包含产品作业卡",
+      "展示已知事实、暂定判断、证据边界、当前主阻断和关键缺口队列",
+      "产品作业卡包含 PMW 产品建议和 PMW 信息架构建议",
+      "关键缺口未补齐、拍板或降级为假设前不能标为已对齐"
     ],
     "forbidden_behaviors": [
       "直接把模糊想法写成已对齐产品简报",
@@ -23,15 +24,23 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "产品信息对齐卡"
+      "contains": "## 产品作业卡"
     },
     {
       "path": "pmworkspace-shared/references/product-manager-brief.md",
-      "contains": "## 产品信息对齐卡"
+      "contains": "## 产品作业卡"
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "用户可见输出必须先给业务版 `产品简述 / 产品简报`，默认包含 `产品信息对齐卡`"
+      "contains": "用户可见输出必须先给业务版 `产品简述 / 产品简报`，默认包含 `产品作业卡`"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "PMW 产品建议"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "PMW 信息架构建议"
     }
   ]
 }

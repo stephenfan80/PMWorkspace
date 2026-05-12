@@ -23,7 +23,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/routing.md",
-      "contains": "PRD、Zoon、访谈、支持洞察、线上截图、录屏、生产视觉基线"
+      "contains": "PRD、Zoon、访谈、支持洞察、线上截图、关键节点截图、生产视觉基线"
     },
     {
       "path": "pmworkspace-shared/references/routing.md",

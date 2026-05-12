@@ -1,0 +1,54 @@
+{
+  "id": "product-office-hours-single-source",
+  "title": "product-office-hours 是产品发现唯一真源",
+  "category": "pm-jobs",
+  "primary_skill": "pm-jobs",
+  "prompt": "维护者要求 PMW 产品发现规则只能收敛到 product-office-hours.md。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "产品发现真源",
+    "required_behaviors": [
+      "product-office-hours 定义 office-hours 姿态",
+      "product-office-hours 定义产品作业卡",
+      "产品作业卡包含 PMW 产品建议和信息架构建议",
+      "其他地图文件只引用真源，不复制产品发现细则"
+    ],
+    "forbidden_behaviors": [
+      "在 pm-workbench-map 维护第二套产品发现规则",
+      "把用户只需补一件事作为产品发现原则",
+      "把产品作业卡降级为普通问题清单"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "## Office-hours 姿态"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "用少量强迫问题和产品作业逼近高质量判断"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "## 产品作业卡"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "PMW 产品建议"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "PMW 信息架构建议"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "本文件不维护第二套产品发现规则"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "产品发现 / 产品方向审查 / 产品作业卡的真源是 `product-office-hours.md`"
+    }
+  ]
+}

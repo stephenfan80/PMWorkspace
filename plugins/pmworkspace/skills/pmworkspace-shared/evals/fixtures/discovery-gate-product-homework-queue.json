@@ -1,0 +1,64 @@
+{
+  "id": "discovery-gate-product-homework-queue",
+  "title": "Discovery gate 必须输出完整产品作业队列和双建议",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-jobs",
+  "prompt": "用户只有一个模糊 idea，PMW 需要判断产品发现缺口。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要补充",
+    "must_stop": true,
+    "gate": "产品作业卡",
+    "required_behaviors": [
+      "输出当前主阻断",
+      "输出关键缺口队列",
+      "输出产品作业队列而不是单个最大缺口",
+      "分别输出 PMW 产品建议和 PMW 信息架构建议"
+    ],
+    "forbidden_behaviors": [
+      "只输出一个产品作业",
+      "把 PMW 产品建议和信息架构建议合并成一行",
+      "出现产品作业：产品作业：这类重复前缀"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-discovery-gate",
+      "contains": "gap_queue_items"
+    },
+    {
+      "path": "bin/pmw-discovery-gate",
+      "contains": "pmw_product_advice_queue"
+    },
+    {
+      "path": "bin/pmw-discovery-gate",
+      "contains": "pmw_ia_advice_queue"
+    },
+    {
+      "path": "bin/pmw-discovery-gate",
+      "contains": "product_homework_queue"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=homework-queue-test; root=\"$PMW_HOME/projects/$PMW_PROJECT_SLUG\"; mkdir -p \"$root/runs\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\"}\\n' > \"$root/project.json\"; printf '{\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"需要补充\",\"title\":\"产品发现\",\"summary\":\"初始输入\"}\\n' > \"$root/runs/r1.jsonl\"; out=$(bin/pmw-discovery-gate check --target alignment || true); printf '%s\\n' \"$out\"; grep -q '## 关键缺口队列' <<< \"$out\"; grep -q '## PMW 产品建议' <<< \"$out\"; grep -q '## PMW 信息架构建议' <<< \"$out\"; grep -q '## 产品作业队列' <<< \"$out\"; grep -q '目标用户与触发场景' <<< \"$out\"; grep -q '用户现状与当前替代' <<< \"$out\"; ! grep -q '产品作业：产品作业：' <<< \"$out\"; ! grep -q 'PMW 建议：PMW 建议：' <<< \"$out\"; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0,
+      "contains": [
+        "## 关键缺口队列",
+        "## PMW 产品建议",
+        "## PMW 信息架构建议",
+        "## 产品作业队列",
+        "目标用户与触发场景",
+        "用户现状与当前替代"
+      ],
+      "not_contains": [
+        "产品作业：产品作业：",
+        "PMW 建议：PMW 建议："
+      ]
+    }
+  ]
+}

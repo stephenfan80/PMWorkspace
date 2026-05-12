@@ -3,16 +3,16 @@
   "title": "已有功能缺线上基线时不能先给三条方案",
   "category": "pm-jobs",
   "primary_skill": "pm-jobs",
-  "prompt": "用户说：帮我优化汽车之家 App 的起购价入口和详情页，但还没有提供线上截图、录屏或当前数据。",
+  "prompt": "用户说：帮我优化汽车之家 App 的起购价入口和详情页，但还没有提供线上截图、关键节点截图或当前数据。",
   "expected": {
     "mode": "deep",
     "status": "需要补充",
     "must_stop": true,
     "gate": "线上基线缺失",
     "required_behaviors": [
-      "先输出产品信息对齐卡",
+      "先输出产品作业卡",
       "说明缺线上基线影响问题区域、保留项、可改项和原型可信度",
-      "只请求线上截图或录屏等证据",
+      "请求线上截图、关键节点截图或等价视觉基线等证据",
       "说明拿到材料后 Agent 会如何拆解"
     ],
     "forbidden_behaviors": [
@@ -25,11 +25,11 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-discovery-gate.md",
-      "contains": "缺截图、录屏或等价视觉基线时，不得输出 `方案 A / 方案 B / 方案 C`"
+      "contains": "缺截图、关键节点截图或等价视觉基线时，不得输出 `方案 A / 方案 B / 方案 C`"
     },
     {
       "path": "pm-workspace/SKILL.md",
-      "contains": "已有功能迭代缺线上截图 / 录屏 / 等价视觉基线时，不输出 `方案 A / 方案 B / 方案 C`"
+      "contains": "已有功能迭代缺线上截图、关键节点截图或等价视觉基线时，不输出 `方案 A / 方案 B / 方案 C`"
     },
     {
       "path": "pm-jobs/SKILL.md",

@@ -14,10 +14,12 @@
       "README 指向地图",
       "routing 指向地图",
       "eval 分类映射到地图",
-      "skill 读取共享状态字段"
+      "skill 读取共享状态字段",
+      "产品发现细则指向 product-office-hours.md"
     ],
     "forbidden_behaviors": [
       "README 维护第二套路由表",
+      "pm-workbench-map 维护第二套产品发现规则",
       "eval 分类无法映射到链路阶段",
       "skill 输出省略门槛和证据状态"
     ]
@@ -30,6 +32,18 @@
     {
       "path": "pmworkspace-shared/references/pm-workbench-map.md",
       "contains": "## 共享状态字段"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "本文件不维护第二套产品发现规则"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "产品发现 / 产品方向审查 / 产品作业卡的真源是 `product-office-hours.md`"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "not_contains": "用户只需做什么"
     },
     {
       "path": "README.zh-CN.md",

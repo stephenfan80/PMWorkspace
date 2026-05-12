@@ -55,6 +55,8 @@ description: |
 - `工作方式`
 - `本轮价值时刻`
 - `产品信息对齐`
+- `产品作业卡`
+- `关键缺口队列`
 - `自动评审结论`
 - `我建议`
 - `理由`
@@ -115,9 +117,9 @@ done
 15. Read `../pmworkspace-shared/references/product-plan-handoff.md`.
 16. Read `../pmworkspace-shared/references/zoon-workflow.md` and `../pmworkspace-shared/references/zoon-drift-check.md`.
 15. Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run，不要重新 `pmw-run start`；如果用户直接调用 `$pm-autoplan` 且没有当前 run，再 start `pmw-run start --skill pm-autoplan --mode <quick|deep> --goal "<本轮目标>"`.
-16. 先建立 `产品信息对齐包`，再 Build the automatic review control panel from `autoplan-workflow.md`: 靠谱产品负责人姿态、模式来源、事实来源优先级、当前阶段、产品信息对齐状态、当前产品缺口、最早阻塞门槛、门槛等级、门槛来源、可自动采用项、必须 PM 拍板项、下一技能和交接上下文.
+16. 先建立 `产品信息对齐包` 和 `产品作业卡`，再 Build the automatic review control panel from `autoplan-workflow.md`: 靠谱产品负责人姿态、模式来源、事实来源优先级、当前阶段、产品信息对齐状态、当前主阻断、关键缺口队列、PMW 产品建议、PMW 信息架构建议、最早阻塞门槛、门槛等级、门槛来源、可自动采用项、必须 PM 拍板项、下一技能和交接上下文.
 17. 快速成型模式：先做生产/高风险升级检查；如果出现生产流程、高风险承诺、真实数据、线索/交易/隐私或研发交付信号，升级到深度交付门槛，不要继续轻量包。
-18. 快速成型模式：按产品方向审查内核检测会影响轻量包结构的缺口：产品路径、证据收集、核心用户/场景、核心问题、当前替代/损失、主目标/反指标、不可虚构项、原型屏幕范围、三条产品路径差异、假设确认。Agent 可先整理材料、拆解截图、生成访谈提纲、梳理数据口径或做最佳实践摘要；只有卡在用户事实或取舍时才问 `Q` / `D`。已有功能迭代缺线上基线时，即使用户要求快速成型，也不能先给三条方案方向；先停在产品信息对齐和截图 / 录屏证据请求。
+18. 快速成型模式：按产品方向审查内核检测会影响轻量包结构的缺口：产品路径、证据收集、核心用户/场景、核心问题、当前替代/损失、主目标/反指标、不可虚构项、原型屏幕范围、三条产品路径差异、假设确认。Agent 可先整理材料、拆解截图、生成访谈提纲、梳理数据口径或做最佳实践摘要；只有卡在用户事实或取舍时才问 `Q` / `D`。已有功能迭代缺线上基线时，即使用户要求快速成型，也不能先给三条方案方向；先停在产品作业卡和截图 / 关键节点截图证据请求。
 19. 快速成型模式：列出关键假设、方案方向和每张图的不可虚构项，请用户确认“按这些假设继续”。确认前不生成图片，并用 `pmw-run event --type gate` 记录当前门槛。
 20. 快速成型模式：确认后输出轻量包：标注假设的产品简述、至少 3 个方案方向、每个方案 1 张移动端 image-2 原型图计划，并把状态写成 `基于假设，可讨论`。少于 3 个方案必须写豁免原因。
 21. 深度交付模式：按最早门槛顺序推进：工作目标模式、产品路径、产品方向审查内核、证据收集、用户需求澄清、数据/现状佐证、路径机会判断、必要 Q/D、前提确认、策略审查、产品简述 / 产品简报、本地简报保存、Zoon A/B 推荐、已启用 Zoon 的漂移检查、线上参考和设计系统基线、Product Readiness Dashboard 的原型准备度或交付准备度。
@@ -127,7 +129,7 @@ done
 25. Every item in `已自动采用` must include source and why no PM decision is needed, for example `默认移动端优先。来源：PMWorkspace 默认规则。原因：不改变产品方向或用户承诺。`
 26. When enough information exists, create the smallest useful product brief and save it with `pmw-log brief <name>`. This saves the local business brief and audit copy, registers `product_brief` in Product Artifact Flow, and syncs to Zoon only when `PMW_ZOON_SYNC_ON_BRIEF=true` / `zoon_sync_on_brief: true` or the user has explicitly chosen online collaboration.
     - `enough information` 必须先通过 `pmw-discovery-gate check --target brief`：深度交付或现有线上功能优化必须覆盖产品定位与链路角色、目标用户与触发时刻、用户现状与当前替代、真实痛点与当前损失、主目标与反指标，并且最终确认产品简报前通常至少完成 2 个方向性 `D`。一个 `Q` 加一个 `D` 不能代表产品发现完成。
-    - 如果产品发现深度不足，最早门槛是 `产品发现深度不足`，下一技能必须是 `$pm-jobs`，回到证据收集、需求澄清、数据/现状佐证或一个当前最大缺口 `Q`；不要直接写产品简报或进入原型。
+    - 如果产品发现深度不足，最早门槛是 `产品发现深度不足`，下一技能必须是 `$pm-jobs`，回到证据收集、需求澄清、数据/现状佐证或产品作业卡里的当前主阻断；不要直接写产品简报或进入原型。
     - 本地 Markdown 保存成功后，自动评审的用户可见 `下一步` 必须走 `$pm-brief` 同一段 Zoon 推荐选择，不能只提示“确认后进入原型 / 交付”。
     - 固定推荐文案：`Zoon 协作建议：这次简报适合多人评审 / 后续原型或 PRD 复用，建议同步到 Zoon；不同步也不影响继续使用本地 Markdown。`
     - 推荐必须说明 Zoon 的好处：多人协作、事实源统一、后续 image-2 原型 / PRD 防漂移；同时说明 `不自动同步，不作为出图或交付阻断`。
@@ -174,7 +176,7 @@ done
 - 当前一步：
 - 已完成：
 - 下一步：
-- 你只需要：
+- 产品作业卡：
 
 自动评审结论：
 - 我建议：

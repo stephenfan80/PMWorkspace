@@ -11,7 +11,7 @@
     "gate": "产品发现深度不足",
     "required_behaviors": [
       "识别产品发现深度不足",
-      "回到对应任务或一个当前最大缺口 Q",
+      "回到产品作业卡里的当前主阻断",
       "覆盖产品定位、用户现状、真实损失、目标和反指标",
       "说明一个 Q 加一个 D 不能代表产品发现完成",
       "退回 $pm-jobs 而不是进入 $pm-brief"
@@ -35,6 +35,10 @@
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
       "contains": "当前任务写成 `产品发现深度不足`"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "产品作业卡里的当前主阻断"
     },
     {
       "path": "pm-jobs/SKILL.md",

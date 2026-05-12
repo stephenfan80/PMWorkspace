@@ -12,6 +12,7 @@
     "required_behaviors": [
       "输出业务判断",
       "输出工作方式",
+      "输出产品作业卡",
       "输出当前需要确认",
       "输出下一步",
       "把当前模式、当前门槛和下一技能写入审计",
@@ -39,7 +40,7 @@
     },
     {
       "path": "pm-workspace/SKILL.md",
-      "contains": "Default user-facing output should show a short `工作方式` card plus `业务判断`、`当前需要确认` and `下一步`"
+      "contains": "Default user-facing output should show a short `工作方式` card plus `业务判断`、`产品作业卡`、`当前需要确认` and `下一步`"
     }
   ]
 }

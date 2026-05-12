@@ -52,6 +52,8 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 - `工作方式`
 - `本轮价值时刻`
 - `产品信息对齐`
+- `产品作业卡`
+- `关键缺口队列`
 - `产品路径`
 - `业务判断`
 - `当前需要确认`
@@ -130,7 +132,7 @@ Use `pmw-run event` for the D0 result, current gate, evidence state, and next sk
 
 Read `../pmworkspace-shared/references/routing.md`; it is the only route table and D0 source of truth.
 
-After routing, record the full routing contract from `routing.md` in local audit: `当前模式`、`当前门槛`、`下一技能`、`为什么`、`run_id`、`证据状态`. Default user-facing output should show a short `工作方式` card plus `业务判断`、`当前需要确认` and `下一步`; it must now also include `本轮价值时刻` and `补齐后解锁`, so users can see whether they are in 10min 快速成型 or 深度交付, what product judgment PMW is helping them obtain now, and what single action is expected now.
+After routing, record the full routing contract from `routing.md` in local audit: `当前模式`、`当前门槛`、`下一技能`、`为什么`、`run_id`、`证据状态`. Default user-facing output should show a short `工作方式` card plus `业务判断`、`产品作业卡`、`当前需要确认` and `下一步`; it must now also include `本轮价值时刻` and `补齐后解锁`, so users can see whether they are in 10min 快速成型 or 深度交付, what product judgment PMW is helping them obtain now, and what product homework must be handled before brief or prototype.
 
 If platform scripts are available, read `pmw-artifact flow --details` for routing context, but do not include the flow table in default user output. A routed child skill should know the latest `上游产物`, expected `本轮产物`, and `下游可读` target from local audit instead of relying only on conversation memory.
 
@@ -149,15 +151,15 @@ If the user provides a product task in the same message, skip the welcome menu a
 - 深度交付模式写图片提示词或生成图片前，必须先完成产品简报对齐。
 - 深度交付模式中，产品简报不是 `已对齐` 时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
 - 快速成型模式中，出图前必须列出关键假设、反指标和不可虚构项，并获得用户确认“按这些假设继续”；输出状态写成 `基于假设，可讨论`，不能写成最终 PRD 或已验证事实。
-- 每次进入产品任务，先输出或内部建立 `产品信息对齐包`：已知事实、暂定判断、证据边界、当前最大缺口、用户只需补什么、补齐后解锁什么。不能只凭最后一句话继续下游。
+- 每次进入产品任务，先输出或内部建立 `产品信息对齐包` 和 `产品作业卡`：已知事实、暂定判断、证据边界、当前主阻断、关键缺口队列、PMW 产品建议、PMW 信息架构建议、用户作业、补齐后解锁什么。不能只凭最后一句话继续下游。
 - 用户提供截图或线上参考时，只更新视觉基线和线上参考状态；不要自动产出完整 md 方案、HTML 或原型图。
-- 已有功能迭代缺线上截图 / 录屏 / 等价视觉基线时，不输出 `方案 A / 方案 B / 方案 C` 或三条产品路径；只输出产品信息对齐卡、证据请求、Agent 拿到材料后会如何拆解和补齐后解锁的下一步。
+- 已有功能迭代缺线上截图、关键节点截图或等价视觉基线时，不输出 `方案 A / 方案 B / 方案 C` 或三条产品路径；只输出产品作业卡、证据请求、Agent 拿到材料后会如何拆解和补齐后解锁的下一步。用户提供录屏时，要求补关键节点截图，或先由外部工具转成截图后再进入 PMW。
 - 用户选择某个方案方向后再上传截图时，只代表“方向选择 + 新证据输入”，不代表产品简报已对齐。必须先做线上基线接收：拆解当前线上优势、问题区域、必须保留、可以改、暂不应改、为什么新方案会优于当前线上；之后回到 `$pm-brief` 做产品简报确认，不能直接进入 `$pm-prototype-shotgun`。
 - 已有功能迭代默认先保护线上体验。若当前线上方案明显比 Agent 新方案更简洁、更符合信息密度或更可信，PMW 必须建议保留 / 微调线上方案，而不是为了出图重画。
 - `Q` / `D` 只作为关键卡点的交互方式，不是完整产品发现流程；Agent 可以先协助整理材料、拆解截图、生成访谈提纲、梳理数据口径、检索最佳实践和归纳路径机会。拍板问题使用 `D`，一次只展开一个，问完必须等待用户回答。
 - 产品简报前必须完成前提确认；未确认前只能保持 `待确认`。
 - 关键产品决策默认使用选择题拍板；读取 `decision-question-mode.md`。
-- 新页面也要判断线上参考需求；承接线上流程、结果页、状态页或生产样式时，缺截图/录屏/相似页面参考要先问。
+- 新页面也要判断线上参考需求；承接线上流程、结果页、状态页或生产样式时，缺截图、关键节点截图或相似页面参考要先问。
 - 产品简报阶段可以按主场景做轻量互联网最佳实践检索；检索结果只用于案例启发和原型重点建议，不增加 Q 数量。
 - 产品简报阶段默认先保存本地 Markdown 业务简报和本地审计副本；不要自动创建或更新 Zoon 在线文档。
 - 在产品简报保存后，用一个轻量选择询问是否同步到在线协作文档（Zoon）。只有用户选择同步、提供现有 Zoon URL 或任务明确需要多人在线协作时，才创建/更新 Zoon，并在成功后自动打开到 Codex 内置浏览器。

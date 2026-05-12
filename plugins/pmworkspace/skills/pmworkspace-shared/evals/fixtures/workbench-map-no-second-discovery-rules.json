@@ -1,0 +1,54 @@
+{
+  "id": "workbench-map-no-second-discovery-rules",
+  "title": "pm-workbench-map 不能维护第二套产品发现规则",
+  "category": "eval-system",
+  "primary_skill": "pm-workspace",
+  "prompt": "维护者要求 pm-workbench-map 只做阶段索引和状态字段地图。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "工作台地图瘦身",
+    "required_behaviors": [
+      "pm-workbench-map 声明自己不是产品发现规则源",
+      "pm-workbench-map 保留端到端链路",
+      "pm-workbench-map 保留共享状态字段",
+      "pm-workbench-map 指向 product-office-hours 和 product-discovery-gate"
+    ],
+    "forbidden_behaviors": [
+      "pm-workbench-map 重新定义产品作业卡细则",
+      "pm-workbench-map 要求用户每轮只补一个事实",
+      "pm-workbench-map 复制截图门槛细则"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "本文件是 PMWorkspace 的全链路索引"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "本文件不维护第二套产品发现规则"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "## 端到端链路"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "## 共享状态字段"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "发现门槛是真源 `product-discovery-gate.md`"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "not_contains": "用户只需做什么"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "not_contains": "本轮只让用户补一个事实"
+    }
+  ]
+}

@@ -368,28 +368,71 @@ def discovery_gate_payload(target: str, run_id: str, brief_path: str = "") -> di
         return {}
 
 
-def discovery_alignment_summary(payload: dict) -> tuple[str, str, str, str]:
+def summarize_queue(values: list, limit: int = 5) -> str:
+    cleaned = [str(item).strip() for item in values if str(item).strip()]
+    if not cleaned:
+        return "无"
+    shown = cleaned[:limit]
+    suffix = f"；另有 {len(cleaned) - limit} 项" if len(cleaned) > limit else ""
+    return "；".join(shown) + suffix
+
+
+def discovery_alignment_summary(payload: dict) -> tuple[str, str, str, str, str, str, str, str]:
     if not payload:
-        return "未运行", "未读取产品发现门槛", "先读取当前 run / brief，再判断产品信息缺口", "暂无"
+        return (
+            "未运行",
+            "未读取产品发现门槛",
+            "先读取当前 run / brief，再判断产品信息缺口",
+            "暂无",
+            "暂无",
+            "先建立产品作业卡：当前判断、证据边界、关键缺口队列、PMW 产品建议、PMW 信息架构建议和用户作业",
+            "先建立产品作业卡：当前判断、证据边界、关键缺口队列、PMW 产品建议、PMW 信息架构建议和用户作业",
+            "先建立产品作业卡：当前判断、证据边界、关键缺口队列、PMW 产品建议、PMW 信息架构建议和用户作业",
+        )
     missing = payload.get("missing_dimensions") or []
     covered = payload.get("covered_dimensions") or {}
     covered_labels = [str(item.get("label") or key) for key, item in covered.items()]
     missing_labels = [str(item.get("label") or item.get("dimension") or "") for item in missing]
+    queue_items = payload.get("gap_queue_items") or []
+    queue_labels = [str(item.get("label") or "") for item in queue_items if isinstance(item, dict)]
+    if not queue_labels:
+        queue_labels = [str(item) for item in (payload.get("gap_queue") or []) if str(item)]
     d_count = payload.get("directional_decisions_count", 0)
     d_required = payload.get("required_directional_decisions", 0)
     if payload.get("passed"):
         status = f"已对齐，覆盖 {len(covered_labels)} 个核心维度，方向性 D {d_count}/{d_required}"
         gap = "无"
+        gap_queue = "无"
         user_action = "继续进入当前准备度门槛"
+        product_advice = "保持产品作业卡随新截图、数据或 Zoon 变更更新"
+        ia_advice = "保持信息架构建议与最新 visual baseline、brief 和反指标同步"
     else:
-        gap_items = missing_labels[:3]
-        if not gap_items and d_count < d_required:
-            gap_items = [f"方向性 D 不足（{d_count}/{d_required}）"]
-        gap = "、".join(item for item in gap_items if item) or "产品发现深度不足"
+        if queue_labels:
+            gap = str(payload.get("current_blocker") or queue_labels[0])
+        elif missing_labels:
+            gap = missing_labels[0]
+        elif d_count < d_required:
+            gap = f"方向性 D 不足（{d_count}/{d_required}）"
+        else:
+            gap = "产品发现深度不足"
+        gap_queue = summarize_queue(queue_labels)
         status = f"需要补齐：{gap}"
-        user_action = str(payload.get("next_question") or "回到产品方向审查，补齐当前最大缺口")
+        homework_queue = payload.get("product_homework_queue") or []
+        if not homework_queue and payload.get("product_homework"):
+            homework_queue = [payload.get("product_homework")]
+        user_action = summarize_queue(homework_queue) if homework_queue else str(payload.get("next_question") or "回到产品方向审查，处理产品作业卡的当前主阻断")
+        product_advice_queue = payload.get("pmw_product_advice_queue") or []
+        if not product_advice_queue and payload.get("pmw_product_advice"):
+            product_advice_queue = [payload.get("pmw_product_advice")]
+        if not product_advice_queue and payload.get("pmw_advice"):
+            product_advice_queue = [payload.get("pmw_advice")]
+        product_advice = summarize_queue(product_advice_queue) if product_advice_queue else "先说明为什么该缺口影响真实问题、当前替代、反指标或原型可信度，再让用户补材料或拍板"
+        ia_advice_queue = payload.get("pmw_ia_advice_queue") or []
+        if not ia_advice_queue and payload.get("pmw_ia_advice"):
+            ia_advice_queue = [payload.get("pmw_ia_advice")]
+        ia_advice = summarize_queue(ia_advice_queue) if ia_advice_queue else "把当前主阻断映射到页面主路径、信息层级、信任证据和行动入口，再决定原型结构"
     covered_text = "、".join(covered_labels[:5]) if covered_labels else "暂无"
-    return status, gap, user_action, covered_text
+    return status, gap, user_action, covered_text, gap_queue, product_advice, ia_advice, str(payload.get("next_question") or "")
 
 
 def redact_sensitive(value: str) -> str:
@@ -726,10 +769,10 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
             f"{artifact_location(browser_evidence) or browser_evidence.get('summary') or '未记录位置'}"
         )
     else:
-        reference_event = latest_event(events, ["线上参考", "生产基线", "当前截图", "截图", "录屏"], {"evidence", "gate"})
+        reference_event = latest_event(events, ["线上参考", "生产基线", "当前截图", "截图", "关键节点截图"], {"evidence", "gate"})
         reference_has_visual_source = bool(reference_event) and contains_any(
             f"{reference_event.get('title', '')} {reference_event.get('summary', '')}",
-            ["生产基线", "当前截图", "截图", "录屏", "视觉基线"],
+            ["生产基线", "当前截图", "截图", "关键节点截图", "视觉基线"],
         )
         reference_text = f"{reference_event.get('status', '')} {reference_event.get('summary', '')}"
         reference_ready = bool(reference_event) and not contains_any(reference_text, ["缺失", "待补充", "未判断", "失败"])
@@ -741,7 +784,7 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
             True,
             redact_sensitive(str(reference_status)),
             redact_sensitive(str(reference_evidence)),
-            "继续" if reference_ready else "先判断是否承接线上流程；必要时补截图、录屏或相似状态页",
+            "继续" if reference_ready else "先判断是否承接线上流程；必要时补截图、关键节点截图或相似状态页",
             reference_ready,
         )
     )
@@ -1210,7 +1253,7 @@ READINESS_GATE_GUIDANCE: dict[str, tuple[str, str]] = {
     ),
     "线上参考": (
         "线上参考未判断会让 PMW 无法确认当前方案是否承接生产流程、状态页或既有样式。",
-        "补截图、录屏、相似页面，或确认不适用；之后才能判断视觉基线和原型可信度。",
+        "补截图、关键节点截图、相似页面，或确认不适用；之后才能判断视觉基线和原型可信度。",
     ),
     "视觉基线": (
         "缺视觉基线会影响现状替代、问题区域、保留项 / 可改项和原型可信度判断。",
@@ -1327,7 +1370,7 @@ def render_status(run_id: Optional[str]) -> str:
     latest_brief_path = str(project.get("latest_brief", ""))
     brief_name, brief_meta = latest_brief_summary(latest_brief_path)
     discovery_payload = discovery_gate_payload("alignment", chosen_run, latest_brief_path)
-    discovery_status, discovery_gap, discovery_action, discovery_covered = discovery_alignment_summary(discovery_payload)
+    discovery_status, discovery_gap, discovery_action, discovery_covered, discovery_gap_queue, discovery_product_advice, discovery_ia_advice, discovery_next_question = discovery_alignment_summary(discovery_payload)
     decisions = read_jsonl(root / "decisions.jsonl")[-5:]
     questions = read_jsonl(root / "questions.jsonl")[-5:]
     board = current_board_items(root, str(project.get("latest_brief", "")), str(project.get("latest_brief_version") or ""), chosen_run)
@@ -1362,8 +1405,12 @@ def render_status(run_id: Optional[str]) -> str:
         "",
         f"- 对齐状态：{discovery_status}",
         f"- 已覆盖：{discovery_covered}",
-        f"- 当前最大缺口：{discovery_gap}",
-        f"- 用户只需做什么：{discovery_action}",
+        f"- 当前主阻断：{discovery_gap}",
+        f"- 关键缺口队列：{discovery_gap_queue}",
+        f"- 产品作业队列：{discovery_action}",
+        f"- PMW 产品建议：{discovery_product_advice}",
+        f"- PMW 信息架构建议：{discovery_ia_advice}",
+        f"- 当前 Q / D：{discovery_next_question or '暂无'}",
         "",
         "## 产品简报与 Zoon",
         "",
@@ -1427,7 +1474,7 @@ def render_status_summary(run_id: Optional[str]) -> str:
     latest_brief_path = str(project.get("latest_brief", ""))
     brief_name, brief_meta = latest_brief_summary(latest_brief_path)
     discovery_payload = discovery_gate_payload("alignment", chosen_run, latest_brief_path)
-    discovery_status, discovery_gap, discovery_action, _discovery_covered = discovery_alignment_summary(discovery_payload)
+    discovery_status, discovery_gap, discovery_action, _discovery_covered, discovery_gap_queue, discovery_product_advice, discovery_ia_advice, discovery_next_question = discovery_alignment_summary(discovery_payload)
     target, verdict_cn, reason, impact, unlock, next_action, _rows = readiness_verdict(project, events, "auto")
     artifact_count = len(read_jsonl(root / "artifact-flow.jsonl"))
     board_count = len(current_board_items(root, str(project.get("latest_brief", "")), str(project.get("latest_brief_version") or ""), chosen_run))
@@ -1446,8 +1493,12 @@ def render_status_summary(run_id: Optional[str]) -> str:
         f"- 当前状态：{latest_status}",
         f"- 产品简报：{brief_name}（{brief_meta}）",
         f"- 产品信息对齐：{discovery_status}",
-        f"- 当前产品缺口：{discovery_gap}",
-        f"- 用户只需做什么：{discovery_action}",
+        f"- 当前主阻断：{discovery_gap}",
+        f"- 关键缺口队列：{discovery_gap_queue}",
+        f"- 产品作业队列：{discovery_action}",
+        f"- PMW 产品建议：{discovery_product_advice}",
+        f"- PMW 信息架构建议：{discovery_ia_advice}",
+        f"- 当前 Q / D：{discovery_next_question or '暂无'}",
         f"- Zoon：{zoon_summary}",
         f"- 准备度：{readiness_target_label(target)}，{verdict_cn}，{reason}",
         f"- {'判断价值' if verdict_cn in {'可出图', '可交付'} else '阻断影响'}：{impact}",

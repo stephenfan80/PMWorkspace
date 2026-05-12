@@ -48,6 +48,34 @@ DIMENSIONS = {
     },
 }
 
+PRODUCT_HOMEWORK = {
+    "product_role": "用一句话说明这个能力在业务链路里负责决策、建立信任、解释结果、承接转化还是交付，并写出它不负责什么。",
+    "target_trigger": "写出最强痛的一类用户和一个具体触发时刻，避免用泛泛的“所有用户”。",
+    "current_alternative": "补充用户今天不用这个方案时的真实替代路径，例如咨询、比价、等待、绕路或放弃。",
+    "pain_loss": "把痛点改写成可观察损失，例如时间、金钱、信任、转化、投诉或客服压力。",
+    "goal_countermetric": "补主目标和一个反指标，说明不能为了什么结果牺牲信任、质量或履约边界。",
+}
+
+PMW_PRODUCT_ADVICE = {
+    "product_role": "先判断链路角色再谈方案，否则方案会变成什么都想放的功能堆叠。",
+    "target_trigger": "把用户压到一类强痛人群和一个触发时刻，才能判断首屏应该先解决信任、效率还是转化。",
+    "current_alternative": "现状替代是新方案的真正竞争对手；说不清替代，就无法证明新方案更好。",
+    "pain_loss": "真实损失决定方案力度；损失不强时应收缩为轻量提示或实验，不要做重流程。",
+    "goal_countermetric": "反指标是原型可信度护栏，能防止为了转化画出过度承诺或虚假确定性。",
+}
+
+PMW_IA_ADVICE = {
+    "product_role": "先把页面主区域映射成链路角色：决策证据、信任解释、行动入口或交付状态；不属于主角色的信息降级到次级区。",
+    "target_trigger": "按触发时刻组织信息优先级：刚进入时先给判断依据，犹豫时补信任证据，准备行动时前置主按钮。",
+    "current_alternative": "把用户现有替代路径拆成页面节点，优先保留用户已经依赖的判断线索，再决定新增入口放在哪里。",
+    "pain_loss": "按损失类型决定信息层级：困惑优先解释，时间成本优先捷径，信任损耗优先证据，转化流失优先下一步。",
+    "goal_countermetric": "把主目标对应到主路径，把反指标放进关键节点护栏，例如价格解释、风险提示、不可承诺信息和退出路径。",
+}
+
+D_HOMEWORK = "完成一个方向性 D，明确范围、承诺、实验口径或交付责任。"
+D_PRODUCT_ADVICE = "先把会改变产品承诺的取舍拍板，再进入产品简报。"
+D_IA_ADVICE = "方向 D 会决定信息架构重心：是前置信任证据、收缩行动入口、增加解释层，还是保留现有结构。"
+
 DIRECTIONAL_DECISION_KEYWORDS = [
     "D",
     "拍板",
@@ -281,6 +309,44 @@ def build_payload(args: argparse.Namespace) -> dict:
         if not decision_ready and needs_decisions
         else ""
     )
+    missing_labels = [DIMENSIONS[dimension]["label"] for dimension in missing]
+    gap_queue_items = [
+        {
+            "dimension": dimension,
+            "label": DIMENSIONS[dimension]["label"],
+            "is_current_blocker": dimension == next_dimension,
+            "pmw_product_advice": PMW_PRODUCT_ADVICE[dimension],
+            "pmw_ia_advice": PMW_IA_ADVICE[dimension],
+            "product_homework": PRODUCT_HOMEWORK[dimension],
+        }
+        for dimension in missing
+    ]
+    if not missing and not decision_ready and needs_decisions:
+        missing_labels = [f"方向性 D 不足（{decision_count}/{args.min_decisions}）"]
+        gap_queue_items = [
+            {
+                "dimension": "directional_decision",
+                "label": missing_labels[0],
+                "is_current_blocker": True,
+                "pmw_product_advice": D_PRODUCT_ADVICE,
+                "pmw_ia_advice": D_IA_ADVICE,
+                "product_homework": D_HOMEWORK,
+            }
+        ]
+    elif missing and not decision_ready and needs_decisions:
+        d_label = f"方向性 D 不足（{decision_count}/{args.min_decisions}）"
+        missing_labels.append(d_label)
+        gap_queue_items.append(
+            {
+                "dimension": "directional_decision",
+                "label": d_label,
+                "is_current_blocker": False,
+                "pmw_product_advice": D_PRODUCT_ADVICE,
+                "pmw_ia_advice": D_IA_ADVICE,
+                "product_homework": D_HOMEWORK,
+            }
+        )
+    current_item = gap_queue_items[0] if gap_queue_items else {}
     return {
         "checked_at": now(),
         "run_id": run_id,
@@ -300,6 +366,16 @@ def build_payload(args: argparse.Namespace) -> dict:
         "required_directional_decisions": args.min_decisions if needs_decisions else 0,
         "d_exemption": d_exemption,
         "next_question": next_question,
+        "current_blocker": current_item.get("label", ""),
+        "gap_queue": missing_labels,
+        "gap_queue_items": gap_queue_items,
+        "product_homework": current_item.get("product_homework", ""),
+        "product_homework_queue": [item["product_homework"] for item in gap_queue_items],
+        "pmw_product_advice": current_item.get("pmw_product_advice", ""),
+        "pmw_product_advice_queue": [item["pmw_product_advice"] for item in gap_queue_items],
+        "pmw_ia_advice": current_item.get("pmw_ia_advice", ""),
+        "pmw_ia_advice_queue": [item["pmw_ia_advice"] for item in gap_queue_items],
+        "pmw_advice": current_item.get("pmw_product_advice", ""),
     }
 
 
@@ -326,6 +402,35 @@ def render_markdown(payload: dict) -> str:
             lines.append(f"- {item['label']}")
     else:
         lines.append("- 无")
+    queue = payload.get("gap_queue") or []
+    queue_items = payload.get("gap_queue_items") or []
+    lines.extend(["", "## 关键缺口队列"])
+    if queue_items:
+        for item in queue_items:
+            marker = "当前主阻断" if item.get("is_current_blocker") else "后续缺口"
+            lines.append(f"- {item.get('label', '')}（{marker}）")
+    elif queue:
+        for item in queue:
+            lines.append(f"- {item}")
+    else:
+        lines.append("- 无")
+    if queue_items:
+        lines.extend(["", "## PMW 产品建议"])
+        for item in queue_items:
+            lines.append(f"- {item.get('label', '')}：{item.get('pmw_product_advice', '')}")
+        lines.extend(["", "## PMW 信息架构建议"])
+        for item in queue_items:
+            lines.append(f"- {item.get('label', '')}：{item.get('pmw_ia_advice', '')}")
+        lines.extend(["", "## 产品作业队列"])
+        for item in queue_items:
+            lines.append(f"- {item.get('label', '')}：{item.get('product_homework', '')}")
+    else:
+        if payload.get("pmw_product_advice") or payload.get("pmw_advice"):
+            lines.extend(["", "## PMW 产品建议", f"- {payload.get('pmw_product_advice') or payload.get('pmw_advice')}"])
+        if payload.get("pmw_ia_advice"):
+            lines.extend(["", "## PMW 信息架构建议", f"- {payload['pmw_ia_advice']}"])
+        if payload.get("product_homework"):
+            lines.extend(["", "## 产品作业队列", f"- {payload['product_homework']}"])
     if payload.get("next_question"):
         lines.extend(["", "## 下一轮", f"- {payload['next_question']}"])
     lines.append("")

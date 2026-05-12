@@ -13,7 +13,7 @@
       "工作方式卡片说明本轮价值时刻",
       "价值判断说明证据边界和当前卡点为什么重要",
       "说明用户补齐后会解锁什么产物",
-      "README 说明 idea / 功能优化 / 原型 / PRD 四类入口如何获得价值"
+      "README 说明新想法 / 优化已有功能 / 原型 / PRD 入口如何获得价值"
     ],
     "forbidden_behaviors": [
       "只写流程阻断而不说明产品判断影响",
@@ -40,23 +40,23 @@
     },
     {
       "path": "README.zh-CN.md",
-      "contains": "PMWorkspace 第一次给你的价值不是“更快画图”"
+      "contains": "先用最少材料拿到可讨论方案；需要交付时，再把事实、截图、风险和复审补齐"
     },
     {
       "path": "README.zh-CN.md",
-      "contains": "**一句 idea：**"
+      "contains": "### 新想法"
     },
     {
       "path": "README.zh-CN.md",
-      "contains": "**已有功能优化：**"
+      "contains": "### 优化已有功能"
     },
     {
       "path": "README.zh-CN.md",
-      "contains": "**要原型：**"
+      "contains": "我想要的结果：<讨论稿 / 原型 / PRD / 交付稿>"
     },
     {
       "path": "README.zh-CN.md",
-      "contains": "**要 PRD / 交付稿：**"
+      "contains": "如果你要原型或 PRD，也可以直接写在“我想要的结果”里。"
     }
   ]
 }

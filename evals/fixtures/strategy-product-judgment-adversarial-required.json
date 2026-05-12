@@ -1,0 +1,42 @@
+{
+  "id": "strategy-product-judgment-adversarial-required",
+  "title": "策略审查必须把产品误判转成范围模式或拍板动作",
+  "category": "pm-strategy-review",
+  "primary_skill": "pm-strategy-review",
+  "prompt": "这个方案我们就按全量能力做吧，顺便把所有推荐、价格和权益都放进首屏。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要拍板",
+    "must_stop": true,
+    "gate": "产品判断对抗校验",
+    "required_behaviors": [
+      "说明如果现在直接做会错在哪里",
+      "标出最危险的产品误判、想当然、理解偏差和证据不足处",
+      "把校验结果转成范围模式、当前 D 或补证据动作",
+      "不能只列抽象风险"
+    ],
+    "forbidden_behaviors": [
+      "默认接受全量范围",
+      "跳过路径对比直接选择方案",
+      "把未验证推荐、价格或权益写成确定承诺"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/adversarial-review.md",
+      "contains": "## 产品判断对抗校验"
+    },
+    {
+      "path": "pm-strategy-review/SKILL.md",
+      "contains": "每轮必须做产品判断对抗校验"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "策略审查：每轮必须输出 `产品判断对抗校验`"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "进入范围模式前必须给 2-3 条路径并完成产品判断对抗校验"
+    }
+  ]
+}

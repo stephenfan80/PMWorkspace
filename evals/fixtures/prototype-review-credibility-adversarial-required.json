@@ -1,0 +1,42 @@
+{
+  "id": "prototype-review-credibility-adversarial-required",
+  "title": "原型复审必须检查原型是否把假设画成事实",
+  "category": "prototype-review",
+  "primary_skill": "pm-prototype-review",
+  "prompt": "复审一张原型图：图上展示了 AI 已经准确推荐车型、价格优惠和权益库存，但 brief 里这些都只是待验证假设。",
+  "expected": {
+    "mode": "deep",
+    "status": "待复审",
+    "must_stop": false,
+    "gate": "原型可信度对抗复审",
+    "required_behaviors": [
+      "检查真实问题一致性、假设视觉化风险和反指标冲突",
+      "识别不可虚构项是否被画入界面",
+      "发现假设被画成事实时至少标为需要 PM 拍板",
+      "发现无法兑现能力或不可虚构违规时不能可通过"
+    ],
+    "forbidden_behaviors": [
+      "只按视觉美观通过",
+      "把未验证数据和能力当成已支持",
+      "把产品判断风险保存成普通审美偏好"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/prototype-quality-review.md",
+      "contains": "## 原型可信度对抗复审"
+    },
+    {
+      "path": "pm-prototype-review/SKILL.md",
+      "contains": "原型可信度对抗复审："
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "原型复审：必须执行 `原型可信度对抗复审`"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "原型把假设画成事实至少需要 PM 拍板"
+    }
+  ]
+}

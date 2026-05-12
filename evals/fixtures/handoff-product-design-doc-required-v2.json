@@ -29,7 +29,7 @@
     },
     {
       "path": "pm-handoff/SKILL.md",
-      "contains": "产品设计文档必须读取 prototype-board"
+      "contains": "产品设计文档必须读取 `product_brief` 中的产品判断对抗校验、`prototype_review` 中的原型可信度对抗复审，以及 prototype-board"
     },
     {
       "path": "pm-handoff/SKILL.md",

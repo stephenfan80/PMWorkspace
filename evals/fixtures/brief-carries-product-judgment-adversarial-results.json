@@ -1,0 +1,38 @@
+{
+  "id": "brief-carries-product-judgment-adversarial-results",
+  "title": "产品简报必须承接产品判断对抗校验结论",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "把刚才产品方向审查后的结论整理成产品简报，里面有几个假设还没有证据。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "产品判断对抗校验",
+    "required_behaviors": [
+      "把想当然、理解偏差和证据缺口写入事实/假设边界",
+      "把需要降级为假设的判断写入风险或待验证",
+      "供后续原型和产品设计文档读取",
+      "不能把对抗校验风险藏成普通备注"
+    ],
+    "forbidden_behaviors": [
+      "把假设写成已验证事实",
+      "只保留 PM 判断摘要而丢失对抗校验",
+      "未确认就进入 image-2 prompt"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "产品简述还必须接收产品评估中的 `产品判断对抗校验` 结论"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "把 `$pm-jobs` 或 `$pm-strategy-review` 的 `产品判断对抗校验` 写入事实/假设边界"
+    },
+    {
+      "path": "pmworkspace-shared/references/artifact-flow.md",
+      "contains": "`PM 判断摘要`、`产品作业`、`产品判断对抗校验` 和 `原型可信度对抗复审` 不新增独立 artifact 类型"
+    }
+  ]
+}

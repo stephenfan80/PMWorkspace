@@ -1,0 +1,51 @@
+{
+  "id": "dashboard-status-product-alignment-pack",
+  "title": "状态摘要必须整合产品信息对齐包",
+  "category": "readiness-dashboard",
+  "primary_skill": "pm-workspace",
+  "prompt": "PMW 项目信息分散，助手需要先读取一个压缩上下文再决定下一步。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要补充",
+    "must_stop": false,
+    "gate": "产品信息对齐包",
+    "required_behaviors": [
+      "状态摘要包含产品信息对齐",
+      "状态摘要包含当前产品缺口",
+      "把用户只需做什么压缩成一行"
+    ],
+    "forbidden_behaviors": [
+      "只能分别读取 artifact-flow 和 readiness 才知道下一步",
+      "状态摘要不显示产品发现缺口"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "discovery_gate_payload"
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "产品信息对齐"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-workbench-map.md",
+      "contains": "统一产品上下文包"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=context-pack-test; root=\"$PMW_HOME/projects/$PMW_PROJECT_SLUG\"; mkdir -p \"$root/runs\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\"}\\n' > \"$root/project.json\"; printf '{\"ts\":\"2099-01-01T00:00:00Z\",\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"需要补充\",\"title\":\"产品信息对齐\",\"summary\":\"初始输入\"}\\n' > \"$root/runs/r1.jsonl\"; out=$(bin/pmw-dashboard status); printf '%s\\n' \"$out\"; grep -q '产品信息对齐' <<< \"$out\"; grep -q '当前产品缺口' <<< \"$out\"; grep -q '产品定位与链路角色' <<< \"$out\"; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0,
+      "contains": [
+        "产品信息对齐",
+        "当前产品缺口",
+        "产品定位与链路角色"
+      ]
+    }
+  ]
+}

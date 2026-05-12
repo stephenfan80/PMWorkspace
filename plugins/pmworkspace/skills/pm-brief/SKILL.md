@@ -53,6 +53,7 @@ description: |
 ### 默认用户可见输出字段
 
 - `产品简述 / 产品简报`
+- `产品信息对齐卡`
 - `核心价值判断`
 - `PM 判断摘要`
 - `产品判断对抗校验`
@@ -63,6 +64,7 @@ description: |
 ### 内部审计字段（默认不展示）
 
 - `产品简报门槛`
+- `产品信息对齐包`
 - `支持信息`
 - `缺失门槛`
 - `事实/假设边界`
@@ -89,6 +91,7 @@ for _CANDIDATE in "$PWD/bin" "$PWD/pmworkspace-shared/bin" "$HOME/.codex/skills/
 done
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-update-check" 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-brief >/dev/null 2>&1 || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" user-summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" flow 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-discovery-gate" ] && "$_PMW_BIN/pmw-discovery-gate" check --target brief 2>/dev/null || true
@@ -111,7 +114,7 @@ done
 11. Read `../pmworkspace-shared/references/zoon-drift-check.md`.
 12. Read `../pmworkspace-shared/references/product-readiness-dashboard.md`; if the next skill will be `$pm-prototype-shotgun` or `$pm-handoff`, run `pmw-dashboard readiness --target prototype|handoff` when available, use the verdict for gating, and only show the short verdict / first blocker by default.
 13. Read `../pmworkspace-shared/references/product-memory.md` and use `pmw-memory user-summary` plus `pmw-memory summary` when available. If memory changes phrasing or recommendation, explicitly say `基于过往偏好...` or `基于本地产品认知...`; memory cannot override the current brief, Zoon, anti-metric, non-fiction boundary, online reference gate, or missing gate.
-14. 先建立产品简述控制器，记录 `来源门槛`、`已完成门槛`、`缺失门槛`、`事实/假设边界`、`PM 判断摘要`、`产品判断对抗校验`、`产品作业`、`策略决策写入`、`产品发现深度`、`简报深度`、`上游产物`、`本轮产物`、`下游可读`、`产物流动`、`下一技能` 和 `证据状态`；再写业务简述，避免把审计日志堆成正文。
+14. 先建立 `产品信息对齐包`，再进入产品简述控制器。控制器要求：先建立产品简述控制器，记录 `来源门槛`、`已完成门槛`、`缺失门槛`、`事实/假设边界`、`PM 判断摘要`、`产品判断对抗校验`、`产品作业`、`策略决策写入`、`5 个核心事实维度`、`当前最大缺口`、`产品发现深度`、`简报深度`、`上游产物`、`本轮产物`、`下游可读`、`产物流动`、`下一技能` 和 `证据状态`；再写业务简述，避免把审计日志堆成正文。
 14. 如果来自 `$pm-jobs` 或 `$pm-strategy-review`，先接收上游输出的前提挑战、现状替代、不做推演、路径对比、范围模式、选中路径、本周期验证、风险、范围、价值交换、信任/风险、反指标、可行性、定位、业务冲突、产品判断对抗校验和待决策队列。
 15. 如果基础事实仍缺失，退回 `$pm-jobs`，只展开一个当前 Q，不写完整产品简报；如果 `pmw-discovery-gate check --target brief` 阻断，也退回 `$pm-jobs` 补齐产品发现维度。基础事实包括产品定位与链路角色、目标人群、触发时刻、用户现状、当前替代方案、真实问题与当前损失、主目标、反指标、约束、数据可用性和不可虚构项。如果策略取舍仍未拍板，退回 `$pm-strategy-review`，只展开一个当前 D。
 16. 确认已完成工作目标模式、多轮 Q 诊断、产品发现深度门槛、至少 2 个方向性 D（或记录 D 豁免原因）、前提确认和必要策略拍板；如果缺失，只输出短对齐摘要、缺失门槛和下一技能，不写完整产品简报。一个 `Q` 加一个 `D` 不能代表产品发现完成；`D` 不能替代事实诊断。
@@ -119,7 +122,7 @@ done
     - 已有功能迭代的 brief 必须说明新方案为什么优于当前线上。如果说不清，只能建议保留 / 微调线上方案或继续补证据，不能把 Agent 生成的新结构写成推荐方案。
 17. 如果已有 Zoon URL，先运行 `pmw-zoon drift` 或读取最新 Zoon 快照；Zoon 漂移如果改变目标、反指标、不可虚构项、范围、用户承诺或方案方向，确认状态退回 `待确认`，并回到 `$pm-jobs` 或 `$pm-strategy-review`。
 18. 根据模糊程度、风险等级和证据状态选择快速版、标准版或深度版产品简述 / 产品简报。简报深度不等于内容长度；深度只代表证据和风险处理深度，不代表把审计日志写进正文。
-19. 用户可见输出必须先给业务版 `产品简述 / 产品简报`，默认包含 `真实问题`、`PM 判断摘要`、`产品判断对抗校验`、`证据状态`、`目标用户`、`当前替代 / 损失`、`选中路径`、`范围模式`、`本周期验证`、`主目标`、`反指标`、`不可虚构项`、`原型范围`、`待验证项与产品作业`。这些业务内容不能默认藏进 `支持信息`；本地路径、run、Zoon 状态表、产物流动和完整证据边界仍进入内部审计。
+19. 用户可见输出必须先给业务版 `产品简述 / 产品简报`，默认包含 `产品信息对齐卡`、`真实问题`、`PM 判断摘要`、`产品判断对抗校验`、`证据状态`、`目标用户`、`当前替代 / 损失`、`选中路径`、`范围模式`、`本周期验证`、`主目标`、`反指标`、`不可虚构项`、`原型范围`、`待验证项与产品作业`。这些业务内容不能默认藏进 `支持信息`；本地路径、run、Zoon 状态表、产物流动和完整证据边界仍进入内部审计。
     - Zoon、线上参考、检索来源、已保存资产和证据边界默认进入内部审计；业务正文只保留会影响产品判断的现状、竞品、痛点、替代方案和解决思路。
 20. `产品核心信息` 可以作为简报摘要保留，但不能替代产品简述正文；产品简述必须讲清真实问题、证据状态、用户痛点、当前替代/损失、选中路径、范围模式、本周期验证和待验证项。
 21. 互联网案例启发只保留 `可借鉴原则`、`不可照搬` 和 `对原型影响`；参考来源放入内部审计。最佳实践不能覆盖当前 brief、Zoon、线上截图、反指标或不可虚构项。
@@ -161,6 +164,13 @@ Return the smallest useful product-manager brief. 用户可见第一屏只放业
 
 ```text
 产品简述 / 产品简报：
+- 产品信息对齐卡：
+  - 已知事实：
+  - 暂定判断：
+  - 证据边界：
+  - 当前最大缺口：
+  - 用户只需确认 / 补充：
+  - 补齐后解锁：
 - 真实问题：
 - PM 判断摘要：
 - 产品判断对抗校验：

@@ -53,6 +53,7 @@ description: |
 
 - `工作方式`
 - `产品路径`
+- `产品信息对齐卡`
 - `当前判断`
 - `我对真实问题的判断`
 - `判断价值`
@@ -70,6 +71,7 @@ description: |
 ### 内部审计字段（默认不展示）
 
 - `问题定义模式`
+- `产品信息对齐包`
 - `前提挑战`
 - `现状替代`
 - `不做推演`
@@ -97,6 +99,7 @@ for _CANDIDATE in "$PWD/bin" "$PWD/pmworkspace-shared/bin" "$HOME/.codex/skills/
 done
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-update-check" 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-jobs >/dev/null 2>&1 || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" user-summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-question-tuning" ] && "$_PMW_BIN/pmw-question-tuning" summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-discovery-gate" ] && "$_PMW_BIN/pmw-discovery-gate" check --target alignment 2>/dev/null || true
@@ -113,7 +116,8 @@ done
 6. Read `../pmworkspace-shared/references/pm-eval-system.md` so diagnostic output preserves PMWorkspace gate contracts.
 7. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 产品方向审查内核 stage fields.
 8. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-jobs` 且没有当前 run，再创建 runtime run.
-9. Build the 产品方向审查控制器 from `product-office-hours.md`: 产品路径、执行深度、工作目标模式、当前判断、判断价值、前提挑战、现状替代、不做推演、路径对比、范围模式、Agent 可协助事项、需要用户补充事项、已知事实、假设驱动项、证据状态、线上参考需求、视觉基线状态、我对真实问题的判断、PM 判断摘要、产品判断对抗校验、阻断影响、解锁动作、产品作业、当前 Q、当前 D、产品简述状态、三条产品路径计划状态、下一技能。
+9. 先建立 `产品信息对齐包`，再建立产品方向审查控制器。脚本可用时读取 `pmw-dashboard status` 和 `pmw-discovery-gate check --target alignment`；脚本不可用时手动整理已知事实、证据边界、5 个核心事实维度、当前最大缺口、对抗校验状态、用户只需补什么和补齐后解锁什么。这个包是本轮判断的入口，不是审计附录。
+10. Build the 产品方向审查控制器 from `product-office-hours.md`: 产品路径、执行深度、工作目标模式、产品信息对齐包、当前判断、判断价值、前提挑战、现状替代、不做推演、路径对比、范围模式、Agent 可协助事项、需要用户补充事项、已知事实、假设驱动项、证据状态、线上参考需求、视觉基线状态、我对真实问题的判断、PM 判断摘要、产品判断对抗校验、阻断影响、解锁动作、产品作业、当前 Q、当前 D、产品简述状态、三条产品路径计划状态、下一技能。
 10. 如果来自 `$pm-autoplan`，只解决自动评审交给 `$pm-jobs` 的最早门槛：工作目标、场景、Q 诊断或前提确认；不要假装后续产品简报、原型或交付已完成。
 11. 先确认或推断 `工作目标模式`：验证价值、优化线上指标、业务评审、设计评审或研发交付；如果无法从上下文判断，用一个选择题询问。
 12. 判断 `问题定义模式`：创业验证、内部业务优化或设计讨论；如果输入同时命中多个模式，按风险选择更严格的模式，并在输出里说明模式来源。
@@ -122,7 +126,7 @@ done
 15. Read `../pmworkspace-shared/references/scenario-experts.md` and select only the dominant expert lens.
 16. Read `../pmworkspace-shared/references/browser-evidence.md` when the user provides URL、线上页面、竞品或 Zoon 参考。
 17. Read `../pmworkspace-shared/references/production-reference-gate.md`，判断新页面是否仍需要线上参考。
-18. If the request is an existing-feature iteration, require current production screenshots, screen recording, or equivalent visual baseline before proceeding.
+18. If the request is an existing-feature iteration, require current production screenshots, screen recording, or equivalent visual baseline before proceeding. 缺线上基线时，不输出 `方案 A / 方案 B / 方案 C`、三条产品路径或原型计划；只输出产品信息对齐卡、为什么缺基线会影响判断、证据请求和补齐后解锁。
 19. 如果新页面承接线上流程、结果状态或生产样式，要求截图、录屏、相似页面参考，或用户明确确认没有线上参考。
 20. 不把产品澄清等同于连续提问。先按产品方向审查内核判断当前最早任务：前提挑战、现状替代、不做推演、路径对比、范围模式、材料整理、证据请求、截图结构拆解、数据口径梳理、访谈提纲、最佳实践检索、产品简述确认，或必要的 `Q` / `D`。
 21. 如果当前任务是证据门槛，停在证据请求；不要继续问后续产品问题。
@@ -172,6 +176,14 @@ done
 
 ```text
 产品方向审查：
+- 产品信息对齐卡：
+  - 已知事实：
+  - 暂定判断：
+  - 证据边界：
+  - 当前最大缺口：
+  - 用户只需补什么：
+  - Agent 可以先帮你做什么：
+  - 补齐后解锁：
 - 核心价值暂判：
 - 我对真实问题的判断：
 - 判断价值：

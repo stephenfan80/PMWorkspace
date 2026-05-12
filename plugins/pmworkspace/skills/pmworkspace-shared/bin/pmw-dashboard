@@ -352,6 +352,46 @@ def read_text(path_value: str) -> str:
     return path.read_text(encoding="utf-8", errors="ignore")
 
 
+def discovery_gate_payload(target: str, run_id: str, brief_path: str = "") -> dict:
+    command = [str(SCRIPT_DIR / "pmw-discovery-gate"), "check", "--target", target, "--json"]
+    if run_id:
+        command.extend(["--run", run_id])
+    if brief_path:
+        command.extend(["--brief", brief_path])
+    try:
+        result = subprocess.run(command, text=True, capture_output=True, check=False)
+    except Exception:
+        return {}
+    try:
+        return json.loads(result.stdout)
+    except Exception:
+        return {}
+
+
+def discovery_alignment_summary(payload: dict) -> tuple[str, str, str, str]:
+    if not payload:
+        return "未运行", "未读取产品发现门槛", "先读取当前 run / brief，再判断产品信息缺口", "暂无"
+    missing = payload.get("missing_dimensions") or []
+    covered = payload.get("covered_dimensions") or {}
+    covered_labels = [str(item.get("label") or key) for key, item in covered.items()]
+    missing_labels = [str(item.get("label") or item.get("dimension") or "") for item in missing]
+    d_count = payload.get("directional_decisions_count", 0)
+    d_required = payload.get("required_directional_decisions", 0)
+    if payload.get("passed"):
+        status = f"已对齐，覆盖 {len(covered_labels)} 个核心维度，方向性 D {d_count}/{d_required}"
+        gap = "无"
+        user_action = "继续进入当前准备度门槛"
+    else:
+        gap_items = missing_labels[:3]
+        if not gap_items and d_count < d_required:
+            gap_items = [f"方向性 D 不足（{d_count}/{d_required}）"]
+        gap = "、".join(item for item in gap_items if item) or "产品发现深度不足"
+        status = f"需要补齐：{gap}"
+        user_action = str(payload.get("next_question") or "回到产品方向审查，补齐当前最大缺口")
+    covered_text = "、".join(covered_labels[:5]) if covered_labels else "暂无"
+    return status, gap, user_action, covered_text
+
+
 def redact_sensitive(value: str) -> str:
     value = re.sub(r"(token=)[^&\s]+", r"\1[redacted]", value)
     value = re.sub(r"(ownerSecret[=: ]*)[^&\s]+", r"\1[redacted]", value)
@@ -1284,7 +1324,10 @@ def render_status(run_id: Optional[str]) -> str:
     project = read_json(root / "project.json")
     chosen_run, events = read_run(run_id)
     latest_status = project.get("latest_run_status") or (events[-1].get("status") if events else "暂无")
-    brief_name, brief_meta = latest_brief_summary(str(project.get("latest_brief", "")))
+    latest_brief_path = str(project.get("latest_brief", ""))
+    brief_name, brief_meta = latest_brief_summary(latest_brief_path)
+    discovery_payload = discovery_gate_payload("alignment", chosen_run, latest_brief_path)
+    discovery_status, discovery_gap, discovery_action, discovery_covered = discovery_alignment_summary(discovery_payload)
     decisions = read_jsonl(root / "decisions.jsonl")[-5:]
     questions = read_jsonl(root / "questions.jsonl")[-5:]
     board = current_board_items(root, str(project.get("latest_brief", "")), str(project.get("latest_brief_version") or ""), chosen_run)
@@ -1314,6 +1357,13 @@ def render_status(run_id: Optional[str]) -> str:
         f"- 生成时间：{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}",
         "",
         render_readiness_section(run_id, "auto", "##").rstrip(),
+        "",
+        "## 产品信息对齐包",
+        "",
+        f"- 对齐状态：{discovery_status}",
+        f"- 已覆盖：{discovery_covered}",
+        f"- 当前最大缺口：{discovery_gap}",
+        f"- 用户只需做什么：{discovery_action}",
         "",
         "## 产品简报与 Zoon",
         "",
@@ -1374,7 +1424,10 @@ def render_status_summary(run_id: Optional[str]) -> str:
     project = read_json(root / "project.json")
     chosen_run, events = read_run(run_id)
     latest_status = project.get("latest_run_status") or (events[-1].get("status") if events else "暂无")
-    brief_name, brief_meta = latest_brief_summary(str(project.get("latest_brief", "")))
+    latest_brief_path = str(project.get("latest_brief", ""))
+    brief_name, brief_meta = latest_brief_summary(latest_brief_path)
+    discovery_payload = discovery_gate_payload("alignment", chosen_run, latest_brief_path)
+    discovery_status, discovery_gap, discovery_action, _discovery_covered = discovery_alignment_summary(discovery_payload)
     target, verdict_cn, reason, impact, unlock, next_action, _rows = readiness_verdict(project, events, "auto")
     artifact_count = len(read_jsonl(root / "artifact-flow.jsonl"))
     board_count = len(current_board_items(root, str(project.get("latest_brief", "")), str(project.get("latest_brief_version") or ""), chosen_run))
@@ -1392,6 +1445,9 @@ def render_status_summary(run_id: Optional[str]) -> str:
         f"- 项目：{project.get('display_name') or pathlib.Path.cwd().name}",
         f"- 当前状态：{latest_status}",
         f"- 产品简报：{brief_name}（{brief_meta}）",
+        f"- 产品信息对齐：{discovery_status}",
+        f"- 当前产品缺口：{discovery_gap}",
+        f"- 用户只需做什么：{discovery_action}",
         f"- Zoon：{zoon_summary}",
         f"- 准备度：{readiness_target_label(target)}，{verdict_cn}，{reason}",
         f"- {'判断价值' if verdict_cn in {'可出图', '可交付'} else '阻断影响'}：{impact}",

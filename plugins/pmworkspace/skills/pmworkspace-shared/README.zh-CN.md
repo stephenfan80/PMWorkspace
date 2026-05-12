@@ -73,6 +73,7 @@ PMWorkspace 接住的就是这种混乱时刻：不是替你跳过思考，而�
 - **方案方向：** 默认最少 3 个方案，不只是换配色，而是在产品策略、信息架构、交互模型、信任模型或关键任务路径上给出不同解法。
 - **移动端优先原型图：** 无线上截图时使用 `standard_first_screen` 模板；有生产截图 / `visual_baseline` 时必须使用 `physical_longboard` 模板和截图物理像素长板。一个方案、一个屏幕、单独一张图。
 - **线上证据记录：** 把线上流程截图、状态页、竞品参考和协作文档漂移证据纳入同一条产品链路。
+- **产品信息对齐包：** 每轮先把已知事实、证据边界、5 个核心事实维度、当前最大缺口和用户只需做的一步收束到同一处，避免在分散材料里误判已对齐。
 - **产品准备度判断：** 在出图或交付前统一检查产品简报、协作文档、线上参考、方案差异、不可虚构项和复审状态；默认只给结论、第一条阻断原因、阻断影响和解锁动作，完整表格用 `--details` 展开。
 - **多角色复审结论：** 从策略、信任 / 风险、设计系统、数据可行性等角度指出能不能通过、要不要重出、哪里需要拍板。
 - **产品设计文档 / 交付稿：** 把通过复审的方向整理成产品设计文档、精简 PRD、设计交付、实验验证或研发交付材料。
@@ -232,7 +233,7 @@ $pm-workspace
 - **Product Readiness Dashboard：** `pmw-dashboard readiness --target prototype|handoff` 在出图 / 交付前统一给出准备度判断，覆盖产品简报、可选 AI 协作文档、线上参考、方案差异、设计规范目标、不可虚构项和复审状态；默认是简洁 verdict、阻断影响和解锁动作，完整门槛表用 `--details`。
 - **Product Artifact Flow：** `pmw-artifact` 记录下游可读产物，让产品简报、原型清单、复审结论和交付稿能流向下一个技能，而不是靠对话记忆重新推断；默认只给摘要，完整链路用 `pmw-artifact flow --details`。
 - **Browser Evidence Lite：** 线上流程截图、状态页、竞品参考、设计启发和协作文档漂移证据统一登记为 `browser_evidence` 产物，复用 `pmw-artifact`，不新增浏览器证据子系统。
-- **Evidence Dashboard：** `pmw-dashboard status` 默认输出中文状态摘要；`pmw-dashboard status --details` 才展开产品简报版本、协作文档状态、线上参考、假设、不可虚构项、原型清单、复审结论和问题偏好。
+- **Evidence Dashboard：** `pmw-dashboard status` 默认输出中文状态摘要和产品信息对齐包；`pmw-dashboard status --details` 才展开产品简报版本、协作文档状态、线上参考、假设、不可虚构项、原型清单、复审结论和问题偏好。
 - **Prototype Shotgun Board：** `pmw-prototype-board` 登记每个独立 image-2 图片单元，并用表格比较方案。
 - **PM Review Army / Product Review Squad：** 原型复审先运行策略、信任 / 风险、设计系统、数据可行性四个可插拔专家独立检查；高风险或深度交付时，可追加 CEO、Eng、Design、DX、安全、QA、发布工程师短结论。
 - **Skill Doc Generator：** `pmw-gen-skill-docs` 从 manifest 生成并检查 SKILL.md 共享契约区块，统一 preamble、共享门槛、必读协议和输出字段。

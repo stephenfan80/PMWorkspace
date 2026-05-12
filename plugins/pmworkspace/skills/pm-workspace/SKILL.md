@@ -51,6 +51,7 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 
 - `工作方式`
 - `本轮价值时刻`
+- `产品信息对齐`
 - `产品路径`
 - `业务判断`
 - `当前需要确认`
@@ -61,6 +62,7 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 
 - `当前模式`
 - `产品路径`
+- `产品信息对齐包`
 - `执行深度`
 - `当前门槛`
 - `下一技能`
@@ -109,6 +111,7 @@ if [ -n "$_PMW_BIN" ]; then
   _UPD=$("$_PMW_BIN/pmw-update-check" 2>/dev/null || true)
   [ -n "$_UPD" ] && echo "$_UPD"
   "$_PMW_BIN/pmw-log" usage pm-workspace >/dev/null 2>&1 || true
+  [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
   [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" flow 2>/dev/null || true
 fi
 ```
@@ -131,6 +134,8 @@ After routing, record the full routing contract from `routing.md` in local audit
 
 If platform scripts are available, read `pmw-artifact flow --details` for routing context, but do not include the flow table in default user output. A routed child skill should know the latest `上游产物`, expected `本轮产物`, and `下游可读` target from local audit instead of relying only on conversation memory.
 
+Before routing to any downstream skill, establish the `产品信息对齐包` from `pm-workbench-map.md`. If `pmw-dashboard status` is available, treat its `产品信息对齐` and `当前产品缺口` lines as the compact project context. If it says core product facts are missing, route to `$pm-jobs` / evidence intake instead of proposing方案方向 or prototypes.
+
 ## Welcome And First Run
 
 If the user invokes `$pm-workspace` with no concrete product task, asks what PMWorkspace does, or has just installed it, read `../pmworkspace-shared/references/welcome-guide.md` and give the welcome message plus the first choice menu.
@@ -144,7 +149,9 @@ If the user provides a product task in the same message, skip the welcome menu a
 - 深度交付模式写图片提示词或生成图片前，必须先完成产品简报对齐。
 - 深度交付模式中，产品简报不是 `已对齐` 时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
 - 快速成型模式中，出图前必须列出关键假设、反指标和不可虚构项，并获得用户确认“按这些假设继续”；输出状态写成 `基于假设，可讨论`，不能写成最终 PRD 或已验证事实。
+- 每次进入产品任务，先输出或内部建立 `产品信息对齐包`：已知事实、暂定判断、证据边界、当前最大缺口、用户只需补什么、补齐后解锁什么。不能只凭最后一句话继续下游。
 - 用户提供截图或线上参考时，只更新视觉基线和线上参考状态；不要自动产出完整 md 方案、HTML 或原型图。
+- 已有功能迭代缺线上截图 / 录屏 / 等价视觉基线时，不输出 `方案 A / 方案 B / 方案 C` 或三条产品路径；只输出产品信息对齐卡、证据请求、Agent 拿到材料后会如何拆解和补齐后解锁的下一步。
 - 用户选择某个方案方向后再上传截图时，只代表“方向选择 + 新证据输入”，不代表产品简报已对齐。必须先做线上基线接收：拆解当前线上优势、问题区域、必须保留、可以改、暂不应改、为什么新方案会优于当前线上；之后回到 `$pm-brief` 做产品简报确认，不能直接进入 `$pm-prototype-shotgun`。
 - 已有功能迭代默认先保护线上体验。若当前线上方案明显比 Agent 新方案更简洁、更符合信息密度或更可信，PMW 必须建议保留 / 微调线上方案，而不是为了出图重画。
 - `Q` / `D` 只作为关键卡点的交互方式，不是完整产品发现流程；Agent 可以先协助整理材料、拆解截图、生成访谈提纲、梳理数据口径、检索最佳实践和归纳路径机会。拍板问题使用 `D`，一次只展开一个，问完必须等待用户回答。

@@ -913,13 +913,14 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .asset-gallery {
   overflow: hidden;
+  padding-bottom: clamp(76px, 10vw, 150px);
 }
 
 .asset-track {
   display: flex;
   gap: 16px;
   width: max-content;
-  padding: 8px clamp(20px, 5vw, 72px) clamp(96px, 12vw, 160px);
+  padding: 8px clamp(20px, 5vw, 72px) clamp(150px, 16vw, 260px);
 }
 
 .asset-card {
@@ -1178,18 +1179,58 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .dot:nth-child(2) { background: var(--champagne); }
 .dot:nth-child(3) { background: var(--cyan); }
 
-.terminal-code {
+.copy-options {
+  display: grid;
+  gap: 12px;
   padding-top: 16px;
-  color: rgba(247, 242, 233, .78);
-  font-family: var(--mono);
-  font-size: 12px;
-  line-height: 1.9;
-  overflow-wrap: anywhere;
 }
 
-.terminal-code .comment { color: rgba(247, 242, 233, .36); }
-.terminal-code .prompt { color: var(--champagne); }
-.terminal-code .cmd { color: var(--ink); }
+.copy-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid rgba(247, 242, 233, .12);
+  background: rgba(255,255,255,.035);
+  padding: 16px;
+}
+
+.copy-card b {
+  display: block;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.copy-card span {
+  display: block;
+  margin-top: 5px;
+  color: var(--faint);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.copy-btn {
+  min-height: 38px;
+  border: 1px solid rgba(230, 201, 143, .48);
+  background: var(--champagne);
+  color: #080808;
+  padding: 0 14px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .26s var(--ease), filter .26s var(--ease);
+}
+
+.copy-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.04);
+}
+
+.copy-btn.is-copied {
+  filter: brightness(.92);
+}
 
 footer {
   display: flex;
@@ -1421,6 +1462,7 @@ footer {
     gap: 12px;
     padding-left: 18px;
     padding-right: 18px;
+    padding-bottom: 120px;
   }
 
   .asset-card {
@@ -1431,6 +1473,15 @@ footer {
   .finale-box {
     min-height: auto;
     padding: 28px 18px;
+  }
+
+  .copy-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .copy-btn {
+    width: 100%;
   }
 
   footer {
@@ -1757,15 +1808,21 @@ footer {
           <span class="dot"></span>
           <span class="dot"></span>
         </div>
-        <div class="terminal-code">
-          <div><span class="comment"># 在 Codex Plugins 中搜索安装</span></div>
-          <div><span class="prompt">$</span> <span class="cmd">AI 产品工作站</span></div>
-          <br>
-          <div><span class="comment"># 或添加 GitHub 本地插件</span></div>
-          <div><span class="prompt">$</span> <span class="cmd">codex plugin marketplace add stephenfan80/PMWorkspace</span></div>
-          <br>
-          <div><span class="comment"># 安装后从这里开始</span></div>
-          <div><span class="prompt">$</span> <span class="cmd">使用 $pm-workspace 显示欢迎引导</span></div>
+        <div class="copy-options">
+          <div class="copy-card">
+            <div>
+              <b>使用插件方式</b>
+              <span>把这段复制给 AI：使用 AI 产品工作站（PMW）插件开始。</span>
+            </div>
+            <button class="copy-btn magnetic" type="button" data-copy="使用 AI 产品工作站（PMW）插件开始。">复制</button>
+          </div>
+          <div class="copy-card">
+            <div>
+              <b>使用技能方式</b>
+              <span>把这段复制给 AI：使用 $pm-workspace 显示欢迎引导。</span>
+            </div>
+            <button class="copy-btn magnetic" type="button" data-copy="使用 $pm-workspace 显示欢迎引导。">复制</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1971,6 +2028,32 @@ footer {
       const box = card.getBoundingClientRect();
       card.style.setProperty("--mx", `${event.clientX - box.left}px`);
       card.style.setProperty("--my", `${event.clientY - box.top}px`);
+    });
+  });
+
+  document.querySelectorAll(".copy-btn").forEach((button) => {
+    const initialText = button.textContent;
+    button.addEventListener("click", async () => {
+      const text = button.dataset.copy || "";
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        const fallback = document.createElement("textarea");
+        fallback.value = text;
+        fallback.setAttribute("readonly", "");
+        fallback.style.position = "fixed";
+        fallback.style.opacity = "0";
+        document.body.appendChild(fallback);
+        fallback.select();
+        document.execCommand("copy");
+        fallback.remove();
+      }
+      button.textContent = "已复制";
+      button.classList.add("is-copied");
+      window.setTimeout(() => {
+        button.textContent = initialText;
+        button.classList.remove("is-copied");
+      }, 1600);
     });
   });
 })();

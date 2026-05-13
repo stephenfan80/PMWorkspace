@@ -76,6 +76,102 @@ D_HOMEWORK = "完成一个方向性 D，明确范围、承诺、实验口径或�
 D_PRODUCT_ADVICE = "先把会改变产品承诺的取舍拍板，再进入产品简报。"
 D_IA_ADVICE = "方向 D 会决定信息架构重心：是前置信任证据、收缩行动入口、增加解释层，还是保留现有结构。"
 
+ONLINE_BASELINE_TERMS = [
+    "当前页面",
+    "已有功能",
+    "现有功能",
+    "已上线",
+    "线上功能",
+    "当前链路",
+    "线上链路",
+    "线上替代路径",
+    "汽车之家其他页面",
+    "其他页面",
+    "当前线上",
+    "线上截图",
+    "关键节点截图",
+    "视觉基线",
+    "线上参考",
+    "承接线上流程",
+    "生产样式",
+]
+
+HARD_ONLINE_BASELINE_TERMS = [
+    "当前页面",
+    "已有功能",
+    "现有功能",
+    "已上线",
+    "线上功能",
+    "当前链路",
+    "线上链路",
+    "线上替代路径",
+    "汽车之家其他页面",
+    "其他页面",
+    "当前线上",
+    "线上截图",
+    "关键节点截图",
+    "视觉基线",
+    "承接线上流程",
+    "生产样式",
+]
+
+COMPETITOR_BASELINE_TERMS = [
+    "竞品平台",
+    "竞品参考",
+    "竞品截图",
+    "竞品 URL",
+    "竞品URL",
+    "竞品可借鉴",
+    "竞品平台查看",
+    "跳到竞品",
+]
+
+ONLINE_BASELINE_PROVIDED_TERMS = [
+    "已提供线上参考",
+    "线上参考状态：已提供",
+    "线上参考状态: 已提供",
+    "已登记 visual_baseline",
+    "视觉基线状态：已登记",
+    "视觉基线状态: 已登记",
+    "browser_evidence",
+    "visual_baseline",
+]
+
+NO_REFERENCE_CONFIRMED_TERMS = [
+    "无线上参考已确认",
+    "没有线上参考，按新页面概念稿推进",
+    "线上参考状态：不适用",
+    "线上参考状态: 不适用",
+]
+
+BASELINE_NEGATIVE_TERMS = [
+    "缺线上截图",
+    "缺少线上截图",
+    "缺视觉基线",
+    "缺失待补充",
+    "待补充基线",
+    "未提供线上",
+    "未提供截图",
+    "没有提供线上截图",
+    "未给截图",
+    "读取失败",
+]
+
+ONLINE_BASELINE_HOMEWORK = (
+    "补当前线上截图 / 关键节点截图 / 线上 URL / Figma 或等价视觉基线；"
+    "如果暂时没有，只能保存待确认简报或明确按假设推进，不能标记已对齐或进入原型。"
+)
+COMPETITOR_BASELINE_HOMEWORK = (
+    "补竞品截图、URL 或具体可借鉴点；如果暂无材料，PMW 可做轻量最佳实践摘要，"
+    "但必须标注仅作启发，不覆盖本轮事实。"
+)
+BASELINE_PRODUCT_ADVICE = (
+    "先看线上 / 竞品基线再判断方案，避免把当前有效入口改掉，或把竞品启发误当成本轮事实。"
+)
+BASELINE_IA_ADVICE = (
+    "用基线拆出当前入口、信息密度、必须保留项、可改项和竞品不可照搬边界，再决定首屏结构。"
+)
+
 DIRECTIONAL_DECISION_KEYWORDS = [
     "D",
     "拍板",
@@ -225,6 +321,114 @@ def collect_evidence_texts(args: argparse.Namespace, run_id: str) -> list[tuple[
     return [(source, text) for source, text in texts if text.strip()]
 
 
+def combined_evidence_text(args: argparse.Namespace, run_id: str) -> str:
+    return "\n".join(text for _source, text in collect_evidence_texts(args, run_id))
+
+
+def contains_any(text: str, terms: list[str]) -> bool:
+    return any(term.lower() in text.lower() for term in terms)
+
+
+def has_real_url_or_image_reference(text: str) -> bool:
+    if re.search(r"https?://[^\s)）>]+", text):
+        return True
+    return bool(re.search(r"[/~][^\s)）>]+?\.(?:png|jpe?g|webp|gif|fig|figma)\b", text, flags=re.I))
+
+
+def artifact_rows(run_id: str) -> list[dict]:
+    return [row for row in read_jsonl(project_dir() / "artifact-flow.jsonl") if row_matches_run(row, run_id)]
+
+
+def artifact_is_available(row: dict) -> bool:
+    text = " ".join(str(row.get(key) or "") for key in ["kind", "title", "status", "path", "url", "summary"])
+    if contains_any(text, BASELINE_NEGATIVE_TERMS + ["待补充", "未采集", "失败"]):
+        return False
+    if str(row.get("kind") or "") == "visual_baseline":
+        return bool(str(row.get("path") or row.get("url") or row.get("summary") or "").strip())
+    if str(row.get("kind") or "") == "browser_evidence":
+        return bool(str(row.get("path") or row.get("url") or row.get("summary") or "").strip())
+    return False
+
+
+def artifact_is_online_baseline(row: dict) -> bool:
+    if not artifact_is_available(row):
+        return False
+    kind = str(row.get("kind") or "")
+    if kind == "visual_baseline":
+        return True
+    row_text = " ".join(str(row.get(key) or "") for key in ["kind", "title", "status", "path", "url", "summary"])
+    return kind == "browser_evidence" and not contains_any(row_text, COMPETITOR_BASELINE_TERMS)
+
+
+def has_online_baseline(args: argparse.Namespace, run_id: str, text: str) -> bool:
+    if any(artifact_is_online_baseline(row) for row in artifact_rows(run_id)):
+        return True
+    if contains_any(text, ONLINE_BASELINE_PROVIDED_TERMS) and not contains_any(text, BASELINE_NEGATIVE_TERMS):
+        return True
+    no_reference_confirmed = contains_any(text, NO_REFERENCE_CONFIRMED_TERMS)
+    hard_existing_signal = contains_any(text, HARD_ONLINE_BASELINE_TERMS)
+    if no_reference_confirmed and not hard_existing_signal:
+        return True
+    for line in text.splitlines():
+        if (
+            has_real_url_or_image_reference(line)
+            and contains_any(line, ONLINE_BASELINE_TERMS)
+            and not contains_any(line, COMPETITOR_BASELINE_TERMS + BASELINE_NEGATIVE_TERMS)
+        ):
+            return True
+    return False
+
+
+def has_competitor_material(run_id: str, text: str) -> bool:
+    for row in artifact_rows(run_id):
+        row_text = " ".join(str(row.get(key) or "") for key in ["kind", "title", "status", "path", "url", "summary"])
+        if contains_any(row_text, COMPETITOR_BASELINE_TERMS) and artifact_is_available(row):
+            return True
+    if contains_any(text, ["竞品参考：已提供", "竞品参考: 已提供", "竞品截图已提供"]):
+        return True
+    return contains_any(text, COMPETITOR_BASELINE_TERMS) and has_real_url_or_image_reference(text)
+
+
+def brief_declares_aligned(path_value: str) -> bool:
+    text = read_text(path_value)
+    return bool(re.search(r"确认状态[：:]\s*已对齐", text))
+
+
+def baseline_state(args: argparse.Namespace, run_id: str) -> dict:
+    text = combined_evidence_text(args, run_id)
+    online_required = contains_any(text, ONLINE_BASELINE_TERMS)
+    competitor_requested = contains_any(text, COMPETITOR_BASELINE_TERMS)
+    online_provided = has_online_baseline(args, run_id, text)
+    competitor_provided = has_competitor_material(run_id, text)
+    online_missing = online_required and not online_provided
+    competitor_missing = competitor_requested and not competitor_provided
+    aligned_brief = brief_declares_aligned(args.brief)
+    blocks_target = False
+    if args.target == "alignment":
+        blocks_target = online_missing or competitor_missing
+    elif args.target == "prototype":
+        blocks_target = online_missing
+    elif args.target == "brief":
+        blocks_target = online_missing and aligned_brief
+    status = "不适用"
+    if online_required:
+        status = "已提供线上参考" if online_provided else "缺失待补充"
+    competitor_status = "不适用"
+    if competitor_requested:
+        competitor_status = "已提供竞品参考" if competitor_provided else "待补充"
+    return {
+        "online_baseline_required": online_required,
+        "online_baseline_status": status,
+        "online_baseline_missing": online_missing,
+        "competitor_baseline_requested": competitor_requested,
+        "competitor_baseline_status": competitor_status,
+        "competitor_baseline_missing": competitor_missing,
+        "brief_declares_aligned": aligned_brief,
+        "baseline_blocks_target": blocks_target,
+        "can_save_pending_brief": bool(args.target == "brief" and online_missing and not aligned_brief),
+    }
+
+
 def explicit_discovery_dimensions(run_id: str) -> dict[str, list[str]]:
     covered: dict[str, list[str]] = {dimension: [] for dimension in DIMENSIONS}
     for row in read_jsonl(project_dir() / "discovery.jsonl"):
@@ -300,9 +504,10 @@ def build_payload(args: argparse.Namespace) -> dict:
     covered = covered_dimensions(args, run_id)
     missing = [dimension for dimension, sources in covered.items() if not sources]
     decision_count, d_exemption = count_directional_decisions(run_id)
+    baseline = baseline_state(args, run_id)
     needs_decisions = args.target in {"brief", "alignment"}
     decision_ready = decision_count >= args.min_decisions or (d_exemption and args.allow_d_exemption)
-    passed = not missing and (decision_ready or not needs_decisions)
+    passed = not missing and (decision_ready or not needs_decisions) and not baseline["baseline_blocks_target"]
     next_dimension = missing[0] if missing else ""
     next_question = DIMENSIONS[next_dimension]["question"] if next_dimension else (
         "D：请拍板产品定位 / 范围、价值交换 / 信任承诺或数据承诺 / 转化动作中的下一个方向性取舍。"
@@ -346,8 +551,27 @@ def build_payload(args: argparse.Namespace) -> dict:
                 "product_homework": D_HOMEWORK,
             }
         )
+    if baseline["online_baseline_missing"] or baseline["competitor_baseline_missing"]:
+        homework_parts = []
+        if baseline["online_baseline_missing"]:
+            homework_parts.append(ONLINE_BASELINE_HOMEWORK)
+        if baseline["competitor_baseline_missing"]:
+            homework_parts.append(COMPETITOR_BASELINE_HOMEWORK)
+        baseline_item = {
+            "dimension": "online_competitor_baseline",
+            "label": "线上 / 竞品基线",
+            "is_current_blocker": bool(baseline["baseline_blocks_target"] or not gap_queue_items),
+            "pmw_product_advice": BASELINE_PRODUCT_ADVICE,
+            "pmw_ia_advice": BASELINE_IA_ADVICE,
+            "product_homework": " ".join(homework_parts),
+        }
+        if baseline_item["is_current_blocker"]:
+            for item in gap_queue_items:
+                item["is_current_blocker"] = False
+        gap_queue_items.insert(0, baseline_item)
+        missing_labels.insert(0, baseline_item["label"])
     current_item = gap_queue_items[0] if gap_queue_items else {}
-    return {
+    payload = {
         "checked_at": now(),
         "run_id": run_id,
         "target": args.target,
@@ -377,6 +601,8 @@ def build_payload(args: argparse.Namespace) -> dict:
         "pmw_ia_advice_queue": [item["pmw_ia_advice"] for item in gap_queue_items],
         "pmw_advice": current_item.get("pmw_product_advice", ""),
     }
+    payload.update(baseline)
+    return payload
 
 
 def render_markdown(payload: dict) -> str:
@@ -388,6 +614,8 @@ def render_markdown(payload: dict) -> str:
         f"- Verdict：{'通过' if payload['passed'] else '阻断'}（{payload['verdict']}）",
         f"- 当前 run：{payload['run_id'] or '暂无'}",
         f"- 方向性 D：{payload['directional_decisions_count']} / {payload['required_directional_decisions']}",
+        f"- 线上参考：{payload.get('online_baseline_status', '不适用')}",
+        f"- 竞品参考：{payload.get('competitor_baseline_status', '不适用')}",
         "",
         "## 已覆盖维度",
     ]

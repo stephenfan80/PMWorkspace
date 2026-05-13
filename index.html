@@ -1,1033 +1,669 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PMWorkspace — 把一句话推进成可评审的产品方案</title>
+<title>AI 产品工作站（PMW）— 把模糊想法推进成可交付的产品方案</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:         #19171a;
-  --bg2:        #201e21;
-  --bg3:        #2b282c;
-  --line:       rgba(255,255,255,0.07);
-  --line2:      rgba(255,255,255,0.12);
-  --text:       #f0ede8;
-  --muted:      rgba(240,237,232,0.5);
-  --muted2:     rgba(240,237,232,0.28);
-  --accent:     oklch(0.76 0.15 52);
-  --accent-dim: oklch(0.76 0.15 52 / 0.12);
-  --accent-border: oklch(0.76 0.15 52 / 0.3);
-  --teal:       oklch(0.76 0.13 195);
-  --teal-dim:   oklch(0.76 0.13 195 / 0.1);
-  --sans:       'DM Sans', sans-serif;
-  --mono:       'DM Mono', monospace;
+  --bg:       #0e0c09;
+  --bg2:      #171310;
+  --bg3:      #201c18;
+  --bg4:      #2a2420;
+  --wire:     rgba(255,235,210,0.07);
+  --wire2:    rgba(255,235,210,0.12);
+  --ink:      #f6ece0;
+  --ink2:     rgba(246,236,224,0.55);
+  --ink3:     rgba(246,236,224,0.28);
+  --a:        oklch(0.76 0.15 52);
+  --a-dim:    oklch(0.76 0.15 52 / 0.13);
+  --a-ring:   oklch(0.76 0.15 52 / 0.30);
+  --a-glow:   oklch(0.76 0.15 52 / 0.18);
+  --teal:     oklch(0.76 0.13 195);
+  --teal-dim:    oklch(0.76 0.13 195 / 0.10);
+  --teal-border: oklch(0.76 0.13 195 / 0.28);
+  --red:      oklch(0.65 0.14 22);
+  --red-dim:  oklch(0.65 0.14 22 / 0.15);
+  --serif:    'Noto Serif SC', 'Songti SC', Georgia, serif;
+  --sans:     'DM Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --mono:     'DM Mono', 'SF Mono', monospace;
+  --r:        14px;
 }
 
 html { scroll-behavior: smooth; }
-body {
-  font-family: var(--sans);
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-  overflow-x: hidden;
-}
+body { font-family: var(--sans); background: var(--bg); color: var(--ink); line-height: 1.6; overflow-x: hidden; }
 
-/* ── NAV ─────────────────────────────── */
+/* ─── NAV ─── */
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0 48px; height: 60px;
-  background: rgba(25,23,26,0.88);
-  backdrop-filter: blur(18px);
-  border-bottom: 1px solid var(--line);
+  padding: 0 52px; height: 56px;
+  background: rgba(14,12,9,0.88); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--wire);
 }
-.nav-logo {
-  font-family: var(--mono); font-size: 14px; font-weight: 500;
-  color: var(--text); text-decoration: none;
-  display: flex; align-items: center; gap: 9px;
+.nav-id {
+  font-family: var(--mono); font-size: 13px; color: var(--ink);
+  text-decoration: none; display: flex; align-items: center; gap: 9px;
+  white-space: nowrap;
 }
-.nav-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--accent); box-shadow: 0 0 10px var(--accent);
-  animation: pulse 2.6s ease-in-out infinite;
+.nav-pip {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--a); box-shadow: 0 0 8px var(--a);
+  animation: pip 2.8s ease-in-out infinite;
 }
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.55;transform:scale(0.8)} }
-.nav-links { display: flex; gap: 32px; align-items: center; }
-.nav-links a {
-  font-size: 13.5px; color: var(--muted);
-  text-decoration: none; transition: color .2s;
+@keyframes pip { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+.nav-links { display: flex; gap: 28px; }
+.nav-links a { font-size: 13px; color: var(--ink2); text-decoration: none; transition: color .2s; }
+.nav-links a:hover { color: var(--ink); }
+.nav-get {
+  font-size: 12.5px; font-weight: 600; padding: 7px 18px; border-radius: 7px;
+  background: var(--a); color: #180e00; text-decoration: none;
+  transition: opacity .2s, transform .15s;
 }
-.nav-links a:hover { color: var(--text); }
-.nav-cta {
-  font-size: 13px; font-weight: 700;
-  padding: 8px 20px; border-radius: 8px;
-  background: var(--accent); color: #1a1000;
-  text-decoration: none; transition: opacity .2s, transform .15s;
-  display: inline-flex; align-items: center; gap: 6px;
-}
-.nav-cta:hover { opacity: .88; transform: translateY(-1px); }
+.nav-get:hover { opacity: .85; transform: translateY(-1px); }
 
-/* ── HERO ─────────────────────────────── */
+/* ─── SHARED ─── */
+.w { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+.rule { height: 1px; background: var(--wire); }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--a);
+  border: 1px solid var(--a-ring); border-radius: 100px;
+  padding: 4px 14px; margin-bottom: 20px;
+}
+.chip::before { content:''; width:5px; height:5px; border-radius:50%; background:var(--a); flex-shrink:0; }
+
+.sh {
+  font-family: var(--serif);
+  font-size: clamp(28px, 3.4vw, 46px); font-weight: 700;
+  letter-spacing: -.02em; line-height: 1.12; text-wrap: balance;
+}
+.sh em { font-style: normal; color: var(--a); }
+.ssub {
+  margin-top: 12px; font-size: 16.5px; color: var(--ink2);
+  max-width: 540px; line-height: 1.68; font-weight: 300; text-wrap: pretty;
+}
+
+/* ─── HERO ─── */
 .hero {
-  min-height: 100vh;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  text-align: center;
-  padding: 140px 24px 100px;
-  position: relative; overflow: hidden;
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  padding: 140px 24px 72px; position: relative; overflow: hidden;
 }
 .hero-grid {
   position: absolute; inset: 0;
-  background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse 90% 75% at 50% 38%, black 20%, transparent 100%);
+  background-image: linear-gradient(var(--wire) 1px,transparent 1px),
+                    linear-gradient(90deg,var(--wire) 1px,transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(ellipse 80% 65% at 50% 36%,black 10%,transparent 100%);
 }
 .hero-glow {
-  position: absolute; width: 800px; height: 800px; border-radius: 50%;
-  background: radial-gradient(circle, oklch(0.76 0.15 52 / 0.07) 0%, transparent 68%);
-  top: 50%; left: 50%; transform: translate(-50%, -54%);
-  pointer-events: none;
+  position: absolute; width: 1000px; height: 700px; border-radius: 50%;
+  background: radial-gradient(ellipse,oklch(0.76 0.15 52 / 0.07) 0%,transparent 65%);
+  top: 32%; left: 50%; transform: translate(-50%,-50%); pointer-events: none;
 }
-.hero-eyebrow {
-  position: relative; z-index: 1;
-  display: inline-flex; align-items: center; gap: 8px;
-  font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em;
-  color: var(--accent); border: 1px solid var(--accent-border);
-  border-radius: 100px; padding: 5px 16px; margin-bottom: 36px;
-  animation: fadeUp .8s ease both;
-}
-.hero-eyebrow::before {
-  content: ''; width: 5px; height: 5px; border-radius: 50%;
-  background: var(--accent); display: inline-block;
-}
+.hero-chip { animation: up .7s ease both; }
 .hero-h1 {
   position: relative; z-index: 1;
-  font-size: clamp(46px, 6.5vw, 92px);
-  font-weight: 700; line-height: 1.05;
-  letter-spacing: -0.035em; text-wrap: balance;
-  animation: fadeUp .8s .08s ease both;
+  font-family: var(--serif);
+  font-size: clamp(36px, 5.8vw, 82px); font-weight: 900;
+  letter-spacing: -.03em; line-height: 1.06; text-wrap: balance;
+  animation: up .7s .08s ease both;
 }
-.hero-h1 em { font-style: normal; color: var(--accent); }
-.hero-h1 .soft { color: var(--muted); }
-.hero-desc {
+.hero-h1 em { font-style: normal; color: var(--a); }
+.hero-h1 .dim { color: var(--ink3); }
+.hero-p {
   position: relative; z-index: 1;
-  margin-top: 28px;
-  font-size: clamp(16px, 1.8vw, 20px);
-  color: var(--muted); font-weight: 300;
-  max-width: 620px; line-height: 1.7;
-  text-wrap: pretty;
-  animation: fadeUp .8s .18s ease both;
+  margin-top: 22px; font-size: clamp(15px, 1.6vw, 18px);
+  color: var(--ink2); font-weight: 300; max-width: 560px; line-height: 1.72; text-wrap: pretty;
+  animation: up .7s .16s ease both;
 }
-.hero-desc strong { color: var(--text); font-weight: 500; }
+.hero-p strong { color: var(--ink); font-weight: 500; }
+
 .hero-btns {
-  position: relative; z-index: 1;
-  margin-top: 48px;
-  display: flex; gap: 14px; align-items: center;
-  justify-content: center; flex-wrap: wrap;
-  animation: fadeUp .8s .28s ease both;
+  position: relative; z-index: 1; margin-top: 40px;
+  display: flex; gap: 12px; align-items: center; justify-content: center; flex-wrap: wrap;
+  animation: up .7s .23s ease both;
 }
-.btn-a {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: var(--accent); color: #1a1000;
-  font-weight: 700; font-size: 16px;
-  padding: 14px 32px; border-radius: 8px;
-  text-decoration: none;
-  box-shadow: 0 0 40px oklch(0.76 0.15 52 / 0.28);
+.btn-fill {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--a); color: #180e00; font-weight: 700; font-size: 14.5px;
+  padding: 13px 28px; border-radius: 8px; text-decoration: none;
+  box-shadow: 0 0 32px var(--a-glow);
   transition: opacity .2s, transform .15s, box-shadow .2s;
 }
-.btn-a:hover { opacity:.9; transform:translateY(-2px); box-shadow:0 0 56px oklch(0.76 0.15 52 / 0.42); }
-.btn-b {
-  display: inline-flex; align-items: center; gap: 8px;
-  color: var(--text); font-size: 15px;
-  padding: 14px 28px; border-radius: 8px;
-  text-decoration: none;
-  border: 1px solid var(--line2);
-  background: rgba(255,255,255,0.04);
+.btn-fill:hover { opacity:.87; transform:translateY(-2px); box-shadow:0 0 48px oklch(0.76 0.15 52 / 0.3); }
+.btn-line {
+  display: inline-flex; align-items: center; gap: 7px;
+  color: var(--ink); font-size: 14px; padding: 13px 24px; border-radius: 8px;
+  text-decoration: none; border: 1px solid var(--wire2);
+  background: rgba(255,255,255,0.03);
   transition: background .2s, border-color .2s, transform .15s;
 }
-.btn-b:hover { background:rgba(255,255,255,0.07); border-color:rgba(255,255,255,0.18); transform:translateY(-2px); }
+.btn-line:hover { background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.18); transform:translateY(-2px); }
 
-/* hero proof bar */
-.hero-proof {
+/* input→output diagram */
+.hero-diagram {
   position: relative; z-index: 1;
-  margin-top: 72px;
-  display: flex; align-items: center; gap: 0;
-  animation: fadeUp .8s .38s ease both;
+  margin-top: 60px; display: flex; align-items: center; gap: 0;
+  animation: up .7s .30s ease both;
 }
-.proof-item {
-  padding: 0 40px; text-align: center;
+.diag-group { display: flex; flex-direction: column; gap: 6px; }
+.diag-pill {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .04em;
+  padding: 5px 12px; border-radius: 6px; white-space: nowrap;
+  background: var(--bg3); border: 1px solid var(--wire); color: var(--ink2);
 }
-.proof-item:first-child { padding-left: 0; }
-.proof-item:last-child { padding-right: 0; }
-.proof-num {
-  font-family: var(--mono); font-size: 30px; font-weight: 500;
-  color: var(--text); letter-spacing: -0.03em; line-height: 1;
+.diag-pill.out {
+  background: var(--a-dim); border-color: var(--a-ring); color: var(--a);
 }
-.proof-num span { color: var(--accent); }
-.proof-label { font-size: 12px; color: var(--muted); margin-top: 4px; letter-spacing: 0.03em; }
-.proof-sep { width: 1px; height: 44px; background: var(--line2); flex-shrink: 0; }
-
-/* ── DIVIDER ──────────────────────────── */
-.divider { height: 1px; background: var(--line); max-width: 100%; }
-
-/* ── SHARED SECTION TOKENS ───────────── */
-.section {
-  max-width: 1120px; margin: 0 auto;
-  padding: 96px 24px;
+.diag-center {
+  padding: 0 28px; display: flex; flex-direction: column; align-items: center; gap: 8px;
 }
-.section-label {
-  font-family: var(--mono); font-size: 11px;
-  letter-spacing: 0.12em; color: var(--accent);
-  text-transform: uppercase; margin-bottom: 16px;
-}
-.section-h2 {
-  font-size: clamp(30px, 3.8vw, 50px);
-  font-weight: 700; letter-spacing: -0.028em;
-  line-height: 1.1; text-wrap: balance;
-}
-.section-sub {
-  margin-top: 14px; font-size: 17px; color: var(--muted);
-  max-width: 580px; line-height: 1.65; font-weight: 300;
-  text-wrap: pretty;
+.diag-arrow { color: var(--a); font-size: 18px; opacity: .7; }
+.diag-core {
+  font-family: var(--mono); font-size: 12px; letter-spacing: .06em;
+  color: var(--a); background: var(--a-dim); border: 1px solid var(--a-ring);
+  border-radius: 8px; padding: 10px 18px; white-space: nowrap;
+  box-shadow: 0 0 20px var(--a-glow);
 }
 
-/* ── PAIN ─────────────────────────────── */
-.pain-grid {
-  margin-top: 56px;
+/* ─── PAIN ─── */
+.pain-sec { padding: 96px 0; }
+.pain-header { margin-bottom: 44px; }
+.pain-bento {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  overflow: hidden;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 12px;
 }
 .pain-card {
-  background: var(--bg);
-  padding: 32px 28px;
-  display: flex; flex-direction: column; gap: 14px;
-  transition: background .2s;
+  background: var(--bg2); border: 1px solid var(--wire);
+  border-radius: var(--r); padding: 28px 24px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: background .2s, border-color .2s;
+  cursor: default;
 }
-.pain-card:hover { background: var(--bg2); }
-.pain-number {
-  font-family: var(--mono); font-size: 11px;
-  letter-spacing: 0.08em; color: var(--muted2);
+.pain-card:hover { background: var(--bg3); border-color: var(--wire2); }
+.pain-card.wide { grid-column: span 2; }
+.pain-n {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em; color: var(--ink3);
 }
-.pain-q {
-  font-size: 17px; font-weight: 600;
-  letter-spacing: -0.01em; line-height: 1.4;
-  color: var(--text);
-}
-.pain-body {
-  font-size: 14px; color: var(--muted); line-height: 1.65; font-weight: 300;
-}
+.pain-title { font-size: 16px; font-weight: 600; color: var(--ink); line-height: 1.38; letter-spacing: -.008em; }
+.pain-body { font-size: 13.5px; color: var(--ink2); line-height: 1.65; font-weight: 300; text-wrap: pretty; }
 
-/* ── BRIDGE ───────────────────────────── */
-.bridge-section {
-  background: var(--bg2);
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+/* ─── DEFINITION ─── */
+.def-outer {
+  background: var(--bg2); border-top: 1px solid var(--wire); border-bottom: 1px solid var(--wire);
   padding: 80px 24px;
 }
-.bridge-inner {
-  max-width: 1120px; margin: 0 auto;
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 80px; align-items: center;
+.def-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: 1.05fr 1fr; gap: 64px; align-items: start;
 }
-.bridge-quote {
-  font-size: clamp(22px, 3vw, 36px);
-  font-weight: 700; line-height: 1.25;
-  letter-spacing: -0.025em; text-wrap: balance;
+.def-q {
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.6vw, 32px); font-weight: 700;
+  letter-spacing: -.02em; line-height: 1.24; text-wrap: balance;
 }
-.bridge-quote em { font-style: normal; color: var(--accent); }
-.bridge-desc {
-  margin-top: 20px; font-size: 16px;
-  color: var(--muted); line-height: 1.7; font-weight: 300;
-  text-wrap: pretty;
-}
-.bridge-list {
-  list-style: none; display: flex; flex-direction: column; gap: 14px;
-}
-.bridge-list li {
+.def-q em { font-style: normal; color: var(--a); }
+.def-body { margin-top: 16px; font-size: 15.5px; color: var(--ink2); line-height: 1.72; font-weight: 300; text-wrap: pretty; }
+.def-steps { display: flex; flex-direction: column; gap: 0; }
+.def-step {
   display: flex; align-items: flex-start; gap: 14px;
-  font-size: 15px; color: var(--muted);
+  padding: 16px 0; border-bottom: 1px solid var(--wire);
 }
-.bridge-check {
-  width: 22px; height: 22px; border-radius: 50%;
-  background: var(--accent-dim); border: 1px solid var(--accent-border);
+.def-step:last-child { border-bottom: none; }
+.def-num {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  background: var(--bg3); border: 1px solid var(--wire2);
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; margin-top: 1px;
-  font-size: 11px; color: var(--accent);
+  font-family: var(--mono); font-size: 10.5px; color: var(--ink3); margin-top: 1px;
 }
-.bridge-list li strong { color: var(--text); font-weight: 600; }
+.def-step-title { font-size: 14.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+.def-step-sub { font-size: 13px; color: var(--ink2); line-height: 1.55; font-weight: 300; }
 
-/* ── OUTPUT ───────────────────────────── */
-.output-grid {
-  margin-top: 56px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+/* ─── VS ─── */
+.vs-sec { padding: 96px 0 72px; }
+.vs-layout {
+  margin-top: 44px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  border: 1px solid var(--wire); border-radius: 18px; overflow: hidden;
 }
-.output-card {
+.vs-pane { padding: 44px 40px; display: flex; flex-direction: column; gap: 28px; }
+.vs-pane.left  { background: var(--bg2); border-right: 1px solid var(--wire); }
+.vs-pane.right { background: var(--bg); }
+
+.vs-tag {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
+  padding: 4px 13px; border-radius: 100px;
+}
+.vs-tag.plain { background: rgba(255,255,255,.04); color: var(--ink3); border: 1px solid var(--wire); }
+.vs-tag.pmw   { background: var(--a-dim); color: var(--a); border: 1px solid var(--a-ring); }
+.vs-tag::before { content:''; width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.vs-tag.plain::before { background: var(--ink3); }
+.vs-tag.pmw::before   { background: var(--a); }
+
+.vs-headline {
+  font-family: var(--serif);
+  font-size: clamp(18px, 2vw, 26px); font-weight: 700;
+  letter-spacing: -.018em; line-height: 1.22; color: var(--ink); text-wrap: balance;
+}
+.vs-pane.right .vs-headline { color: var(--a); }
+
+/* story rows */
+.vs-story { display: flex; flex-direction: column; gap: 0; }
+.vs-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 0; border-bottom: 1px solid var(--wire);
+}
+.vs-row:last-child { border-bottom: none; }
+.vs-icon {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;
+  display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700;
+}
+.vs-pane.left  .vs-icon { background: var(--red-dim); color: var(--red); border: 1px solid oklch(0.65 0.14 22 / 0.25); }
+.vs-pane.right .vs-icon { background: var(--a-dim); color: var(--a); border: 1px solid var(--a-ring); }
+.vs-row-title { font-size: 13.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px; line-height: 1.3; }
+.vs-pane.left .vs-row-title { color: var(--ink3); text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 1px; }
+.vs-row-body { font-size: 12.5px; color: var(--ink2); line-height: 1.55; font-weight: 300; }
+.vs-pane.left .vs-row-body { color: var(--ink3); }
+
+.vs-banner {
+  padding: 16px 18px; border-radius: 10px;
+  background: var(--a-dim); border: 1px solid var(--a-ring);
+}
+.vs-banner-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--a); margin-bottom: 6px; }
+.vs-banner-text { font-size: 13.5px; color: var(--ink); font-weight: 500; line-height: 1.5; }
+
+/* ─── MEMORY ─── */
+.mem-outer {
   background: var(--bg2);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 28px 24px;
-  display: flex; flex-direction: column; gap: 12px;
-  transition: border-color .2s, transform .2s;
+  border-top: 1px solid var(--wire); border-bottom: 1px solid var(--wire);
+  padding: 96px 24px; position: relative; overflow: hidden;
 }
-.output-card:hover { border-color: var(--line2); transform: translateY(-3px); }
-.output-tag {
-  font-family: var(--mono); font-size: 11px;
-  letter-spacing: 0.07em; color: var(--accent);
-  background: var(--accent-dim); border: 1px solid var(--accent-border);
-  border-radius: 4px; padding: 2px 9px; width: fit-content;
+.mem-glow {
+  position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+  width: 1000px; height: 700px; border-radius: 50%;
+  background: radial-gradient(ellipse,oklch(0.76 0.15 52 / 0.05) 0%,transparent 65%);
+  pointer-events: none;
 }
-.output-name {
-  font-size: 16px; font-weight: 600;
-  letter-spacing: -0.01em; color: var(--text);
-}
-.output-desc { font-size: 13.5px; color: var(--muted); line-height: 1.6; font-weight: 300; }
-
-/* ── HOW ──────────────────────────────── */
-.how-section { padding-top: 80px; }
-.how-steps {
-  margin-top: 64px;
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-  position: relative;
-}
-.how-steps::before {
-  content: '';
-  position: absolute;
-  top: 28px; left: calc(100% / 6);
-  right: calc(100% / 6);
-  height: 1px;
-  background: linear-gradient(90deg, var(--accent) 0%, var(--teal) 100%);
-  opacity: 0.25;
-}
-.how-step {
-  padding: 0 32px 0 0;
-  display: flex; flex-direction: column; gap: 16px;
-}
-.how-step:last-child { padding-right: 0; }
-.how-node {
-  width: 56px; height: 56px; border-radius: 50%;
-  background: var(--bg3); border: 1.5px solid var(--line2);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 14px; font-weight: 500;
-  color: var(--muted);
-  transition: all .25s;
+.mem-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1.1fr; gap: 64px; align-items: start;
   position: relative; z-index: 1;
 }
-.how-step:hover .how-node {
-  background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent);
+.mem-big {
+  font-family: var(--serif);
+  font-size: clamp(44px, 5.5vw, 76px); font-weight: 900;
+  letter-spacing: -.035em; line-height: 1.0; margin-top: 8px;
 }
-.how-step-title {
-  font-size: 18px; font-weight: 700;
-  letter-spacing: -0.015em; color: var(--text);
-  margin-top: 8px;
-}
-.how-step-body {
-  font-size: 14px; color: var(--muted); line-height: 1.65; font-weight: 300;
-  text-wrap: pretty;
-}
-.how-step-detail {
-  margin-top: 4px; display: flex; flex-direction: column; gap: 6px;
-}
-.how-detail-item {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 13px; color: var(--muted2);
-  font-family: var(--mono);
-}
-.how-detail-item::before {
-  content: '→'; color: var(--accent); font-size: 11px;
-}
+.mem-big em { font-style: normal; color: var(--a); }
+.mem-sub { margin-top: 18px; font-size: 16px; color: var(--ink2); line-height: 1.7; font-weight: 300; text-wrap: pretty; }
+.mem-note { margin-top: 14px; font-size: 14px; color: var(--ink3); font-style: italic; line-height: 1.6; text-wrap: pretty; }
 
-/* ── ADVANTAGES ──────────────────────── */
-.adv-section { padding-top: 80px; }
-.adv-grid {
-  margin-top: 56px;
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+/* growth cards */
+.growth { display: flex; flex-direction: column; gap: 0; position: relative; }
+.growth::before {
+  content: ''; position: absolute; left: 18px; top: 20px; bottom: 20px;
+  width: 1.5px; background: linear-gradient(to bottom, var(--a) 0%, var(--teal) 100%);
+  opacity: .18;
 }
-.adv-card {
-  background: var(--bg2);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 32px 28px;
-  display: flex; flex-direction: column; gap: 12px;
-  transition: border-color .2s, background .2s;
+.g-item {
+  display: flex; align-items: flex-start; gap: 18px;
+  padding: 20px 0; border-bottom: 1px solid var(--wire);
+  position: relative; z-index: 1; cursor: default;
+  transition: background .2s; border-radius: 8px;
 }
-.adv-card:hover { border-color: var(--line2); background: #232021; }
-.adv-index {
-  font-family: var(--mono); font-size: 11px;
-  color: var(--muted2); letter-spacing: 0.06em;
+.g-item:last-child { border-bottom: none; }
+.g-item:hover .g-dot { background: var(--a-dim); border-color: var(--a-ring); color: var(--a); box-shadow: 0 0 14px var(--a-glow); }
+.g-dot {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  background: var(--bg3); border: 1.5px solid var(--wire2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 10px; color: var(--ink3);
+  transition: all .25s; position: relative; z-index: 2;
 }
-.adv-title {
-  font-size: 18px; font-weight: 700;
-  letter-spacing: -0.015em; color: var(--text);
-  line-height: 1.3;
+.g-item.lit .g-dot { background: var(--a-dim); border-color: var(--a-ring); color: var(--a); box-shadow: 0 0 14px var(--a-glow); }
+.g-tag {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink3); margin-bottom: 4px;
 }
-.adv-title em { font-style: normal; color: var(--accent); }
-.adv-body {
-  font-size: 14px; color: var(--muted); line-height: 1.65; font-weight: 300;
-  text-wrap: pretty;
-}
-.adv-proof {
-  margin-top: 6px; padding: 10px 14px;
-  background: rgba(255,255,255,0.03); border-radius: 6px;
-  border-left: 2px solid var(--accent-border);
-  font-size: 13px; color: var(--muted);
-  font-style: italic; line-height: 1.5;
-}
+.g-item.lit .g-tag { color: var(--a); }
+.g-title { font-size: 14.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+.g-item.future .g-title { color: var(--ink3); }
+.g-body { font-size: 12.5px; color: var(--ink2); line-height: 1.55; font-weight: 300; }
+.g-item.future .g-body { color: var(--ink3); }
 
-/* ── MODES ───────────────────────────── */
-.modes-section { padding-top: 80px; }
-.modes-grid {
-  margin-top: 56px;
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 24px;
+/* ─── OUTPUTS ─── */
+.out-sec { padding: 96px 0; }
+.out-grid {
+  margin-top: 44px;
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 12px;
 }
+.out-card {
+  background: var(--bg2); border: 1px solid var(--wire); border-radius: var(--r);
+  padding: 26px 22px; display: flex; flex-direction: column; gap: 10px;
+  transition: border-color .2s, transform .2s;
+}
+.out-card:hover { border-color: var(--wire2); transform: translateY(-3px); }
+.out-tag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--a); background: var(--a-dim); border: 1px solid var(--a-ring);
+  border-radius: 4px; padding: 2px 8px; width: fit-content;
+}
+.out-name { font-size: 15px; font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
+.out-body { font-size: 13px; color: var(--ink2); line-height: 1.6; font-weight: 300; }
+
+/* ─── MODES ─── */
+.modes-sec { padding: 0 0 96px; }
+.modes-grid { margin-top: 44px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .mode-card {
-  background: var(--bg2); border: 1px solid var(--line);
-  border-radius: 18px; padding: 44px 40px;
-  display: flex; flex-direction: column; gap: 20px;
+  background: var(--bg2); border: 1px solid var(--wire); border-radius: 18px;
+  padding: 36px 32px; display: flex; flex-direction: column; gap: 16px;
   position: relative; overflow: hidden;
   transition: border-color .25s, transform .2s;
 }
-.mode-card:hover { border-color: var(--line2); transform: translateY(-3px); }
-.mode-card::after {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+.mode-card:hover { border-color: var(--wire2); transform: translateY(-3px); }
+.mode-card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+.mode-card.q::after { background: var(--a); }
+.mode-card.d::after { background: var(--teal); }
+.m-tag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 3px 11px; border-radius: 4px; width: fit-content;
 }
-.mode-card.quick::after { background: var(--accent); }
-.mode-card.deep::after  { background: var(--teal); }
-.mode-tag {
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
-  text-transform: uppercase; padding: 4px 12px; border-radius: 4px;
-  width: fit-content;
+.mode-card.q .m-tag { background: var(--a-dim); color: var(--a); }
+.mode-card.d .m-tag { background: var(--teal-dim); color: var(--teal); }
+.m-headline {
+  font-family: var(--serif); font-size: 22px; font-weight: 700;
+  letter-spacing: -.015em; line-height: 1.2; color: var(--ink);
 }
-.mode-card.quick .mode-tag { background: var(--accent-dim); color: var(--accent); }
-.mode-card.deep  .mode-tag { background: var(--teal-dim); color: var(--teal); }
-.mode-headline {
-  font-size: 26px; font-weight: 700;
-  letter-spacing: -0.02em; line-height: 1.2;
-  color: var(--text);
+.mode-card.q .m-headline em { font-style:normal; color: var(--a); }
+.mode-card.d .m-headline em { font-style:normal; color: var(--teal); }
+.m-body { font-size: 14px; color: var(--ink2); line-height: 1.68; font-weight: 300; text-wrap: pretty; }
+.m-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.m-list li { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; color: var(--ink2); line-height: 1.5; }
+.m-list li::before { content:'✓'; font-size:11px; margin-top:2px; flex-shrink:0; font-weight:700; }
+.mode-card.q .m-list li::before { color: var(--a); }
+.mode-card.d .m-list li::before { color: var(--teal); }
+.m-list li strong { color: var(--ink); font-weight: 500; }
+.m-time {
+  font-family: var(--mono); font-size: 11.5px;
+  padding: 6px 12px; border-radius: 6px; width: fit-content; margin-top: 2px;
 }
-.mode-headline span { display: block; }
-.mode-card.quick .mode-headline span { color: var(--accent); }
-.mode-card.deep  .mode-headline span { color: var(--teal); }
-.mode-body {
-  font-size: 15px; color: var(--muted);
-  line-height: 1.7; font-weight: 300; text-wrap: pretty;
-}
-.mode-list {
-  list-style: none; display: flex; flex-direction: column; gap: 10px;
-}
-.mode-list li {
-  display: flex; align-items: flex-start; gap: 10px;
-  font-size: 14px; color: var(--muted);
-}
-.mode-list li::before {
-  content: '✓'; font-size: 12px; margin-top: 2px; flex-shrink: 0; font-weight: 700;
-}
-.mode-card.quick .mode-list li::before { color: var(--accent); }
-.mode-card.deep  .mode-list li::before { color: var(--teal); }
-.mode-list li strong { color: var(--text); font-weight: 500; }
-.mode-time {
-  font-family: var(--mono); font-size: 13px;
-  padding: 8px 14px; border-radius: 6px; width: fit-content;
-  margin-top: 4px;
-}
-.mode-card.quick .mode-time { background: var(--accent-dim); color: var(--accent); }
-.mode-card.deep  .mode-time { background: var(--teal-dim);   color: var(--teal); }
+.mode-card.q .m-time { background: var(--a-dim); color: var(--a); }
+.mode-card.d .m-time { background: var(--teal-dim); color: var(--teal); }
 
-/* ── SCENARIOS ───────────────────────── */
-.scenarios-section { padding-top: 80px; }
-.scenarios-grid {
-  margin-top: 56px;
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 1px; background: var(--line);
-  border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
-}
-.scenario-card {
-  background: var(--bg);
-  padding: 32px 28px;
-  display: flex; flex-direction: column; gap: 10px;
-  transition: background .2s;
-}
-.scenario-card:hover { background: var(--bg2); }
-.scenario-situation {
-  font-size: 13px; color: var(--muted2);
-  font-family: var(--mono); letter-spacing: 0.03em;
-}
-.scenario-title {
-  font-size: 16px; font-weight: 600; color: var(--text);
-  letter-spacing: -0.01em; line-height: 1.35;
-}
-.scenario-result {
-  font-size: 13.5px; color: var(--muted); line-height: 1.6; font-weight: 300;
-  text-wrap: pretty;
-}
-.scenario-cmd {
-  margin-top: 6px; font-family: var(--mono); font-size: 11.5px;
-  color: var(--accent); background: var(--accent-dim);
-  border: 1px solid var(--accent-border);
-  border-radius: 4px; padding: 3px 10px; width: fit-content;
-}
-
-/* ── CTA ─────────────────────────────── */
-.cta-wrap {
-  padding: 0 24px 96px;
-  max-width: 1120px; margin: 0 auto;
-}
+/* ─── CTA ─── */
+.cta-outer { padding: 0 24px 96px; max-width: 1100px; margin: 0 auto; }
 .cta-box {
-  background: var(--bg2); border: 1px solid var(--line);
-  border-radius: 22px; padding: 88px 72px;
+  background: var(--bg2); border: 1px solid var(--wire);
+  border-radius: 22px; padding: 72px 60px;
   display: grid; grid-template-columns: 1fr auto;
-  align-items: center; gap: 64px;
+  align-items: start; gap: 48px;
   position: relative; overflow: hidden;
 }
-.cta-box::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, var(--accent), var(--teal));
-}
+.cta-box::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: linear-gradient(90deg,var(--a),var(--teal)); }
 .cta-box::after {
-  content: '';
-  position: absolute; top: -120px; right: -120px;
-  width: 480px; height: 480px; border-radius: 50%;
-  background: radial-gradient(circle, oklch(0.76 0.15 52 / 0.055) 0%, transparent 70%);
+  content:''; position:absolute; top:-80px; right:-80px;
+  width:400px; height:400px; border-radius:50%;
+  background: radial-gradient(circle,oklch(0.76 0.15 52 / 0.04) 0%,transparent 70%);
   pointer-events: none;
 }
-.cta-heading {
-  font-size: clamp(28px, 3.5vw, 46px);
-  font-weight: 700; letter-spacing: -0.03em;
-  line-height: 1.12; text-wrap: balance;
+.cta-h {
+  font-family: var(--serif);
+  font-size: clamp(24px, 3vw, 40px); font-weight: 700;
+  letter-spacing: -.025em; line-height: 1.12; text-wrap: balance;
 }
-.cta-heading em { font-style: normal; color: var(--accent); }
-.cta-sub {
-  margin-top: 16px; font-size: 17px; color: var(--muted);
-  line-height: 1.65; font-weight: 300; max-width: 480px;
-  text-wrap: pretty;
+.cta-h em { font-style: normal; color: var(--a); }
+.cta-p { margin-top: 12px; font-size: 15.5px; color: var(--ink2); line-height: 1.65; font-weight: 300; max-width: 460px; text-wrap: pretty; }
+.cta-install {
+  margin-top: 22px; background: #090706;
+  border: 1px solid var(--wire); border-radius: 10px;
+  padding: 16px 20px; font-family: var(--mono); font-size: 12.5px; line-height: 1.9;
 }
-.cta-actions {
-  display: flex; flex-direction: column; gap: 12px;
-  flex-shrink: 0; position: relative; z-index: 1;
-}
-.cta-actions .btn-a { font-size: 15px; padding: 14px 36px; white-space: nowrap; justify-content: center; }
-.cta-actions .btn-b { font-size: 14px; padding: 12px 28px; justify-content: center; text-align: center; }
+.ci-comment { color: var(--ink3); }
+.ci-prompt  { color: var(--a); }
+.ci-cmd     { color: var(--ink); }
 
-/* ── FOOTER ──────────────────────────── */
+.cta-actions { display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; position: relative; z-index: 1; }
+.cta-actions .btn-fill { font-size: 13.5px; padding: 12px 28px; white-space: nowrap; justify-content: center; }
+.cta-actions .btn-line { font-size: 13px; padding: 10px 22px; justify-content: center; }
+
+/* ─── FOOTER ─── */
 footer {
-  border-top: 1px solid var(--line);
-  padding: 32px 48px;
-  display: flex; align-items: center;
-  justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  border-top: 1px solid var(--wire); padding: 26px 52px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
 }
-.footer-brand {
-  font-family: var(--mono); font-size: 13px; color: var(--muted2);
-}
-.footer-links { display: flex; gap: 24px; }
-.footer-links a {
-  font-size: 13px; color: var(--muted);
-  text-decoration: none; transition: color .2s;
-}
-.footer-links a:hover { color: var(--text); }
-.footer-note { font-size: 12px; color: var(--muted2); }
+.foot-brand { font-family: var(--mono); font-size: 12px; color: var(--ink3); }
+.foot-links { display: flex; gap: 20px; }
+.foot-links a { font-size: 12px; color: var(--ink2); text-decoration: none; transition: color .2s; }
+.foot-links a:hover { color: var(--ink); }
+.foot-copy { font-size: 11px; color: var(--ink3); }
 
-/* ── TERMINAL ────────────────────────── */
-.terminal-section {
-  padding: 0 24px 96px;
-  max-width: 1120px; margin: 0 auto;
+/* ─── TWEAKS ─── */
+#tweaks {
+  display: none; position: fixed; bottom: 24px; right: 24px; z-index: 200;
+  width: 240px; background: var(--bg3); border: 1px solid var(--wire2);
+  border-radius: 14px; padding: 18px; box-shadow: 0 24px 60px rgba(0,0,0,.55);
 }
-.terminal-wrap { max-width: 740px; margin: 0 auto; }
-.terminal {
-  background: #111013;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 14px; overflow: hidden;
-  box-shadow: 0 40px 100px rgba(0,0,0,0.55);
+#tweaks.on { display: block; }
+.tw-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.tw-hd-label { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+.tw-x { background: none; border: none; color: var(--ink2); cursor: pointer; font-size: 18px; line-height: 1; padding: 0; }
+.tw-grp { margin-bottom: 14px; }
+.tw-lbl { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink3); margin-bottom: 7px; font-family: var(--mono); }
+.tw-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.tw-btn {
+  padding: 5px 11px; border-radius: 6px; font-size: 12px; cursor: pointer;
+  border: 1px solid var(--wire2); color: var(--ink2); background: var(--bg);
+  transition: all .15s; font-family: var(--sans);
 }
-.term-bar {
-  display: flex; align-items: center; gap: 8px;
-  padding: 13px 18px; background: #1c1a1d;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-}
-.td { width: 12px; height: 12px; border-radius: 50%; }
-.td-r { background: #ff5f57; } .td-y { background: #febc2e; } .td-g { background: #28c840; }
-.term-title {
-  flex: 1; text-align: center;
-  font-family: var(--mono); font-size: 12px; color: var(--muted);
-}
-.term-body {
-  padding: 22px 28px; font-family: var(--mono);
-  font-size: 13px; line-height: 1.9;
-}
-.t-prompt { color: var(--accent); }
-.t-cmd    { color: var(--text); }
-.t-out    { color: var(--teal); }
-.t-dim    { color: var(--muted); }
-.t-cursor {
-  display: inline-block; width: 8px; height: 14px;
-  background: var(--accent); vertical-align: middle;
-  animation: blink 1.1s step-end infinite;
-}
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-.term-label {
-  text-align: center; margin-top: 28px;
-  font-size: 14px; color: var(--muted);
-  font-style: italic;
-}
+.tw-btn:hover { border-color: var(--a-ring); color: var(--a); }
+.tw-btn.sel { background: var(--a-dim); border-color: var(--a-ring); color: var(--a); }
 
+/* ─── ANIMATIONS ─── */
+@keyframes up { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+.rev { opacity:0; transform:translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+.rev.in { opacity:1; transform:translateY(0); }
+.d1 { transition-delay:.06s; } .d2 { transition-delay:.12s; } .d3 { transition-delay:.18s; }
 
-/* ── DIFF SECTION ─────────────────────── */
-.diff-section { padding-top: 80px; }
-.diff-compare {
-  margin-top: 56px;
-  display: grid; grid-template-columns: 1fr 48px 1fr;
-  gap: 0; align-items: start;
-  border: 1px solid var(--line);
-  border-radius: 16px; overflow: hidden;
-}
-.diff-col { padding: 40px 36px; }
-.diff-col-plain { background: var(--bg2); border-right: 1px solid var(--line); }
-.diff-col-pm { background: var(--bg); }
-.diff-col-header { margin-bottom: 28px; }
-.diff-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em;
-  padding: 5px 14px; border-radius: 100px;
-}
-.diff-badge.plain {
-  background: rgba(255,255,255,0.05);
-  color: var(--muted2); border: 1px solid var(--line);
-}
-.diff-badge.pm {
-  background: var(--accent-dim); color: var(--accent);
-  border: 1px solid var(--accent-border);
-}
-.diff-vs {
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
-  color: var(--muted2); background: var(--bg2);
-  border-right: 1px solid var(--line);
-  padding-top: 52px;
-}
-.diff-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
-.diff-col-plain .diff-list li {
-  font-size: 14px; color: var(--muted2); line-height: 1.55;
-  padding-left: 18px; position: relative;
-}
-.diff-col-plain .diff-list li::before {
-  content: '✕'; position: absolute; left: 0;
-  font-size: 11px; color: rgba(255,255,255,0.2); margin-top: 1px;
-}
-.diff-col-pm .diff-list li {
-  font-size: 14px; color: var(--muted); line-height: 1.55;
-  padding-left: 20px; position: relative;
-}
-.diff-col-pm .diff-list li::before {
-  content: '✓'; position: absolute; left: 0;
-  font-size: 11px; color: var(--accent); font-weight: 700; margin-top: 1px;
-}
-.diff-col-pm .diff-list li strong { color: var(--text); font-weight: 600; }
-
-/* ── MEMORY SECTION ───────────────────── */
-.memory-section {
-  background: var(--bg2);
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  padding: 88px 24px;
-  margin-top: 0;
-}
-.memory-inner {
-  max-width: 1120px; margin: 0 auto;
-  display: grid; grid-template-columns: 1fr 1.3fr;
-  gap: 80px; align-items: center;
-}
-.memory-h2 {
-  font-size: clamp(36px, 4.5vw, 60px);
-  font-weight: 700; letter-spacing: -0.03em;
-  line-height: 1.08; margin-top: 12px;
-}
-.memory-h2 em { font-style: normal; color: var(--accent); }
-.memory-desc {
-  margin-top: 16px; font-size: 16px; color: var(--muted);
-  line-height: 1.7; font-weight: 300; text-wrap: pretty;
-}
-.memory-assets { display: flex; flex-direction: column; gap: 24px; }
-.asset-group {}
-.asset-group-label {
-  font-family: var(--mono); font-size: 11px;
-  letter-spacing: 0.1em; color: var(--muted2);
-  text-transform: uppercase; margin-bottom: 10px;
-  padding-bottom: 8px; border-bottom: 1px solid var(--line);
-}
-.asset-items { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-.asset-item {
-  display: flex; align-items: flex-start; gap: 12px;
-  background: var(--bg3); border: 1px solid var(--line);
-  border-radius: 8px; padding: 12px 14px;
-  transition: border-color .2s, background .2s;
-}
-.asset-item:hover { border-color: var(--line2); background: #302d31; }
-.asset-icon { font-size: 16px; line-height: 1; margin-top: 1px; flex-shrink: 0; }
-.asset-name {
-  font-family: var(--mono); font-size: 12px;
-  color: var(--accent); letter-spacing: 0.02em;
-  margin-bottom: 3px;
-}
-.asset-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
-
-@media (max-width: 900px) {
-  .diff-compare { grid-template-columns: 1fr; }
-  .diff-vs { display: none; }
-  .diff-col-plain { border-right: none; border-bottom: 1px solid var(--line); }
-  .diff-col { padding: 28px 24px; }
-  .memory-inner { grid-template-columns: 1fr; gap: 40px; }
-  .memory-section { padding: 56px 20px; }
-}
-@media (max-width: 560px) {
-  .diff-col { padding: 24px 18px; }
-  .memory-section { padding: 44px 16px; }
-  .memory-h2 { font-size: 32px; }
-}
-
-/* ── SCROLL REVEALS ──────────────────── */
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(28px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-.reveal {
-  opacity: 0; transform: translateY(22px);
-  transition: opacity .65s ease, transform .65s ease;
-}
-.reveal.visible { opacity: 1; transform: translateY(0); }
-.d1 { transition-delay: .08s; }
-.d2 { transition-delay: .16s; }
-.d3 { transition-delay: .24s; }
-.d4 { transition-delay: .32s; }
-
-/* ── RESPONSIVE ──────────────────────── */
-@media (max-width: 900px) {
+/* ─── RESPONSIVE ─── */
+@media (max-width: 960px) {
   nav { padding: 0 20px; }
   .nav-links { display: none; }
-  .pain-grid { grid-template-columns: 1fr 1fr; }
-  .output-grid { grid-template-columns: 1fr 1fr; }
-  .how-steps { grid-template-columns: 1fr; }
-  .how-steps::before { display: none; }
-  .how-step { padding-right: 0; padding-bottom: 32px; border-bottom: 1px solid var(--line); }
-  .how-step:last-child { border-bottom: none; }
-  .adv-grid { grid-template-columns: 1fr 1fr; }
+  .def-inner { grid-template-columns: 1fr; gap: 36px; }
+  .def-outer { padding: 56px 20px; }
+  .vs-layout { grid-template-columns: 1fr; }
+  .vs-pane.left { border-right: none; border-bottom: 1px solid var(--wire); }
+  .vs-pane { padding: 28px 24px; }
+  .mem-inner { grid-template-columns: 1fr; gap: 44px; }
+  .mem-outer { padding: 64px 20px; }
+  .out-grid { grid-template-columns: 1fr 1fr; }
   .modes-grid { grid-template-columns: 1fr; }
-  .bridge-inner { grid-template-columns: 1fr; gap: 40px; }
-  .bridge-section { padding: 56px 20px; }
-  .scenarios-grid { grid-template-columns: 1fr 1fr; }
-  .cta-box { grid-template-columns: 1fr; padding: 48px 32px; gap: 32px; }
-  .cta-actions .btn-a, .cta-actions .btn-b { width: 100%; justify-content: center; }
-  footer { padding: 24px 20px; flex-direction: column; align-items: flex-start; gap: 20px; }
-  .hero { padding: 100px 20px 72px; }
-  .hero-proof { flex-wrap: wrap; gap: 16px; justify-content: center; padding: 0; }
-  .proof-sep { display: none; }
-  .proof-item { padding: 0; min-width: 100px; }
-  .section { padding: 64px 20px; }
-  .mode-card { padding: 32px 28px; }
-  .terminal-section { padding: 0 20px 64px; }
+  .cta-box { grid-template-columns: 1fr; padding: 40px 28px; gap: 24px; }
+  .cta-actions .btn-fill, .cta-actions .btn-line { width: 100%; justify-content: center; }
+  .pain-bento { grid-template-columns: 1fr 1fr; }
+  .pain-card.wide { grid-column: span 1; }
+  footer { padding: 22px 20px; flex-direction: column; align-items: flex-start; gap: 16px; }
+  .w { padding: 0 20px; }
+  .hero-diagram { display: none; }
+  .pain-sec, .out-sec { padding: 72px 0; }
+  .vs-sec { padding: 72px 0 56px; }
 }
-
 @media (max-width: 560px) {
-  .pain-grid { grid-template-columns: 1fr; }
-  .output-grid { grid-template-columns: 1fr; }
-  .adv-grid { grid-template-columns: 1fr; }
-  .scenarios-grid { grid-template-columns: 1fr; }
-  .hero { padding: 90px 16px 60px; }
-  .hero-desc br { display: none; }
+  .pain-bento { grid-template-columns: 1fr; }
+  .out-grid { grid-template-columns: 1fr; }
+  .hero { padding: 88px 16px 52px; }
   .hero-btns { flex-direction: column; width: 100%; }
-  .hero-btns .btn-a, .hero-btns .btn-b { width: 100%; justify-content: center; text-align: center; }
-  .hero-proof { gap: 12px; }
-  .proof-item { width: calc(50% - 6px); text-align: center; }
-  .proof-num { font-size: 24px; }
-  .nav-cta { font-size: 12px; padding: 7px 12px; }
-  .section { padding: 48px 16px; }
-  .section-h2 { font-size: 26px; }
-  .section-sub { font-size: 15px; }
-  .bridge-section { padding: 44px 16px; }
-  .bridge-quote { font-size: 22px; }
-  .mode-card { padding: 28px 20px; }
-  .mode-headline { font-size: 22px; }
-  .cta-wrap { padding: 0 16px 56px; }
-  .cta-box { padding: 40px 20px; }
-  .cta-heading { font-size: 24px; }
-  .cta-sub { font-size: 14px; }
-  .term-body { padding: 16px 16px; font-size: 12px; line-height: 1.75; }
-  .terminal { overflow-x: auto; }
-  footer { padding: 24px 16px; gap: 16px; }
-  .footer-links { flex-wrap: wrap; gap: 14px; }
-  .adv-card, .output-card, .pain-card, .scenario-card { padding: 24px 18px; }
-  .how-step-title { font-size: 17px; }
-  .hero-eyebrow { font-size: 11px; padding: 4px 12px; }
+  .hero-btns .btn-fill, .hero-btns .btn-line { width: 100%; justify-content: center; }
+  .cta-outer { padding: 0 16px 56px; }
+  .cta-box { padding: 32px 18px; }
+  footer { padding: 18px 16px; }
+  .w { padding: 0 16px; }
+  .pain-sec, .out-sec { padding: 56px 0; }
+  .modes-sec { padding: 0 0 72px; }
 }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
+<!-- ══ NAV ══ -->
 <nav>
-  <a class="nav-logo" href="#">
-    <span class="nav-dot"></span>PMWorkspace
+  <a class="nav-id" href="#">
+    <span class="nav-pip"></span>AI 产品工作站
   </a>
   <div class="nav-links">
     <a href="#pain">痛点</a>
-    <a href="#output">产出</a>
-    <a href="#how">工作方式</a>
-    <a href="#modes">使用模式</a>
+    <a href="#vs">和 AI 对话的区别</a>
+    <a href="#memory">越用越懂你</a>
+    <a href="#modes">使用方式</a>
   </div>
-  <a class="nav-cta" href="https://github.com/stephenfan80/PMWorkspace" target="_blank">立即开始使用 →</a>
+  <a class="nav-get" href="https://github.com/stephenfan80/PMWorkspace" target="_blank">免费安装 →</a>
 </nav>
 
-<!-- ── HERO ── -->
+
+<!-- ══ HERO ══ -->
 <section class="hero">
   <div class="hero-grid"></div>
   <div class="hero-glow"></div>
 
-  <div class="hero-eyebrow">快速成型 · 深度交付 · AI 产品工作台</div>
+  <div class="chip hero-chip" style="position:relative;z-index:1;">Codex 插件 · AI 产品工作站（PMW）</div>
 
   <h1 class="hero-h1">
-    把一句话推进成<br>
-    <em>可评审的产品方案</em>
+    把一句想法、截图反馈或 PRD，<br>
+    变成<em>能讨论、能出图、</em><br>
+    <em>能交付</em><span class="dim">的产品方案</span>
   </h1>
 
-  <p class="hero-desc">
-    老板今天给了一句话，你明天要交方案——<br>
-    PMWorkspace 是你的 <strong>AI 产品小队</strong>，从混乱输入到简报、原型、交付文档，一条线串通。
+  <p class="hero-p" style="position:relative;z-index:1;">
+    不只是 AI 对话——PMW 有记忆、有流程，把每次工作变成积累。<br>
+    <strong>越用，越懂你的产品。</strong>
   </p>
 
   <div class="hero-btns">
-    <a class="btn-a" href="https://github.com/stephenfan80/PMWorkspace" target="_blank">立即开始使用</a>
-    <a class="btn-b" href="#how">了解工作方式 ↓</a>
+    <a class="btn-fill" href="https://github.com/stephenfan80/PMWorkspace" target="_blank">免费安装 PMW →</a>
+    <a class="btn-line" href="#pain">先了解一下 ↓</a>
   </div>
 
-  <div class="hero-proof">
-    <div class="proof-item">
-      <div class="proof-num">10min</div>
-      <div class="proof-label">轻量包输出时间</div>
+  <!-- Input→Output diagram -->
+  <div class="hero-diagram">
+    <div class="diag-group">
+      <div class="diag-pill">一句想法</div>
+      <div class="diag-pill">截图反馈</div>
+      <div class="diag-pill">PRD 草稿</div>
+      <div class="diag-pill">用户反馈</div>
     </div>
-    <div class="proof-sep"></div>
-    <div class="proof-item">
-      <div class="proof-num">8</div>
-      <div class="proof-label">专项技能覆盖全流程</div>
+    <div class="diag-center">
+      <div class="diag-arrow">→</div>
+      <div class="diag-core">AI 产品工作站</div>
+      <div class="diag-arrow">→</div>
     </div>
-    <div class="proof-sep"></div>
-    <div class="proof-item">
-      <div class="proof-num">4</div>
-      <div class="proof-label">原型评审视角</div>
-    </div>
-    <div class="proof-sep"></div>
-    <div class="proof-item">
-      <div class="proof-num">0</div>
-      <div class="proof-label">重复解释次数</div>
+    <div class="diag-group">
+      <div class="diag-pill out">产品简报</div>
+      <div class="diag-pill out">原型方案</div>
+      <div class="diag-pill out">交付 PRD</div>
+      <div class="diag-pill out">多角色评审</div>
     </div>
   </div>
 </section>
 
-<div class="divider"></div>
+<div class="rule"></div>
 
-<!-- ── PAIN ── -->
-<div id="pain" class="section">
-  <div class="section-label reveal">你是不是也遇到过</div>
-  <h2 class="section-h2 reveal d1">每个产品经理都熟悉这些时刻</h2>
-  <p class="section-sub reveal d2">这些不是个人问题，是没有合适工具时的系统性摩擦。</p>
+<!-- ══ PAIN ══ -->
+<section id="pain" class="pain-sec">
+  <div class="w">
+    <div class="pain-header">
+      <div class="chip rev">你是不是也遇到这些情况</div>
+      <h2 class="sh rev d1">做产品工作时，<br>这些摩擦每天都在发生</h2>
+      <p class="ssub rev d2">不是个人效率问题——是没有合适工具时的系统性卡点。</p>
+    </div>
 
-  <div class="pain-grid reveal d2">
-    <div class="pain-card">
-      <div class="pain-number">01</div>
-      <div class="pain-q">老板只给了一句话，明天就要方案</div>
-      <div class="pain-body">需求来的时候永远只有一个方向，没有背景，没有约束，没有成功标准——但 deadline 是真实的。</div>
-    </div>
-    <div class="pain-card">
-      <div class="pain-number">02</div>
-      <div class="pain-q">材料散落各处，每次交付都要重讲一遍</div>
-      <div class="pain-body">用户反馈在群里，PRD 在文档，截图在本地，线上参考要临时找——协作文档和对话记录从来没有对齐过。</div>
-    </div>
-    <div class="pain-card">
-      <div class="pain-number">03</div>
-      <div class="pain-q">原型越出越快，但问题根本没想清楚</div>
-      <div class="pain-body">AI 帮你快速生成了漂亮的原型，却没人问"这解决的是不是真实问题"——方向跑偏了，才意识到在错误的路上走快了。</div>
-    </div>
-    <div class="pain-card">
-      <div class="pain-number">04</div>
-      <div class="pain-q">线上页面要优化，却没有视觉基线</div>
-      <div class="pain-body">谁也说不清楚现在线上是什么状态，有哪些承诺不能动，哪些问题是真实痛点——凭记忆出图，设计同学也不敢直接用。</div>
-    </div>
-    <div class="pain-card">
-      <div class="pain-number">05</div>
-      <div class="pain-q">评审只有一个 PM 视角，总有盲区</div>
-      <div class="pain-body">你看了很多遍，仍然会漏掉信任风险、数据可行性或设计系统边界——等到设计评审或研发排期时，才发现有问题。</div>
-    </div>
-    <div class="pain-card">
-      <div class="pain-number">06</div>
-      <div class="pain-q">每次交付，上下文都要从头说</div>
-      <div class="pain-body">产品决策停在对话记录里，简报没有沉淀，下次做类似功能时，你找不到当初"为什么这么做"的原因。</div>
+    <div class="pain-bento rev d2">
+      <div class="pain-card wide">
+        <div class="pain-n">01</div>
+        <div class="pain-title">老板给了一句话，明天要交方案——用 AI 出了稿，评审才发现方向跑偏了</div>
+        <div class="pain-body">AI 能快速生成漂亮的方案，但没人帮你问"这解决的是不是真实问题"。速度越快，跑得越偏——等发现的时候已经晚了。</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-n">02</div>
+        <div class="pain-title">材料散在各处，每次交付都要从头解释</div>
+        <div class="pain-body">用户反馈在群里，PRD 在文档，截图在本地——协作文档和对话记录从来没有真正对齐过。每次评审都要重新讲上下文。</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-n">03</div>
+        <div class="pain-title">线上页面要改版，却没有视觉基线</div>
+        <div class="pain-body">谁也说不清现在线上是什么状态，哪些承诺不能动——凭记忆出图，设计同学也不敢直接用。</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-n">04</div>
+        <div class="pain-title">评审时只有 PM 视角，总有盲区</div>
+        <div class="pain-body">你反复检查了很多遍，但研发排期时才发现漏掉了数据可行性、信任风险或设计系统约束。</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-n">05</div>
+        <div class="pain-title">做过的决策，下次全靠记忆</div>
+        <div class="pain-body">产品决策停在对话记录里，下次做类似功能时，找不到"当初为什么这么做"——每次都从零开始。</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-n">06</div>
+        <div class="pain-title">用的 AI 越来越多，上下文要解释的也越来越多</div>
+        <div class="pain-body">每换一个 AI 工具，就要重新介绍你的产品、背景和偏好。工具变多了，摩擦反而没少。</div>
+      </div>
     </div>
   </div>
-</div>
+</section>
 
-<div class="divider"></div>
+<div class="rule"></div>
 
-<!-- ── BRIDGE ── -->
-<div class="bridge-section">
-  <div class="bridge-inner">
-    <div class="reveal">
-      <div class="section-label">PMWorkspace 的解法</div>
-      <div class="bridge-quote">
-        不是帮你<em>跳过思考</em>，<br>而是把思考<em>压缩成路径</em>
+<!-- ══ DEFINITION ══ -->
+<div class="def-outer">
+  <div class="def-inner">
+    <div class="rev">
+      <div class="chip">PMW 是什么</div>
+      <div class="def-q">
+        不是聊天框——是一支<br><em>有记忆、有流程</em>的 AI 产品小队
       </div>
-      <p class="bridge-desc">
-        PMWorkspace 不是一个聊天框，而是一支 AI 产品小队。它有结构、有记忆、有流程——把散乱的输入收束成可以继续流动的产品资产。
+      <p class="def-body">
+        你把一句想法、一张截图、一段 PRD 或一份用户反馈丢进来，PMW 先帮你判断真实问题，再把它推进成能讨论、能出图、能交付的产品资产——不是替你跳过思考，而是把思考压缩成一条能往前走的路径。
       </p>
     </div>
-    <div class="reveal d1">
-      <ul class="bridge-list">
-        <li>
-          <span class="bridge-check">✓</span>
-          <span><strong>先判断真实问题</strong>，再出方向——不会把功能愿望当解法</span>
-        </li>
-        <li>
-          <span class="bridge-check">✓</span>
-          <span><strong>把散乱材料收束成共识</strong>——想法、截图、PRD、协作文档压缩成一份能继续流动的简报</span>
-        </li>
-        <li>
-          <span class="bridge-check">✓</span>
-          <span><strong>出图前有证据</strong>——线上参考、视觉基线、状态页不再只是口头描述</span>
-        </li>
-        <li>
-          <span class="bridge-check">✓</span>
-          <span><strong>多角色评审补盲区</strong>——策略、信任风险、设计系统、数据可行性四视角联合把关</span>
-        </li>
-        <li>
-          <span class="bridge-check">✓</span>
-          <span><strong>产物往下游流动</strong>——产品决策沉淀为资产，下次不用重新讲</span>
-        </li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-
-<div class="divider"></div>
-
-<!-- ── DIFF vs RAW AI ── -->
-<div class="section diff-section">
-  <div class="section-label reveal">和直接用 AI 有什么不同</div>
-  <h2 class="section-h2 reveal d1">不只是更快，<br>而是一套<em style="font-style:normal;color:var(--accent)">会成长的产品工作系统</em></h2>
-  <p class="section-sub reveal d2">直接对话 AI 能帮你生成内容，但它不记得你、不懂你的产品、没有流程约束、不积累资产。PMWorkspace 从根本上不同。</p>
-
-  <div class="diff-compare reveal d2">
-    <div class="diff-col diff-col-plain">
-      <div class="diff-col-header">
-        <span class="diff-badge plain">直接用 AI 对话</span>
-      </div>
-      <ul class="diff-list">
-        <li>每次从零开始，没有你的上下文</li>
-        <li>你问什么答什么，不质疑问题本身</li>
-        <li>快速生成原型，不管问题有没有想清楚</li>
-        <li>单一视角，容易漏掉策略和风险盲区</li>
-        <li>对话结束即消失，决策没有沉淀</li>
-        <li>不记得你的偏好、历史决策、产品风格</li>
-        <li>每次交付都要重新解释上下文</li>
-      </ul>
-    </div>
-    <div class="diff-vs">VS</div>
-    <div class="diff-col diff-col-pm">
-      <div class="diff-col-header">
-        <span class="diff-badge pm">PMWorkspace</span>
-      </div>
-      <ul class="diff-list">
-        <li><strong>资产积累</strong>——简报、决策、偏好持续沉淀，越用越懂你</li>
-        <li><strong>先判断真实问题</strong>，再出方案，不跳过思考环节</li>
-        <li><strong>有门槛才出图</strong>——简报未对齐时不生成原型</li>
-        <li><strong>多角色评审军团</strong>——策略、风险、设计、数据四视角把关</li>
-        <li><strong>产物往下游流动</strong>——简报、原型、PRD 形成完整链路</li>
-        <li><strong>越用越懂你</strong>——沉淀产品品味、认知框架和历史决策</li>
-        <li><strong>下次不用重新讲</strong>——项目记忆随时可调用</li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- ── MEMORY ── -->
-<div class="memory-section">
-  <div class="memory-inner">
-    <div class="memory-left reveal">
-      <div class="section-label">资产积累</div>
-      <h2 class="memory-h2">越用，<em>越懂你</em></h2>
-      <p class="memory-desc">每一次产品工作，PMWorkspace 都在积累你的品味、决策模式和交付偏好。不是靠对话记忆，而是靠结构化的资产沉淀。</p>
-      <p class="memory-desc" style="margin-top:16px">第 1 次用，它帮你对齐问题。<br>第 10 次用，它已经知道你不喜欢哪类方案。<br>第 100 次用，它是最懂你产品的协作伙伴。</p>
-    </div>
-    <div class="memory-right reveal d1">
-      <div class="memory-assets">
-        <div class="asset-group">
-          <div class="asset-group-label">产品品味 · 持续学习</div>
-          <div class="asset-items">
-            <div class="asset-item">
-              <div class="asset-icon">🧠</div>
-              <div class="asset-content">
-                <div class="asset-name">taste-profile</div>
-                <div class="asset-desc">你偏好的方案风格、交互模型、信息密度偏好</div>
-              </div>
-            </div>
-            <div class="asset-item">
-              <div class="asset-icon">💡</div>
-              <div class="asset-content">
-                <div class="asset-name">product-cognition</div>
-                <div class="asset-desc">你的产品判断框架和认知模式，越用越精准</div>
-              </div>
-            </div>
+    <div class="rev d1">
+      <div class="def-steps">
+        <div class="def-step">
+          <div class="def-num">01</div>
+          <div>
+            <div class="def-step-title">判断真实问题</div>
+            <div class="def-step-sub">澄清目标用户、触发场景和真实损失，不把功能愿望当解法</div>
           </div>
         </div>
-        <div class="asset-group">
-          <div class="asset-group-label">项目记忆 · 跨项目复用</div>
-          <div class="asset-items">
-            <div class="asset-item">
-              <div class="asset-icon">📋</div>
-              <div class="asset-content">
-                <div class="asset-name">decisions.jsonl</div>
-                <div class="asset-desc">每个项目确认过的产品决策、取舍和拍板结论</div>
-              </div>
-            </div>
-            <div class="asset-item">
-              <div class="asset-icon">📦</div>
-              <div class="asset-content">
-                <div class="asset-name">artifact-flow</div>
-                <div class="asset-desc">简报 → 原型 → 评审 → 交付的完整产物链路</div>
-              </div>
-            </div>
+        <div class="def-step">
+          <div class="def-num">02</div>
+          <div>
+            <div class="def-step-title">生成对齐简报</div>
+            <div class="def-step-sub">想法、截图、PRD、协作文档，压缩成一份所有人看同一份的产品简报</div>
           </div>
         </div>
-        <div class="asset-group">
-          <div class="asset-group-label">交付积累 · 下次直接复用</div>
-          <div class="asset-items">
-            <div class="asset-item">
-              <div class="asset-icon">🚀</div>
-              <div class="asset-content">
-                <div class="asset-name">delivery-facts</div>
-                <div class="asset-desc">脱敏的交付事实——接口、数据、埋点标准</div>
-              </div>
-            </div>
-            <div class="asset-item">
-              <div class="asset-icon">📈</div>
-              <div class="asset-content">
-                <div class="asset-name">learnings</div>
-                <div class="asset-desc">验证过的假设和可跨项目复用的产品洞察</div>
-              </div>
-            </div>
+        <div class="def-step">
+          <div class="def-num">03</div>
+          <div>
+            <div class="def-step-title">输出差异化方案</div>
+            <div class="def-step-sub">默认最少 3 个方向，在产品策略、信息架构、交互模型上真正不同</div>
+          </div>
+        </div>
+        <div class="def-step">
+          <div class="def-num">04</div>
+          <div>
+            <div class="def-step-title">四视角联合评审 → 交付</div>
+            <div class="def-step-sub">策略、风险、设计系统、数据可行性把关后，整理成 PRD 或交付稿</div>
           </div>
         </div>
       </div>
@@ -1035,369 +671,413 @@ footer {
   </div>
 </div>
 
-<!-- ── OUTPUT ── -->
-<div id="output" class="section">
-  <div class="section-label reveal">你能拿到什么</div>
-  <h2 class="section-h2 reveal d1">具体的产品资产，不是聊天记录</h2>
-  <p class="section-sub reveal d2">每一次工作流的结尾，你得到的是可以继续用的东西——不是对话截图。</p>
+<div class="rule"></div>
 
-  <div class="output-grid reveal d2">
-    <div class="output-card">
-      <div class="output-tag">产品简报</div>
-      <div class="output-name">可对齐的共识文档</div>
-      <div class="output-desc">目标用户、核心问题、当前损失、反指标、约束和不可虚构项，压缩成一份所有人看同一份的材料。</div>
+<!-- ══ VS CHAT AI ══ -->
+<section id="vs" class="vs-sec">
+  <div class="w">
+    <div class="chip rev">核心差异</div>
+    <h2 class="sh rev d1">和直接用聊天 AI，<br>根本上有什么不同？</h2>
+    <p class="ssub rev d2">聊天 AI 帮你生成内容，但它没有你的产品上下文，不积累决策，不记住你的偏好——每次都从零开始。</p>
+
+    <div class="vs-layout rev d2">
+      <!-- LEFT: chat AI -->
+      <div class="vs-pane left">
+        <div>
+          <div class="vs-tag plain">直接用聊天 AI</div>
+          <div class="vs-headline" style="margin-top:14px">每次从零，<br>决策不会沉淀</div>
+        </div>
+        <div class="vs-story">
+          <div class="vs-row">
+            <div class="vs-icon">✕</div>
+            <div>
+              <div class="vs-row-title">不记得你是谁</div>
+              <div class="vs-row-body">每次都要重新介绍产品背景、用户群体和历史决策</div>
+            </div>
+          </div>
+          <div class="vs-row">
+            <div class="vs-icon">✕</div>
+            <div>
+              <div class="vs-row-title">你问什么答什么</div>
+              <div class="vs-row-body">不会质疑问题本身是否正确，不判断真实需求</div>
+            </div>
+          </div>
+          <div class="vs-row">
+            <div class="vs-icon">✕</div>
+            <div>
+              <div class="vs-row-title">方案快，但没有门槛</div>
+              <div class="vs-row-body">不管问题有没有想清楚，立刻生成——方向对不对无从保证</div>
+            </div>
+          </div>
+          <div class="vs-row">
+            <div class="vs-icon">✕</div>
+            <div>
+              <div class="vs-row-title">对话结束即清空</div>
+              <div class="vs-row-body">决策、偏好、历史判断全部消失，下次重头来过</div>
+            </div>
+          </div>
+          <div class="vs-row">
+            <div class="vs-icon">✕</div>
+            <div>
+              <div class="vs-row-title">用得越多，你做的铺垫越多</div>
+              <div class="vs-row-body">时间越长，要重复解释的上下文反而越积越多</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: PMW -->
+      <div class="vs-pane right">
+        <div>
+          <div class="vs-tag pmw">AI 产品工作站（PMW）</div>
+          <div class="vs-headline" style="margin-top:14px">越用越懂你，<br>资产持续积累</div>
+        </div>
+        <div class="vs-story">
+          <div class="vs-row">
+            <div class="vs-icon">✓</div>
+            <div>
+              <div class="vs-row-title">记住你的每个决策</div>
+              <div class="vs-row-body">简报、方案取舍、偏好风格——持续沉淀，下次直接复用</div>
+            </div>
+          </div>
+          <div class="vs-row">
+            <div class="vs-icon">✓</div>
+            <div>
+              <div class="vs-row-title">先判断问题是否正确</div>
+              <div class="vs-row-body">不替你跳过思考，先帮你确认解决的是真实问题</div>
+            </div>
+          </div>
+          <div class="vs-row">
+            <div class="vs-icon">✓</div>
+            <div>
+              <div class="vs-row-title">有门槛才出图</div>
+              <div class="vs-row-body">简报未对齐时不生成原型，避免在错误方向上越走越快</div>
+            </div>
+          </div>
+          <div class="vs-row">
+            <div class="vs-icon">✓</div>
+            <div>
+              <div class="vs-row-title">四角色评审，不靠记忆</div>
+              <div class="vs-row-body">策略、风险、设计系统、数据可行性联合把关，结论留存可查</div>
+            </div>
+          </div>
+          <div class="vs-row">
+            <div class="vs-icon">✓</div>
+            <div>
+              <div class="vs-row-title">用得越多，它帮你做的越多</div>
+              <div class="vs-row-body">积累越深，PMW 越懂你，你需要解释的越来越少</div>
+            </div>
+          </div>
+        </div>
+        <div class="vs-banner">
+          <div class="vs-banner-label">核心差异 · 不可替代的优势</div>
+          <div class="vs-banner-text">每次使用，PMW 都在积累你的产品认知。这些资产是你专属的，是普通聊天 AI 无法复制的长期投资。</div>
+        </div>
+      </div>
     </div>
-    <div class="output-card">
-      <div class="output-tag">方案方向</div>
-      <div class="output-name">真正有差异的解法</div>
-      <div class="output-desc">在产品策略、信息架构、交互模型或信任模型上不同，不只是换配色的"多版本"。</div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ══ MEMORY ══ -->
+<div id="memory" class="mem-outer">
+  <div class="mem-glow"></div>
+  <div class="mem-inner">
+    <div class="rev">
+      <div class="chip">资产积累</div>
+      <div class="mem-big">越用，<br><em>越懂你</em></div>
+      <p class="mem-sub">
+        不是靠对话记忆——而是结构化的资产沉淀。每次产品工作，PMW 都在学习你的品味、决策模式和交付偏好。
+      </p>
+      <p class="mem-note">
+        这是 PMW 和所有聊天 AI 的根本区别——它是一项随时间增值的投资，而不是每次都从零开始的工具。
+      </p>
     </div>
-    <div class="output-card">
-      <div class="output-tag">移动端原型</div>
-      <div class="output-name">一方案一屏一张图</div>
-      <div class="output-desc">默认按 iPhone 17 竖屏生成 image-2 原型图。一个方案、一个屏幕、单独一张图，清晰可判断。</div>
-    </div>
-    <div class="output-card">
-      <div class="output-tag">交付文档</div>
-      <div class="output-name">可直接用的 PRD</div>
-      <div class="output-desc">通过评审后整理成精简 PRD、设计交付、实验验证或研发交付材料，保留接口、数据、埋点和实验标准。</div>
+    <div class="rev d1">
+      <div class="growth">
+        <div class="g-item">
+          <div class="g-dot">1</div>
+          <div>
+            <div class="g-tag">第 1 次使用</div>
+            <div class="g-title">帮你对齐真实问题</div>
+            <div class="g-body">判断需求背后的真实用户问题，保存首个产品简报和决策记录</div>
+          </div>
+        </div>
+        <div class="g-item lit">
+          <div class="g-dot">10</div>
+          <div>
+            <div class="g-tag">第 10 次使用</div>
+            <div class="g-title">已经知道你的偏好</div>
+            <div class="g-body">记住你不喜欢哪类方案风格，自动过滤不符合你产品认知的方向，主动提醒历史决策</div>
+          </div>
+        </div>
+        <div class="g-item">
+          <div class="g-dot">50</div>
+          <div>
+            <div class="g-tag">第 50 次使用</div>
+            <div class="g-title">最懂你产品的协作伙伴</div>
+            <div class="g-body">完整的产品认知框架、历史决策、反指标库——类似项目随时可调，不用重新解释</div>
+          </div>
+        </div>
+        <div class="g-item future">
+          <div class="g-dot">∞</div>
+          <div>
+            <div class="g-tag">持续增值</div>
+            <div class="g-title">专属于你的产品智慧库</div>
+            <div class="g-body">用得越多越省力——这些资产只属于你，随产品工作持续复利增长</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="divider"></div>
+<div class="rule"></div>
 
-<!-- ── HOW ── -->
-<div id="how" class="section how-section">
-  <div class="section-label reveal">工作方式</div>
-  <h2 class="section-h2 reveal d1">像一支产品小队，不是问答机器</h2>
-  <p class="section-sub reveal d2">每一步都有明确的进入条件和产出标准，不会在错误的问题上快速出图。</p>
+<!-- ══ OUTPUTS ══ -->
+<section class="out-sec">
+  <div class="w">
+    <div class="chip rev">你能拿到什么</div>
+    <h2 class="sh rev d1">具体的产品资产，不是聊天记录</h2>
+    <p class="ssub rev d2">每次工作流结束，你得到的是可以继续用的东西——不是截图，不是散乱的 Markdown。</p>
 
-  <div class="how-steps reveal d2">
-    <div class="how-step">
-      <div class="how-node">01</div>
-      <div class="how-step-title">判断真实问题</div>
-      <p class="how-step-body">每次只问最关键的问题，最多 5 轮。先说清"我对真实问题的判断"，避免把功能愿望当解法。</p>
-      <div class="how-step-detail">
-        <div class="how-detail-item">动态诊断提问</div>
-        <div class="how-detail-item">策略评审 & 前提确认</div>
-        <div class="how-detail-item">拍板选择题减少反复</div>
+    <div class="out-grid rev d2">
+      <div class="out-card">
+        <div class="out-tag">产品简报</div>
+        <div class="out-name">对齐共识文档</div>
+        <div class="out-body">目标用户、核心问题、当前损失、反指标、约束和不可虚构项，压缩成全员共用一份的材料</div>
       </div>
-    </div>
-    <div class="how-step">
-      <div class="how-node">02</div>
-      <div class="how-step-title">对齐 & 生成方案</div>
-      <p class="how-step-body">产品简报对齐后，生成多个方向和移动端原型图，并纳入线上截图证据和协作文档。</p>
-      <div class="how-step-detail">
-        <div class="how-detail-item">产品简报 → Zoon 同步</div>
-        <div class="how-detail-item">2–3 个差异化方案方向</div>
-        <div class="how-detail-item">每方向 1 张 image-2 原型</div>
+      <div class="out-card">
+        <div class="out-tag">方案方向</div>
+        <div class="out-name">真正差异化的解法</div>
+        <div class="out-body">在产品策略、信息架构、交互模型上不同——默认最少 3 个，不只是换颜色的多版本</div>
       </div>
-    </div>
-    <div class="how-step">
-      <div class="how-node">03</div>
-      <div class="how-step-title">评审 & 交付</div>
-      <p class="how-step-body">四视角联合评审，产出通过 / 重生成 / PM 决策三种结论，最终整理成可直接进入评审的交付文档。</p>
-      <div class="how-step-detail">
-        <div class="how-detail-item">策略 + 风险 + 设计 + 数据</div>
-        <div class="how-detail-item">PRD / 设计 / 实验 / 工程稿</div>
-        <div class="how-detail-item">产物沉淀供下游复用</div>
+      <div class="out-card">
+        <div class="out-tag">移动端原型</div>
+        <div class="out-name">一方案一屏一张图</div>
+        <div class="out-body">移动端优先的原型图，一个方案、一个屏幕、单独一张——清晰可判断，不糊成拼图</div>
+      </div>
+      <div class="out-card">
+        <div class="out-tag">交付文档</div>
+        <div class="out-name">可直接进研发的 PRD</div>
+        <div class="out-body">通过评审后整理成精简 PRD 或工程交付材料，保留接口、数据、埋点和实验标准</div>
       </div>
     </div>
   </div>
-</div>
+</section>
 
-<div class="divider"></div>
+<div class="rule"></div>
 
-<!-- ── ADVANTAGES ── -->
-<div class="section adv-section">
-  <div class="section-label reveal">核心优势</div>
-  <h2 class="section-h2 reveal d1">不是"更快的 AI"，是更结构化的产品工作方式</h2>
+<!-- ══ MODES ══ -->
+<section id="modes" class="modes-sec">
+  <div class="w" style="padding-top:96px;">
+    <div class="chip rev">两条路径</div>
+    <h2 class="sh rev d1">不确定从哪里开始？<br>先看你现在在哪个阶段</h2>
+    <p class="ssub rev d2">PMW 有两种进入方式，覆盖从"一句想法"到"研发可接手的交付稿"的完整路径。</p>
 
-  <div class="adv-grid reveal d2">
-    <div class="adv-card">
-      <div class="adv-index">01</div>
-      <div class="adv-title">快，但<em>不莽</em></div>
-      <div class="adv-body">快速成型 10 分钟起步，但必须带假设、反指标和不可虚构项。速度不等于失控。</div>
-      <div class="adv-proof">"可以先基于假设推进，但出图前必须确认这些假设。"</div>
-    </div>
-    <div class="adv-card">
-      <div class="adv-index">02</div>
-      <div class="adv-title">把<em>散乱材料</em>收束成共识</div>
-      <div class="adv-body">想法、PRD、截图、协作文档、用户洞察——无论你带来什么，都会被压缩成一份能继续流动的产品简报。</div>
-      <div class="adv-proof">再也不用在评审现场重新解释"这个需求从哪里来"。</div>
-    </div>
-    <div class="adv-card">
-      <div class="adv-index">03</div>
-      <div class="adv-title">出图前<em>有证据</em></div>
-      <div class="adv-body">线上参考、视觉基线、状态页和竞品流程不再只是口头描述，统一登记为可复用的线上证据产物。</div>
-      <div class="adv-proof">设计同学再也不会拿到一张"没有线上参考"的原型。</div>
-    </div>
-    <div class="adv-card">
-      <div class="adv-index">04</div>
-      <div class="adv-title">评审<em>不只靠一个视角</em></div>
-      <div class="adv-body">原型复审默认有策略、信任/风险、设计系统、数据可行性四个专家视角，高风险场景还能追加更多角色。</div>
-      <div class="adv-proof">把评审时才发现的问题，提前到出图前发现。</div>
-    </div>
-    <div class="adv-card">
-      <div class="adv-index">05</div>
-      <div class="adv-title">产物<em>往下游流动</em></div>
-      <div class="adv-body">产品简报、原型清单、复审结论和交付稿被登记为下游可读产物。产品决策沉淀成资产，不靠记忆传递。</div>
-      <div class="adv-proof">下一次类似项目，你能找到"当初为什么这么决策"。</div>
-    </div>
-    <div class="adv-card">
-      <div class="adv-index">06</div>
-      <div class="adv-title">有记忆，<em>但不越界</em></div>
-      <div class="adv-body">可以沉淀你的产品偏好和历史决策，但不会用偏好覆盖本轮的事实、风险或用户确认，隐私边界清晰。</div>
-      <div class="adv-proof">token、客户资料、内部录音、未脱敏文档不写入公开材料。</div>
-    </div>
-  </div>
-</div>
-
-<div class="divider"></div>
-
-<!-- ── MODES ── -->
-<div id="modes" class="section modes-section">
-  <div class="section-label reveal">两种工作模式</div>
-  <h2 class="section-h2 reveal d1">按你现在的状态选择入口</h2>
-  <p class="section-sub reveal d2">想法还很模糊？快速成型。已有 PRD 或需要对外交付？深度交付。</p>
-
-  <div class="modes-grid reveal d2">
-    <div class="mode-card quick">
-      <span class="mode-tag">快速成型</span>
-      <div class="mode-headline">
-        想法 → 方案包
-        <span>最快 10 分钟</span>
+    <div class="modes-grid rev d2">
+      <!-- QUICK -->
+      <div class="mode-card q">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <span class="m-tag">快速成型</span>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--a);background:var(--a-dim);border:1px solid var(--a-ring);border-radius:5px;padding:3px 10px;">10 min 起步</span>
+        </div>
+        <div class="m-headline">有想法，<br>想快速<em>看到方向</em></div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin:4px 0;">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">适合这些情况</div>
+          <div style="font-size:13px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5;"><span style="color:var(--a);flex-shrink:0;margin-top:1px;">→</span>老板给了一句话，明天要讨论方向</div>
+          <div style="font-size:13px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5;"><span style="color:var(--a);flex-shrink:0;margin-top:1px;">→</span>想法还很早期，需要快速验证可行性</div>
+          <div style="font-size:13px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5;"><span style="color:var(--a);flex-shrink:0;margin-top:1px;">→</span>组内讨论、领导预览，需要一个可讨论包</div>
+        </div>
+        <ul class="m-list">
+          <li>PMW 只问最关键的 2–3 个问题</li>
+          <li>输出<strong>产品简报</strong>，明确标注假设和风险</li>
+          <li>输出<strong>2–3 个差异化方案方向</strong></li>
+          <li>每个方向各出 <strong>1 张移动端原型图</strong></li>
+        </ul>
+        <div class="m-time">⚡ 带着假设出发，当天进会议室</div>
       </div>
-      <p class="mode-body">适合新想法、组内讨论、领导预览或创业验证。带着假设出发，快速得到可以讨论的东西——而不是一直在"想清楚再动"。</p>
-      <ul class="mode-list">
-        <li>2–3 个关键澄清，补齐最大缺口</li>
-        <li><strong>产品简报</strong>（明确标注假设）</li>
-        <li><strong>2–3 个方案方向</strong>（策略/架构/交互各维度不同）</li>
-        <li>每个方向 <strong>1 张移动端原型图</strong></li>
-        <li>下一步建议：验证 / 评审 / 升级交付</li>
-      </ul>
-      <div class="mode-time">⚡ 10 分钟起步，不等想法"完全想清楚"</div>
-    </div>
-    <div class="mode-card deep">
-      <span class="mode-tag">深度交付</span>
-      <div class="mode-headline">
-        PRD → 交付就绪
-        <span>诊断驱动，端到端</span>
+
+      <!-- DEEP -->
+      <div class="mode-card d">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <span class="m-tag">深度交付</span>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--teal);background:var(--teal-dim);border:1px solid var(--teal-border);border-radius:5px;padding:3px 10px;">端到端</span>
+        </div>
+        <div class="m-headline">需要 PRD，<br>或对外<em>正式交付</em></div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin:4px 0;">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">适合这些情况</div>
+          <div style="font-size:13px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5;"><span style="color:var(--teal);flex-shrink:0;margin-top:1px;">→</span>要进设计评审或研发排期</div>
+          <div style="font-size:13px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5;"><span style="color:var(--teal);flex-shrink:0;margin-top:1px;">→</span>已有线上截图，优化现有功能流程</div>
+          <div style="font-size:13px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5;"><span style="color:var(--teal);flex-shrink:0;margin-top:1px;">→</span>高风险决策，需要多方对齐后再动</div>
+        </div>
+        <ul class="m-list">
+          <li>动态诊断 + 策略评审 + 拍板选择题</li>
+          <li>线上截图 / 视觉基线纳入工作流</li>
+          <li><strong>四视角评审军团</strong>把关原型，通过才交付</li>
+          <li>产出 PRD / 设计 / 实验 / 工程 <strong>交付文档</strong></li>
+        </ul>
+        <div class="m-time">🎯 先对齐，再出图，不在错误方向加速</div>
       </div>
-      <p class="mode-body">适合 PRD 交付、设计评审、研发排期或需要协作文档对齐的项目。只有简报达到"已对齐"状态，才进入出图或交付——避免在错误方向上快速推进。</p>
-      <ul class="mode-list">
-        <li>动态诊断 + 策略评审 + 拍板选择题</li>
-        <li>产品简报 ↔ <strong>Zoon 协作文档双向同步</strong></li>
-        <li>线上截图证据纳入工作流</li>
-        <li>四视角 <strong>PM 评审军团</strong>把关原型</li>
-        <li>PRD / 设计 / 实验 / 工程 <strong>交付文档</strong></li>
-      </ul>
-      <div class="mode-time">🎯 高风险项目的标准路径</div>
+    </div>
+
+    <!-- 不确定选哪个的提示 -->
+    <div class="rev d3" style="margin-top:16px;padding:16px 22px;background:var(--bg2);border:1px solid var(--wire);border-radius:10px;display:flex;align-items:center;gap:14px;">
+      <span style="font-family:var(--mono);font-size:11px;color:var(--a);background:var(--a-dim);border:1px solid var(--a-ring);border-radius:5px;padding:3px 10px;flex-shrink:0;white-space:nowrap;">不确定？</span>
+      <span style="font-size:13.5px;color:var(--ink2);line-height:1.55;">先从<strong style="color:var(--ink)">快速成型</strong>开始——带着假设推进，PMW 会在关键节点提示你是否需要升级到深度交付流程。</span>
     </div>
   </div>
-</div>
+</section>
 
-<div class="divider"></div>
+<div class="rule"></div>
 
-<!-- ── SCENARIOS ── -->
-<div class="section scenarios-section">
-  <div class="section-label reveal">真实使用场景</div>
-  <h2 class="section-h2 reveal d1">你可以这样用它</h2>
-
-  <div class="scenarios-grid reveal d2">
-    <div class="scenario-card">
-      <div class="scenario-situation">场景 01 · 新功能验证</div>
-      <div class="scenario-title">一句 idea 变成可讨论的轻量包</div>
-      <div class="scenario-result">从一个想法生成带假设标注的简报、2–3 个差异化方向和讨论用原型图，当天就能带进会议室。</div>
-      <div class="scenario-cmd">$pm-workspace · 快速成型</div>
-    </div>
-    <div class="scenario-card">
-      <div class="scenario-situation">场景 02 · 线上页面优化</div>
-      <div class="scenario-title">有截图有现状，知道哪里能动哪里不能</div>
-      <div class="scenario-result">先采集线上证据，判断哪些承诺必须保留，哪些是真实痛点，再生成有事实依据的优化方向。</div>
-      <div class="scenario-cmd">$pm-brief + 线上证据</div>
-    </div>
-    <div class="scenario-card">
-      <div class="scenario-situation">场景 03 · 协作文档转原型</div>
-      <div class="scenario-title">Zoon 文档直接进入出图流程</div>
-      <div class="scenario-result">同步最新产品简报，检查漂移，确认对齐后直接进入多方案 image-2 原型生成，不用重新讲上下文。</div>
-      <div class="scenario-cmd">$pm-autoplan · 深度交付</div>
-    </div>
-    <div class="scenario-card">
-      <div class="scenario-situation">场景 04 · 多方案设计讨论</div>
-      <div class="scenario-title">每个方案独立成图，取舍一目了然</div>
-      <div class="scenario-result">3 个方案 × 2 个屏幕 = 6 张独立图片，进入方案比较板，设计同学和 PM 能在同一份材料上讨论。</div>
-      <div class="scenario-cmd">$pm-prototype-shotgun</div>
-    </div>
-    <div class="scenario-card">
-      <div class="scenario-situation">场景 05 · 原型评审</div>
-      <div class="scenario-title">四个视角帮你发现 PM 看不到的问题</div>
-      <div class="scenario-result">策略、信任/风险、设计系统、数据可行性四个专家各出短结论，合并为通过 / 重生成 / PM 决策。</div>
-      <div class="scenario-cmd">$pm-prototype-review</div>
-    </div>
-    <div class="scenario-card">
-      <div class="scenario-situation">场景 06 · 研发交付</div>
-      <div class="scenario-title">通过评审的方向直接变成 PRD</div>
-      <div class="scenario-result">保留接口、数据、埋点、实验标准和待补充项，压缩成精简 PRD，可直接进入研发评审流程。</div>
-      <div class="scenario-cmd">$pm-handoff</div>
-    </div>
-  </div>
-</div>
-
-<div class="divider"></div>
-
-<!-- ── TERMINAL ── -->
-<div class="terminal-section">
-  <div class="section-label reveal" style="text-align:center">看看它实际上说什么</div>
-  <h2 class="section-h2 reveal d1" style="text-align:center;margin-bottom:48px">10 分钟轻量包，真实输出示例</h2>
-  <div class="terminal-wrap reveal d2">
-    <div class="terminal">
-      <div class="term-bar">
-        <div class="td td-r"></div>
-        <div class="td td-y"></div>
-        <div class="td td-g"></div>
-        <div class="term-title">codex — pmworkspace · quick shaping</div>
-      </div>
-      <div class="term-body" id="termBody"></div>
-    </div>
-    <p class="term-label">真实工作流示意 · 用户输入一句话 → 10 分钟内拿到产品资产</p>
-  </div>
-</div>
-
-<!-- ── CTA ── -->
-<div class="cta-wrap reveal">
-  <div class="cta-box">
+<!-- ══ CTA ══ -->
+<div class="cta-outer" style="margin-top:96px;">
+  <div class="cta-box rev">
     <div>
-      <h2 class="cta-heading">
-        今天拿到了一句需求，<br>
-        <em>明早就能带方案进会议室</em>
-      </h2>
-      <p class="cta-sub">
-        安装 PMWorkspace，让每次产品工作都从混乱变成清晰——快速成型时有假设，深度交付时有证据，评审时有多个视角。
-      </p>
+      <h2 class="cta-h">今天拿到一句需求，<br><em>明早带方案进会议室</em></h2>
+      <p class="cta-p">安装 PMW，你的每次产品工作都在积累成专属资产。越用，它越懂你的产品。</p>
+      <div class="cta-install">
+        <div><span class="ci-comment"># 在 Codex Plugins 中搜索安装</span></div>
+        <div><span class="ci-prompt">$</span> <span class="ci-cmd">AI 产品工作站</span></div>
+        <div style="margin-top:8px"><span class="ci-comment"># 或添加 GitHub 本地插件</span></div>
+        <div><span class="ci-prompt">$</span> <span class="ci-cmd">codex plugin marketplace add stephenfan80/PMWorkspace</span></div>
+        <div style="margin-top:8px"><span class="ci-comment"># 安装后从这里开始</span></div>
+        <div><span class="ci-prompt">$</span> <span class="ci-cmd">使用 $pm-workspace 显示欢迎引导</span></div>
+      </div>
     </div>
     <div class="cta-actions">
-      <a class="btn-a" href="https://github.com/stephenfan80/PMWorkspace" target="_blank">前往 GitHub 安装 →</a>
-      <a class="btn-b" href="https://github.com/stephenfan80/PMWorkspace/blob/main/README.zh-CN.md" target="_blank">阅读完整中文文档</a>
+      <a class="btn-fill" href="https://github.com/stephenfan80/PMWorkspace" target="_blank">前往 GitHub 安装 →</a>
+      <a class="btn-line" href="https://github.com/stephenfan80/PMWorkspace/blob/main/README.zh-CN.md" target="_blank">阅读完整中文文档</a>
     </div>
   </div>
 </div>
 
-<!-- FOOTER -->
+<!-- ══ FOOTER ══ -->
 <footer>
-  <div class="footer-brand">PMWorkspace · 产品经理的 AI 工作台</div>
-  <div class="footer-links">
+  <div class="foot-brand">AI 产品工作站（PMW）· PMWorkspace</div>
+  <div class="foot-links">
     <a href="https://github.com/stephenfan80/PMWorkspace" target="_blank">GitHub</a>
     <a href="https://github.com/stephenfan80/PMWorkspace/blob/main/README.zh-CN.md" target="_blank">中文文档</a>
-    <a href="https://github.com/stephenfan80/PMWorkspace/blob/main/AGENTS.md" target="_blank">AGENTS.md</a>
     <a href="https://github.com/stephenfan80/PMWorkspace/blob/main/LICENSE" target="_blank">MIT 协议</a>
   </div>
-  <div class="footer-note">© 2026 stephenfan80</div>
+  <div class="foot-copy">© 2026 stephenfan80</div>
 </footer>
 
-<!-- ── SCRIPTS ── -->
+<!-- ══ TWEAKS ══ -->
+<div id="tweaks">
+  <div class="tw-hd">
+    <span class="tw-hd-label">Tweaks</span>
+    <button class="tw-x" id="tw-x">×</button>
+  </div>
+  <div class="tw-grp">
+    <div class="tw-lbl">主色调</div>
+    <div class="tw-row" id="tc">
+      <div class="tw-btn sel" data-c="amber">琥珀</div>
+      <div class="tw-btn" data-c="blue">靛蓝</div>
+      <div class="tw-btn" data-c="jade">碧绿</div>
+    </div>
+  </div>
+  <div class="tw-grp">
+    <div class="tw-lbl">英雄副标题</div>
+    <div class="tw-row" id="th">
+      <div class="tw-btn sel" data-h="0">记忆型</div>
+      <div class="tw-btn" data-h="1">结果型</div>
+      <div class="tw-btn" data-h="2">对比型</div>
+    </div>
+  </div>
+  <div class="tw-grp">
+    <div class="tw-lbl">底色风格</div>
+    <div class="tw-row" id="tb">
+      <div class="tw-btn sel" data-b="warm">暖棕黑</div>
+      <div class="tw-btn" data-b="cool">冷炭黑</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCRIPTS ══ -->
 <script>
-// Scroll reveals
+/* scroll reveal */
 const io = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
-  });
-}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: 0.08, rootMargin: '0px 0px -28px 0px' });
+document.querySelectorAll('.rev').forEach(el => io.observe(el));
 
-// Terminal — type once, then hold with blinking cursor
-const lines = [
-  { type: 'cmd',   text: 'Use $pm-workspace to quickly shape this product idea' },
-  { type: 'dim',   text: 'Idea: 用户购物后延迟弹出复购提醒卡片' },
-  { type: 'blank' },
-  { type: 'dim',   text: '→ 判断真实问题中...' },
-  { type: 'out',   text: '✓ 真实问题：复购召回时机不精准，默认弹出打扰感强' },
-  { type: 'blank' },
-  { type: 'dim',   text: '→ 关键假设确认...' },
-  { type: 'out',   text: '✓ 假设已确认  ·  Brief v1 已对齐' },
-  { type: 'blank' },
-  { type: 'out',   text: '✓ 方案 A：行为触发型 — 基于上次购买间隔智能延迟' },
-  { type: 'out',   text: '✓ 方案 B：情境感知型 — 结合库存 + 价格窗口触发' },
-  { type: 'out',   text: '✓ 方案 C：渐进式 — 先推送 → 无响应才弹卡片' },
-  { type: 'blank' },
-  { type: 'out',   text: '✓ 原型图生成完毕  ·  scheme_A_home.png  scheme_B_home.png  scheme_C_home.png' },
-  { type: 'dim',   text: '下一步：进入原型评审 或 升级为交付稿' },
+/* growth hover */
+const items = document.querySelectorAll('.g-item:not(.future)');
+items.forEach(it => {
+  it.addEventListener('mouseenter', () => { items.forEach(i => i.classList.remove('lit')); it.classList.add('lit'); });
+  it.addEventListener('mouseleave', () => { items.forEach(i => i.classList.remove('lit')); items[1].classList.add('lit'); });
+});
+
+/* tweaks */
+const panel = document.getElementById('tweaks');
+const root  = document.documentElement;
+window.addEventListener('message', e => {
+  if (!e.data) return;
+  if (e.data.type === '__activate_edit_mode')   panel.classList.add('on');
+  if (e.data.type === '__deactivate_edit_mode') panel.classList.remove('on');
+});
+window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+document.getElementById('tw-x').addEventListener('click', () => {
+  panel.classList.remove('on');
+  window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+});
+
+const palettes = {
+  amber: ['oklch(0.76 0.15 52)','oklch(0.76 0.15 52 / 0.13)','oklch(0.76 0.15 52 / 0.30)','oklch(0.76 0.15 52 / 0.18)'],
+  blue:  ['oklch(0.72 0.15 245)','oklch(0.72 0.15 245 / 0.13)','oklch(0.72 0.15 245 / 0.30)','oklch(0.72 0.15 245 / 0.18)'],
+  jade:  ['oklch(0.74 0.14 160)','oklch(0.74 0.14 160 / 0.13)','oklch(0.74 0.14 160 / 0.30)','oklch(0.74 0.14 160 / 0.18)'],
+};
+document.querySelectorAll('#tc .tw-btn').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#tc .tw-btn').forEach(x => x.classList.remove('sel'));
+  b.classList.add('sel');
+  const [a,d,r,g] = palettes[b.dataset.c];
+  root.style.setProperty('--a', a);
+  root.style.setProperty('--a-dim', d);
+  root.style.setProperty('--a-ring', r);
+  root.style.setProperty('--a-glow', g);
+}));
+
+const heroSubs = [
+  '不只是 AI 对话——PMW 有记忆、有流程，把每次工作变成积累。<br><strong>越用，越懂你的产品。</strong>',
+  '今天一句需求，明早带着三套方案走进会议室。<br><strong>有简报、有原型、有评审结论。</strong>',
+  '聊天 AI 会忘记你说过的一切——<br><strong>PMW 记住你的每个产品决策。</strong>',
 ];
+document.querySelectorAll('#th .tw-btn').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#th .tw-btn').forEach(x => x.classList.remove('sel'));
+  b.classList.add('sel');
+  document.querySelector('.hero-p').innerHTML = heroSubs[+b.dataset.h];
+}));
 
-const body = document.getElementById('termBody');
-let lineIdx = 0, charIdx = 0, rendered = [], finished = false;
-
-function render() {
-  let html = '';
-  rendered.forEach((ln, i) => {
-    if (ln.type === 'blank') { html += '<br>'; return; }
-    const cls = ln.type === 'cmd' ? 't-cmd' : ln.type === 'out' ? 't-out' : 't-dim';
-    const prefix = ln.type === 'cmd' ? '<span class="t-prompt">$ </span>' : '';
-    const isTyping = !finished && i === rendered.length - 1;
-    const text = isTyping ? ln.text.slice(0, charIdx) : ln.text;
-    html += `${prefix}<span class="${cls}">${text}</span><br>`;
-  });
-  html += '<span class="t-cursor"></span>';
-  body.innerHTML = html;
-}
-
-function tick() {
-  if (finished) return;
-  const cur = lines[lineIdx];
-  if (cur.type === 'blank') {
-    rendered.push(cur); lineIdx++; charIdx = 0;
-    if (lineIdx >= lines.length) { finished = true; render(); return; }
-    render(); setTimeout(tick, 90); return;
-  }
-  if (charIdx < cur.text.length) {
-    charIdx++; render();
-    setTimeout(tick, charIdx === 1 ? 100 : 32);
-  } else {
-    rendered.push({ ...cur }); lineIdx++; charIdx = 0;
-    if (lineIdx >= lines.length) { finished = true; render(); return; }
-    render();
-    setTimeout(tick, cur.type === 'cmd' ? 280 : cur.type === 'dim' ? 180 : 120);
-  }
-}
-setTimeout(tick, 800);
+const bgModes = {
+  warm: { '--bg':'#0e0c09', '--bg2':'#171310', '--bg3':'#201c18', '--bg4':'#2a2420', '--ink':'#f6ece0', '--ink2':'rgba(246,236,224,0.55)', '--ink3':'rgba(246,236,224,0.28)', '--wire':'rgba(255,235,210,0.07)', '--wire2':'rgba(255,235,210,0.12)' },
+  cool: { '--bg':'#0d0d10', '--bg2':'#161619', '--bg3':'#1f1f23', '--bg4':'#29292e', '--ink':'#f0edf6', '--ink2':'rgba(240,237,246,0.52)', '--ink3':'rgba(240,237,246,0.26)', '--wire':'rgba(220,215,255,0.07)', '--wire2':'rgba(220,215,255,0.12)' },
+};
+document.querySelectorAll('#tb .tw-btn').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#tb .tw-btn').forEach(x => x.classList.remove('sel'));
+  b.classList.add('sel');
+  Object.entries(bgModes[b.dataset.b]).forEach(([k,v]) => root.style.setProperty(k,v));
+}));
 </script>
 
-<template id="__bundler_thumbnail" data-bg-color="#19171a">
+<template id="__bundler_thumbnail" data-bg-color="#0e0c09">
   <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
-    <rect width="1200" height="800" fill="#19171a"/>
-    <line x1="0" y1="160" x2="1200" y2="160" stroke="#fff" stroke-opacity="0.05" stroke-width="1"/>
-    <line x1="0" y1="320" x2="1200" y2="320" stroke="#fff" stroke-opacity="0.05" stroke-width="1"/>
-    <line x1="0" y1="480" x2="1200" y2="480" stroke="#fff" stroke-opacity="0.05" stroke-width="1"/>
-    <line x1="0" y1="640" x2="1200" y2="640" stroke="#fff" stroke-opacity="0.05" stroke-width="1"/>
-    <line x1="240" y1="0" x2="240" y2="800" stroke="#fff" stroke-opacity="0.05" stroke-width="1"/>
-    <line x1="480" y1="0" x2="480" y2="800" stroke="#fff" stroke-opacity="0.05" stroke-width="1"/>
-    <line x1="720" y1="0" x2="720" y2="800" stroke="#fff" stroke-opacity="0.05" stroke-width="1"/>
-    <line x1="960" y1="0" x2="960" y2="800" stroke="#fff" stroke-opacity="0.05" stroke-width="1"/>
-    <circle cx="600" cy="340" r="320" fill="url(#g)"/>
+    <rect width="1200" height="800" fill="#0e0c09"/>
+    <circle cx="600" cy="350" r="380" fill="url(#bg)"/>
     <defs>
-      <radialGradient id="g" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#d97706" stop-opacity="0.12"/>
+      <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#d97706" stop-opacity="0.08"/>
         <stop offset="100%" stop-color="#d97706" stop-opacity="0"/>
       </radialGradient>
     </defs>
-    <circle cx="571" cy="260" r="4" fill="#d97706"/>
-    <rect x="380" y="278" width="260" height="20" rx="3" fill="#f0ede8" fill-opacity="0.9"/>
-    <rect x="350" y="312" width="200" height="20" rx="3" fill="#d97706" fill-opacity="0.95"/>
-    <rect x="360" y="348" width="180" height="14" rx="3" fill="#f0ede8" fill-opacity="0.25"/>
-    <rect x="320" y="400" width="360" height="10" rx="2" fill="#f0ede8" fill-opacity="0.18"/>
-    <rect x="340" y="420" width="320" height="10" rx="2" fill="#f0ede8" fill-opacity="0.12"/>
-    <rect x="430" y="464" width="130" height="38" rx="7" fill="#d97706"/>
-    <rect x="572" y="464" width="120" height="38" rx="7" fill="#2b282c" stroke="#fff" stroke-opacity="0.1" stroke-width="1"/>
-    <rect x="290" y="546" width="620" height="130" rx="12" fill="#111013" stroke="#fff" stroke-opacity="0.1" stroke-width="1"/>
-    <rect x="290" y="546" width="620" height="30" rx="12" fill="#1c1a1d"/>
-    <circle cx="314" cy="561" r="5" fill="#ff5f57"/>
-    <circle cx="333" cy="561" r="5" fill="#febc2e"/>
-    <circle cx="352" cy="561" r="5" fill="#28c840"/>
-    <rect x="310" y="592" width="200" height="8" rx="2" fill="#d97706" fill-opacity="0.75"/>
-    <rect x="310" y="612" width="280" height="8" rx="2" fill="#6ee7b7" fill-opacity="0.6"/>
-    <rect x="310" y="632" width="240" height="8" rx="2" fill="#6ee7b7" fill-opacity="0.45"/>
-    <rect x="310" y="652" width="180" height="8" rx="2" fill="#6ee7b7" fill-opacity="0.3"/>
+    <rect x="340" y="255" width="520" height="56" rx="6" fill="#f6ece0" fill-opacity="0.82"/>
+    <rect x="380" y="325" width="440" height="56" rx="6" fill="#d97706" fill-opacity="0.9"/>
+    <rect x="430" y="396" width="340" height="20" rx="4" fill="#f6ece0" fill-opacity="0.2"/>
+    <rect x="456" y="426" width="288" height="20" rx="4" fill="#f6ece0" fill-opacity="0.13"/>
+    <rect x="440" y="474" width="136" height="42" rx="8" fill="#d97706"/>
+    <rect x="588" y="474" width="128" height="42" rx="8" fill="#201c18" stroke="#f6ece0" stroke-opacity="0.1" stroke-width="1"/>
   </svg>
 </template>
 </body>

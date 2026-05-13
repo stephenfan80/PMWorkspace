@@ -29,11 +29,23 @@
     },
     {
       "path": "pmworkspace-shared/references/product-office-hours.md",
-      "contains": "触发信号包括：`当前页面`、`已有功能`、`线上链路`、`汽车之家其他页面`、`其他页面`、`竞品平台`、`竞品参考`、`页面截图`、`URL`、`Figma`、`设计稿`"
+      "contains": "触发信号包括：`当前页面`、`已有功能`、`当前链路`、`线上链路`、`线上替代路径`、`汽车之家其他页面`、`其他页面`、`竞品平台`、`竞品参考`、`跳到竞品`、`竞品平台查看`、`页面截图`、`URL`、`Figma`、`设计稿`"
     },
     {
       "path": "pm-jobs/SKILL.md",
-      "contains": "在输出当前 `Q` / `D` 前，先检查线上 / 竞品基线触发器"
+      "contains": "当前页面、已有功能、当前链路、线上链路、线上替代路径、汽车之家其他页面、其他页面、竞品平台、竞品参考、跳到竞品、竞品平台查看"
+    },
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "-> 线上/竞品基线识别"
+    },
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "这里不再首次发现基线缺口"
+    },
+    {
+      "path": "pmworkspace-shared/references/production-reference-gate.md",
+      "contains": "先把 `线上参考需求` 标记为 `需要` 或 `待确认基线`"
     },
     {
       "path": "pmworkspace-shared/references/production-reference-gate.md",

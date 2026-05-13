@@ -1,0 +1,43 @@
+{
+  "id": "jobs-online-competitor-baseline-requested-before-d",
+  "title": "提到其他页面或竞品时必须先前置线上/竞品基线作业",
+  "category": "pm-jobs",
+  "primary_skill": "pm-jobs",
+  "prompt": "用户说现在会在汽车之家其他页面找经销商电话，或者去竞品平台查看门店、报价和联系方式。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要补充",
+    "must_stop": true,
+    "gate": "线上 / 竞品基线",
+    "required_behaviors": [
+      "识别其他页面和竞品平台触发线上 / 竞品基线",
+      "在产品作业卡展示该证据缺口",
+      "要求截图、URL 或具体可借鉴点",
+      "说明为什么影响当前问题区域、保留项、可改项和竞品借鉴边界",
+      "把它作为产品作业或证据请求，不作为方向 D"
+    ],
+    "forbidden_behaviors": [
+      "直接继续问方向 D 而不提示线上 / 竞品基线",
+      "把竞品参考当成可复制方案",
+      "把截图 / 竞品材料做成固定新增流程"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "线上 / 竞品基线触发器"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-office-hours.md",
+      "contains": "触发信号包括：`当前页面`、`已有功能`、`线上链路`、`汽车之家其他页面`、`其他页面`、`竞品平台`、`竞品参考`、`页面截图`、`URL`、`Figma`、`设计稿`"
+    },
+    {
+      "path": "pm-jobs/SKILL.md",
+      "contains": "在输出当前 `Q` / `D` 前，先检查线上 / 竞品基线触发器"
+    },
+    {
+      "path": "pmworkspace-shared/references/production-reference-gate.md",
+      "contains": "如果用户已经提到其他页面或竞品平台，但还没给截图 / URL"
+    }
+  ]
+}

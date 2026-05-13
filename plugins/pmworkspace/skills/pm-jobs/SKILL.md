@@ -130,19 +130,20 @@ fi
 15. Read `../pmworkspace-shared/references/scenario-experts.md` and select only the dominant expert lens.
 16. Read `../pmworkspace-shared/references/browser-evidence.md` when the user provides URL、线上页面、竞品或 Zoon 参考。
 17. Read `../pmworkspace-shared/references/production-reference-gate.md`，判断新页面是否仍需要线上参考。
-18. If the request is an existing-feature iteration, require current production screenshots, key-state screenshots, URL, Figma/design file, or equivalent visual baseline before proceeding. 缺线上基线时，不输出 `方案 A / 方案 B / 方案 C`、三条产品路径或原型计划；只输出产品作业卡、为什么缺基线会影响判断、证据请求和补齐后解锁。用户提供录屏时，要求补关键节点截图，或先由外部工具转成截图后再进入 PMW。
-19. 如果新页面承接线上流程、结果状态或生产样式，要求截图、关键节点截图、相似页面参考，或用户明确确认没有线上参考。
-20. 不把产品澄清等同于连续提问。先按产品方向审查内核判断当前最早任务：前提挑战、现状替代、不做推演、路径对比、范围模式、材料整理、证据请求、截图结构拆解、数据口径梳理、访谈提纲、最佳实践检索、产品简述确认，或必要的 `Q` / `D`。
-21. 如果当前任务是证据门槛，停在证据请求；不要继续问后续产品问题。
-22. If the missing item is a fact, ask one `Q`; if facts are enough but a tradeoff changes direction, scope, promise, experiment framing, or handoff, ask one `D`. `Q` / `D` 是关键卡点机制，不是完整产品发现流程。
-23. 如果用户只给功能愿望，不能把功能名直接写成核心问题；先追问真实用户、触发场景、当前损失或现状替代。
-24. 进入方案方向、前提确认或产品简报前，必须识别当前替代方案、最小可赢切口和至少 2 条路径；如果仍宽泛，先收窄，不直接写完整产品简报。
-25. 进入前提确认、策略审查或产品简报前，必须通过产品发现深度门槛，并完成产品判断对抗校验：深度交付或现有线上功能优化必须覆盖 `产品定位与链路角色`、`目标用户与触发时刻`、`用户现状与当前替代`、`真实痛点与当前损失`、`主目标与反指标`，同时标出想当然、理解偏差、证据不足处和需要降级为假设的判断。最终确认产品简报前通常至少完成 2 个方向性 `D`；一个 `Q` 加一个 `D` 不能代表已完成产品定位、用户现状、真实损失、目标和反指标的分析，`D` 也不能替代事实诊断。
-26. 如果产品发现深度不足，当前任务写成 `产品发现深度不足`，回到前提挑战、现状替代、不做推演、证据收集、路径对比或产品作业卡里的当前主阻断，并说明它会影响产品定位、用户任务、价值交换、首屏主张、反指标或不可虚构项中的哪一项；同时写清补齐后会解锁产品简述、三条产品路径或原型计划中的哪一步；不要进入 `$pm-brief`。
-27. 在信息足够后，输出 2-4 条前提确认；用户不同意时回到对应 `Q` 或 `D`。
-28. Read `../pmworkspace-shared/references/decision-question-mode.md`; when a missing answer would change product direction, prototype scope, experiment framing, user promise, or handoff, ask it as a D-numbered choice question.
-29. 输出价值判断先行的简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。未完成前提确认、产品发现深度门槛或关键 D 拍板时，不能标记为 `已对齐`。每次阶段结束必须给一个现实 `产品作业`，写成 `现实动作 -> 解锁结果`，例如访谈 3 个用户 -> 判断真实损失是否成立、补线上截图 -> 判断问题区域和保留项、拉漏斗数据 -> 判断主目标和反指标、找竞品流程 -> 判断产品路径差异、确认不可承诺项 -> 判断原型和交付边界；不要把“继续聊聊”当作产品作业。
-30. 平台脚本可用时，用 `pmw-project set-name "<中文项目名>"` 保存中文项目名，用 `pmw-log discovery --dimension <id> --source <source> --summary <text> --confidence confirmed`、`pmw-log question`、`pmw-log decision` 和 `pmw-run event` 记录关键事实与选择。进入产品简报前运行 `pmw-discovery-gate check --target brief`。
+18. 在输出当前 `Q` / `D` 前，先检查线上 / 竞品基线触发器：如果用户提到当前页面、已有功能、线上链路、汽车之家其他页面、其他页面、竞品平台、竞品参考、页面截图、URL、Figma 或设计稿，产品作业卡必须展示 `线上 / 竞品基线` 缺口，要求当前线上截图 / 关键节点截图 / 线上 URL / Figma，或竞品截图、URL、具体可借鉴点，并说明为什么影响问题区域、保留项、可改项、竞品只可借鉴点和补齐后解锁。这个动作是产品作业 / 证据请求，不是方向 `D`；不要为了它增加一轮完整选择题。
+19. If the request is an existing-feature iteration, require current production screenshots, key-state screenshots, URL, Figma/design file, or equivalent visual baseline before proceeding. 缺线上基线时，不输出 `方案 A / 方案 B / 方案 C`、三条产品路径或原型计划；只输出产品作业卡、为什么缺基线会影响判断、证据请求和补齐后解锁。用户提供录屏时，要求补关键节点截图，或先由外部工具转成截图后再进入 PMW。
+20. 如果新页面承接线上流程、结果状态或生产样式，要求截图、关键节点截图、相似页面参考，或用户明确确认没有线上参考。
+21. 不把产品澄清等同于连续提问。先按产品方向审查内核判断当前最早任务：前提挑战、现状替代、不做推演、路径对比、范围模式、材料整理、证据请求、截图结构拆解、数据口径梳理、访谈提纲、最佳实践检索、产品简述确认，或必要的 `Q` / `D`。
+22. 如果当前任务是证据门槛，停在证据请求；不要继续问后续产品问题。
+23. If the missing item is a fact, ask one `Q`; if facts are enough but a tradeoff changes direction, scope, promise, experiment framing, or handoff, ask one `D`. `Q` / `D` 是关键卡点机制，不是完整产品发现流程。
+24. 如果用户只给功能愿望，不能把功能名直接写成核心问题；先追问真实用户、触发场景、当前损失或现状替代。
+25. 进入方案方向、前提确认或产品简报前，必须识别当前替代方案、最小可赢切口和至少 2 条路径；如果仍宽泛，先收窄，不直接写完整产品简报。
+26. 进入前提确认、策略审查或产品简报前，必须通过产品发现深度门槛，并完成产品判断对抗校验：深度交付或现有线上功能优化必须覆盖 `产品定位与链路角色`、`目标用户与触发时刻`、`用户现状与当前替代`、`真实痛点与当前损失`、`主目标与反指标`，同时标出想当然、理解偏差、证据不足处和需要降级为假设的判断。最终确认产品简报前通常至少完成 2 个方向性 `D`；一个 `Q` 加一个 `D` 不能代表已完成产品定位、用户现状、真实损失、目标和反指标的分析，`D` 也不能替代事实诊断。
+27. 如果产品发现深度不足，当前任务写成 `产品发现深度不足`，回到前提挑战、现状替代、不做推演、证据收集、路径对比或产品作业卡里的当前主阻断，并说明它会影响产品定位、用户任务、价值交换、首屏主张、反指标或不可虚构项中的哪一项；同时写清补齐后会解锁产品简述、三条产品路径或原型计划中的哪一步；不要进入 `$pm-brief`。
+28. 在信息足够后，输出 2-4 条前提确认；用户不同意时回到对应 `Q` 或 `D`。
+29. Read `../pmworkspace-shared/references/decision-question-mode.md`; when a missing answer would change product direction, prototype scope, experiment framing, user promise, or handoff, ask it as a D-numbered choice question.
+30. 输出价值判断先行的简短对齐摘要，并用中文状态标记：`需要补充`、`待确认` 或 `已对齐`。未完成前提确认、产品发现深度门槛或关键 D 拍板时，不能标记为 `已对齐`。每次阶段结束必须给一个现实 `产品作业`，写成 `现实动作 -> 解锁结果`，例如访谈 3 个用户 -> 判断真实损失是否成立、补线上截图 -> 判断问题区域和保留项、拉漏斗数据 -> 判断主目标和反指标、找竞品流程 -> 判断产品路径差异、确认不可承诺项 -> 判断原型和交付边界；不要把“继续聊聊”当作产品作业。
+31. 平台脚本可用时，用 `pmw-project set-name "<中文项目名>"` 保存中文项目名，用 `pmw-log discovery --dimension <id> --source <source> --summary <text> --confidence confirmed`、`pmw-log question`、`pmw-log decision` 和 `pmw-run event` 记录关键事实与选择。进入产品简报前运行 `pmw-discovery-gate check --target brief`。
 
 ## 产品方向审查任务
 

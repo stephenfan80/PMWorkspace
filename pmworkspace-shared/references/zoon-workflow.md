@@ -16,7 +16,7 @@
 - 用户在对话中调整产品简报后，必须重新保存本地简报；只有已启用 Zoon 时才同步到 Zoon，不能只更新对话里的口径。
 - 创建或更新 Zoon 成功后，必须先自动加入协作态，再尝试自动打开可编辑 URL；不能只保存本地 Markdown 后结束。
 - 创建新文档的 payload 只能表达一次正文写入：使用 `title` + 单个 `markdown` 字段，不同时发送 `content`、`initialMarkdown` 等同义字段，避免 Zoon 服务端兼容解析时把同一份简报写入多遍。
-- 追加 / 同步简报时只使用 `operations[].markdown` 表达新增内容，不再额外发送顶层 `markdown` 同义字段；同步块必须带 `PMWorkspace brief sync hash`，同一 hash 已存在时跳过重复追加。
+- 追加 / 同步文档时只使用 `operations[].markdown` 表达新增内容，不再额外发送顶层 `markdown` 同义字段；同步块必须带 `PMWorkspace document sync hash`，同一 hash 已存在时跳过重复追加；读取旧文档时仍兼容历史 `PMWorkspace brief sync hash`。
 - `pmw-log brief` 默认只记录本地 latest brief 和完整审计副本，并把 `last_zoon_sync_status` 标记为 `disabled`；即使 `zoon_sync_on_brief` 或 `PMW_ZOON_SYNC_ON_BRIEF` 显式开启，产品简报未 `已对齐` 时也必须输出 `ZOON_SYNC_DEFERRED_UNTIL_ALIGNED=true` 并延后同步；只有简报已对齐时才执行 `pmw-zoon sync` 并记录 `last_zoon_sync_status`、`last_zoon_sync_brief`、`last_zoon_join_status` 和 Zoon URL。
 - 未启用 Zoon 时，出图 / 交付准备度中的 Zoon 行显示 `未启用，使用本地简报`，不作为阻断；已启用或已有 URL 时，才必须检查同步与漂移。
 
@@ -62,6 +62,28 @@ B. 需要，同步到 Zoon 供团队在线修改。
 
 如果用户选择 A，不创建 Zoon，不打开浏览器，继续使用本地已对齐产品简报。
 如果用户选择 B 或提供现有 Zoon URL，按下列 Zoon 流程执行。
+
+## 交付稿 / PRD / 产品设计文档同步
+
+`$pm-handoff` 生成 PRD、产品设计文档或交付稿后，默认先保存本地 Markdown 和 artifact-flow 登记，再输出 `Zoon 协作建议`。Zoon 是团队在线修改、评审、研发对齐和让 PMWorkspace agent 一起改文档的协作层，不是交付阻断，也不能在用户未选择时自动同步。
+
+交付完成后的用户可见选择固定为：
+
+```text
+在线协作选择：
+A. 暂不需要，继续使用本地 Markdown。
+B. 同步到已有 Zoon 文档（提供 URL 或使用项目已记录 URL）。
+C. 新建一个 Zoon 交付文档。
+```
+
+执行规则：
+
+- 用户选择 A：不创建、不追加、不打开 Zoon；继续使用本地 Markdown。
+- 用户选择 B：优先使用用户提供的 Zoon URL；如果只存在项目已记录 URL，先让用户确认再追加；已有本地交付稿路径时可用 `pmw-zoon sync --title "PRD：<需求名>" --url "<Zoon URL>" --document "<PRD.md>"`。
+- 用户选择 C：使用 `pmw-zoon create --title "PRD：<需求名>"` 或 `pmw-zoon create --title "产品设计文档：<功能名>"` 新建文档。
+- 创建或追加成功后，`pmw-zoon` 必须自动执行 `join` / presence，让 `pmworkspace` agent 进入协作态；随后优先打开 Codex 内置浏览器。
+- 如果自动加入失败或服务不支持，输出：`已创建/已同步，但 agent 自动加入失败/不支持，请在文档编辑页手动邀请或继续用本地 Markdown`。
+- 同步块使用 `PMWorkspace document sync hash` 去重；读取旧 Zoon 文档时兼容历史 `PMWorkspace brief sync hash`，避免重复追加同一份内容。
 
 ### 可升级协议发现
 

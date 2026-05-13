@@ -59,6 +59,8 @@ description: |
 - `精简 PRD`
 - `功能能力与研发依赖`
 - `待补充项`
+- `Zoon 协作建议`
+- `在线协作选择`
 - `下一步`
 
 ### 内部审计字段（默认不展示）
@@ -119,7 +121,7 @@ fi
 15. Read `../pmworkspace-shared/references/pm-eval-system.md` and preserve delivery contracts.
 16. Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-handoff` 且没有当前 run，再创建 runtime run.
 17. 如果用户要 PRD、研发交付、实验标准、埋点或接口梳理，先提示：`如果你有现成 PRD、接口文档、埋点方案、实验方案、Zoon 或截图，可以上传给我参考；没有的话，我会基于当前已对齐 brief 生成精简 PRD，并把缺失项留空待补充。`
-18. 建立交付控制器，记录 `交付目标`、`事实来源`、`Product Readiness Dashboard`、`交付前门槛`、`原型复审状态`、`未决拍板`、`交付类型`、`产品设计文档来源`、`产品判断对抗校验`、`原型可信度对抗复审`、`研发可行性反问`、`功能能力与研发依赖`、`PRD 缺口处理`、`验收写入边界`、`交付资产沉淀`、`上游产物`、`本轮产物`、`下游可读`、`产物流动`、`下一技能` 和 `证据状态`；这些默认写入审计，不能进入 PRD 正文。用户可见输出只保留交付结论、产品设计文档或精简 PRD、功能能力与研发依赖、待补充项和下一步，不输出 `PRD 生成判断`。
+18. 建立交付控制器，记录 `交付目标`、`事实来源`、`Product Readiness Dashboard`、`交付前门槛`、`原型复审状态`、`未决拍板`、`交付类型`、`产品设计文档来源`、`产品判断对抗校验`、`原型可信度对抗复审`、`研发可行性反问`、`功能能力与研发依赖`、`PRD 缺口处理`、`验收写入边界`、`交付资产沉淀`、`上游产物`、`本轮产物`、`下游可读`、`产物流动`、`下一技能` 和 `证据状态`；这些默认写入审计，不能进入 PRD 正文。用户可见输出只保留交付结论、产品设计文档或精简 PRD、功能能力与研发依赖、待补充项、Zoon 协作建议、在线协作选择和下一步，不输出 `PRD 生成判断`。
 19. 如果 `pmw-project show` 中有 Zoon URL，先运行 `pmw-zoon drift`；若存在实质漂移，读取最新文档，作为交付事实来源，并退回 `$pm-brief` 或 `$pm-strategy-review`，不要沿用旧交付口径。
 20. 如果产品简报不是 `已对齐`，退回 `$pm-brief`；如果交付依赖原型但复审不是 `可通过`，退回 `$pm-prototype-review`、`$pm-prototype-shotgun` 或当前 `D`。
 21. 交付稿输出前执行 `研发可行性反问`：逐项审查功能承诺背后的数据来源、接口能力、算法 / 推荐能力、规则口径、权限、后台配置、运营支持、埋点日志、异常 / 空态和合规边界；把结果落入 `产品需补齐`、`研发需评估`、`可留待补充` 或 `不可写入验收`。
@@ -134,6 +136,8 @@ fi
 30. Keep unsupported capabilities under `不可虚构`; unsupported capabilities, unverified data, unresolved commitments, and future ideas must not appear as acceptance criteria.
 31. 从用户输入中提取可复用交付资产：接口、数据来源、指标口径、埋点事件、实验标准、功能能力依赖和数据可用性判断；平台脚本可用时，用 `pmw-memory add-delivery-fact` 写入本地脱敏资产，并标明 `scenario`、`target`、`scope`、`source`、`confidence` 和 `fact-type`。
 32. 平台脚本可用时，用 `pmw-log handoff <name>` 保存交付稿，它会登记 `handoff` 到 Product Artifact Flow；产品设计文档用 `pmw-log handoff <name> --artifact-kind product_design_doc` 保存并登记 `product_design_doc`，同时把 `PM 判断摘要` / `产品判断演进` 和 `下一步产品作业` 写入结构化字段。需要给 QA、发布或文档同步接力时，额外用 `pmw-artifact add --kind acceptance_seed` 或 `--kind release_doc_seed` 记录下游可读摘要。记录 `pmw-run event --type artifact`，并且只有交付前门槛全部通过时才 `pmw-run finish --status "可交付"`。
+33. 交付稿 / PRD / 产品设计文档保存后必须输出 `Zoon 协作建议` 和 `在线协作选择`，把本地 Markdown 定位为已完成交付稿，把 Zoon 定位为团队继续修改、评审和研发对齐的协作起点。推荐文案必须说明：同步后 PMWorkspace agent 会自动加入文档继续协助修改；不自动同步、不阻断本地 Markdown 继续使用。每次让用户选择：`A. 暂不需要，继续使用本地 Markdown`；`B. 同步到已有 Zoon 文档（提供 URL 或使用项目已记录 URL）`；`C. 新建一个 Zoon 交付文档`。
+34. 用户选择 B/C 后才调用 `pmw-zoon append|create|sync`。创建或追加成功后，默认由 `pmw-zoon` 自动执行 `join` / presence，让 `pmworkspace` agent 加入协作态，并优先打开 Codex 内置浏览器。若自动加入失败或服务不支持，输出：`已创建/已同步，但 agent 自动加入失败/不支持，请在文档编辑页手动邀请或继续用本地 Markdown`；不要把手动邀请作为默认流程。
 
 ## 输出结构
 
@@ -250,5 +254,14 @@ fi
 ## 不可虚构
 
 ```
+
+## Zoon 协作建议
+
+交付稿已保存为本地 Markdown。建议同步到 Zoon，让团队在线修改 PRD / 产品设计文档，并让 PMWorkspace agent 加入文档继续协助完善接口、埋点、实验标准和待补充项。不同步也不影响继续使用本地 Markdown。
+
+在线协作选择：
+- A. 暂不需要，继续使用本地 Markdown。
+- B. 同步到已有 Zoon 文档（提供 URL 或使用项目已记录 URL）。
+- C. 新建一个 Zoon 交付文档。
 
 内部交付审计继续记录交付前门槛、原型复审状态、未决拍板、产物流动和已保存资产；默认不展示给用户，也不写入 PRD 正文。

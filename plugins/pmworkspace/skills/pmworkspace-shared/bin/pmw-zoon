@@ -37,7 +37,7 @@ mode, title, markdown_file = sys.argv[1:4]
 markdown = open(markdown_file, encoding="utf-8").read().strip()
 digest = hashlib.sha256(markdown.encode("utf-8")).hexdigest()
 ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-wrapped = "\n\n<!-- PMWorkspace brief sync hash: %s; synced_at: %s -->\n\n%s\n\n<!-- PMWorkspace brief sync end -->\n" % (digest, ts, markdown)
+wrapped = "\n\n<!-- PMWorkspace document sync hash: %s; synced_at: %s -->\n\n%s\n\n<!-- PMWorkspace document sync end -->\n" % (digest, ts, markdown)
 if mode == "create":
     print(json.dumps({
         "title": title,
@@ -156,7 +156,7 @@ PY
 }
 
 usage() {
-  echo "Usage: pmw-zoon {protocol --host <Zoon host-or-url>|join --url <Zoon URL>|create --title <中文标题>|append --url <Zoon URL>|sync --title <中文标题> [--url <Zoon URL>] [--brief <path>]|read --url <Zoon URL>|drift [--url <Zoon URL>] [--brief <path>]}" >&2
+  echo "Usage: pmw-zoon {protocol --host <Zoon host-or-url>|join --url <Zoon URL>|create --title <中文标题>|append --url <Zoon URL>|sync --title <中文标题> [--url <Zoon URL>] [--document <path>|--brief <path>]|read --url <Zoon URL>|drift [--url <Zoon URL>] [--brief <path>]}" >&2
   exit 1
 }
 
@@ -640,9 +640,7 @@ case "$COMMAND" in
 
     if [ -n "${PMW_ZOON_MOCK_CREATE_URL:-}" ]; then
       "$SCRIPT_DIR/pmw-project" link-zoon "$PMW_ZOON_MOCK_CREATE_URL" >/dev/null 2>&1 || true
-      if ! PMW_ZOON_MOCK_JOIN="${PMW_ZOON_MOCK_JOIN:-joined}" agent_join "$PMW_ZOON_MOCK_CREATE_URL"; then
-        exit 1
-      fi
+      PMW_ZOON_MOCK_JOIN="${PMW_ZOON_MOCK_JOIN:-joined}" agent_join "$PMW_ZOON_MOCK_CREATE_URL" || true
       printf '%s\n' "$PMW_ZOON_MOCK_CREATE_URL"
       exit 0
     fi
@@ -663,9 +661,7 @@ case "$COMMAND" in
     fi
     URL="$(printf '%s' "$RESPONSE" | extract_url "$HOST")"
     "$SCRIPT_DIR/pmw-project" link-zoon "$URL" >/dev/null 2>&1 || true
-    if ! agent_join "$URL"; then
-      exit 1
-    fi
+    agent_join "$URL" || true
     printf '%s\n' "$URL"
     ;;
   append)
@@ -676,9 +672,7 @@ case "$COMMAND" in
     cat > "$MARKDOWN_FILE"
 
     if [ "${PMW_ZOON_MOCK_APPEND:-}" = "1" ]; then
-      if ! PMW_ZOON_MOCK_JOIN="${PMW_ZOON_MOCK_JOIN:-joined}" agent_join "$URL"; then
-        exit 1
-      fi
+      PMW_ZOON_MOCK_JOIN="${PMW_ZOON_MOCK_JOIN:-joined}" agent_join "$URL" || true
       printf '%s\n' "$URL"
       exit 0
     fi
@@ -688,9 +682,6 @@ case "$COMMAND" in
     SLUG="$(printf '%s\n' "$PARSED" | sed -n '2p')"
     TOKEN="$(printf '%s\n' "$PARSED" | sed -n '3p')"
     protocol_discover "$ORIGIN"
-    if ! agent_join "$URL"; then
-      exit 1
-    fi
     BODY_FILE="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-body.XXXXXX")"
     json_payload append "" "$MARKDOWN_FILE" > "$BODY_FILE"
     AUTH_ARGS=()
@@ -716,19 +707,22 @@ case "$COMMAND" in
     fi
     rm -f "$RESPONSE_FILE"
     "$SCRIPT_DIR/pmw-project" link-zoon "$URL" >/dev/null 2>&1 || true
+    agent_join "$URL" || true
     printf '%s\n' "$URL"
     ;;
   sync)
     TITLE="$(read_arg_value --title "$@" || true)"
     URL="$(read_arg_value --url "$@" || true)"
+    DOCUMENT_PATH="$(read_arg_value --document "$@" || true)"
     BRIEF_PATH="$(read_arg_value --brief "$@" || true)"
+    [ -n "$DOCUMENT_PATH" ] || DOCUMENT_PATH="$BRIEF_PATH"
     [ -n "$TITLE" ] || TITLE="产品设计简报"
     if [ -z "$URL" ]; then
       URL="$(project_value zoon_url)"
     fi
-    if [ -n "$BRIEF_PATH" ]; then
-      [ -f "$BRIEF_PATH" ] || { echo "Brief not found: $BRIEF_PATH" >&2; exit 1; }
-      MARKDOWN_FILE="$BRIEF_PATH"
+    if [ -n "$DOCUMENT_PATH" ]; then
+      [ -f "$DOCUMENT_PATH" ] || { echo "Document not found: $DOCUMENT_PATH" >&2; exit 1; }
+      MARKDOWN_FILE="$DOCUMENT_PATH"
     else
       MARKDOWN_FILE="$(mktemp "${TMPDIR:-/tmp}/pmw-zoon-sync.XXXXXX")"
       trap 'rm -f "$MARKDOWN_FILE"' EXIT
@@ -737,7 +731,7 @@ case "$COMMAND" in
     if [ -n "$URL" ]; then
       DEDUPE="${PMW_ZOON_DEDUP_SYNC:-true}"
       BRIEF_HASH="$(markdown_hash "$MARKDOWN_FILE")"
-      if [ "$DEDUPE" != "false" ] && "$0" read --url "$URL" 2>/dev/null | grep -Fq "PMWorkspace brief sync hash: $BRIEF_HASH"; then
+      if [ "$DEDUPE" != "false" ] && "$0" read --url "$URL" 2>/dev/null | grep -Eq "PMWorkspace (document|brief) sync hash: $BRIEF_HASH"; then
         RESULT="$URL"
         printf 'ZOON_SYNC_SKIPPED_DUPLICATE=true\n' >&2
       else
@@ -752,7 +746,7 @@ case "$COMMAND" in
       RESULT="$("$0" create --title "$TITLE" < "$MARKDOWN_FILE")"
     fi
     if [ "${PMW_ZOON_DEFER_PROJECT_UPDATE:-}" != "1" ]; then
-      "$SCRIPT_DIR/pmw-project" set-zoon-sync "$RESULT" "$BRIEF_PATH" >/dev/null 2>&1 || true
+      "$SCRIPT_DIR/pmw-project" set-zoon-sync "$RESULT" "$DOCUMENT_PATH" >/dev/null 2>&1 || true
     fi
     printf '%s\n' "$RESULT"
     ;;

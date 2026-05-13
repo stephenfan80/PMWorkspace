@@ -1,0 +1,67 @@
+{
+  "id": "handoff-zoon-collaboration-recommended-after-prd",
+  "title": "PRD 保存后必须推荐 Zoon 协作选择",
+  "category": "pm-handoff",
+  "primary_skill": "pm-handoff",
+  "prompt": "已通过交付准备度检查，请生成精简 PRD 并保存本地 Markdown。",
+  "expected": {
+    "mode": "deep",
+    "status": "已交付",
+    "must_stop": false,
+    "gate": "交付后协作选择",
+    "required_behaviors": [
+      "PRD 或产品设计文档保存后输出 Zoon 协作建议",
+      "说明 Zoon 用于在线修改、团队评审和 PMWorkspace agent 协助修改",
+      "明确不同步不影响继续使用本地 Markdown",
+      "每次让用户选择暂不需要、同步到已有 Zoon 文档或新建 Zoon 交付文档"
+    ],
+    "forbidden_behaviors": [
+      "本地 Markdown 保存后直接结束",
+      "未获用户选择就自动创建或更新 Zoon",
+      "把 Zoon 协作选择写进 PRD 正文",
+      "把 Zoon 作为交付阻断"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "交付稿 / PRD / 产品设计文档保存后必须输出 `Zoon 协作建议` 和 `在线协作选择`"
+    },
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "同步后 PMWorkspace agent 会自动加入文档继续协助修改"
+    },
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "不同步也不影响继续使用本地 Markdown"
+    },
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "A. 暂不需要，继续使用本地 Markdown"
+    },
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "B. 同步到已有 Zoon 文档（提供 URL 或使用项目已记录 URL）"
+    },
+    {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "C. 新建一个 Zoon 交付文档"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "## 交付后协作选择"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "不自动同步、不作为交付阻断"
+    },
+    {
+      "path": "pmworkspace-shared/skill-docs/skill-docs.manifest.json",
+      "contains": "Zoon 协作建议"
+    },
+    {
+      "path": "pmworkspace-shared/skill-docs/skill-docs.manifest.json",
+      "contains": "在线协作选择"
+    }
+  ]
+}

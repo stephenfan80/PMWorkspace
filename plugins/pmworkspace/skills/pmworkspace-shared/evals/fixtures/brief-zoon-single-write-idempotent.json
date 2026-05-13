@@ -12,7 +12,7 @@
     "required_behaviors": [
       "create payload 只用一个 markdown 字段表达正文",
       "append payload 只通过 operations[].markdown 写正文",
-      "同步块带 PMWorkspace brief sync hash",
+      "同步块带 PMWorkspace document sync hash，并兼容历史 brief sync hash",
       "同一 hash 已存在时跳过重复追加"
     ],
     "forbidden_behaviors": [
@@ -24,7 +24,11 @@
   "contract_checks": [
     {
       "path": "bin/pmw-zoon",
-      "contains": "PMWorkspace brief sync hash"
+      "contains": "PMWorkspace document sync hash"
+    },
+    {
+      "path": "bin/pmw-zoon",
+      "contains": "PMWorkspace (document|brief) sync hash"
     },
     {
       "path": "bin/pmw-zoon",
@@ -56,7 +60,7 @@
     },
     {
       "path": "pmworkspace-shared/references/zoon-workflow.md",
-      "contains": "同一 hash 已存在时跳过重复追加"
+      "contains": "同一 hash 已存在时跳过重复追加；读取旧文档时仍兼容历史 `PMWorkspace brief sync hash`"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
@@ -68,7 +72,19 @@
       "command": [
         "bash",
         "-lc",
-        "tmp=$(mktemp -d); printf '# 产品设计简报：测试\\n\\n重复字段测试\\n' > \"$tmp/brief.md\"; hash=$(python3 - \"$tmp/brief.md\" <<'PY'\nimport hashlib, sys\nprint(hashlib.sha256(open(sys.argv[1], encoding='utf-8').read().strip().encode('utf-8')).hexdigest())\nPY\n); out=$(PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=zoon-dedupe PMW_ZOON_MOCK_READ=\"<!-- PMWorkspace brief sync hash: $hash; synced_at: old -->\" bin/pmw-zoon sync --title '产品设计简报：测试' --url 'https://example.test/d/doc?token=t' --brief \"$tmp/brief.md\" 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
+        "tmp=$(mktemp -d); printf '# 产品设计简报：测试\\n\\n重复字段测试\\n' > \"$tmp/brief.md\"; hash=$(python3 - \"$tmp/brief.md\" <<'PY'\nimport hashlib, sys\nprint(hashlib.sha256(open(sys.argv[1], encoding='utf-8').read().strip().encode('utf-8')).hexdigest())\nPY\n); out=$(PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=zoon-dedupe PMW_ZOON_MOCK_READ=\"<!-- PMWorkspace document sync hash: $hash; synced_at: old -->\" bin/pmw-zoon sync --title '产品设计简报：测试' --url 'https://example.test/d/doc?token=t' --brief \"$tmp/brief.md\" 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
+      ],
+      "exit_code": 0,
+      "contains": [
+        "ZOON_SYNC_SKIPPED_DUPLICATE=true",
+        "https://example.test/d/doc?token=t"
+      ]
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); printf '# 产品设计简报：测试\\n\\n历史去重测试\\n' > \"$tmp/brief.md\"; hash=$(python3 - \"$tmp/brief.md\" <<'PY'\nimport hashlib, sys\nprint(hashlib.sha256(open(sys.argv[1], encoding='utf-8').read().strip().encode('utf-8')).hexdigest())\nPY\n); out=$(PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=zoon-dedupe-legacy PMW_ZOON_MOCK_READ=\"<!-- PMWorkspace brief sync hash: $hash; synced_at: old -->\" bin/pmw-zoon sync --title '产品设计简报：测试' --url 'https://example.test/d/doc?token=t' --brief \"$tmp/brief.md\" 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
       ],
       "exit_code": 0,
       "contains": [

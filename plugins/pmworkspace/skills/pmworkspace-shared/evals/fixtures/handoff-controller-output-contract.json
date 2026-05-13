@@ -16,6 +16,7 @@
       "把原型复审状态、未决拍板和验收写入边界写入审计",
       "把研发可行性反问和功能能力与研发依赖写入审计",
       "交付控制器不进入 PRD 正文",
+      "交付后输出 Zoon 协作建议和在线协作选择，但不写入 PRD 正文",
       "把下一技能和证据状态写入审计"
     ],
     "forbidden_behaviors": [
@@ -40,15 +41,27 @@
     },
     {
       "path": "pm-handoff/SKILL.md",
-      "contains": "这些默认写入审计，不能进入 PRD 正文。用户可见输出只保留交付结论、产品设计文档或精简 PRD、功能能力与研发依赖、待补充项和下一步"
+      "contains": "这些默认写入审计，不能进入 PRD 正文。用户可见输出只保留交付结论、产品设计文档或精简 PRD、功能能力与研发依赖、待补充项、Zoon 协作建议、在线协作选择和下一步"
     },
     {
       "path": "pmworkspace-shared/references/delivery-handoff.md",
       "contains": "交付控制器只写入内部审计、本地状态或调试输出，不进入 PRD 正文"
     },
     {
+      "path": "pm-handoff/SKILL.md",
+      "contains": "交付稿 / PRD / 产品设计文档保存后必须输出 `Zoon 协作建议` 和 `在线协作选择`"
+    },
+    {
+      "path": "pmworkspace-shared/references/delivery-handoff.md",
+      "contains": "`Zoon 协作建议` 和 `在线协作选择` 是交付完成后的下一步提示，不写进 PRD 正文"
+    },
+    {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
       "contains": "交付控制器默认内部审计，不进入 PRD 正文"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "默认用户输出只给交付结论、精简 PRD、功能能力与研发依赖、待补充项、Zoon 协作建议、在线协作选择和下一步"
     }
   ]
 }

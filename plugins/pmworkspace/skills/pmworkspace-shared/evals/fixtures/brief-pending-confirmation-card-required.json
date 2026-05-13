@@ -1,0 +1,47 @@
+{
+  "id": "brief-pending-confirmation-card-required",
+  "title": "待确认简报必须逐项输出待确认问题卡",
+  "category": "pm-brief",
+  "primary_skill": "pm-brief",
+  "prompt": "产品简报仍是待确认状态，输出时要告诉用户具体还缺什么。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "待确认问题卡",
+    "required_behaviors": [
+      "每个待确认项都有还缺什么",
+      "每个待确认项都有为什么影响判断",
+      "每个待确认项都有不补齐的偏差风险",
+      "每个待确认项都有你现在可以怎么做",
+      "已有功能缺截图时把线上截图 / 视觉基线列为第一项"
+    ],
+    "forbidden_behaviors": [
+      "只问是否认可这版简报并允许按假设继续",
+      "只列待验证项不解释偏差风险",
+      "缺线上截图时把截图放到次要补充项"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "每张待确认问题卡必须包含 `还缺什么`、`为什么影响判断`、`不补齐的偏差风险`、`你现在可以怎么做`"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "禁止只问“是否认可这版简报，并允许按假设继续”"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-manager-brief.md",
+      "contains": "只要简报是 `待确认`，`当前需要确认` 必须逐项展示待确认问题卡"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-manager-brief.md",
+      "contains": "第一条待确认问题必须是 `线上截图 / 视觉基线`"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-plan-handoff.md",
+      "contains": "每项包含 `还缺什么`、`为什么影响判断`、`不补齐的偏差风险`、`你现在可以怎么做`"
+    }
+  ]
+}

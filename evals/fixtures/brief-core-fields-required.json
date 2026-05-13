@@ -1,6 +1,6 @@
 {
   "id": "brief-core-fields-required",
-  "title": "产品简述必须包含关键 PM 字段",
+  "title": "产品简述必须包含短版决策字段",
   "category": "pm-brief",
   "primary_skill": "pm-brief",
   "prompt": "输出产品简报核心信息，用于后续原型、复审和交付。",
@@ -8,58 +8,50 @@
     "mode": "deep",
     "status": "待确认",
     "must_stop": true,
-    "gate": "核心字段完整",
+    "gate": "短版核心字段完整",
     "required_behaviors": [
-      "包含真实问题和证据状态",
-      "包含目标用户、当前替代 / 损失",
-      "包含选中路径、范围模式、本周期验证、主目标、反指标、不可虚构项、原型范围、待验证项、待确认信息与偏差风险"
+      "包含一句话判断",
+      "包含推荐方案和为什么这样做",
+      "包含原型范围、不能虚构 / 不能承诺、当前需要确认"
     ],
     "forbidden_behaviors": [
-      "只写 8 行核心信息",
-      "省略现状、竞品或当前替代",
-      "省略反指标、约束或不可虚构项"
+      "默认输出长字段清单",
+      "省略当前需要确认",
+      "省略不可虚构或不可承诺边界"
     ]
   },
   "contract_checks": [
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "- 真实问题："
+      "contains": "一句话判断"
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "- 证据状态："
+      "contains": "推荐方案"
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "- 目标用户："
+      "contains": "为什么这样做"
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "- 当前替代 / 损失："
+      "contains": "原型范围"
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "- 主目标："
+      "contains": "不能虚构 / 不能承诺"
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "- 反指标："
+      "contains": "当前需要确认："
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "- 不可虚构项："
-    },
-    {
-      "path": "pm-brief/SKILL.md",
-      "contains": "- 选中路径："
-    },
-    {
-      "path": "pm-brief/SKILL.md",
-      "contains": "- 原型范围："
+      "contains": "不补齐的偏差风险"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "产品简报：`产品简述 / 产品简报` 必须包含真实问题、证据状态、目标用户、当前替代 / 损失、选中路径、范围模式、本周期验证、主目标、反指标、不可虚构项、原型范围、待验证项、待确认信息与偏差风险"
+      "contains": "用户可见版必须先回答一句话判断、推荐方案、为什么这样做、原型范围、不能虚构 / 不能承诺和当前需要确认"
     }
   ]
 }

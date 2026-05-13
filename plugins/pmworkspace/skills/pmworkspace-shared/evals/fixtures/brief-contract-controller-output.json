@@ -39,7 +39,7 @@
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "产品简述 / 产品简报："
+      "contains": "产品简报：{功能名}"
     },
     {
       "path": "pm-brief/SKILL.md",

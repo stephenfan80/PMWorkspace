@@ -10,7 +10,7 @@
     "must_stop": true,
     "gate": "简报确认与 Zoon 顺序",
     "required_behaviors": [
-      "产品简报生成后输出待确认信息与偏差风险",
+      "产品简报生成后逐项输出待确认问题卡",
       "逐项说明不补齐会导致哪类产品方案偏差",
       "要求用户补材料、回答 Q、拍板 D 或确认按假设推进",
       "未对齐时不询问 Zoon 同步",
@@ -25,11 +25,11 @@
   "contract_checks": [
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "待确认信息与偏差风险"
+      "contains": "每张待确认问题卡必须包含 `还缺什么`、`为什么影响判断`、`不补齐的偏差风险`、`你现在可以怎么做`"
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "不补齐可能导致哪类产品方案偏差"
+      "contains": "不补齐的偏差风险"
     },
     {
       "path": "pm-brief/SKILL.md",
@@ -45,7 +45,7 @@
     },
     {
       "path": "pmworkspace-shared/references/product-manager-brief.md",
-      "contains": "产品简报生成后如果还有待确认信息，必须告诉用户不补齐可能导致哪些产品方案偏差"
+      "contains": "必须逐项告诉用户缺什么、为什么影响判断、不补齐可能导致哪些产品方案偏差"
     },
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",
@@ -69,7 +69,7 @@
       "command": [
         "bash",
         "-lc",
-        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=brief-pending-zoon-test PMW_ZOON_SYNC_ON_BRIEF=true; out=$(printf '# 产品简述：测试\\n确认状态：待确认\\n\\n## 待确认信息与偏差风险\\n- 待确认信息：目标用户未确认\\n- 不补齐可能导致的产品方案偏差：首屏任务错位\\n' | bin/pmw-log brief 测试 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=brief-pending-zoon-test PMW_ZOON_SYNC_ON_BRIEF=true; out=$(printf '# 产品简报：测试\\n状态：待确认\\n\\n## 当前需要确认\\n1. 目标用户\\n- 还缺什么：目标用户未确认\\n- 为什么影响判断：首屏任务会变化\\n- 不补齐的偏差风险：首屏任务错位\\n- 你现在可以怎么做：补充目标用户或确认按假设推进\\n' | bin/pmw-log brief 测试 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
       ],
       "exit_code": 0,
       "contains": [

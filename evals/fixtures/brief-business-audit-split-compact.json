@@ -25,7 +25,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",
-      "contains": "产品简述 / 产品简报通常控制在短版可确认范围内"
+      "contains": "产品简述 / 产品简报必须控制在短版可确认范围内"
     },
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",

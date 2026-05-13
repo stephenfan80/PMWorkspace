@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -6,441 +5,535 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI 产品工作站（PMW）— 把模糊想法推进成可交付的产品方案</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@300;400;600;700;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js"></script>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+/* ══ TOKENS ══ */
 :root {
-  --bg:       #0e0c09;
-  --bg2:      #171310;
-  --bg3:      #201c18;
-  --bg4:      #2a2420;
-  --wire:     rgba(255,235,210,0.07);
-  --wire2:    rgba(255,235,210,0.12);
-  --ink:      #f6ece0;
-  --ink2:     rgba(246,236,224,0.55);
-  --ink3:     rgba(246,236,224,0.28);
-  --a:        oklch(0.76 0.15 52);
-  --a-dim:    oklch(0.76 0.15 52 / 0.13);
-  --a-ring:   oklch(0.76 0.15 52 / 0.30);
-  --a-glow:   oklch(0.76 0.15 52 / 0.18);
-  --teal:     oklch(0.76 0.13 195);
-  --teal-dim:    oklch(0.76 0.13 195 / 0.10);
-  --teal-border: oklch(0.76 0.13 195 / 0.28);
-  --red:      oklch(0.65 0.14 22);
-  --red-dim:  oklch(0.65 0.14 22 / 0.15);
-  --serif:    'Noto Serif SC', 'Songti SC', Georgia, serif;
-  --sans:     'DM Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  --mono:     'DM Mono', 'SF Mono', monospace;
-  --r:        14px;
+  --bg:    #0b0906;
+  --bg2:   #13100a;
+  --bg3:   #1d1813;
+  --ink:   #f0e8d5;
+  --ink2:  rgba(240,232,213,.52);
+  --ink3:  rgba(240,232,213,.22);
+  --wire:  rgba(255,232,195,.07);
+  --wire2: rgba(255,232,195,.13);
+  --a:     oklch(0.76 0.15 52);
+  --a-d:   oklch(0.76 0.15 52/.12);
+  --a-r:   oklch(0.76 0.15 52/.30);
+  --a-g:   oklch(0.76 0.15 52/.13);
+  --teal:  oklch(0.76 0.13 195);
+  --teal-d:oklch(0.76 0.13 195/.10);
+  --teal-r:oklch(0.76 0.13 195/.28);
+  --red:   oklch(0.65 0.14 22);
+  --red-d: oklch(0.65 0.14 22/.12);
+  --red-r: oklch(0.65 0.14 22/.28);
+  --serif: 'Noto Serif SC', Georgia, serif;
+  --disp:  'Cormorant Garamond', serif;
+  --sans:  'DM Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --mono:  'DM Mono', 'SF Mono', monospace;
 }
 
-html { scroll-behavior: smooth; }
-body { font-family: var(--sans); background: var(--bg); color: var(--ink); line-height: 1.6; overflow-x: hidden; }
+/* ══ RESET ══ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+@media (pointer: fine) { body { cursor: none; } }
 
-/* ─── NAV ─── */
+/* ══ CUSTOM CURSOR ══ */
+#c-dot, #c-ring {
+  position: fixed; border-radius: 50%;
+  pointer-events: none; z-index: 10000;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  transition-property: width, height, background, border-color, opacity;
+  transition-duration: .3s;
+}
+#c-dot  { width: 6px; height: 6px; background: var(--a); }
+#c-ring { width: 34px; height: 34px; border: 1.5px solid oklch(0.76 0.15 52 / 0.35); }
+body.c-link #c-ring  { width: 50px; height: 50px; border-color: oklch(0.76 0.15 52 / 0.55); }
+body.c-cta  #c-dot   { background: #100900; }
+body.c-cta  #c-ring  { width: 58px; height: 58px; background: var(--a-d); border-color: var(--a-r); }
+@media (pointer: coarse) { #c-dot, #c-ring { display: none; } }
+
+/* ══ GRAIN ══ */
+.grain {
+  position: fixed; inset: -60%; width: 220%; height: 220%;
+  opacity: .032; pointer-events: none; z-index: 9000;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 7s steps(1) infinite;
+}
+@keyframes grain {
+  0%,100%{ transform:translate(0,0) }
+  14%{ transform:translate(-4%,-9%) } 28%{ transform:translate(-13%,5%) }
+  42%{ transform:translate(6%,-20%) } 56%{ transform:translate(-5%,24%) }
+  70%{ transform:translate(13%,-3%) } 84%{ transform:translate(-7%,11%) }
+}
+
+/* ══ NAV ══ */
 nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  position: fixed; top: 0; inset-inline: 0; z-index: 500;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0 52px; height: 56px;
-  background: rgba(14,12,9,0.88); backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--wire);
+  padding: 0 52px; height: 60px;
+  border-bottom: 1px solid transparent;
+  transition: background .5s, border-color .5s, backdrop-filter .5s;
 }
-.nav-id {
+nav.solid {
+  background: rgba(11,9,6,.9);
+  backdrop-filter: blur(28px);
+  border-color: var(--wire);
+}
+.nav-brand {
   font-family: var(--mono); font-size: 13px; color: var(--ink);
   text-decoration: none; display: flex; align-items: center; gap: 9px;
-  white-space: nowrap;
 }
 .nav-pip {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--a); box-shadow: 0 0 8px var(--a);
-  animation: pip 2.8s ease-in-out infinite;
+  animation: pip 2.6s ease-in-out infinite;
 }
-@keyframes pip { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
-.nav-links { display: flex; gap: 28px; }
+@keyframes pip { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.55)} }
+.nav-links { display: flex; gap: 32px; }
 .nav-links a { font-size: 13px; color: var(--ink2); text-decoration: none; transition: color .2s; }
 .nav-links a:hover { color: var(--ink); }
-.nav-get {
-  font-size: 12.5px; font-weight: 600; padding: 7px 18px; border-radius: 7px;
-  background: var(--a); color: #180e00; text-decoration: none;
+.nav-cta {
+  font-size: 12.5px; font-weight: 600; font-family: var(--mono);
+  padding: 8px 18px; border-radius: 7px; text-decoration: none;
+  background: var(--a); color: #1a0d00;
   transition: opacity .2s, transform .15s;
 }
-.nav-get:hover { opacity: .85; transform: translateY(-1px); }
+.nav-cta:hover { opacity: .85; transform: translateY(-1px); }
 
-/* ─── SHARED ─── */
-.w { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+/* ══ BUTTONS ══ */
+.btn-fill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--a); color: #1a0d00;
+  font-weight: 600; font-size: 14px;
+  padding: 13px 30px; border-radius: 8px; text-decoration: none;
+  box-shadow: 0 0 40px var(--a-g);
+  transition: opacity .2s, transform .15s, box-shadow .2s;
+}
+.btn-fill:hover { opacity: .87; transform: translateY(-2px); box-shadow: 0 0 60px oklch(0.76 0.15 52 / 0.28); }
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--ink); font-size: 14px;
+  padding: 13px 26px; border-radius: 8px; text-decoration: none;
+  border: 1px solid var(--wire2); background: rgba(255,255,255,.025);
+  transition: background .2s, border-color .2s, transform .15s;
+}
+.btn-ghost:hover { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.18); transform: translateY(-2px); }
+
+/* ══ HERO ══ */
+#hero {
+  min-height: 100svh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 120px 24px 80px; position: relative; overflow: hidden;
+  text-align: center;
+}
+.hero-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--wire) 1px, transparent 1px),
+    linear-gradient(90deg, var(--wire) 1px, transparent 1px);
+  background-size: 76px 76px;
+  mask-image: radial-gradient(ellipse 75% 60% at 50% 38%, black 0%, transparent 100%);
+  will-change: transform;
+}
+.hero-glow {
+  position: absolute; top: 28%; left: 50%;
+  width: 1000px; height: 680px; border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse, oklch(0.76 0.15 52 / 0.09) 0%, transparent 65%);
+  pointer-events: none; will-change: transform;
+  animation: glowpulse 6s ease-in-out infinite;
+}
+@keyframes glowpulse { 0%,100%{opacity:1} 50%{opacity:.65} }
+
+.hero-label {
+  position: relative; z-index: 2;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--a);
+  border: 1px solid var(--a-r); border-radius: 100px;
+  padding: 5px 16px; margin-bottom: 36px;
+  opacity: 0;
+}
+.hero-label::before { content:''; width:5px; height:5px; border-radius:50%; background:var(--a); flex-shrink:0; }
+
+.hero-h1 {
+  position: relative; z-index: 2;
+  font-family: var(--serif);
+  font-size: clamp(40px, 6.2vw, 92px);
+  font-weight: 900; letter-spacing: -.03em; line-height: 1.04;
+  text-wrap: balance;
+}
+.hero-h1 em { font-style: normal; color: var(--a); }
+.hl { display: block; overflow: hidden; }
+.hli { display: block; will-change: transform; }
+
+.hero-sub {
+  position: relative; z-index: 2;
+  margin-top: 28px; max-width: 520px;
+  font-size: clamp(15px, 1.5vw, 18px); color: var(--ink2);
+  font-weight: 300; line-height: 1.72; text-wrap: pretty;
+  opacity: 0;
+}
+.hero-sub strong { color: var(--ink); font-weight: 400; }
+
+.hero-btns {
+  position: relative; z-index: 2;
+  margin-top: 40px; display: flex; gap: 12px;
+  align-items: center; justify-content: center; flex-wrap: wrap;
+  opacity: 0;
+}
+
+/* flow diagram */
+.hero-flow {
+  position: relative; z-index: 2;
+  margin-top: 72px; display: flex; align-items: center; gap: 0;
+  opacity: 0;
+}
+.flow-col { display: flex; flex-direction: column; gap: 6px; }
+.fpill {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .04em;
+  padding: 5px 13px; border-radius: 6px; white-space: nowrap;
+  background: var(--bg3); border: 1px solid var(--wire); color: var(--ink2);
+}
+.fpill.out { background: var(--a-d); border-color: var(--a-r); color: var(--a); }
+.flow-mid { padding: 0 24px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.flow-core {
+  font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--a);
+  background: var(--a-d); border: 1px solid var(--a-r);
+  border-radius: 8px; padding: 11px 20px; white-space: nowrap;
+  box-shadow: 0 0 28px var(--a-g);
+}
+.flow-arr { color: var(--a); opacity: .6; font-size: 17px; }
+
+.scroll-cue {
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  opacity: 0;
+}
+.scroll-cue span { font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em; color: var(--ink3); text-transform: uppercase; }
+.scroll-bar { width: 1px; height: 36px; background: linear-gradient(to bottom, var(--a), transparent); animation: scbar 2.2s ease-in-out infinite; }
+@keyframes scbar { 0%,100%{opacity:.3;transform:scaleY(.5)} 50%{opacity:1;transform:scaleY(1)} }
+
+/* ══ SHARED SECTION ══ */
+.w { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
 .rule { height: 1px; background: var(--wire); }
+.sec { padding: 120px 24px; max-width: 1120px; margin: 0 auto; position: relative; }
 
 .chip {
   display: inline-flex; align-items: center; gap: 7px;
   font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;
   text-transform: uppercase; color: var(--a);
-  border: 1px solid var(--a-ring); border-radius: 100px;
+  border: 1px solid var(--a-r); border-radius: 100px;
   padding: 4px 14px; margin-bottom: 20px;
 }
 .chip::before { content:''; width:5px; height:5px; border-radius:50%; background:var(--a); flex-shrink:0; }
 
 .sh {
   font-family: var(--serif);
-  font-size: clamp(28px, 3.4vw, 46px); font-weight: 700;
-  letter-spacing: -.02em; line-height: 1.12; text-wrap: balance;
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 700; letter-spacing: -.028em; line-height: 1.07; text-wrap: balance;
 }
 .sh em { font-style: normal; color: var(--a); }
-.ssub {
-  margin-top: 12px; font-size: 16.5px; color: var(--ink2);
-  max-width: 540px; line-height: 1.68; font-weight: 300; text-wrap: pretty;
+.ssub { margin-top: 14px; font-size: 16px; color: var(--ink2); max-width: 520px; line-height: 1.72; font-weight: 300; text-wrap: pretty; }
+
+/* watermark numbers */
+.wm {
+  position: absolute; font-family: var(--disp); font-size: clamp(120px,18vw,220px);
+  font-weight: 300; color: rgba(255,232,195,.028);
+  letter-spacing: -.04em; line-height: 1; pointer-events: none; user-select: none;
+  will-change: transform;
 }
 
-/* ─── HERO ─── */
-.hero {
-  min-height: 100vh; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; text-align: center;
-  padding: 140px 24px 72px; position: relative; overflow: hidden;
-}
-.hero-grid {
-  position: absolute; inset: 0;
-  background-image: linear-gradient(var(--wire) 1px,transparent 1px),
-                    linear-gradient(90deg,var(--wire) 1px,transparent 1px);
-  background-size: 52px 52px;
-  mask-image: radial-gradient(ellipse 80% 65% at 50% 36%,black 10%,transparent 100%);
-}
-.hero-glow {
-  position: absolute; width: 1000px; height: 700px; border-radius: 50%;
-  background: radial-gradient(ellipse,oklch(0.76 0.15 52 / 0.07) 0%,transparent 65%);
-  top: 32%; left: 50%; transform: translate(-50%,-50%); pointer-events: none;
-}
-.hero-chip { animation: up .7s ease both; }
-.hero-h1 {
-  position: relative; z-index: 1;
-  font-family: var(--serif);
-  font-size: clamp(36px, 5.8vw, 82px); font-weight: 900;
-  letter-spacing: -.03em; line-height: 1.06; text-wrap: balance;
-  animation: up .7s .08s ease both;
-}
-.hero-h1 em { font-style: normal; color: var(--a); }
-.hero-h1 .dim { color: var(--ink3); }
-.hero-p {
-  position: relative; z-index: 1;
-  margin-top: 22px; font-size: clamp(15px, 1.6vw, 18px);
-  color: var(--ink2); font-weight: 300; max-width: 560px; line-height: 1.72; text-wrap: pretty;
-  animation: up .7s .16s ease both;
-}
-.hero-p strong { color: var(--ink); font-weight: 500; }
-
-.hero-btns {
-  position: relative; z-index: 1; margin-top: 40px;
-  display: flex; gap: 12px; align-items: center; justify-content: center; flex-wrap: wrap;
-  animation: up .7s .23s ease both;
-}
-.btn-fill {
-  display: inline-flex; align-items: center; gap: 7px;
-  background: var(--a); color: #180e00; font-weight: 700; font-size: 14.5px;
-  padding: 13px 28px; border-radius: 8px; text-decoration: none;
-  box-shadow: 0 0 32px var(--a-glow);
-  transition: opacity .2s, transform .15s, box-shadow .2s;
-}
-.btn-fill:hover { opacity:.87; transform:translateY(-2px); box-shadow:0 0 48px oklch(0.76 0.15 52 / 0.3); }
-.btn-line {
-  display: inline-flex; align-items: center; gap: 7px;
-  color: var(--ink); font-size: 14px; padding: 13px 24px; border-radius: 8px;
-  text-decoration: none; border: 1px solid var(--wire2);
-  background: rgba(255,255,255,0.03);
-  transition: background .2s, border-color .2s, transform .15s;
-}
-.btn-line:hover { background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.18); transform:translateY(-2px); }
-
-/* input→output diagram */
-.hero-diagram {
-  position: relative; z-index: 1;
-  margin-top: 60px; display: flex; align-items: center; gap: 0;
-  animation: up .7s .30s ease both;
-}
-.diag-group { display: flex; flex-direction: column; gap: 6px; }
-.diag-pill {
-  font-family: var(--mono); font-size: 11px; letter-spacing: .04em;
-  padding: 5px 12px; border-radius: 6px; white-space: nowrap;
-  background: var(--bg3); border: 1px solid var(--wire); color: var(--ink2);
-}
-.diag-pill.out {
-  background: var(--a-dim); border-color: var(--a-ring); color: var(--a);
-}
-.diag-center {
-  padding: 0 28px; display: flex; flex-direction: column; align-items: center; gap: 8px;
-}
-.diag-arrow { color: var(--a); font-size: 18px; opacity: .7; }
-.diag-core {
-  font-family: var(--mono); font-size: 12px; letter-spacing: .06em;
-  color: var(--a); background: var(--a-dim); border: 1px solid var(--a-ring);
-  border-radius: 8px; padding: 10px 18px; white-space: nowrap;
-  box-shadow: 0 0 20px var(--a-glow);
-}
-
-/* ─── PAIN ─── */
-.pain-sec { padding: 96px 0; }
-.pain-header { margin-bottom: 44px; }
+/* ══ PAIN ══ */
 .pain-bento {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: auto auto;
-  gap: 12px;
+  margin-top: 52px;
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 1px; background: var(--wire);
+  border: 1px solid var(--wire); border-radius: 20px; overflow: hidden;
 }
 .pain-card {
-  background: var(--bg2); border: 1px solid var(--wire);
-  border-radius: var(--r); padding: 28px 24px;
+  background: var(--bg2); padding: 36px 30px;
   display: flex; flex-direction: column; gap: 10px;
-  transition: background .2s, border-color .2s;
-  cursor: default;
+  position: relative; overflow: hidden; cursor: default;
+  transition: background .28s;
 }
-.pain-card:hover { background: var(--bg3); border-color: var(--wire2); }
+.pain-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(380px at var(--mx,50%) var(--my,50%), oklch(0.76 0.15 52 / 0.05), transparent);
+  opacity: 0; transition: opacity .35s;
+}
+.pain-card:hover { background: var(--bg3); }
+.pain-card:hover::before { opacity: 1; }
 .pain-card.wide { grid-column: span 2; }
 .pain-n {
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em; color: var(--ink3);
+  font-family: var(--disp); font-size: 64px; font-weight: 300;
+  color: rgba(255,232,195,.08); line-height: 1; margin-bottom: -8px;
 }
-.pain-title { font-size: 16px; font-weight: 600; color: var(--ink); line-height: 1.38; letter-spacing: -.008em; }
-.pain-body { font-size: 13.5px; color: var(--ink2); line-height: 1.65; font-weight: 300; text-wrap: pretty; }
+.pain-title { font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.4; letter-spacing: -.01em; }
+.pain-body { font-size: 13.5px; color: var(--ink2); line-height: 1.68; font-weight: 300; text-wrap: pretty; }
 
-/* ─── DEFINITION ─── */
+/* ══ DEFINITION ══ */
 .def-outer {
-  background: var(--bg2); border-top: 1px solid var(--wire); border-bottom: 1px solid var(--wire);
-  padding: 80px 24px;
-}
-.def-inner {
-  max-width: 1100px; margin: 0 auto;
-  display: grid; grid-template-columns: 1.05fr 1fr; gap: 64px; align-items: start;
-}
-.def-q {
-  font-family: var(--serif);
-  font-size: clamp(22px, 2.6vw, 32px); font-weight: 700;
-  letter-spacing: -.02em; line-height: 1.24; text-wrap: balance;
-}
-.def-q em { font-style: normal; color: var(--a); }
-.def-body { margin-top: 16px; font-size: 15.5px; color: var(--ink2); line-height: 1.72; font-weight: 300; text-wrap: pretty; }
-.def-steps { display: flex; flex-direction: column; gap: 0; }
-.def-step {
-  display: flex; align-items: flex-start; gap: 14px;
-  padding: 16px 0; border-bottom: 1px solid var(--wire);
-}
-.def-step:last-child { border-bottom: none; }
-.def-num {
-  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
-  background: var(--bg3); border: 1px solid var(--wire2);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 10.5px; color: var(--ink3); margin-top: 1px;
-}
-.def-step-title { font-size: 14.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
-.def-step-sub { font-size: 13px; color: var(--ink2); line-height: 1.55; font-weight: 300; }
-
-/* ─── VS ─── */
-.vs-sec { padding: 96px 0 72px; }
-.vs-layout {
-  margin-top: 44px;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
-  border: 1px solid var(--wire); border-radius: 18px; overflow: hidden;
-}
-.vs-pane { padding: 44px 40px; display: flex; flex-direction: column; gap: 28px; }
-.vs-pane.left  { background: var(--bg2); border-right: 1px solid var(--wire); }
-.vs-pane.right { background: var(--bg); }
-
-.vs-tag {
-  display: inline-flex; align-items: center; gap: 7px;
-  font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
-  padding: 4px 13px; border-radius: 100px;
-}
-.vs-tag.plain { background: rgba(255,255,255,.04); color: var(--ink3); border: 1px solid var(--wire); }
-.vs-tag.pmw   { background: var(--a-dim); color: var(--a); border: 1px solid var(--a-ring); }
-.vs-tag::before { content:''; width:5px; height:5px; border-radius:50%; flex-shrink:0; }
-.vs-tag.plain::before { background: var(--ink3); }
-.vs-tag.pmw::before   { background: var(--a); }
-
-.vs-headline {
-  font-family: var(--serif);
-  font-size: clamp(18px, 2vw, 26px); font-weight: 700;
-  letter-spacing: -.018em; line-height: 1.22; color: var(--ink); text-wrap: balance;
-}
-.vs-pane.right .vs-headline { color: var(--a); }
-
-/* story rows */
-.vs-story { display: flex; flex-direction: column; gap: 0; }
-.vs-row {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 14px 0; border-bottom: 1px solid var(--wire);
-}
-.vs-row:last-child { border-bottom: none; }
-.vs-icon {
-  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;
-  display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700;
-}
-.vs-pane.left  .vs-icon { background: var(--red-dim); color: var(--red); border: 1px solid oklch(0.65 0.14 22 / 0.25); }
-.vs-pane.right .vs-icon { background: var(--a-dim); color: var(--a); border: 1px solid var(--a-ring); }
-.vs-row-title { font-size: 13.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px; line-height: 1.3; }
-.vs-pane.left .vs-row-title { color: var(--ink3); text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 1px; }
-.vs-row-body { font-size: 12.5px; color: var(--ink2); line-height: 1.55; font-weight: 300; }
-.vs-pane.left .vs-row-body { color: var(--ink3); }
-
-.vs-banner {
-  padding: 16px 18px; border-radius: 10px;
-  background: var(--a-dim); border: 1px solid var(--a-ring);
-}
-.vs-banner-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--a); margin-bottom: 6px; }
-.vs-banner-text { font-size: 13.5px; color: var(--ink); font-weight: 500; line-height: 1.5; }
-
-/* ─── MEMORY ─── */
-.mem-outer {
   background: var(--bg2);
   border-top: 1px solid var(--wire); border-bottom: 1px solid var(--wire);
-  padding: 96px 24px; position: relative; overflow: hidden;
+  padding: 120px 24px; position: relative; overflow: hidden;
+}
+.def-inner {
+  max-width: 1120px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: start;
+}
+.def-q {
+  font-family: var(--serif); font-size: clamp(24px,2.8vw,36px);
+  font-weight: 700; letter-spacing: -.022em; line-height: 1.2; text-wrap: balance;
+}
+.def-q em { font-style: normal; color: var(--a); }
+.def-body { margin-top: 18px; font-size: 15.5px; color: var(--ink2); line-height: 1.75; font-weight: 300; text-wrap: pretty; }
+.def-steps { display: flex; flex-direction: column; }
+.def-step {
+  display: flex; align-items: flex-start; gap: 18px;
+  padding: 20px 0; border-bottom: 1px solid var(--wire);
+}
+.def-step:last-child { border-bottom: none; }
+.step-n {
+  font-family: var(--disp); font-size: 36px; font-weight: 300;
+  color: var(--a); min-width: 44px; line-height: 1; margin-top: -4px; flex-shrink: 0;
+}
+.step-title { font-size: 14.5px; font-weight: 600; color: var(--ink); margin-bottom: 5px; }
+.step-body { font-size: 13px; color: var(--ink2); line-height: 1.6; font-weight: 300; }
+
+/* ══ VS ══ */
+.vs-grid {
+  margin-top: 52px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-radius: 20px; overflow: hidden; border: 1px solid var(--wire);
+}
+.vsp {
+  padding: 48px 40px; display: flex; flex-direction: column; gap: 28px;
+}
+.vsp.left  { background: var(--bg2); border-right: 1px solid var(--wire); }
+.vsp.right { background: var(--bg); }
+.vs-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
+  padding: 5px 14px; border-radius: 100px; width: fit-content;
+}
+.vs-tag::before { content:''; width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.vs-tag.plain { background: rgba(255,255,255,.03); color: var(--ink3); border: 1px solid var(--wire); }
+.vs-tag.plain::before { background: var(--ink3); }
+.vs-tag.pmw { background: var(--a-d); color: var(--a); border: 1px solid var(--a-r); }
+.vs-tag.pmw::before { background: var(--a); }
+.vs-head {
+  font-family: var(--serif); font-size: clamp(20px,2.2vw,28px);
+  font-weight: 700; letter-spacing: -.018em; line-height: 1.2; text-wrap: balance; margin-top: 12px;
+}
+.vsp.left .vs-head { color: var(--ink3); }
+.vsp.right .vs-head { color: var(--a); }
+.vs-rows { display: flex; flex-direction: column; }
+.vs-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 13px 0; border-bottom: 1px solid var(--wire);
+}
+.vs-row:last-child { border-bottom: none; }
+.vs-dot {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700;
+}
+.vsp.left  .vs-dot { background: var(--red-d); color: var(--red); border: 1px solid var(--red-r); }
+.vsp.right .vs-dot { background: var(--a-d); color: var(--a); border: 1px solid var(--a-r); }
+.vs-rt { font-size: 13.5px; font-weight: 600; margin-bottom: 3px; line-height: 1.3; }
+.vsp.left .vs-rt { color: var(--ink3); text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 1px; }
+.vsp.right .vs-rt { color: var(--ink); }
+.vs-rb { font-size: 12.5px; line-height: 1.55; font-weight: 300; }
+.vsp.left .vs-rb { color: var(--ink3); }
+.vsp.right .vs-rb { color: var(--ink2); }
+.vs-banner {
+  padding: 18px 20px; border-radius: 10px;
+  background: var(--a-d); border: 1px solid var(--a-r);
+}
+.vs-banner-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--a); margin-bottom: 7px; }
+.vs-banner-text { font-size: 13.5px; color: var(--ink); font-weight: 400; line-height: 1.55; }
+
+/* ══ MEMORY ══ */
+.mem-outer {
+  background: var(--bg2); position: relative; overflow: hidden;
+  border-top: 1px solid var(--wire); border-bottom: 1px solid var(--wire);
+  padding: 120px 24px;
 }
 .mem-glow {
-  position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
-  width: 1000px; height: 700px; border-radius: 50%;
-  background: radial-gradient(ellipse,oklch(0.76 0.15 52 / 0.05) 0%,transparent 65%);
+  position: absolute; top: -160px; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 600px; border-radius: 50%;
+  background: radial-gradient(ellipse, oklch(0.76 0.15 52 / 0.06) 0%, transparent 65%);
   pointer-events: none;
 }
 .mem-inner {
-  max-width: 1100px; margin: 0 auto;
-  display: grid; grid-template-columns: 1fr 1.1fr; gap: 64px; align-items: start;
-  position: relative; z-index: 1;
+  max-width: 1120px; margin: 0 auto; position: relative; z-index: 1;
+  display: grid; grid-template-columns: 1fr 1.1fr; gap: 72px; align-items: start;
 }
 .mem-big {
-  font-family: var(--serif);
-  font-size: clamp(44px, 5.5vw, 76px); font-weight: 900;
-  letter-spacing: -.035em; line-height: 1.0; margin-top: 8px;
+  font-family: var(--serif); font-size: clamp(52px,7vw,90px);
+  font-weight: 900; letter-spacing: -.04em; line-height: .97; margin-top: 12px;
 }
 .mem-big em { font-style: normal; color: var(--a); }
-.mem-sub { margin-top: 18px; font-size: 16px; color: var(--ink2); line-height: 1.7; font-weight: 300; text-wrap: pretty; }
-.mem-note { margin-top: 14px; font-size: 14px; color: var(--ink3); font-style: italic; line-height: 1.6; text-wrap: pretty; }
+.mem-sub { margin-top: 20px; font-size: 16px; color: var(--ink2); line-height: 1.74; font-weight: 300; text-wrap: pretty; }
+.mem-note { margin-top: 14px; font-size: 13.5px; color: var(--ink3); font-style: italic; line-height: 1.62; text-wrap: pretty; }
 
-/* growth cards */
-.growth { display: flex; flex-direction: column; gap: 0; position: relative; }
-.growth::before {
-  content: ''; position: absolute; left: 18px; top: 20px; bottom: 20px;
-  width: 1.5px; background: linear-gradient(to bottom, var(--a) 0%, var(--teal) 100%);
-  opacity: .18;
+.timeline { display: flex; flex-direction: column; position: relative; }
+.tl-track {
+  position: absolute; left: 17.5px; top: 20px; bottom: 20px; width: 1.5px;
+  background: linear-gradient(to bottom, var(--a) 0%, var(--teal) 70%, transparent 100%);
+  transform-origin: top; transform: scaleY(0); opacity: 0;
 }
-.g-item {
+.tl-item {
   display: flex; align-items: flex-start; gap: 18px;
-  padding: 20px 0; border-bottom: 1px solid var(--wire);
-  position: relative; z-index: 1; cursor: default;
-  transition: background .2s; border-radius: 8px;
+  padding: 22px 0; border-bottom: 1px solid var(--wire); position: relative; z-index: 1; cursor: default;
 }
-.g-item:last-child { border-bottom: none; }
-.g-item:hover .g-dot { background: var(--a-dim); border-color: var(--a-ring); color: var(--a); box-shadow: 0 0 14px var(--a-glow); }
-.g-dot {
+.tl-item:last-child { border-bottom: none; }
+.tl-dot {
   width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
   background: var(--bg3); border: 1.5px solid var(--wire2);
   display: flex; align-items: center; justify-content: center;
   font-family: var(--mono); font-size: 10px; color: var(--ink3);
-  transition: all .25s; position: relative; z-index: 2;
+  transition: all .3s; position: relative; z-index: 2;
 }
-.g-item.lit .g-dot { background: var(--a-dim); border-color: var(--a-ring); color: var(--a); box-shadow: 0 0 14px var(--a-glow); }
-.g-tag {
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--ink3); margin-bottom: 4px;
-}
-.g-item.lit .g-tag { color: var(--a); }
-.g-title { font-size: 14.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
-.g-item.future .g-title { color: var(--ink3); }
-.g-body { font-size: 12.5px; color: var(--ink2); line-height: 1.55; font-weight: 300; }
-.g-item.future .g-body { color: var(--ink3); }
+.tl-item.lit .tl-dot { background: var(--a-d); border-color: var(--a-r); color: var(--a); box-shadow: 0 0 16px var(--a-g); }
+.tl-tag { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); margin-bottom: 5px; }
+.tl-item.lit .tl-tag { color: var(--a); }
+.tl-title { font-size: 14.5px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.tl-body { font-size: 12.5px; color: var(--ink2); line-height: 1.58; font-weight: 300; }
+.tl-item.dim .tl-title { color: var(--ink3); }
+.tl-item.dim .tl-body { color: var(--ink3); }
 
-/* ─── OUTPUTS ─── */
-.out-sec { padding: 96px 0; }
+/* ══ OUTPUTS ══ */
 .out-grid {
-  margin-top: 44px;
+  margin-top: 52px;
   display: grid; grid-template-columns: repeat(4,1fr); gap: 12px;
 }
 .out-card {
-  background: var(--bg2); border: 1px solid var(--wire); border-radius: var(--r);
-  padding: 26px 22px; display: flex; flex-direction: column; gap: 10px;
-  transition: border-color .2s, transform .2s;
+  background: var(--bg2); border: 1px solid var(--wire);
+  border-radius: 14px; padding: 28px 24px;
+  display: flex; flex-direction: column; gap: 10px;
+  position: relative; overflow: hidden;
+  transition: border-color .25s, transform .22s, box-shadow .22s;
 }
-.out-card:hover { border-color: var(--wire2); transform: translateY(-3px); }
+.out-card::after {
+  content: ''; position: absolute; top: 0; inset-inline: 0; height: 2px;
+  background: var(--a); transform: scaleX(0); transform-origin: left; transition: transform .38s ease;
+}
+.out-card:hover { border-color: var(--wire2); transform: translateY(-5px); box-shadow: 0 22px 48px rgba(0,0,0,.35); }
+.out-card:hover::after { transform: scaleX(1); }
 .out-tag {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .07em; text-transform: uppercase;
-  color: var(--a); background: var(--a-dim); border: 1px solid var(--a-ring);
+  font-family: var(--mono); font-size: 10px; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--a);
+  background: var(--a-d); border: 1px solid var(--a-r);
   border-radius: 4px; padding: 2px 8px; width: fit-content;
 }
 .out-name { font-size: 15px; font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
-.out-body { font-size: 13px; color: var(--ink2); line-height: 1.6; font-weight: 300; }
+.out-body { font-size: 13px; color: var(--ink2); line-height: 1.62; font-weight: 300; }
 
-/* ─── MODES ─── */
-.modes-sec { padding: 0 0 96px; }
-.modes-grid { margin-top: 44px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+/* ══ MODES ══ */
+.modes-grid { margin-top: 52px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .mode-card {
-  background: var(--bg2); border: 1px solid var(--wire); border-radius: 18px;
-  padding: 36px 32px; display: flex; flex-direction: column; gap: 16px;
+  border-radius: 20px; padding: 40px 36px;
+  display: flex; flex-direction: column; gap: 18px;
   position: relative; overflow: hidden;
-  transition: border-color .25s, transform .2s;
+  border: 1px solid var(--wire2);
+  transition: transform .22s, box-shadow .22s;
 }
-.mode-card:hover { border-color: var(--wire2); transform: translateY(-3px); }
-.mode-card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
-.mode-card.q::after { background: var(--a); }
-.mode-card.d::after { background: var(--teal); }
+.mode-card:hover { transform: translateY(-4px); box-shadow: 0 24px 52px rgba(0,0,0,.4); }
+.mode-card.q { background: linear-gradient(145deg, var(--bg3) 0%, var(--bg2) 100%); }
+.mode-card.d { background: linear-gradient(145deg, var(--bg3) 0%, var(--bg2) 100%); }
+.mode-card::before {
+  content: ''; position: absolute; top: 0; inset-inline: 0; height: 2px;
+}
+.mode-card.q::before { background: var(--a); }
+.mode-card.d::before { background: var(--teal); }
+.mode-card::after {
+  content: ''; position: absolute; top: -60px; right: -60px;
+  width: 260px; height: 260px; border-radius: 50%; pointer-events: none;
+}
+.mode-card.q::after { background: radial-gradient(circle, oklch(0.76 0.15 52/.10) 0%, transparent 70%); }
+.mode-card.d::after { background: radial-gradient(circle, oklch(0.76 0.13 195/.10) 0%, transparent 70%); }
 .m-tag {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
-  padding: 3px 11px; border-radius: 4px; width: fit-content;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; padding: 3px 11px; border-radius: 4px; width: fit-content;
 }
-.mode-card.q .m-tag { background: var(--a-dim); color: var(--a); }
-.mode-card.d .m-tag { background: var(--teal-dim); color: var(--teal); }
-.m-headline {
-  font-family: var(--serif); font-size: 22px; font-weight: 700;
-  letter-spacing: -.015em; line-height: 1.2; color: var(--ink);
+.mode-card.q .m-tag { background: var(--a-d); color: var(--a); }
+.mode-card.d .m-tag { background: var(--teal-d); color: var(--teal); }
+.m-head { font-family: var(--serif); font-size: 24px; font-weight: 700; letter-spacing: -.015em; line-height: 1.18; }
+.mode-card.q .m-head em { font-style: normal; color: var(--a); }
+.mode-card.d .m-head em { font-style: normal; color: var(--teal); }
+.m-items { display: flex; flex-direction: column; gap: 8px; }
+.m-item { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; color: var(--ink2); line-height: 1.5; }
+.m-item::before { content:'✓'; font-size:11px; margin-top:2px; flex-shrink:0; font-weight:700; }
+.mode-card.q .m-item::before { color: var(--a); }
+.mode-card.d .m-item::before { color: var(--teal); }
+.m-item strong { color: var(--ink); font-weight: 500; }
+.m-time { font-family: var(--mono); font-size: 11.5px; padding: 6px 13px; border-radius: 6px; width: fit-content; }
+.mode-card.q .m-time { background: var(--a-d); color: var(--a); }
+.mode-card.d .m-time { background: var(--teal-d); color: var(--teal); }
+.modes-hint {
+  margin-top: 14px; padding: 16px 22px;
+  background: var(--bg2); border: 1px solid var(--wire); border-radius: 10px;
+  display: flex; align-items: center; gap: 14px;
 }
-.mode-card.q .m-headline em { font-style:normal; color: var(--a); }
-.mode-card.d .m-headline em { font-style:normal; color: var(--teal); }
-.m-body { font-size: 14px; color: var(--ink2); line-height: 1.68; font-weight: 300; text-wrap: pretty; }
-.m-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-.m-list li { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; color: var(--ink2); line-height: 1.5; }
-.m-list li::before { content:'✓'; font-size:11px; margin-top:2px; flex-shrink:0; font-weight:700; }
-.mode-card.q .m-list li::before { color: var(--a); }
-.mode-card.d .m-list li::before { color: var(--teal); }
-.m-list li strong { color: var(--ink); font-weight: 500; }
-.m-time {
-  font-family: var(--mono); font-size: 11.5px;
-  padding: 6px 12px; border-radius: 6px; width: fit-content; margin-top: 2px;
+.hint-badge {
+  font-family: var(--mono); font-size: 11px; color: var(--a);
+  background: var(--a-d); border: 1px solid var(--a-r);
+  border-radius: 5px; padding: 3px 10px; flex-shrink: 0; white-space: nowrap;
 }
-.mode-card.q .m-time { background: var(--a-dim); color: var(--a); }
-.mode-card.d .m-time { background: var(--teal-dim); color: var(--teal); }
+.hint-txt { font-size: 13.5px; color: var(--ink2); line-height: 1.55; }
+.hint-txt strong { color: var(--ink); font-weight: 500; }
 
-/* ─── CTA ─── */
-.cta-outer { padding: 0 24px 96px; max-width: 1100px; margin: 0 auto; }
+/* ══ CTA ══ */
+.cta-wrap { padding: 120px 24px; }
 .cta-box {
+  max-width: 1120px; margin: 0 auto;
   background: var(--bg2); border: 1px solid var(--wire);
-  border-radius: 22px; padding: 72px 60px;
+  border-radius: 24px; padding: 80px 72px;
   display: grid; grid-template-columns: 1fr auto;
-  align-items: start; gap: 48px;
-  position: relative; overflow: hidden;
+  align-items: start; gap: 48px; position: relative; overflow: hidden;
 }
-.cta-box::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: linear-gradient(90deg,var(--a),var(--teal)); }
+.cta-box::before {
+  content: ''; position: absolute; top: 0; inset-inline: 0; height: 1.5px;
+  background: linear-gradient(90deg, var(--a), var(--teal));
+}
 .cta-box::after {
-  content:''; position:absolute; top:-80px; right:-80px;
-  width:400px; height:400px; border-radius:50%;
-  background: radial-gradient(circle,oklch(0.76 0.15 52 / 0.04) 0%,transparent 70%);
-  pointer-events: none;
+  content: ''; position: absolute; top: -120px; right: -120px;
+  width: 540px; height: 540px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, oklch(0.76 0.15 52 / 0.05) 0%, transparent 65%);
 }
 .cta-h {
-  font-family: var(--serif);
-  font-size: clamp(24px, 3vw, 40px); font-weight: 700;
-  letter-spacing: -.025em; line-height: 1.12; text-wrap: balance;
+  font-family: var(--serif); font-size: clamp(26px,3.2vw,44px);
+  font-weight: 700; letter-spacing: -.025em; line-height: 1.1; text-wrap: balance;
 }
 .cta-h em { font-style: normal; color: var(--a); }
-.cta-p { margin-top: 12px; font-size: 15.5px; color: var(--ink2); line-height: 1.65; font-weight: 300; max-width: 460px; text-wrap: pretty; }
+.cta-p { margin-top: 14px; font-size: 15.5px; color: var(--ink2); line-height: 1.7; font-weight: 300; max-width: 440px; }
 .cta-install {
-  margin-top: 22px; background: #090706;
+  margin-top: 26px; background: #090704;
   border: 1px solid var(--wire); border-radius: 10px;
-  padding: 16px 20px; font-family: var(--mono); font-size: 12.5px; line-height: 1.9;
+  padding: 18px 22px; font-family: var(--mono); font-size: 12.5px; line-height: 2;
 }
-.ci-comment { color: var(--ink3); }
-.ci-prompt  { color: var(--a); }
-.ci-cmd     { color: var(--ink); }
+.ci-c { color: var(--ink3); } .ci-p { color: var(--a); } .ci-cmd { color: var(--ink); }
+.cta-acts { display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; position: relative; z-index: 1; min-width: 200px; }
+.cta-acts .btn-fill, .cta-acts .btn-ghost { justify-content: center; font-size: 13.5px; }
 
-.cta-actions { display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; position: relative; z-index: 1; }
-.cta-actions .btn-fill { font-size: 13.5px; padding: 12px 28px; white-space: nowrap; justify-content: center; }
-.cta-actions .btn-line { font-size: 13px; padding: 10px 22px; justify-content: center; }
-
-/* ─── FOOTER ─── */
+/* ══ FOOTER ══ */
 footer {
-  border-top: 1px solid var(--wire); padding: 26px 52px;
+  border-top: 1px solid var(--wire); padding: 28px 52px;
   display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
 }
 .foot-brand { font-family: var(--mono); font-size: 12px; color: var(--ink3); }
@@ -449,145 +542,120 @@ footer {
 .foot-links a:hover { color: var(--ink); }
 .foot-copy { font-size: 11px; color: var(--ink3); }
 
-/* ─── TWEAKS ─── */
-#tweaks {
-  display: none; position: fixed; bottom: 24px; right: 24px; z-index: 200;
-  width: 240px; background: var(--bg3); border: 1px solid var(--wire2);
-  border-radius: 14px; padding: 18px; box-shadow: 0 24px 60px rgba(0,0,0,.55);
-}
-#tweaks.on { display: block; }
-.tw-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-.tw-hd-label { font-size: 12.5px; font-weight: 600; color: var(--ink); }
-.tw-x { background: none; border: none; color: var(--ink2); cursor: pointer; font-size: 18px; line-height: 1; padding: 0; }
-.tw-grp { margin-bottom: 14px; }
-.tw-lbl { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink3); margin-bottom: 7px; font-family: var(--mono); }
-.tw-row { display: flex; gap: 6px; flex-wrap: wrap; }
-.tw-btn {
-  padding: 5px 11px; border-radius: 6px; font-size: 12px; cursor: pointer;
-  border: 1px solid var(--wire2); color: var(--ink2); background: var(--bg);
-  transition: all .15s; font-family: var(--sans);
-}
-.tw-btn:hover { border-color: var(--a-ring); color: var(--a); }
-.tw-btn.sel { background: var(--a-dim); border-color: var(--a-ring); color: var(--a); }
-
-/* ─── ANIMATIONS ─── */
-@keyframes up { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
-.rev { opacity:0; transform:translateY(18px); transition: opacity .6s ease, transform .6s ease; }
-.rev.in { opacity:1; transform:translateY(0); }
-.d1 { transition-delay:.06s; } .d2 { transition-delay:.12s; } .d3 { transition-delay:.18s; }
-
-/* ─── RESPONSIVE ─── */
+/* ══ RESPONSIVE ══ */
 @media (max-width: 960px) {
   nav { padding: 0 20px; }
   .nav-links { display: none; }
-  .def-inner { grid-template-columns: 1fr; gap: 36px; }
-  .def-outer { padding: 56px 20px; }
-  .vs-layout { grid-template-columns: 1fr; }
-  .vs-pane.left { border-right: none; border-bottom: 1px solid var(--wire); }
-  .vs-pane { padding: 28px 24px; }
-  .mem-inner { grid-template-columns: 1fr; gap: 44px; }
-  .mem-outer { padding: 64px 20px; }
+  .def-inner { grid-template-columns: 1fr; gap: 40px; }
+  .vs-grid { grid-template-columns: 1fr; }
+  .vsp.left { border-right: none; border-bottom: 1px solid var(--wire); }
+  .vsp { padding: 32px 26px; }
+  .mem-inner { grid-template-columns: 1fr; gap: 52px; }
   .out-grid { grid-template-columns: 1fr 1fr; }
   .modes-grid { grid-template-columns: 1fr; }
-  .cta-box { grid-template-columns: 1fr; padding: 40px 28px; gap: 24px; }
-  .cta-actions .btn-fill, .cta-actions .btn-line { width: 100%; justify-content: center; }
+  .cta-box { grid-template-columns: 1fr; padding: 48px 36px; gap: 28px; }
   .pain-bento { grid-template-columns: 1fr 1fr; }
   .pain-card.wide { grid-column: span 1; }
-  footer { padding: 22px 20px; flex-direction: column; align-items: flex-start; gap: 16px; }
-  .w { padding: 0 20px; }
-  .hero-diagram { display: none; }
-  .pain-sec, .out-sec { padding: 72px 0; }
-  .vs-sec { padding: 72px 0 56px; }
+  footer { padding: 22px 20px; flex-direction: column; align-items: flex-start; }
+  .sec { padding: 80px 24px; }
+  .def-outer, .mem-outer { padding: 80px 24px; }
+  .hero-flow { display: none; }
+  .cta-wrap { padding: 80px 24px; }
 }
 @media (max-width: 560px) {
   .pain-bento { grid-template-columns: 1fr; }
   .out-grid { grid-template-columns: 1fr; }
-  .hero { padding: 88px 16px 52px; }
   .hero-btns { flex-direction: column; width: 100%; }
-  .hero-btns .btn-fill, .hero-btns .btn-line { width: 100%; justify-content: center; }
-  .cta-outer { padding: 0 16px 56px; }
-  .cta-box { padding: 32px 18px; }
-  footer { padding: 18px 16px; }
-  .w { padding: 0 16px; }
-  .pain-sec, .out-sec { padding: 56px 0; }
-  .modes-sec { padding: 0 0 72px; }
+  .hero-btns .btn-fill, .hero-btns .btn-ghost { width: 100%; justify-content: center; }
+  .cta-box { padding: 36px 22px; }
+  footer { padding: 20px 16px; }
 }
 </style>
 </head>
 <body>
 
+<!-- cursor -->
+<div id="c-dot"></div>
+<div id="c-ring"></div>
+
+<!-- grain overlay -->
+<div class="grain" aria-hidden="true"></div>
+
 <!-- ══ NAV ══ -->
-<nav>
-  <a class="nav-id" href="#">
+<nav id="nav">
+  <a class="nav-brand" href="#">
     <span class="nav-pip"></span>AI 产品工作站
   </a>
   <div class="nav-links">
     <a href="#pain">痛点</a>
-    <a href="#vs">和 AI 对话的区别</a>
-    <a href="#memory">越用越懂你</a>
+    <a href="#vs">核心差异</a>
+    <a href="#memory">资产积累</a>
     <a href="#modes">使用方式</a>
   </div>
-  <a class="nav-get" href="https://github.com/stephenfan80/PMWorkspace" target="_blank">免费安装 →</a>
+  <a class="nav-cta" href="https://github.com/stephenfan80/PMWorkspace" target="_blank">免费安装 →</a>
 </nav>
 
-
 <!-- ══ HERO ══ -->
-<section class="hero">
-  <div class="hero-grid"></div>
-  <div class="hero-glow"></div>
+<section id="hero">
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="hero-glow" aria-hidden="true"></div>
 
-  <div class="chip hero-chip" style="position:relative;z-index:1;">Codex 插件 · AI 产品工作站（PMW）</div>
+  <div class="hero-label">Codex 插件 · AI 产品工作站（PMW）</div>
 
   <h1 class="hero-h1">
-    把一句想法、截图反馈或 PRD，<br>
-    变成<em>能讨论、能出图、</em><br>
-    <em>能交付</em><span class="dim">的产品方案</span>
+    <span class="hl"><span class="hli">把一句想法、截图反馈</span></span>
+    <span class="hl"><span class="hli">或 PRD，变成</span></span>
+    <span class="hl"><span class="hli"><em>能讨论、能出图、</em></span></span>
+    <span class="hl"><span class="hli"><em>能交付</em>的产品方案</span></span>
   </h1>
 
-  <p class="hero-p" style="position:relative;z-index:1;">
+  <p class="hero-sub">
     不只是 AI 对话——PMW 有记忆、有流程，把每次工作变成积累。<br>
     <strong>越用，越懂你的产品。</strong>
   </p>
 
   <div class="hero-btns">
     <a class="btn-fill" href="https://github.com/stephenfan80/PMWorkspace" target="_blank">免费安装 PMW →</a>
-    <a class="btn-line" href="#pain">先了解一下 ↓</a>
+    <a class="btn-ghost" href="#pain">先了解一下 ↓</a>
   </div>
 
-  <!-- Input→Output diagram -->
-  <div class="hero-diagram">
-    <div class="diag-group">
-      <div class="diag-pill">一句想法</div>
-      <div class="diag-pill">截图反馈</div>
-      <div class="diag-pill">PRD 草稿</div>
-      <div class="diag-pill">用户反馈</div>
+  <div class="hero-flow">
+    <div class="flow-col">
+      <div class="fpill">一句想法</div>
+      <div class="fpill">截图反馈</div>
+      <div class="fpill">PRD 草稿</div>
+      <div class="fpill">用户反馈</div>
     </div>
-    <div class="diag-center">
-      <div class="diag-arrow">→</div>
-      <div class="diag-core">AI 产品工作站</div>
-      <div class="diag-arrow">→</div>
+    <div class="flow-mid">
+      <div class="flow-arr">→</div>
+      <div class="flow-core">AI 产品工作站</div>
+      <div class="flow-arr">→</div>
     </div>
-    <div class="diag-group">
-      <div class="diag-pill out">产品简报</div>
-      <div class="diag-pill out">原型方案</div>
-      <div class="diag-pill out">交付 PRD</div>
-      <div class="diag-pill out">多角色评审</div>
+    <div class="flow-col">
+      <div class="fpill out">产品简报</div>
+      <div class="fpill out">原型方案</div>
+      <div class="fpill out">交付 PRD</div>
+      <div class="fpill out">多角色评审</div>
     </div>
+  </div>
+
+  <div class="scroll-cue">
+    <span>向下探索</span>
+    <div class="scroll-bar"></div>
   </div>
 </section>
 
 <div class="rule"></div>
 
 <!-- ══ PAIN ══ -->
-<section id="pain" class="pain-sec">
-  <div class="w">
-    <div class="pain-header">
-      <div class="chip rev">你是不是也遇到这些情况</div>
-      <h2 class="sh rev d1">做产品工作时，<br>这些摩擦每天都在发生</h2>
-      <p class="ssub rev d2">不是个人效率问题——是没有合适工具时的系统性卡点。</p>
-    </div>
+<section id="pain" style="overflow:hidden; position:relative;">
+  <div class="wm" style="left:-10px; top:-30px;" data-para=".28">01</div>
+  <div class="sec">
+    <div class="chip" data-anim>你是不是也遇到这些情况</div>
+    <h2 class="sh" data-anim>做产品工作时，<br>这些摩擦每天都在发生</h2>
+    <p class="ssub" data-anim>不是个人效率问题——是没有合适工具时的系统性卡点。</p>
 
-    <div class="pain-bento rev d2">
+    <div class="pain-bento" data-anim-stagger=".pain-card">
       <div class="pain-card wide">
         <div class="pain-n">01</div>
         <div class="pain-title">老板给了一句话，明天要交方案——用 AI 出了稿，评审才发现方向跑偏了</div>
@@ -596,7 +664,7 @@ footer {
       <div class="pain-card">
         <div class="pain-n">02</div>
         <div class="pain-title">材料散在各处，每次交付都要从头解释</div>
-        <div class="pain-body">用户反馈在群里，PRD 在文档，截图在本地——协作文档和对话记录从来没有真正对齐过。每次评审都要重新讲上下文。</div>
+        <div class="pain-body">用户反馈在群里，PRD 在文档，截图在本地——每次评审都要重新讲上下文。</div>
       </div>
       <div class="pain-card">
         <div class="pain-n">03</div>
@@ -611,7 +679,7 @@ footer {
       <div class="pain-card">
         <div class="pain-n">05</div>
         <div class="pain-title">做过的决策，下次全靠记忆</div>
-        <div class="pain-body">产品决策停在对话记录里，下次做类似功能时，找不到"当初为什么这么做"——每次都从零开始。</div>
+        <div class="pain-body">产品决策停在对话记录里，找不到"当初为什么这么做"——每次都从零开始。</div>
       </div>
       <div class="pain-card">
         <div class="pain-n">06</div>
@@ -626,46 +694,29 @@ footer {
 
 <!-- ══ DEFINITION ══ -->
 <div class="def-outer">
+  <div class="wm" style="right:-20px; left:auto; top:-20px;" data-para=".18">PMW</div>
   <div class="def-inner">
-    <div class="rev">
-      <div class="chip">PMW 是什么</div>
-      <div class="def-q">
-        不是聊天框——是一支<br><em>有记忆、有流程</em>的 AI 产品小队
-      </div>
-      <p class="def-body">
-        你把一句想法、一张截图、一段 PRD 或一份用户反馈丢进来，PMW 先帮你判断真实问题，再把它推进成能讨论、能出图、能交付的产品资产——不是替你跳过思考，而是把思考压缩成一条能往前走的路径。
-      </p>
+    <div>
+      <div class="chip" data-anim>PMW 是什么</div>
+      <div class="def-q" data-anim>不是聊天框——<br>是一支<em>有记忆、有流程</em><br>的 AI 产品小队</div>
+      <p class="def-body" data-anim>你把一句想法、一张截图、一段 PRD 或一份用户反馈丢进来，PMW 先帮你判断真实问题，再把它推进成能讨论、能出图、能交付的产品资产——不是替你跳过思考，而是把思考压缩成一条能往前走的路径。</p>
     </div>
-    <div class="rev d1">
-      <div class="def-steps">
-        <div class="def-step">
-          <div class="def-num">01</div>
-          <div>
-            <div class="def-step-title">判断真实问题</div>
-            <div class="def-step-sub">澄清目标用户、触发场景和真实损失，不把功能愿望当解法</div>
-          </div>
-        </div>
-        <div class="def-step">
-          <div class="def-num">02</div>
-          <div>
-            <div class="def-step-title">生成对齐简报</div>
-            <div class="def-step-sub">想法、截图、PRD、协作文档，压缩成一份所有人看同一份的产品简报</div>
-          </div>
-        </div>
-        <div class="def-step">
-          <div class="def-num">03</div>
-          <div>
-            <div class="def-step-title">输出差异化方案</div>
-            <div class="def-step-sub">默认最少 3 个方向，在产品策略、信息架构、交互模型上真正不同</div>
-          </div>
-        </div>
-        <div class="def-step">
-          <div class="def-num">04</div>
-          <div>
-            <div class="def-step-title">四视角联合评审 → 交付</div>
-            <div class="def-step-sub">策略、风险、设计系统、数据可行性把关后，整理成 PRD 或交付稿</div>
-          </div>
-        </div>
+    <div class="def-steps" data-anim-stagger=".def-step">
+      <div class="def-step">
+        <div class="step-n">01</div>
+        <div><div class="step-title">判断真实问题</div><div class="step-body">澄清目标用户、触发场景和真实损失，不把功能愿望当解法</div></div>
+      </div>
+      <div class="def-step">
+        <div class="step-n">02</div>
+        <div><div class="step-title">生成对齐简报</div><div class="step-body">想法、截图、PRD、协作文档，压缩成一份所有人看同一份的产品简报</div></div>
+      </div>
+      <div class="def-step">
+        <div class="step-n">03</div>
+        <div><div class="step-title">输出差异化方案</div><div class="step-body">默认最少 3 个方向，在产品策略、信息架构、交互模型上真正不同</div></div>
+      </div>
+      <div class="def-step">
+        <div class="step-n">04</div>
+        <div><div class="step-title">四视角联合评审 → 交付</div><div class="step-body">策略、风险、设计系统、数据可行性把关后，整理成 PRD 或交付稿</div></div>
       </div>
     </div>
   </div>
@@ -673,101 +724,38 @@ footer {
 
 <div class="rule"></div>
 
-<!-- ══ VS CHAT AI ══ -->
-<section id="vs" class="vs-sec">
-  <div class="w">
-    <div class="chip rev">核心差异</div>
-    <h2 class="sh rev d1">和直接用聊天 AI，<br>根本上有什么不同？</h2>
-    <p class="ssub rev d2">聊天 AI 帮你生成内容，但它没有你的产品上下文，不积累决策，不记住你的偏好——每次都从零开始。</p>
+<!-- ══ VS ══ -->
+<section id="vs">
+  <div class="sec">
+    <div class="chip" data-anim>核心差异</div>
+    <h2 class="sh" data-anim>和直接用聊天 AI，<br>根本上有什么不同？</h2>
+    <p class="ssub" data-anim>聊天 AI 帮你生成内容，但它没有你的产品上下文，不积累决策，不记住你的偏好——每次都从零开始。</p>
 
-    <div class="vs-layout rev d2">
-      <!-- LEFT: chat AI -->
-      <div class="vs-pane left">
+    <div class="vs-grid">
+      <div class="vsp left" data-slide="-60">
         <div>
           <div class="vs-tag plain">直接用聊天 AI</div>
-          <div class="vs-headline" style="margin-top:14px">每次从零，<br>决策不会沉淀</div>
+          <div class="vs-head">每次从零，<br>决策不会沉淀</div>
         </div>
-        <div class="vs-story">
-          <div class="vs-row">
-            <div class="vs-icon">✕</div>
-            <div>
-              <div class="vs-row-title">不记得你是谁</div>
-              <div class="vs-row-body">每次都要重新介绍产品背景、用户群体和历史决策</div>
-            </div>
-          </div>
-          <div class="vs-row">
-            <div class="vs-icon">✕</div>
-            <div>
-              <div class="vs-row-title">你问什么答什么</div>
-              <div class="vs-row-body">不会质疑问题本身是否正确，不判断真实需求</div>
-            </div>
-          </div>
-          <div class="vs-row">
-            <div class="vs-icon">✕</div>
-            <div>
-              <div class="vs-row-title">方案快，但没有门槛</div>
-              <div class="vs-row-body">不管问题有没有想清楚，立刻生成——方向对不对无从保证</div>
-            </div>
-          </div>
-          <div class="vs-row">
-            <div class="vs-icon">✕</div>
-            <div>
-              <div class="vs-row-title">对话结束即清空</div>
-              <div class="vs-row-body">决策、偏好、历史判断全部消失，下次重头来过</div>
-            </div>
-          </div>
-          <div class="vs-row">
-            <div class="vs-icon">✕</div>
-            <div>
-              <div class="vs-row-title">用得越多，你做的铺垫越多</div>
-              <div class="vs-row-body">时间越长，要重复解释的上下文反而越积越多</div>
-            </div>
-          </div>
+        <div class="vs-rows">
+          <div class="vs-row"><div class="vs-dot">✕</div><div><div class="vs-rt">不记得你是谁</div><div class="vs-rb">每次都要重新介绍产品背景、用户群体和历史决策</div></div></div>
+          <div class="vs-row"><div class="vs-dot">✕</div><div><div class="vs-rt">你问什么答什么</div><div class="vs-rb">不会质疑问题本身是否正确，不判断真实需求</div></div></div>
+          <div class="vs-row"><div class="vs-dot">✕</div><div><div class="vs-rt">方案快，但没有门槛</div><div class="vs-rb">不管问题有没有想清楚，立刻生成——方向对不对无从保证</div></div></div>
+          <div class="vs-row"><div class="vs-dot">✕</div><div><div class="vs-rt">对话结束即清空</div><div class="vs-rb">决策、偏好、历史判断全部消失，下次重头来过</div></div></div>
+          <div class="vs-row"><div class="vs-dot">✕</div><div><div class="vs-rt">用得越多，你做的铺垫越多</div><div class="vs-rb">时间越长，要重复解释的上下文反而越积越多</div></div></div>
         </div>
       </div>
-
-      <!-- RIGHT: PMW -->
-      <div class="vs-pane right">
+      <div class="vsp right" data-slide="60">
         <div>
           <div class="vs-tag pmw">AI 产品工作站（PMW）</div>
-          <div class="vs-headline" style="margin-top:14px">越用越懂你，<br>资产持续积累</div>
+          <div class="vs-head">越用越懂你，<br>资产持续积累</div>
         </div>
-        <div class="vs-story">
-          <div class="vs-row">
-            <div class="vs-icon">✓</div>
-            <div>
-              <div class="vs-row-title">记住你的每个决策</div>
-              <div class="vs-row-body">简报、方案取舍、偏好风格——持续沉淀，下次直接复用</div>
-            </div>
-          </div>
-          <div class="vs-row">
-            <div class="vs-icon">✓</div>
-            <div>
-              <div class="vs-row-title">先判断问题是否正确</div>
-              <div class="vs-row-body">不替你跳过思考，先帮你确认解决的是真实问题</div>
-            </div>
-          </div>
-          <div class="vs-row">
-            <div class="vs-icon">✓</div>
-            <div>
-              <div class="vs-row-title">有门槛才出图</div>
-              <div class="vs-row-body">简报未对齐时不生成原型，避免在错误方向上越走越快</div>
-            </div>
-          </div>
-          <div class="vs-row">
-            <div class="vs-icon">✓</div>
-            <div>
-              <div class="vs-row-title">四角色评审，不靠记忆</div>
-              <div class="vs-row-body">策略、风险、设计系统、数据可行性联合把关，结论留存可查</div>
-            </div>
-          </div>
-          <div class="vs-row">
-            <div class="vs-icon">✓</div>
-            <div>
-              <div class="vs-row-title">用得越多，它帮你做的越多</div>
-              <div class="vs-row-body">积累越深，PMW 越懂你，你需要解释的越来越少</div>
-            </div>
-          </div>
+        <div class="vs-rows">
+          <div class="vs-row"><div class="vs-dot">✓</div><div><div class="vs-rt">记住你的每个决策</div><div class="vs-rb">简报、方案取舍、偏好风格——持续沉淀，下次直接复用</div></div></div>
+          <div class="vs-row"><div class="vs-dot">✓</div><div><div class="vs-rt">先判断问题是否正确</div><div class="vs-rb">不替你跳过思考，先帮你确认解决的是真实问题</div></div></div>
+          <div class="vs-row"><div class="vs-dot">✓</div><div><div class="vs-rt">有门槛才出图</div><div class="vs-rb">简报未对齐时不生成原型，避免在错误方向上越走越快</div></div></div>
+          <div class="vs-row"><div class="vs-dot">✓</div><div><div class="vs-rt">四角色评审，不靠记忆</div><div class="vs-rb">策略、风险、设计系统、数据可行性联合把关，结论留存可查</div></div></div>
+          <div class="vs-row"><div class="vs-dot">✓</div><div><div class="vs-rt">用得越多，它帮你做的越多</div><div class="vs-rb">积累越深，PMW 越懂你，你需要解释的越来越少</div></div></div>
         </div>
         <div class="vs-banner">
           <div class="vs-banner-label">核心差异 · 不可替代的优势</div>
@@ -782,51 +770,32 @@ footer {
 
 <!-- ══ MEMORY ══ -->
 <div id="memory" class="mem-outer">
-  <div class="mem-glow"></div>
+  <div class="mem-glow" aria-hidden="true"></div>
   <div class="mem-inner">
-    <div class="rev">
-      <div class="chip">资产积累</div>
-      <div class="mem-big">越用，<br><em>越懂你</em></div>
-      <p class="mem-sub">
-        不是靠对话记忆——而是结构化的资产沉淀。每次产品工作，PMW 都在学习你的品味、决策模式和交付偏好。
-      </p>
-      <p class="mem-note">
-        这是 PMW 和所有聊天 AI 的根本区别——它是一项随时间增值的投资，而不是每次都从零开始的工具。
-      </p>
+    <div>
+      <div class="chip" data-anim>资产积累</div>
+      <div class="mem-big" data-anim>越用，<br><em>越懂你</em></div>
+      <p class="mem-sub" data-anim>不是靠对话记忆——而是结构化的资产沉淀。每次产品工作，PMW 都在学习你的品味、决策模式和交付偏好。</p>
+      <p class="mem-note" data-anim>这是 PMW 和所有聊天 AI 的根本区别——它是一项随时间增值的投资，而不是每次都从零开始的工具。</p>
     </div>
-    <div class="rev d1">
-      <div class="growth">
-        <div class="g-item">
-          <div class="g-dot">1</div>
-          <div>
-            <div class="g-tag">第 1 次使用</div>
-            <div class="g-title">帮你对齐真实问题</div>
-            <div class="g-body">判断需求背后的真实用户问题，保存首个产品简报和决策记录</div>
-          </div>
+    <div>
+      <div class="timeline" id="timeline">
+        <div class="tl-track"></div>
+        <div class="tl-item lit">
+          <div class="tl-dot">1</div>
+          <div><div class="tl-tag">第 1 次使用</div><div class="tl-title">帮你对齐真实问题</div><div class="tl-body">判断需求背后的真实用户问题，保存首个产品简报和决策记录</div></div>
         </div>
-        <div class="g-item lit">
-          <div class="g-dot">10</div>
-          <div>
-            <div class="g-tag">第 10 次使用</div>
-            <div class="g-title">已经知道你的偏好</div>
-            <div class="g-body">记住你不喜欢哪类方案风格，自动过滤不符合你产品认知的方向，主动提醒历史决策</div>
-          </div>
+        <div class="tl-item">
+          <div class="tl-dot">10</div>
+          <div><div class="tl-tag">第 10 次使用</div><div class="tl-title">已经知道你的偏好</div><div class="tl-body">记住你不喜欢哪类方案风格，自动过滤不符合你产品认知的方向，主动提醒历史决策</div></div>
         </div>
-        <div class="g-item">
-          <div class="g-dot">50</div>
-          <div>
-            <div class="g-tag">第 50 次使用</div>
-            <div class="g-title">最懂你产品的协作伙伴</div>
-            <div class="g-body">完整的产品认知框架、历史决策、反指标库——类似项目随时可调，不用重新解释</div>
-          </div>
+        <div class="tl-item">
+          <div class="tl-dot">50</div>
+          <div><div class="tl-tag">第 50 次使用</div><div class="tl-title">最懂你产品的协作伙伴</div><div class="tl-body">完整的产品认知框架、历史决策、反指标库——类似项目随时可调，不用重新解释</div></div>
         </div>
-        <div class="g-item future">
-          <div class="g-dot">∞</div>
-          <div>
-            <div class="g-tag">持续增值</div>
-            <div class="g-title">专属于你的产品智慧库</div>
-            <div class="g-body">用得越多越省力——这些资产只属于你，随产品工作持续复利增长</div>
-          </div>
+        <div class="tl-item dim">
+          <div class="tl-dot">∞</div>
+          <div><div class="tl-tag">持续增值</div><div class="tl-title">专属于你的产品智慧库</div><div class="tl-body">用得越多越省力——这些资产只属于你，随产品工作持续复利增长</div></div>
         </div>
       </div>
     </div>
@@ -836,13 +805,14 @@ footer {
 <div class="rule"></div>
 
 <!-- ══ OUTPUTS ══ -->
-<section class="out-sec">
-  <div class="w">
-    <div class="chip rev">你能拿到什么</div>
-    <h2 class="sh rev d1">具体的产品资产，不是聊天记录</h2>
-    <p class="ssub rev d2">每次工作流结束，你得到的是可以继续用的东西——不是截图，不是散乱的 Markdown。</p>
+<section id="outputs" style="overflow:hidden; position:relative;">
+  <div class="wm" style="right:-10px; left:auto; top:-30px;" data-para=".22">03</div>
+  <div class="sec">
+    <div class="chip" data-anim>你能拿到什么</div>
+    <h2 class="sh" data-anim>具体的产品资产，<br>不是聊天记录</h2>
+    <p class="ssub" data-anim>每次工作流结束，你得到的是可以继续用的东西——不是截图，不是散乱的 Markdown。</p>
 
-    <div class="out-grid rev d2">
+    <div class="out-grid" data-anim-stagger=".out-card">
       <div class="out-card">
         <div class="out-tag">产品简报</div>
         <div class="out-name">对齐共识文档</div>
@@ -870,62 +840,48 @@ footer {
 <div class="rule"></div>
 
 <!-- ══ MODES ══ -->
-<section id="modes" class="modes-sec">
-  <div class="w" style="padding-top:96px;">
-    <div class="chip rev">两条路径</div>
-    <h2 class="sh rev d1">不确定从哪里开始？<br>先看你现在在哪个阶段</h2>
-    <p class="ssub rev d2">PMW 有两种进入方式，覆盖从"一句想法"到"研发可接手的交付稿"的完整路径。</p>
+<section id="modes" style="overflow:hidden; position:relative;">
+  <div class="wm" style="left:-10px; top:-30px;" data-para=".2">04</div>
+  <div class="sec">
+    <div class="chip" data-anim>两条路径</div>
+    <h2 class="sh" data-anim>不确定从哪里开始？<br>先看你现在在哪个阶段</h2>
+    <p class="ssub" data-anim>PMW 有两种进入方式，覆盖从"一句想法"到"研发可接手的交付稿"的完整路径。</p>
 
-    <div class="modes-grid rev d2">
-      <!-- QUICK -->
-      <div class="mode-card q">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <div class="modes-grid">
+      <div class="mode-card q" data-slide="-50">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
           <span class="m-tag">快速成型</span>
-          <span style="font-family:var(--mono);font-size:11px;color:var(--a);background:var(--a-dim);border:1px solid var(--a-ring);border-radius:5px;padding:3px 10px;">10 min 起步</span>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--a);background:var(--a-d);border:1px solid var(--a-r);border-radius:5px;padding:3px 10px;">10 min 起步</span>
         </div>
-        <div class="m-headline">有想法，<br>想快速<em>看到方向</em></div>
-        <div style="display:flex;flex-direction:column;gap:6px;margin:4px 0;">
-          <div style="font-family:var(--mono);font-size:11px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">适合这些情况</div>
-          <div style="font-size:13px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5;"><span style="color:var(--a);flex-shrink:0;margin-top:1px;">→</span>老板给了一句话，明天要讨论方向</div>
-          <div style="font-size:13px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5;"><span style="color:var(--a);flex-shrink:0;margin-top:1px;">→</span>想法还很早期，需要快速验证可行性</div>
-          <div style="font-size:13px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5;"><span style="color:var(--a);flex-shrink:0;margin-top:1px;">→</span>组内讨论、领导预览，需要一个可讨论包</div>
+        <div class="m-head">有想法，<br>想快速<em>看到方向</em></div>
+        <div class="m-items">
+          <div class="m-item">PMW 只问最关键的 2–3 个问题</div>
+          <div class="m-item">输出<strong>产品简报</strong>，明确标注假设和风险</div>
+          <div class="m-item">输出<strong>2–3 个差异化方案方向</strong></div>
+          <div class="m-item">每个方向各出 <strong>1 张移动端原型图</strong></div>
         </div>
-        <ul class="m-list">
-          <li>PMW 只问最关键的 2–3 个问题</li>
-          <li>输出<strong>产品简报</strong>，明确标注假设和风险</li>
-          <li>输出<strong>2–3 个差异化方案方向</strong></li>
-          <li>每个方向各出 <strong>1 张移动端原型图</strong></li>
-        </ul>
         <div class="m-time">⚡ 带着假设出发，当天进会议室</div>
       </div>
 
-      <!-- DEEP -->
-      <div class="mode-card d">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div class="mode-card d" data-slide="50">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
           <span class="m-tag">深度交付</span>
-          <span style="font-family:var(--mono);font-size:11px;color:var(--teal);background:var(--teal-dim);border:1px solid var(--teal-border);border-radius:5px;padding:3px 10px;">端到端</span>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--teal);background:var(--teal-d);border:1px solid var(--teal-r);border-radius:5px;padding:3px 10px;">端到端</span>
         </div>
-        <div class="m-headline">需要 PRD，<br>或对外<em>正式交付</em></div>
-        <div style="display:flex;flex-direction:column;gap:6px;margin:4px 0;">
-          <div style="font-family:var(--mono);font-size:11px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">适合这些情况</div>
-          <div style="font-size:13px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5;"><span style="color:var(--teal);flex-shrink:0;margin-top:1px;">→</span>要进设计评审或研发排期</div>
-          <div style="font-size:13px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5;"><span style="color:var(--teal);flex-shrink:0;margin-top:1px;">→</span>已有线上截图，优化现有功能流程</div>
-          <div style="font-size:13px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5;"><span style="color:var(--teal);flex-shrink:0;margin-top:1px;">→</span>高风险决策，需要多方对齐后再动</div>
+        <div class="m-head">需要 PRD，<br>或对外<em>正式交付</em></div>
+        <div class="m-items">
+          <div class="m-item">动态诊断 + 策略评审 + 拍板选择题</div>
+          <div class="m-item">线上截图 / 视觉基线纳入工作流</div>
+          <div class="m-item"><strong>四视角评审军团</strong>把关原型，通过才交付</div>
+          <div class="m-item">产出 PRD / 设计 / 实验 / 工程 <strong>交付文档</strong></div>
         </div>
-        <ul class="m-list">
-          <li>动态诊断 + 策略评审 + 拍板选择题</li>
-          <li>线上截图 / 视觉基线纳入工作流</li>
-          <li><strong>四视角评审军团</strong>把关原型，通过才交付</li>
-          <li>产出 PRD / 设计 / 实验 / 工程 <strong>交付文档</strong></li>
-        </ul>
         <div class="m-time">🎯 先对齐，再出图，不在错误方向加速</div>
       </div>
     </div>
 
-    <!-- 不确定选哪个的提示 -->
-    <div class="rev d3" style="margin-top:16px;padding:16px 22px;background:var(--bg2);border:1px solid var(--wire);border-radius:10px;display:flex;align-items:center;gap:14px;">
-      <span style="font-family:var(--mono);font-size:11px;color:var(--a);background:var(--a-dim);border:1px solid var(--a-ring);border-radius:5px;padding:3px 10px;flex-shrink:0;white-space:nowrap;">不确定？</span>
-      <span style="font-size:13.5px;color:var(--ink2);line-height:1.55;">先从<strong style="color:var(--ink)">快速成型</strong>开始——带着假设推进，PMW 会在关键节点提示你是否需要升级到深度交付流程。</span>
+    <div class="modes-hint" data-anim>
+      <div class="hint-badge">不确定？</div>
+      <div class="hint-txt">先从<strong>快速成型</strong>开始——带着假设推进，PMW 会在关键节点提示你是否需要升级到深度交付流程。</div>
     </div>
   </div>
 </section>
@@ -933,23 +889,23 @@ footer {
 <div class="rule"></div>
 
 <!-- ══ CTA ══ -->
-<div class="cta-outer" style="margin-top:96px;">
-  <div class="cta-box rev">
+<div class="cta-wrap">
+  <div class="cta-box" id="cta-box">
     <div>
       <h2 class="cta-h">今天拿到一句需求，<br><em>明早带方案进会议室</em></h2>
       <p class="cta-p">安装 PMW，你的每次产品工作都在积累成专属资产。越用，它越懂你的产品。</p>
       <div class="cta-install">
-        <div><span class="ci-comment"># 在 Codex Plugins 中搜索安装</span></div>
-        <div><span class="ci-prompt">$</span> <span class="ci-cmd">AI 产品工作站</span></div>
-        <div style="margin-top:8px"><span class="ci-comment"># 或添加 GitHub 本地插件</span></div>
-        <div><span class="ci-prompt">$</span> <span class="ci-cmd">codex plugin marketplace add stephenfan80/PMWorkspace</span></div>
-        <div style="margin-top:8px"><span class="ci-comment"># 安装后从这里开始</span></div>
-        <div><span class="ci-prompt">$</span> <span class="ci-cmd">使用 $pm-workspace 显示欢迎引导</span></div>
+        <div><span class="ci-c"># 在 Codex Plugins 中搜索安装</span></div>
+        <div><span class="ci-p">$</span> <span class="ci-cmd">AI 产品工作站</span></div>
+        <div style="margin-top:8px"><span class="ci-c"># 或添加 GitHub 本地插件</span></div>
+        <div><span class="ci-p">$</span> <span class="ci-cmd">codex plugin marketplace add stephenfan80/PMWorkspace</span></div>
+        <div style="margin-top:8px"><span class="ci-c"># 安装后从这里开始</span></div>
+        <div><span class="ci-p">$</span> <span class="ci-cmd">使用 $pm-workspace 显示欢迎引导</span></div>
       </div>
     </div>
-    <div class="cta-actions">
+    <div class="cta-acts">
       <a class="btn-fill" href="https://github.com/stephenfan80/PMWorkspace" target="_blank">前往 GitHub 安装 →</a>
-      <a class="btn-line" href="https://github.com/stephenfan80/PMWorkspace/blob/main/README.zh-CN.md" target="_blank">阅读完整中文文档</a>
+      <a class="btn-ghost" href="https://github.com/stephenfan80/PMWorkspace/blob/main/README.zh-CN.md" target="_blank">阅读完整中文文档</a>
     </div>
   </div>
 </div>
@@ -965,120 +921,171 @@ footer {
   <div class="foot-copy">© 2026 stephenfan80</div>
 </footer>
 
-<!-- ══ TWEAKS ══ -->
-<div id="tweaks">
-  <div class="tw-hd">
-    <span class="tw-hd-label">Tweaks</span>
-    <button class="tw-x" id="tw-x">×</button>
-  </div>
-  <div class="tw-grp">
-    <div class="tw-lbl">主色调</div>
-    <div class="tw-row" id="tc">
-      <div class="tw-btn sel" data-c="amber">琥珀</div>
-      <div class="tw-btn" data-c="blue">靛蓝</div>
-      <div class="tw-btn" data-c="jade">碧绿</div>
-    </div>
-  </div>
-  <div class="tw-grp">
-    <div class="tw-lbl">英雄副标题</div>
-    <div class="tw-row" id="th">
-      <div class="tw-btn sel" data-h="0">记忆型</div>
-      <div class="tw-btn" data-h="1">结果型</div>
-      <div class="tw-btn" data-h="2">对比型</div>
-    </div>
-  </div>
-  <div class="tw-grp">
-    <div class="tw-lbl">底色风格</div>
-    <div class="tw-row" id="tb">
-      <div class="tw-btn sel" data-b="warm">暖棕黑</div>
-      <div class="tw-btn" data-b="cool">冷炭黑</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ SCRIPTS ══ -->
-<script>
-/* scroll reveal */
-const io = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-}, { threshold: 0.08, rootMargin: '0px 0px -28px 0px' });
-document.querySelectorAll('.rev').forEach(el => io.observe(el));
-
-/* growth hover */
-const items = document.querySelectorAll('.g-item:not(.future)');
-items.forEach(it => {
-  it.addEventListener('mouseenter', () => { items.forEach(i => i.classList.remove('lit')); it.classList.add('lit'); });
-  it.addEventListener('mouseleave', () => { items.forEach(i => i.classList.remove('lit')); items[1].classList.add('lit'); });
-});
-
-/* tweaks */
-const panel = document.getElementById('tweaks');
-const root  = document.documentElement;
-window.addEventListener('message', e => {
-  if (!e.data) return;
-  if (e.data.type === '__activate_edit_mode')   panel.classList.add('on');
-  if (e.data.type === '__deactivate_edit_mode') panel.classList.remove('on');
-});
-window.parent.postMessage({ type: '__edit_mode_available' }, '*');
-document.getElementById('tw-x').addEventListener('click', () => {
-  panel.classList.remove('on');
-  window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
-});
-
-const palettes = {
-  amber: ['oklch(0.76 0.15 52)','oklch(0.76 0.15 52 / 0.13)','oklch(0.76 0.15 52 / 0.30)','oklch(0.76 0.15 52 / 0.18)'],
-  blue:  ['oklch(0.72 0.15 245)','oklch(0.72 0.15 245 / 0.13)','oklch(0.72 0.15 245 / 0.30)','oklch(0.72 0.15 245 / 0.18)'],
-  jade:  ['oklch(0.74 0.14 160)','oklch(0.74 0.14 160 / 0.13)','oklch(0.74 0.14 160 / 0.30)','oklch(0.74 0.14 160 / 0.18)'],
-};
-document.querySelectorAll('#tc .tw-btn').forEach(b => b.addEventListener('click', () => {
-  document.querySelectorAll('#tc .tw-btn').forEach(x => x.classList.remove('sel'));
-  b.classList.add('sel');
-  const [a,d,r,g] = palettes[b.dataset.c];
-  root.style.setProperty('--a', a);
-  root.style.setProperty('--a-dim', d);
-  root.style.setProperty('--a-ring', r);
-  root.style.setProperty('--a-glow', g);
-}));
-
-const heroSubs = [
-  '不只是 AI 对话——PMW 有记忆、有流程，把每次工作变成积累。<br><strong>越用，越懂你的产品。</strong>',
-  '今天一句需求，明早带着三套方案走进会议室。<br><strong>有简报、有原型、有评审结论。</strong>',
-  '聊天 AI 会忘记你说过的一切——<br><strong>PMW 记住你的每个产品决策。</strong>',
-];
-document.querySelectorAll('#th .tw-btn').forEach(b => b.addEventListener('click', () => {
-  document.querySelectorAll('#th .tw-btn').forEach(x => x.classList.remove('sel'));
-  b.classList.add('sel');
-  document.querySelector('.hero-p').innerHTML = heroSubs[+b.dataset.h];
-}));
-
-const bgModes = {
-  warm: { '--bg':'#0e0c09', '--bg2':'#171310', '--bg3':'#201c18', '--bg4':'#2a2420', '--ink':'#f6ece0', '--ink2':'rgba(246,236,224,0.55)', '--ink3':'rgba(246,236,224,0.28)', '--wire':'rgba(255,235,210,0.07)', '--wire2':'rgba(255,235,210,0.12)' },
-  cool: { '--bg':'#0d0d10', '--bg2':'#161619', '--bg3':'#1f1f23', '--bg4':'#29292e', '--ink':'#f0edf6', '--ink2':'rgba(240,237,246,0.52)', '--ink3':'rgba(240,237,246,0.26)', '--wire':'rgba(220,215,255,0.07)', '--wire2':'rgba(220,215,255,0.12)' },
-};
-document.querySelectorAll('#tb .tw-btn').forEach(b => b.addEventListener('click', () => {
-  document.querySelectorAll('#tb .tw-btn').forEach(x => x.classList.remove('sel'));
-  b.classList.add('sel');
-  Object.entries(bgModes[b.dataset.b]).forEach(([k,v]) => root.style.setProperty(k,v));
-}));
-</script>
-
-<template id="__bundler_thumbnail" data-bg-color="#0e0c09">
+<template id="__bundler_thumbnail" data-bg-color="#0b0906">
   <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
-    <rect width="1200" height="800" fill="#0e0c09"/>
-    <circle cx="600" cy="350" r="380" fill="url(#bg)"/>
-    <defs>
-      <radialGradient id="bg" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#d97706" stop-opacity="0.08"/>
-        <stop offset="100%" stop-color="#d97706" stop-opacity="0"/>
-      </radialGradient>
-    </defs>
-    <rect x="340" y="255" width="520" height="56" rx="6" fill="#f6ece0" fill-opacity="0.82"/>
-    <rect x="380" y="325" width="440" height="56" rx="6" fill="#d97706" fill-opacity="0.9"/>
-    <rect x="430" y="396" width="340" height="20" rx="4" fill="#f6ece0" fill-opacity="0.2"/>
-    <rect x="456" y="426" width="288" height="20" rx="4" fill="#f6ece0" fill-opacity="0.13"/>
-    <rect x="440" y="474" width="136" height="42" rx="8" fill="#d97706"/>
-    <rect x="588" y="474" width="128" height="42" rx="8" fill="#201c18" stroke="#f6ece0" stroke-opacity="0.1" stroke-width="1"/>
+    <rect width="1200" height="800" fill="#0b0906"/>
+    <circle cx="600" cy="340" r="400" fill="url(#g)"/>
+    <defs><radialGradient id="g" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#d97706" stop-opacity="0.08"/><stop offset="100%" stop-color="#d97706" stop-opacity="0"/></radialGradient></defs>
+    <rect x="340" y="240" width="520" height="68" rx="6" fill="#f0e8d5" fill-opacity="0.82"/>
+    <rect x="380" y="322" width="440" height="68" rx="6" fill="#d97706" fill-opacity="0.88"/>
+    <rect x="430" y="406" width="340" height="22" rx="4" fill="#f0e8d5" fill-opacity="0.20"/>
+    <rect x="450" y="466" width="136" height="46" rx="8" fill="#d97706"/>
+    <rect x="600" y="466" width="128" height="46" rx="8" fill="#1c1712" stroke="#f0e8d5" stroke-opacity="0.1" stroke-width="1"/>
   </svg>
 </template>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ── LENIS ── */
+const lenis = new Lenis({ lerp: 0.075, smoothWheel: true, syncTouch: false });
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add(t => lenis.raf(t * 1000));
+gsap.ticker.lagSmoothing(0);
+
+/* ── NAV ── */
+ScrollTrigger.create({
+  start: 'top -80',
+  onUpdate: s => document.getElementById('nav').classList.toggle('solid', s.scroll() > 80)
+});
+
+/* ── CUSTOM CURSOR ── */
+(function () {
+  if (window.matchMedia('(pointer: coarse)').matches) return;
+  const dot = document.getElementById('c-dot');
+  const ring = document.getElementById('c-ring');
+  let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my;
+
+  window.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    gsap.to(dot, { x: mx, y: my, duration: 0.08, ease: 'none', overwrite: 'auto' });
+  });
+  gsap.ticker.add(() => {
+    rx += (mx - rx) * 0.11; ry += (my - ry) * 0.11;
+    gsap.set(ring, { x: rx, y: ry });
+  });
+
+  const links = document.querySelectorAll('a, button, .pain-card, .out-card, .mode-card');
+  const ctas  = document.querySelectorAll('.btn-fill, .nav-cta');
+  links.forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('c-link'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('c-link'));
+  });
+  ctas.forEach(el => {
+    el.addEventListener('mouseenter', () => { document.body.classList.remove('c-link'); document.body.classList.add('c-cta'); });
+    el.addEventListener('mouseleave', () => document.body.classList.remove('c-cta'));
+  });
+})();
+
+/* ── HERO ENTRANCE ── */
+gsap.set('.hli', { yPercent: 110 });
+gsap.set(['.hero-sub', '.hero-btns'], { y: 20 });
+gsap.set(['.hero-label', '.hero-sub', '.hero-btns', '.hero-flow', '.scroll-cue', '.hero-grid', '.hero-glow'], { opacity: 0 });
+
+window.addEventListener('load', () => {
+  const tl = gsap.timeline({ delay: 0.1 });
+  tl.to('.hero-grid', { opacity: 1, duration: 2, ease: 'power2.out' })
+    .to('.hero-glow',  { opacity: 1, duration: 2.5, ease: 'power2.out' }, '<')
+    .to('.hero-label', { opacity: 1, duration: 0.8, ease: 'power3.out' }, 0.25)
+    .to('.hli',        { yPercent: 0, duration: 1.15, ease: 'power4.out', stagger: 0.09 }, 0.48)
+    .to('.hero-sub',   { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }, 1.1)
+    .to('.hero-btns',  { opacity: 1, y: 0, duration: 0.85, ease: 'power3.out' }, 1.24)
+    .to('.hero-flow',  { opacity: 1, duration: 0.75, ease: 'power2.out' }, 1.38)
+    .to('.scroll-cue', { opacity: 1, duration: 0.7,  ease: 'power2.out' }, 1.55);
+});
+
+/* ── HERO PARALLAX ── */
+gsap.to('.hero-grid', {
+  yPercent: -22, ease: 'none',
+  scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true }
+});
+gsap.to('.hero-glow', {
+  yPercent: -35, ease: 'none',
+  scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true }
+});
+gsap.to('.hero-h1', {
+  yPercent: -12, ease: 'none',
+  scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true }
+});
+
+/* ── WATERMARK PARALLAX ── */
+document.querySelectorAll('[data-para]').forEach(el => {
+  const speed = parseFloat(el.dataset.para) || 0.25;
+  gsap.to(el, {
+    yPercent: -100 * speed, ease: 'none',
+    scrollTrigger: {
+      trigger: el.parentElement,
+      start: 'top bottom', end: 'bottom top', scrub: true
+    }
+  });
+});
+
+/* ── GENERIC FADE-UP ── */
+document.querySelectorAll('[data-anim]').forEach(el => {
+  gsap.from(el, {
+    y: 44, opacity: 0, duration: 0.95, ease: 'power3.out',
+    scrollTrigger: { trigger: el, start: 'top 88%', once: true }
+  });
+});
+
+/* ── STAGGER GROUPS ── */
+document.querySelectorAll('[data-anim-stagger]').forEach(parent => {
+  const sel = parent.dataset.animStagger;
+  gsap.from(parent.querySelectorAll(sel), {
+    y: 52, opacity: 0, scale: 0.97, duration: 0.85, ease: 'power3.out',
+    stagger: 0.07,
+    scrollTrigger: { trigger: parent, start: 'top 82%', once: true }
+  });
+});
+
+/* ── VS SLIDE IN ── */
+document.querySelectorAll('[data-slide]').forEach(el => {
+  const x = parseFloat(el.dataset.slide);
+  gsap.from(el, {
+    x, opacity: 0, duration: 1.05, ease: 'power3.out',
+    scrollTrigger: { trigger: el.parentElement, start: 'top 78%', once: true }
+  });
+});
+
+/* ── TIMELINE ── */
+ScrollTrigger.create({
+  trigger: '#timeline',
+  start: 'top 72%',
+  once: true,
+  onEnter: () => {
+    gsap.to('.tl-track', { scaleY: 1, opacity: 1, duration: 1.8, ease: 'power2.inOut' });
+    gsap.from('.tl-item', {
+      y: 32, opacity: 0, stagger: 0.16, duration: 0.85, ease: 'power3.out', delay: 0.15
+    });
+  }
+});
+
+const tlItems = document.querySelectorAll('.tl-item:not(.dim)');
+tlItems.forEach(item => {
+  item.addEventListener('mouseenter', () => {
+    tlItems.forEach(i => i.classList.remove('lit'));
+    item.classList.add('lit');
+  });
+  item.addEventListener('mouseleave', () => {
+    tlItems.forEach(i => i.classList.remove('lit'));
+    tlItems[0].classList.add('lit');
+  });
+});
+
+/* ── CTA ENTRANCE ── */
+gsap.from('#cta-box', {
+  y: 64, opacity: 0, scale: 0.96, duration: 1.1, ease: 'power3.out',
+  scrollTrigger: { trigger: '#cta-box', start: 'top 84%', once: true }
+});
+
+/* ── PAIN CARD SPOTLIGHT ── */
+document.querySelectorAll('.pain-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+    card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+  });
+});
+</script>
 </body>
 </html>

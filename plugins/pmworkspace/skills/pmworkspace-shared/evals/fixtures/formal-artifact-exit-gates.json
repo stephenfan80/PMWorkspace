@@ -1,0 +1,174 @@
+{
+  "id": "formal-artifact-exit-gates",
+  "title": "正式产物出口必须执行 PMW 守门",
+  "category": "runtime-gates",
+  "primary_skill": "pm-workspace",
+  "prompt": "维护者希望 PMWorkspace 不再依赖 Agent 自觉：假设不能当事实，泛化 decision 不能当方向性 D，未通过 readiness 不能写正式 prototype / handoff。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "正式产物出口守门",
+    "required_behaviors": [
+      "confidence=assumed 的 discovery 不计入已确认事实",
+      "泛化 decision 不计入方向性 D",
+      "未通过出图前 readiness 时，pmw-log prototype 阻断正式原型清单",
+      "未通过交付前 readiness 时，pmw-log handoff 阻断正式交付稿",
+      "草稿仍可用 --draft 保存，但不能伪装成正式下游产物",
+      "待确认 brief 不把下一技能指向 pm-prototype-shotgun 或 pm-handoff"
+    ],
+    "forbidden_behaviors": [
+      "用 assumed 补齐产品发现门槛",
+      "用普通 decision 代替 D 拍板",
+      "绕过 readiness 直接登记 prototype_manifest 或 handoff 正式产物"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-discovery-gate",
+      "contains": "confidence == \"confirmed\""
+    },
+    {
+      "path": "bin/pmw-discovery-gate",
+      "contains": "looks_like_directional_decision"
+    },
+    {
+      "path": "bin/pmw-log",
+      "contains": "require_readiness prototype \"可出图\""
+    },
+    {
+      "path": "bin/pmw-log",
+      "contains": "require_readiness handoff \"可交付\""
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "render_readiness_json"
+    },
+    {
+      "path": "bin/pmw-artifact",
+      "contains": "validate_formal_artifact_gate"
+    },
+    {
+      "path": "bin/pmw-artifact",
+      "contains": "run_has_brief_confirmation"
+    },
+    {
+      "path": "bin/pmw-artifact",
+      "contains": "validate_nonformal_next_skill"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=assumed-gate; root=\"$PMW_HOME/projects/$PMW_PROJECT_SLUG\"; mkdir -p \"$root/runs\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\"}\\n' > \"$root/project.json\"; for dim in product_role target_trigger current_alternative pain_loss goal_countermetric; do bin/pmw-log discovery --dimension \"$dim\" --source 对话 --summary \"用户已确认 $dim 的具体事实\" --confidence assumed >/dev/null; done; bin/pmw-log question D1 产品定位 推荐A A 用户选择A >/dev/null; bin/pmw-log question D2 价值交换 推荐B B 用户选择B >/dev/null; set +e; out=$(bin/pmw-discovery-gate check --target brief --json 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
+      ],
+      "exit_code": 2,
+      "contains": [
+        "\"passed\": false",
+        "\"covered_dimensions\": {}"
+      ]
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=generic-decision; root=\"$PMW_HOME/projects/$PMW_PROJECT_SLUG\"; mkdir -p \"$root/runs\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\"}\\n' > \"$root/project.json\"; for dim in product_role target_trigger current_alternative pain_loss goal_countermetric; do bin/pmw-log discovery --dimension \"$dim\" --source 对话 --summary \"用户已确认 $dim 的具体事实\" --confidence confirmed >/dev/null; done; bin/pmw-log decision \"门槛结果\" \"已确认可以继续\" >/dev/null; set +e; out=$(bin/pmw-discovery-gate check --target brief --json 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
+      ],
+      "exit_code": 2,
+      "contains": [
+        "\"directional_decisions_count\": 0",
+        "方向性 D 不足"
+      ]
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=proto-gate; set +e; out=$(printf '{\"scheme\":\"A\"}\\n' | bin/pmw-log prototype 测试 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
+      ],
+      "exit_code": 2,
+      "contains": "READINESS_GATE_BLOCKED"
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=handoff-gate; set +e; out=$(printf '# 交付稿\\n' | bin/pmw-log handoff 测试 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
+      ],
+      "exit_code": 2,
+      "contains": "READINESS_GATE_BLOCKED"
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=artifact-proto-gate; set +e; out=$(bin/pmw-artifact add --kind prototype_manifest --title 测试 --status 已保存 --source-skill pm-prototype-shotgun 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
+      ],
+      "exit_code": 1,
+      "contains": "ARTIFACT_GATE_BLOCKED"
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=artifact-handoff-gate; set +e; out=$(bin/pmw-artifact add --kind handoff --title 测试 --status 已保存 --source-skill pm-handoff 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
+      ],
+      "exit_code": 1,
+      "contains": "ARTIFACT_GATE_BLOCKED"
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=artifact-brief-gate; set +e; out=$(bin/pmw-artifact add --kind product_brief --title 测试 --status 已对齐 --source-skill pm-brief 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
+      ],
+      "exit_code": 1,
+      "contains": "ARTIFACT_GATE_BLOCKED"
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=artifact-brief-no-confirm; root=\"$PMW_HOME/projects/$PMW_PROJECT_SLUG\"; mkdir -p \"$root/runs\" \"$root/briefs\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\"}\\n' > \"$root/project.json\"; for dim in product_role target_trigger current_alternative pain_loss goal_countermetric; do bin/pmw-log discovery --dimension \"$dim\" --source 用户 --summary \"已确认 $dim 的具体事实\" --confidence confirmed >/dev/null; done; bin/pmw-log question D1 首屏策略 推荐A A 用户选择A >/dev/null; bin/pmw-log question D2 承诺边界 推荐B B 用户选择B >/dev/null; brief=\"$root/briefs/current.md\"; printf '# 产品简报\\n确认状态：已对齐\\n\\n## 核心价值判断\\n- 产品定位：帮助用户决策。\\n- 目标用户：高意向用户。\\n- 当前替代：比价或放弃。\\n- 真实痛点：信任不足。\\n- 主目标：提升转化；反指标：不增加骚扰。\\n' > \"$brief\"; set +e; out=$(bin/pmw-artifact add --kind product_brief --title 测试 --status 已对齐 --source-skill pm-brief --path \"$brief\" --next-skill pm-prototype-shotgun,pm-handoff 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
+      ],
+      "exit_code": 1,
+      "contains": "未记录产品简报确认"
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=nonformal-next-skill; set +e; out=$(bin/pmw-artifact add --kind product_brief --title 测试 --status 待确认 --source-skill pm-brief --next-skill pm-prototype-shotgun,pm-handoff 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
+      ],
+      "exit_code": 1,
+      "contains": "非正式产物不能指向正式下游"
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=draft-still-works; printf '{\"scheme\":\"A\"}\\n' | bin/pmw-log prototype 测试 --draft >/dev/null; bin/pmw-artifact latest --kind prototype_manifest; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0,
+      "contains": "待确认草稿"
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=pending-brief-next; printf '# 产品简报\\n确认状态：待确认\\n\\n## PM 判断摘要\\n- 真实问题待确认。\\n' | bin/pmw-log brief 测试 >/dev/null; bin/pmw-artifact latest --kind product_brief; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0,
+      "contains": [
+        "\"status\": \"待确认\"",
+        "\"pm-brief\""
+      ],
+      "not_contains": [
+        "pm-prototype-shotgun",
+        "pm-handoff"
+      ]
+    }
+  ]
+}

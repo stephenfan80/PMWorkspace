@@ -172,22 +172,23 @@ BASELINE_IA_ADVICE = (
     "用基线拆出当前入口、信息密度、必须保留项、可改项和竞品不可照搬边界，再决定首屏结构。"
 )
 
-DIRECTIONAL_DECISION_KEYWORDS = [
-    "D",
-    "拍板",
-    "取舍",
-    "选择",
-    "定位",
-    "范围",
-    "价值交换",
-    "信任承诺",
-    "数据承诺",
-    "转化动作",
-]
-
 PLACEHOLDER_TOKENS = ["待补充", "未提供", "未确认", "不清楚", "TBD", "TODO", "暂无", "待定"]
 CONFIRMED_TOKENS = ["已确认", "已同意", "已选择", "用户确认", "用户同意", "选择", "选了", "批准"]
 NEGATIVE_TOKENS = ["待确认", "未确认", "需要确认", "不同意", "未选择", "待拍板", "需要 PM 拍板"]
+GAP_COVERAGE_TOKENS = [
+    "产品发现深度不足",
+    "尚未完成",
+    "未完成",
+    "未覆盖",
+    "缺失门槛",
+    "当前主阻断",
+    "关键缺口",
+    "产品作业队列",
+    "需要补齐",
+    "需要补充",
+    "待补充",
+]
+DIMENSION_TEXT_SOURCES = {"候选产品简报", "最新产品简报"}
 
 
 def now() -> str:
@@ -264,6 +265,26 @@ def useful_text(value: str) -> bool:
     return not any(token.lower() in cleaned.lower() for token in PLACEHOLDER_TOKENS)
 
 
+def declares_gap_for_dimension(text: str, dimension: str) -> bool:
+    if not text:
+        return False
+    spec = DIMENSIONS[dimension]
+    label = spec["label"]
+    anchors = [label, *spec["section_keywords"]]
+    segments = [segment for segment in re.split(r"[\n。；;]", text) if segment.strip()]
+    if any(contains_any(segment, GAP_COVERAGE_TOKENS) and contains_any(segment, anchors) for segment in segments):
+        return True
+    negative_prefixes = ["缺少", "缺失", "未提供", "未确认", "待确认", "未补齐"]
+    for segment in segments:
+        for anchor in anchors:
+            if not anchor:
+                continue
+            pattern = rf"({'|'.join(map(re.escape, negative_prefixes))}).{{0,12}}{re.escape(anchor)}|{re.escape(anchor)}.{{0,12}}({'|'.join(map(re.escape, negative_prefixes))})"
+            if re.search(pattern, segment):
+                return True
+    return False
+
+
 def section_has_content(text: str, section_keywords: list[str]) -> bool:
     lines = text.splitlines()
     for index, line in enumerate(lines):
@@ -287,6 +308,8 @@ def section_has_content(text: str, section_keywords: list[str]) -> bool:
 
 def text_covers_dimension(text: str, dimension: str) -> bool:
     spec = DIMENSIONS[dimension]
+    if declares_gap_for_dimension(text, dimension):
+        return False
     if section_has_content(text, spec["section_keywords"]):
         return True
     if not useful_text(text):
@@ -436,7 +459,7 @@ def explicit_discovery_dimensions(run_id: str) -> dict[str, list[str]]:
             continue
         dimension = str(row.get("dimension") or "")
         confidence = str(row.get("confidence") or "")
-        if dimension in covered and confidence != "rejected" and useful_text(str(row.get("summary") or "")):
+        if dimension in covered and confidence == "confirmed" and useful_text(str(row.get("summary") or "")):
             covered[dimension].append(str(row.get("source") or "discovery ledger"))
     return covered
 
@@ -444,6 +467,8 @@ def explicit_discovery_dimensions(run_id: str) -> dict[str, list[str]]:
 def covered_dimensions(args: argparse.Namespace, run_id: str) -> dict[str, list[str]]:
     covered = explicit_discovery_dimensions(run_id)
     for source, text in collect_evidence_texts(args, run_id):
+        if source not in DIMENSION_TEXT_SOURCES:
+            continue
         for dimension in DIMENSIONS:
             if covered[dimension]:
                 continue
@@ -467,7 +492,37 @@ def event_is_confirmed(row: dict) -> bool:
         return False
     if any(token in text for token in CONFIRMED_TOKENS):
         return True
-    return row.get("event") == "decision" and useful_text(str(row.get("summary") or row.get("body") or ""))
+    if row.get("event") == "decision":
+        return useful_text(str(row.get("summary") or row.get("body") or ""))
+    return "body" in row and useful_text(str(row.get("body") or ""))
+
+
+def looks_like_directional_decision(row: dict) -> bool:
+    question_id = str(row.get("question_id") or "").strip()
+    if question_id.upper().startswith("D"):
+        return True
+    title = str(row.get("title") or "").strip()
+    summary = str(row.get("summary") or row.get("body") or "").strip()
+    text = f"{title} {summary}"
+    if re.search(r"(^|[\s#：:|`>*_\-])D\d*([\s#：:|`>*_\-]|$)", title, flags=re.I):
+        return True
+    return contains_any(
+        text,
+        [
+            "方向性 D",
+            "D 豁免原因",
+            "D豁免原因",
+            "PM 拍板",
+            "PM拍板",
+            "拍板",
+            "取舍",
+            "方案方向确认",
+            "范围确认",
+            "承诺确认",
+            "价值交换确认",
+            "实验口径确认",
+        ],
+    )
 
 
 def count_directional_decisions(run_id: str) -> tuple[int, bool]:
@@ -483,14 +538,9 @@ def count_directional_decisions(run_id: str) -> tuple[int, bool]:
         text = " ".join(str(row.get(key) or "") for key in sorted(row))
         if "D 豁免原因" in text or "D豁免原因" in text:
             exemption = True
-        question_id = str(row.get("question_id") or "")
-        looks_directional = (
-            question_id.upper().startswith("D")
-            or row.get("event") == "decision"
-            or any(keyword in text for keyword in DIRECTIONAL_DECISION_KEYWORDS)
-        )
-        if not looks_directional or not event_is_confirmed(row):
+        if not looks_like_directional_decision(row) or not event_is_confirmed(row):
             continue
+        question_id = str(row.get("question_id") or "")
         fingerprint = f"{row.get('title') or question_id}:{row.get('summary') or row.get('body') or row.get('user_choice')}"
         if fingerprint in seen:
             continue

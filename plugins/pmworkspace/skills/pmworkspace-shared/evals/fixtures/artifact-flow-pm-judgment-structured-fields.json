@@ -52,7 +52,7 @@
       "command": [
         "bash",
         "-lc",
-        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=handoff-structured; printf '# 产品设计文档\\n\\n## 产品判断演进\\n- 保留：假设A，因为证据更强。\\n\\n## 下一步产品作业\\n- 拉一段漏斗数据。\\n' | bin/pmw-log handoff 设计文档 --artifact-kind product_design_doc >/dev/null; bin/pmw-artifact latest --kind product_design_doc | grep -q '假设A' && bin/pmw-artifact latest --kind product_design_doc | grep -q '拉一段漏斗数据'; rm -rf \"$tmp\""
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=handoff-structured; printf '# 产品设计文档\\n\\n## 产品判断演进\\n- 保留：假设A，因为证据更强。\\n\\n## 下一步产品作业\\n- 拉一段漏斗数据。\\n' | bin/pmw-log handoff 设计文档 --artifact-kind product_design_doc --draft >/dev/null; bin/pmw-artifact latest --kind product_design_doc | grep -q '假设A' && bin/pmw-artifact latest --kind product_design_doc | grep -q '拉一段漏斗数据'; rm -rf \"$tmp\""
       ],
       "exit_code": 0
     }

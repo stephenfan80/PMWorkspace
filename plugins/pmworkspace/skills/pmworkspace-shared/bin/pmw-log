@@ -98,9 +98,45 @@ with open(sys.argv[1], encoding="utf-8") as handle:
             continue
         if ("产品简报确认" in title or "前提确认" in title) and confirmed(row):
             ok = True
-print("yes" if ok else "no")
 sys.exit(0 if ok else 1)
 PY
+}
+
+require_readiness() {
+  local target="$1"
+  local expected="$2"
+  if [ ! -x "$SCRIPT_DIR/pmw-dashboard" ]; then
+    echo "READINESS_DASHBOARD_UNAVAILABLE: 缺少 pmw-dashboard，不能写入正式 ${target} 产物。" >&2
+    return 2
+  fi
+  local report
+  report="$(mktemp "${TMPDIR:-/tmp}/pmw-readiness.XXXXXX")"
+  if ! "$SCRIPT_DIR/pmw-dashboard" readiness --target "$target" --json >"$report" 2>&1; then
+    echo "READINESS_DASHBOARD_FAILED: 产品准备度检查运行失败，不能写入正式 ${target} 产物。" >&2
+    cat "$report" >&2
+    rm -f "$report" 2>/dev/null || true
+    return 2
+  fi
+  if ! python3 - "$report" "$expected" <<'PY'
+import json
+import sys
+
+path, expected = sys.argv[1], sys.argv[2]
+try:
+    data = json.load(open(path, encoding="utf-8"))
+except Exception:
+    sys.exit(1)
+ready = bool(data.get("ready")) and str(data.get("verdict_cn") or "") == expected
+sys.exit(0 if ready else 1)
+PY
+  then
+    echo "READINESS_GATE_BLOCKED: 产品准备度未达到「${expected}」，不能写入正式 ${target} 产物。若只是过程记录，请使用 --draft 保存草稿。" >&2
+    "$SCRIPT_DIR/pmw-dashboard" readiness --target "$target" >&2 || true
+    rm -f "$report" 2>/dev/null || true
+    return 2
+  fi
+  rm -f "$report" 2>/dev/null || true
+  return 0
 }
 
 extract_md_section() {
@@ -298,18 +334,27 @@ case "$EVENT" in
         ;;
     esac
     if [ -x "$SCRIPT_DIR/pmw-artifact" ]; then
+      if [ "$brief_aligned" = "true" ]; then
+        artifact_status="已对齐"
+        artifact_next_skill="pm-prototype-shotgun,pm-handoff"
+        artifact_summary="业务简报版本：${brief_version}；业务简报已对齐并保存，审计副本已保存，Zoon 同步状态：${sync_status}"
+      else
+        artifact_status="待确认"
+        artifact_next_skill="pm-brief"
+        artifact_summary="业务简报版本：${brief_version}；业务简报待确认，仅作为草稿事实源，不能进入原型或交付，Zoon 同步状态：${sync_status}"
+      fi
       "$SCRIPT_DIR/pmw-artifact" add \
         --kind product_brief \
         --title "$name" \
-        --status "$sync_status" \
+        --status "$artifact_status" \
         --source-skill pm-brief \
         --path "$file" \
         --url "$zoon_url" \
-        --summary "业务简报版本：${brief_version}；业务简报已保存，审计副本已保存，Zoon 同步状态：${sync_status}" \
+        --summary "$artifact_summary" \
         --pm-judgment-summary "$pm_judgment_summary" \
         --product-homework "$product_homework" \
         --upstream "decision,question,strategy_review" \
-        --next-skill "pm-prototype-shotgun,pm-handoff" >/dev/null 2>&1 || true
+        --next-skill "$artifact_next_skill" >/dev/null 2>&1 || true
     fi
     rm -f "$input_file" "$business_file" 2>/dev/null || true
     trap - EXIT
@@ -388,30 +433,45 @@ case "$EVENT" in
     fi
     pm_judgment_summary=""
     product_homework=""
+    draft="false"
     while [ "$#" -gt 0 ]; do
       case "$1" in
+        --draft)
+          draft="true"; shift ;;
         --pm-judgment-summary)
           pm_judgment_summary="${2:-}"; shift 2 ;;
         --product-homework)
           product_homework="${2:-}"; shift 2 ;;
-        *)
+        *) 
           echo "unknown prototype option: $1" >&2; exit 1 ;;
       esac
     done
+    if [ "$draft" != "true" ]; then
+      require_readiness prototype "可出图" || exit 2
+    fi
     manifest="$PROJECT_DIR/prototypes/$(date -u +%Y%m%dT%H%M%SZ)-$(safe_fragment "$batch").jsonl"
     cat >> "$manifest"
     if [ -x "$SCRIPT_DIR/pmw-artifact" ]; then
+      if [ "$draft" = "true" ]; then
+        artifact_status="待确认草稿"
+        artifact_summary="原型草稿清单已保存；未通过出图前 readiness，不能作为下游正式原型复审依据"
+        artifact_next_skill="pm-prototype-shotgun"
+      else
+        artifact_status="已保存"
+        artifact_summary="原型清单已保存，可供原型复审读取"
+        artifact_next_skill="pm-prototype-review"
+      fi
       "$SCRIPT_DIR/pmw-artifact" add \
         --kind prototype_manifest \
         --title "$batch" \
-        --status "已保存" \
+        --status "$artifact_status" \
         --source-skill pm-prototype-shotgun \
         --path "$manifest" \
-        --summary "原型清单已保存，可供原型复审读取" \
+        --summary "$artifact_summary" \
         --pm-judgment-summary "$pm_judgment_summary" \
         --product-homework "$product_homework" \
         --upstream "product_brief,prototype_board" \
-        --next-skill "pm-prototype-review" >/dev/null 2>&1 || true
+        --next-skill "$artifact_next_skill" >/dev/null 2>&1 || true
     fi
     echo "$manifest"
     ;;
@@ -425,8 +485,11 @@ case "$EVENT" in
     artifact_kind="handoff"
     pm_judgment_summary=""
     product_homework=""
+    draft="false"
     while [ "$#" -gt 0 ]; do
       case "$1" in
+        --draft)
+          draft="true"; shift ;;
         --artifact-kind)
           artifact_kind="${2:-}"; shift 2 ;;
         --pm-judgment-summary)
@@ -441,6 +504,9 @@ case "$EVENT" in
       handoff|product_design_doc) ;;
       *) echo "artifact kind must be handoff or product_design_doc" >&2; exit 1 ;;
     esac
+    if [ "$draft" != "true" ]; then
+      require_readiness handoff "可交付" || exit 2
+    fi
     file="$PROJECT_DIR/handoffs/$(date -u +%Y%m%dT%H%M%SZ)-$(safe_fragment "$name").md"
     cat > "$file"
     if [ -z "$pm_judgment_summary" ]; then
@@ -456,10 +522,16 @@ case "$EVENT" in
         next_skill="pm-handoff,document-release"
         summary="产品设计文档已保存，可供后续评审、研发交付或继续迭代读取"
       fi
+      status="已保存"
+      if [ "$draft" = "true" ]; then
+        next_skill="pm-handoff"
+        status="待确认草稿"
+        summary="交付草稿已保存；未通过交付前 readiness，不能作为下游正式交付依据"
+      fi
       "$SCRIPT_DIR/pmw-artifact" add \
         --kind "$artifact_kind" \
         --title "$name" \
-        --status "已保存" \
+        --status "$status" \
         --source-skill pm-handoff \
         --path "$file" \
         --summary "$summary" \

@@ -1,0 +1,79 @@
+{
+  "id": "discovery-gate-negative-gap-text-not-evidence",
+  "title": "Discovery gate 不得把缺口描述当作已覆盖事实",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-jobs",
+  "prompt": "运行审计里记录了“已确认北极星，但尚未完成产品定位、目标用户、当前替代、真实损失和反指标”，PMW 需要判断这是否覆盖产品发现维度。",
+  "expected": {
+    "mode": "deep",
+    "status": "需要补充",
+    "must_stop": true,
+    "gate": "产品发现深度不足",
+    "required_behaviors": [
+      "缺口描述不得计入 covered_dimensions",
+      "普通 gate 事件不得计入方向性 D",
+      "继续输出完整产品作业队列"
+    ],
+    "forbidden_behaviors": [
+      "把尚未完成的维度标记为已覆盖",
+      "把已确认北极星误算为方向性 D",
+      "把下一步推进到产品简报或原型"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-discovery-gate",
+      "contains": "DIMENSION_TEXT_SOURCES"
+    },
+    {
+      "path": "bin/pmw-discovery-gate",
+      "contains": "declares_gap_for_dimension"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-discovery-gate.md",
+      "contains": "缺口、阻断、纠偏或产品作业描述不能反向充当事实证据"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "普通 run gate 事件不能靠“产品定位 / 目标用户 / 反指标”等词命中来覆盖维度"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=negative-gap-text-test; root=\"$PMW_HOME/projects/$PMW_PROJECT_SLUG\"; mkdir -p \"$root/runs\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\"}\\n' > \"$root/project.json\"; printf '{\"event\":\"gate\",\"run_id\":\"r1\",\"status\":\"blocked\",\"title\":\"流程纠偏：产品发现深度不足\",\"summary\":\"已确认北极星，但尚未完成产品定位与链路角色、目标用户与触发时刻、用户现状与当前替代、真实痛点与当前损失、主目标与反指标；停止直接出方案。\"}\\n' > \"$root/runs/r1.jsonl\"; out=$(bin/pmw-discovery-gate check --target alignment --json 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
+      ],
+      "exit_code": 2,
+      "contains": [
+        "\"covered_dimensions\": {}",
+        "\"directional_decisions_count\": 0",
+        "产品定位与链路角色",
+        "目标用户与触发场景",
+        "用户现状与当前替代",
+        "真实痛点与当前损失",
+        "主目标与反指标"
+      ],
+      "not_contains": [
+        "\"directional_decisions_count\": 1"
+      ]
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=brief-gap-word-test; root=\"$PMW_HOME/projects/$PMW_PROJECT_SLUG\"; mkdir -p \"$root/runs\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\"}\\n' > \"$root/project.json\"; brief=\"$tmp/brief.md\"; printf '# 产品简报：测试\\n确认状态：待确认\\n\\n## 产品作业卡\\n- 当前主阻断：无。\\n\\n## 产品定位\\n该能力负责建立信任并承接转化，不负责最终成交。\\n\\n## 目标用户\\n准备联系门店的新能源购车用户，在车型决策后触发。\\n\\n## 当前替代\\n用户今天会自行比价、咨询或放弃。\\n\\n## 真实痛点\\n当前损失是信任损耗、时间成本和转化流失。\\n\\n## 主目标\\n主目标提升有效联系，反指标是不牺牲信息可信度。\\n' > \"$brief\"; bin/pmw-discovery-gate check --target prototype --brief \"$brief\" --json; code=$?; rm -rf \"$tmp\"; exit $code"
+      ],
+      "exit_code": 0,
+      "contains": [
+        "\"passed\": true",
+        "\"product_role\"",
+        "\"target_trigger\"",
+        "\"current_alternative\"",
+        "\"pain_loss\"",
+        "\"goal_countermetric\""
+      ]
+    }
+  ]
+}

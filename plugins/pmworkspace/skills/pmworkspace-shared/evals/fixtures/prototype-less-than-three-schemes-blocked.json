@@ -1,0 +1,51 @@
+{
+  "id": "prototype-less-than-three-schemes-blocked",
+  "title": "少于 3 个方案且无当前豁免时不可出图",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "单图或少于三条产品路径的原型计划，除非当前 run 明确确认豁免原因，否则不能写 image-2 prompt。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "不可出图",
+    "must_stop": true,
+    "gate": "三条方案数量检查",
+    "required_behaviors": [
+      "image preflight 检查当前输出单元数量",
+      "少于 3 个方案需要当前 run 的明确豁免事件",
+      "dashboard 也显示少于 3 个方案且无豁免"
+    ],
+    "forbidden_behaviors": [
+      "默认单图直接出图",
+      "用旧豁免确认新任务",
+      "把一个方案换配色当三方案"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-image-preflight",
+      "contains": "默认最少 3 个方案"
+    },
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "少于 3 个方案且无豁免"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "旧 prototype-board"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=one-scheme; python3 - <<'PY'\nimport json, os, pathlib\nroot=pathlib.Path(os.environ['PMW_HOME'])/'projects'/os.environ['PMW_PROJECT_SLUG']; (root/'runs').mkdir(parents=True)\nproj={'slug':os.environ['PMW_PROJECT_SLUG'],'current_run_id':'run1','latest_run_id':'run1','latest_run_status':'已开始','current_task_digest':'digest','current_input_revision':'rev'}\n(root/'project.json').write_text(json.dumps(proj, ensure_ascii=False), encoding='utf-8')\n(root/'runs'/'run1.jsonl').write_text('', encoding='utf-8')\n(root/'prototype-board.jsonl').write_text(json.dumps({'record_type':'item','run_id':'run1','scheme':'A','screen':'首屏','task_digest':'digest','input_revision':'rev'}, ensure_ascii=False)+'\\n', encoding='utf-8')\nPY\nbin/pmw-image-preflight check --json"
+      ],
+      "exit_code": 2,
+      "contains": [
+        "\"output_units\": 1",
+        "默认最少 3 个方案；少于 3 个必须有当前 run 的明确豁免原因"
+      ]
+    }
+  ]
+}

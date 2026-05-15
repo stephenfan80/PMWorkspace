@@ -2,6 +2,8 @@
 
 PMWorkspace 产物流动层让每一步产物都能被下游技能读取，而不是只存在于对话里。产品简述 / 产品简报、原型清单、复审结论、最终产品设计文档和交付稿必须登记为下游可读产物。浏览器证据也以 `browser_evidence` 产物进入同一条 Product Artifact Flow。浏览器证据和视觉基线也进入同一条 Product Artifact Flow：`browser_evidence` 说明线上参考在哪里，`visual_baseline` 说明参考图如何转成可执行的尺寸、字号、间距和密度约束。
 
+所有正式 artifact 必须绑定 controller 当前任务：`run_id`、`task_digest`、`input_revision` 和 `controller_verdict`。旧 artifact 可以继续读取为背景材料，但只要不匹配当前任务，就只能显示 `可参考，不可放行`，不能进入出图、复审或交付。
+
 ## 目标
 
 - 把 `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` 的输出串成一条可追溯链路。
@@ -48,7 +50,7 @@ pmw-dashboard status --details
 
 `visual_baseline` 的最小摘要包含：参考图路径、参考像素尺寸、逻辑宽度推断、目标输出像素、核心字号层级、页面边距、模块间距、底部栏高度、参考优先级和不可压缩项。有线上截图时，视觉基线优先级高于泛化 AutoDesign token；缺视觉基线时，现有功能迭代不能写 image-2 prompt。
 
-正式产物登记也有脚本守门：`product_brief` 声明 `已对齐` 时必须通过产品发现门槛；`prototype_manifest`、`product_design_doc` 和 `handoff` 必须通过对应 readiness。过程记录可以保存为 `待确认` / `草稿`，但不能伪装成下游可继续的正式产物。
+正式产物登记也有脚本守门：`product_brief` 声明 `已对齐` 时必须通过产品发现门槛并匹配当前 `input_revision` 的确认；`prototype_manifest`、`product_design_doc` 和 `handoff` 必须通过 controller preflight 与对应 readiness。过程记录可以保存为 `待确认` / `草稿`，但不能伪装成下游可继续的正式产物。
 
 设计启发不新增 artifact 类型：Dribbble、Pinterest、公开参考页、平台模式或用户自有截图的启发统一登记为 `browser_evidence`，摘要必须写清 `设计启发`、可复用模式、不可照搬项和版权边界。它只能帮助确定设计规范目标和 prompt 约束，不能覆盖产品简报、线上截图、反指标或不可虚构项。
 

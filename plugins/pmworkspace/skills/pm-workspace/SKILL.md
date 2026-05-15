@@ -30,6 +30,7 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 
 - `_PMW_BIN`
 - `pmw-update-check`
+- `pmw-controller`
 - `usage`
 - `usage pm-workspace`
 - `pmw-artifact`
@@ -46,7 +47,10 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 
 - 真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。
 - 快速更新：每个 skill 运行前用 `pmw-update-check --quick`；如果输出 `UPGRADE_AVAILABLE`，先询问用户是否执行 `UPGRADE_COMMAND`，除非 `auto_upgrade` 为 `true`。
-- 摘要：中文本地化、复用 `current_run_id`、记忆不覆盖本轮事实、等待 Q/D/证据/确认时停住、禁止泄露 token/ownerSecret/私密资料。
+- 运行时入口：每个 PMW 产品任务先过 `pmw-controller intake`，由 controller 判定是否继承或新建 run，并写入 `task_digest` / `input_revision`。
+- STOP gate：`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能进入下游产物。
+- 当前任务绑定：brief、visual baseline、prototype-board、review、handoff 和用户确认必须匹配当前 run、`task_digest` 与 `input_revision`；旧产物只能参考，不能放行。
+- 摘要：中文本地化、记忆不覆盖本轮事实、出图前必须通过 prototype preflight、禁止泄露 token/ownerSecret/私密资料。
 
 ### 默认用户可见输出字段
 
@@ -114,6 +118,7 @@ if [ -n "$_PMW_BIN" ]; then
   _UPD=$("$_PMW_BIN/pmw-update-check" --quick 2>/dev/null || true)
   [ -n "$_UPD" ] && echo "$_UPD"
   "$_PMW_BIN/pmw-log" usage pm-workspace >/dev/null 2>&1 || true
+  [ -x "$_PMW_BIN/pmw-controller" ] && "$_PMW_BIN/pmw-controller" next --json 2>/dev/null || true
   [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
   [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" flow 2>/dev/null || true
 fi
@@ -121,13 +126,20 @@ fi
 
 If output contains `UPGRADE_AVAILABLE old new`, tell the user PMWorkspace has an update. If output also contains `UPGRADE_COMMAND <command>`, offer that exact command; otherwise offer `pmw-upgrade --host codex`. If `auto_upgrade` is `true`, upgrade automatically with the detected command and say what changed only after upgrade succeeds.
 
-After D0 and routing choose 快速成型模式 or 深度交付模式, `$pm-workspace` creates the runtime run for routed sessions when scripts are available:
+After D0 and routing choose 产品路径 and 快速成型 / 深度交付模式, `$pm-workspace` must hand control to the runtime controller. Do not call `pmw-run start` directly for a product task; the controller decides whether the active project/run can be inherited or whether the new user materials require a new run / revision:
 
 ```bash
-"$_PMW_BIN/pmw-run" start --skill pm-workspace --mode <quick|deep> --goal "<本轮产品目标>"
+"$_PMW_BIN/pmw-controller" intake \
+  --goal "<本轮产品目标>" \
+  --materials "<本轮用户材料摘要>" \
+  --skill pm-workspace \
+  --product-path "<全新功能|已有功能迭代>" \
+  --depth "<quick|deep>" \
+  --stage intake
+"$_PMW_BIN/pmw-controller" next --json
 ```
 
-Use `pmw-run event` for the D0 result, current gate, evidence state, and next skill. If a child skill continues the workflow, do not finish the run in `$pm-workspace`; the child skill must reuse `current_run_id` and finish only at a terminal readiness state. If scripts are unavailable, mark `运行审计：未启用`.
+If `pmw-controller next` returns `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` or `BLOCKED`, stop at that gate and show the work mode card plus the first needed confirmation/evidence. Use `pmw-run event` only after controller intake has stamped the run with the current `task_digest` and `input_revision`. If a child skill continues the workflow, do not finish the run in `$pm-workspace`; the child skill must reuse the current controller run/revision and finish only at a terminal readiness state. If scripts are unavailable, mark `运行审计：未启用`.
 
 ## Routing Source
 

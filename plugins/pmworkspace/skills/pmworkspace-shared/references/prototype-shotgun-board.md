@@ -9,6 +9,7 @@ Prototype Shotgun Board 用来比较多方案，但比较对象首先是产品�
 生成或计划生成每个图片单元前，平台脚本可用时登记：
 
 ```bash
+pmw-controller preflight --target prototype --json
 pmw-prototype-board add \
   --scheme "<方案名>" \
   --screen "<屏幕任务>" \
@@ -48,6 +49,8 @@ pmw-prototype-board add \
 	  --status "计划生成"
 ```
 
+脚本会把当前 controller 的 `run_id`、`task_digest`、`input_revision` 和 `controller_verdict` 写入 board item。没有当前 controller run，或 board item 只匹配旧任务时，该输出单元只能作为参考方案，不能进入 image-2 prompt、复审或交付。
+
 `--product-path`、`--behavior-assumption`、`--current-loss` 和 `--tradeoff` 是新写入记录的必填字段；这里的 product path 记录产品路径判断。旧记录缺字段时继续可读，但新输出单元缺任一字段都不能登记为已写入。
 
 设计完整度字段第一阶段为可选字段，旧记录缺失时展示为 `未记录`。但 `$pm-prototype-shotgun` 的新输出必须写入 `--design-score`、`--design-gap`、`--ten-out-of-ten-standard`、`--prompt-design-fix`、`--anti-ai-slop-constraints`、`--state-coverage` 和 `--first-second-third-hierarchy`；否则只能标记 `方案比较板：设计完整度未写入`，不能声称已完成设计完整度判断。
@@ -61,6 +64,7 @@ pmw-prototype-board add \
 生成后把图片路径或 URL 补写到同一个方案/屏幕单元：
 
 ```bash
+pmw-image-preflight check --json
 pmw-prototype-board image \
   --scheme "<方案名>" \
   --screen "<屏幕任务>" \
@@ -69,6 +73,8 @@ pmw-prototype-board image \
 ```
 
 如果当前 run 有 `visual_baseline` 且输出单元是 `physical_longboard`，`pmw-prototype-board image` 会自动调用 `pmw-image-audit`。审计失败时图片状态必须写成 `需要重出`，命令返回非 0；助手不能把这张图展示为交付结果。
+
+`pmw-prototype-board image` 必须绑定回同一个当前 run / 当前 `task_digest` / 当前 `input_revision` 的输出单元。若没有 `ALLOW_IMAGE_PROMPT` preflight，或当前任务没有匹配输出单元，图片标为 `对话附件，不是 PMW 原型产物`：不能写入 prototype_manifest，不能进入 `$pm-prototype-review`，也不能被 `$pm-handoff` 当作交付依据。
 
 用户反馈后记录评分：
 
@@ -106,5 +112,5 @@ pmw-prototype-board list
 - 每个 board item 应能追溯到设计规范目标：用户提供、AutoDesign、平台模式库或 PMW 默认假设；平台模式和灵感来源不得替代产品路径差异。
 - 每个 board item 在有线上截图视觉基线时，必须能追溯到 `canvas_mode=physical_longboard`、`target_output_pixels`、`generation_mode`、`base_image`、`edit_scope` 和 `preserve_regions`。
 - 每个 board item 必须保留独立状态：`计划生成`、`已生成`、`生成失败`、`待重试` 或 `需要重出`；批量成功不能掩盖单张失败。
-- 已登记的 board item 必须绑定当前 latest brief 的 `brief_path` 和 `brief_version`；旧版本 brief 的输出单元必须重新登记，不能靠当前 run 里的旧方案确认放行。
+- 已登记的 board item 必须绑定当前 run、`task_digest`、`input_revision`、latest brief 的 `brief_path` 和 `brief_version`；旧版本 brief 或旧任务 revision 的输出单元必须重新登记，不能靠旧方案确认放行。
 - 如果 `pmw-prototype-board add` 或 `pmw-prototype-board image` 不可用，原型计划必须写明 `方案比较板：未写入（原因）`，不能假装已经记录。

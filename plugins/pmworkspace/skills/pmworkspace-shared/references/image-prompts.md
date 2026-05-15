@@ -1,6 +1,6 @@
 # 图片提示词模板
 
-仅在产品简报已对齐、产品路径已确认后，才把这些模板用于 `imagegen` / 内置图像生成。`$pm-prototype-shotgun` 是 image-2 原型出图导演：每个提示词只对应一个屏幕，每张图只对应一个产品路径。
+仅在产品简报已对齐、产品路径已确认，并且当前任务通过 `pmw-controller preflight --target prototype` 与 `pmw-image-preflight check` 后，才把这些模板用于 `imagegen` / 内置图像生成。`$pm-prototype-shotgun` 是 image-2 原型出图导演：每个提示词只对应一个屏幕，每张图只对应一个产品路径。
 
 ```text
 一次 image-2 调用 = 一张图 = 一个产品路径 + 一个屏幕任务
@@ -15,6 +15,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 `$pm-prototype-shotgun` 写图片提示词或调用 image-2 前，先建立原型方案控制器。控制器至少记录：
 
 - `产品简报来源`：已对齐产品简报版本、Zoon URL / 快照状态、最新漂移检查结论。
+- `Controller Preflight`：用 `pmw-controller preflight --target prototype --json` 确认当前 run / `task_digest` / `input_revision` 可进入出图准备；返回 STOP gate 时停止。
 - `Product Readiness Dashboard`：用 `pmw-dashboard readiness --target prototype` 统一检查产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态；verdict 不是 `可出图` 时停止。默认只展示短 verdict 和第一阻断原因，完整表格只在审计 / 调试时展开。
 - `图片生成前门槛`：产品简报已对齐、Zoon 无实质漂移、线上参考门槛通过、设计系统已载入、image-2 可用。
 - `视觉基线`：当用户提供线上截图或生产视觉参考时，必须登记 `visual_baseline`，记录参考图路径、像素尺寸、逻辑宽度推断、目标输出像素、核心字号层级、页面边距、模块间距、底部栏高度和参考优先级。
@@ -25,7 +26,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - `原型设计完整度`：每条产品路径在写 image-2 prompt 前必须给出 0-10 评分、为什么是这个分数、距离 10/10 的最大设计差距、10/10 原型标准、本轮 prompt 如何补齐、反 AI 模板味约束、状态覆盖策略和第一眼 / 第二眼 / 第三眼信息层级。快速成型可以低分继续，但必须标记 `基于假设，可讨论`，不能包装成设计已完成。
 - `设计规范目标`：每个输出单元必须声明目标来自用户提供规范、AutoDesign、平台模式库或 PMW 默认假设，并写清平台模式、灵感来源摘要、不可照搬项和版权边界。Dribbble / Pinterest / 平台参考只能转成抽象设计原则，不能复制图片、文案、品牌素材或专有 UI。
 - `方案方向确认`：用户已确认方向，或明确批准使用默认方向；未确认时只输出方向和取舍，不写图片提示词。
-- `输出单元清单`：把每个 `方案 + 屏幕任务` 拆成一张独立图片，并绑定主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统、image-2 状态和画布。
+- `输出单元清单`：把每个 `方案 + 屏幕任务` 拆成一张独立图片，并绑定当前 run、`task_digest`、`input_revision`、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统、image-2 状态和画布。
 - `方案比较板写入`：生成前用 `pmw-prototype-board add` 登记计划单元，生成后补充图片路径或 URL；脚本不可用时在输出中标记原因。
 - `生成后复审`：每批图片后运行 `prototype-quality-review.md`，实质问题交给 `$pm-prototype-review`。
 - `证据状态`：产品简报、Zoon、线上参考、设计系统、方案方向、输出单元、方案比较板和图片资产的状态。
@@ -56,6 +57,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - 如果新页面需要线上参考，用户已提供参考，或已明确确认没有线上参考并批准按概念稿推进。
 - 对话或 Zoon 中已有快速版、标准版或深度版产品简报。
 - 产品简报已通过用户确认、最新 Zoon 编辑确认，或明确批准假设而达到“已对齐”。
+- 产品简报、用户确认、visual_baseline、prototype-board 输出单元都匹配当前 run / `task_digest` / `input_revision`；旧产物只能参考，不能放行本轮。
 - 多方案任务已有至少 3 条命名产品路径，并得到用户确认或批准作为默认方向；少于 3 条路径时已记录豁免原因。
 - 输出计划已经把每个方案/屏幕映射为一张独立图片，不把多个方案合成一张比较图。
 - 每张图片已经绑定方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统和 image-2 状态。
@@ -70,6 +72,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - 已通过 `design-system-workflow.md` 确定并确认设计规范目标。
 - 产品方向审查中的实质改动已写回产品简报。
 - 已运行 Product Readiness Dashboard，且出图前 required 行的 verdict 是 `可出图`。
+- 已运行 `pmw-image-preflight check --json`，且返回 `ALLOW_IMAGE_PROMPT`。PMW 无法拦截宿主级 `imagegen` 工具，但绕过 preflight 的图片不能登记为 prototype artifact、不能复审、不能交付。
 
 ## 媒介锁
 

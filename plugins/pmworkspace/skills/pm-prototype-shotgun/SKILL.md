@@ -39,9 +39,11 @@ description: |
 
 - `_PMW_BIN`
 - `pmw-update-check`
+- `pmw-controller`
 - `usage`
 - `usage pm-prototype-shotgun`
 - `pmw-dashboard`
+- `pmw-image-preflight`
 - `readiness --target prototype`
 - `pmw-prototype-board`
 
@@ -62,7 +64,10 @@ description: |
 
 - 真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。
 - 快速更新：每个 skill 运行前用 `pmw-update-check --quick`；如果输出 `UPGRADE_AVAILABLE`，先询问用户是否执行 `UPGRADE_COMMAND`，除非 `auto_upgrade` 为 `true`。
-- 摘要：中文本地化、复用 `current_run_id`、记忆不覆盖本轮事实、等待 Q/D/证据/确认时停住、禁止泄露 token/ownerSecret/私密资料。
+- 运行时入口：每个 PMW 产品任务先过 `pmw-controller intake`，由 controller 判定是否继承或新建 run，并写入 `task_digest` / `input_revision`。
+- STOP gate：`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能进入下游产物。
+- 当前任务绑定：brief、visual baseline、prototype-board、review、handoff 和用户确认必须匹配当前 run、`task_digest` 与 `input_revision`；旧产物只能参考，不能放行。
+- 摘要：中文本地化、记忆不覆盖本轮事实、出图前必须通过 prototype preflight、禁止泄露 token/ownerSecret/私密资料。
 
 ### 默认用户可见输出字段
 
@@ -114,9 +119,11 @@ if [ -n "$_PMW_BIN" ]; then
   [ -n "$_UPD" ] && echo "$_UPD"
 fi
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-prototype-shotgun >/dev/null 2>&1 || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-controller" ] && "$_PMW_BIN/pmw-controller" preflight --target prototype --json 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" user-summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" readiness --target prototype 2>/dev/null || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-image-preflight" ] && "$_PMW_BIN/pmw-image-preflight" check --json 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" latest --kind product_brief 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" latest --kind visual_baseline 2>/dev/null || true
 ```
@@ -138,7 +145,9 @@ fi
 - Read `../pmworkspace-shared/references/prototype-shotgun-board.md`.
 - Read `../pmworkspace-shared/references/design-system-workflow.md`.
 - Read `../pmworkspace-shared/references/prototype-quality-review.md`.
-- Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-prototype-shotgun` 且没有当前 run，再创建 runtime run.
+- Follow `runtime-kernel.md` Run Owner 协议 through `pmw-controller`. If called directly, run `pmw-controller intake --goal "<本轮原型目标>" --materials "<本轮用户材料摘要>" --skill pm-prototype-shotgun --product-path "<全新功能|已有功能迭代>" --depth "<quick|deep>" --stage prototype` before planning images. Then run `pmw-controller next --json` and `pmw-controller preflight --target prototype --json`.
+  - If controller returns `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` or `BLOCKED`, stop and do not write image-2 prompts.
+  - Only current-run/current-task artifacts count. Old aligned briefs, old prototype-board units, old screenshots, or old scheme confirmations are reference material until they are updated and stamped to the current `task_digest` / `input_revision`.
 - 原型方案阶段必须先读取统一 `产品信息对齐包`：脚本可用时用 `pmw-dashboard status` 的产品信息对齐和当前产品缺口；脚本不可用时从最新 brief / artifact-flow / run 手动整理。若对齐包显示核心事实维度缺失、最新截图/数据未写回 brief、或产品判断对抗校验缺失，退回 `$pm-jobs` / `$pm-brief`，不能只靠当前对话继续写 prompt。
 - 原型出图前必须先输出 `原型出图判断`，说明我建议出哪些图、暂时不出哪些图、为什么，以及图片生成前门槛；不能直接写 image-2 prompt。
 - 原型出图前必须运行 Product Readiness Dashboard；`产品简报`、`产品简报确认`、`Zoon`、`线上参考`、必要的 `视觉基线`、`方案差异`、`方案方向确认`、`不可虚构项` 未通过时，停止在第一条阻断门槛，不写 image-2 prompt。默认只向用户展示短 verdict 和第一条阻断原因，完整表格只在审计 / 调试输出中展示。`数据佐证` 和 `复审状态` 出图前展示但不阻断，出图后再进入复审。
@@ -201,10 +210,10 @@ fi
     - 移动长板仍是一张连续移动端界面，不得拆成多张图、拼图、多屏故事板或桌面端。
 15. 把批量请求拆成顺序单图队列：`3 条产品路径` -> 3 个输出单元，`3 条产品路径 x 2 个屏幕` -> 6 个输出单元。每个输出单元单独调用一次 image-2；不要把多个单元合成一个 prompt。
 16. 平台脚本可用时，先用 `pmw-prototype-board add` 登记每个方案/屏幕单元；`--product-path`、`--behavior-assumption`、`--current-loss` 和 `--tradeoff` 是必填字段；有 `visual_baseline` 时还必须写入 `--baseline-problem`、`--changed-regions`、`--why-better-than-current` 和 `--baseline-preservation`；新输出必须同时写入 `--design-score`、`--design-gap`、`--ten-out-of-ten-standard`、`--prompt-design-fix`、`--anti-ai-slop-constraints`、`--state-coverage`、`--first-second-third-hierarchy`、`--design-spec-target`、`--design-system-profile`、`--platform-pattern`、`--inspiration-sources`、`--inspiration-patterns` 和 `--no-copy-boundary`。如果写入失败，输出 `方案比较板：未写入（原因）`，不能假装已记录。
-17. 平台脚本可用时运行 `pmw-dashboard readiness --target prototype`；用户可见输出只包含短 verdict / 第一阻断原因。如果 verdict 是 `不可出图`，根据第一条阻断行退回 `$pm-brief`、线上参考门槛、设计规范目标卡、方案方向确认或不可虚构项补齐，不写 image-2 prompt。只有用户要求看审计时才展示 `pmw-dashboard readiness --details`。
+17. 平台脚本可用时运行 `pmw-controller preflight --target prototype --json`，再运行 `pmw-dashboard readiness --target prototype`；用户可见输出只包含短 verdict / 第一阻断原因。如果 verdict 是 `不可出图`，根据第一条阻断行退回 `$pm-brief`、线上参考门槛、设计规范目标卡、方案方向确认或不可虚构项补齐，不写 image-2 prompt。只有用户要求看审计时才展示 `pmw-dashboard readiness --details`。
 18. 数据佐证缺失时不阻断出图，但必须把 `未验证风险` 写入用户可见输出和每个 image-2 prompt 的不可虚构项：不得展示确定性承诺、真实验证过的数值、已核验结果或无法兑现的数据能力，只能使用示例、区间、占位或明确标注假设。
-19. 在每个输出单元的图片生成前门槛通过后，先把最终 prompt 交给 `pmw-prototype-prompt-check`；有视觉基线时检查失败必须重写 prompt，不得调用 image-2。检查通过后逐个 Generate with image-2 / image generation。每次生成只服务当前一个输出单元，并在 prompt 中写明 10/10 原型标准、设计规范目标、平台模式、灵感来源摘要、禁止照搬项、第一眼 / 第二眼 / 第三眼信息层级、必须出现的状态、必须删除 / 降级的内容、反 AI 模板味约束，以及禁止拼图、并排比较、一图多屏、一图多方案。 如果当前环境无法生成 image-2，停止并说明，不用 HTML、Markdown 线框或方案比较板替代。
-20. 每张图出图后用 `pmw-prototype-board image` 补充图片路径或 URL；当当前 run 有 `visual_baseline` 且输出单元是 `physical_longboard` 时，脚本会自动调用 `pmw-image-audit`。如果返回 `需要重出` 或命令非 0，必须把该图标为 `需要重出`，不能展示为交付结果，也不能把批次写成全成功。
+19. 在每个输出单元的图片生成前门槛通过后，先运行 `pmw-image-preflight check --json`；只有返回 `ALLOW_IMAGE_PROMPT`，才把最终 prompt 交给 `pmw-prototype-prompt-check`。有视觉基线时检查失败必须重写 prompt，不得调用 image-2。检查通过后逐个 Generate with image-2 / image generation。每次生成只服务当前一个输出单元，并在 prompt 中写明 10/10 原型标准、设计规范目标、平台模式、灵感来源摘要、禁止照搬项、第一眼 / 第二眼 / 第三眼信息层级、必须出现的状态、必须删除 / 降级的内容、反 AI 模板味约束，以及禁止拼图、并排比较、一图多屏、一图多方案。 如果当前环境无法生成 image-2，停止并说明，不用 HTML、Markdown 线框或方案比较板替代。
+20. 每张图出图后用 `pmw-prototype-board image` 补充图片路径或 URL；图片必须绑定回同一个当前 run / 当前 task revision 的输出单元。若没有通过 `ALLOW_IMAGE_PROMPT` preflight 或没有匹配输出单元，图片只能标为 `对话附件，不是 PMW 原型产物`，不得进入 prototype_manifest、原型复审或交付。当前 run 有 `visual_baseline` 且输出单元是 `physical_longboard` 时，脚本会自动调用 `pmw-image-audit`。如果返回 `需要重出` 或命令非 0，必须把该图标为 `需要重出`，不能展示为交付结果，也不能把批次写成全成功。
 21. Run `prototype-quality-review.md`; if a reference screenshot exists, first trust the `pmw-prototype-board image` audit result or run `pmw-image-audit audit --image <生成图> --reference <参考图>` again for复核，并 expose `视觉审计：通过 / 需要重出`. Then route substantial post-image review to `$pm-prototype-review`.
 22. 平台脚本可用时，用 `pmw-log prototype <batch>` 保存原型清单，它会登记 `prototype_manifest` 到 Product Artifact Flow；再用 `pmw-run event --type artifact` 记录产物。
 23. Record approved/rejected design feedback with `pmw-log taste`, including scenario, feedback target, source, scope, and confidence when available.

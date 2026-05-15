@@ -11,7 +11,18 @@ from datetime import datetime, timezone
 
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
-VALID_TYPES = {"gate", "decision", "evidence", "artifact", "review"}
+VALID_TYPES = {
+    "gate",
+    "decision",
+    "evidence",
+    "artifact",
+    "review",
+    "task_intake",
+    "task_revision",
+    "workflow_transition",
+    "stop_gate",
+    "preflight_verdict",
+}
 
 
 def now() -> str:
@@ -122,6 +133,7 @@ def command_event(args: argparse.Namespace) -> int:
         print("Invalid event type. Use one of: " + ", ".join(sorted(VALID_TYPES)), file=sys.stderr)
         return 1
     run_id = args.run or latest_run_id()
+    project = read_project()
     row = {
         "ts": now(),
         "event": args.type,
@@ -129,6 +141,9 @@ def command_event(args: argparse.Namespace) -> int:
         "status": args.status,
         "title": args.title,
         "summary": args.summary,
+        "task_digest": project.get("current_task_digest", ""),
+        "input_revision": project.get("current_input_revision", ""),
+        "controller_verdict": project.get("last_controller_verdict", ""),
     }
     append_jsonl(run_path(run_id), row)
     print(run_path(run_id))

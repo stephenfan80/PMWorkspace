@@ -10,7 +10,9 @@ For Chinese users, use Chinese names in explanations and keep skill ids unchange
 
 路由前同时读取 `pm-workbench-map.md`。本文件决定“下一技能是什么”，`pm-workbench-map.md` 决定“当前链路阶段、共享状态字段和 eval 分类怎么对齐”。
 
-路由前先建立 `产品信息对齐包`。脚本可用时，读取 `pmw-dashboard status` 默认摘要；脚本不可用时，也要用当前对话、已对齐 brief、截图、Zoon、artifact-flow 和 run 事实手动整理同样字段。路由不能只看用户最后一句“要原型 / 使用方案 A / 参考截图”，必须先判断当前事实是否足以继续下游。
+路由前先建立 `产品信息对齐包`。脚本可用时，先运行 `pmw-controller intake` 生成或继承本轮 run / `task_digest` / `input_revision`，再读取 `pmw-dashboard status` 默认摘要；脚本不可用时，也要用当前对话、已对齐 brief、截图、Zoon、artifact-flow 和 run 事实手动整理同样字段。路由不能只看用户最后一句“要原型 / 使用方案 A / 参考截图”，必须先判断当前事实是否足以继续下游。
+
+`pmw-controller next` 是路由后的唯一合法下一动作来源。返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时，路由必须停在当前门槛；不要因为历史资料充足、旧 brief 已对齐或旧 board 有 3 个方案就继续下游。
 
 路由前先完成产品路径识别：`全新功能` 或 `已有功能迭代`。执行深度由 Agent 根据风险、证据和交付目标判定；只有产品路径不清、风险信号冲突或输入材料不足以判断时，才停在路径/证据卡点等待用户回答。
 
@@ -137,12 +139,13 @@ run_id：
 - `当前门槛`：当前必须停住或即将处理的最早门槛，例如 D0 工作方式、假设确认、产品简报未已对齐、线上参考缺失、原型复审、交付确认。
 - `下一技能`：写 skill id，例如 `$pm-autoplan`。
 - `为什么`：用一句话说明路由依据，只引用用户输入、已对齐产品简报、最新 Zoon、截图/线上参考或当前 run 证据，不用历史偏好替代事实。
-- `run_id`：平台脚本可用时由 `$pm-workspace` 创建；脚本不可用时写 `未启用`。
+- `run_id`：平台脚本可用时由 `pmw-controller intake` 创建或继承；脚本不可用时写 `未启用`。
+- `task_revision`：平台脚本可用时记录 `task_digest` / `input_revision`；旧产物若不匹配只能写 `可参考，不可放行`。
 - `证据状态`：至少说明产品简报、Zoon、线上参考、原型清单、待决策项和 Product Readiness Dashboard 的当前状态；未知项写 `未提供`、`未运行` 或 `待检查`。
 
 ## Run 衔接
 
-`$pm-workspace` 是路由型会话的 run owner：完成 D0 和路由判定后先创建 run，并记录当前门槛、证据状态和下一技能。被路由到的子 skill 必须复用当前 run；只有用户直接调用子 skill 且没有当前 run 时，子 skill 才创建自己的 run。
+`$pm-workspace` 是路由型会话的 run owner：完成 D0 和路由判定后先调用 `pmw-controller intake`，由 controller 判断是否复用当前 active run、创建新 revision 或新 run，并记录当前门槛、证据状态和下一技能。被路由到的子 skill 必须复用当前 controller run/revision；只有用户直接调用子 skill 且没有当前 run 时，子 skill 才通过 controller 创建自己的 run。全局 `current-project` 只是候选上下文，不能跳过 controller 的语义匹配。
 
 ## 端到端地图衔接
 

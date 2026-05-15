@@ -116,6 +116,19 @@ def current_run_id() -> str:
     return str(project.get("current_run_id") or project.get("latest_run_id") or "")
 
 
+def current_project() -> dict:
+    return read_json(project_dir() / "project.json")
+
+
+def current_task_context() -> tuple[str, str, str]:
+    project = current_project()
+    return (
+        str(project.get("current_task_digest") or ""),
+        str(project.get("current_input_revision") or ""),
+        str(project.get("last_controller_verdict") or ""),
+    )
+
+
 def append_row(row: dict) -> None:
     path = artifact_log()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -134,6 +147,13 @@ def event_is_confirmed(row: dict) -> bool:
     return positive and not negative
 
 
+def event_matches_current_task(row: dict) -> bool:
+    digest, revision, _verdict = current_task_context()
+    if not digest and not revision:
+        return True
+    return str(row.get("task_digest") or "") == digest and str(row.get("input_revision") or "") == revision
+
+
 def run_has_brief_confirmation() -> bool:
     run_id = current_run_id()
     if not run_id:
@@ -141,6 +161,8 @@ def run_has_brief_confirmation() -> bool:
     run_file = project_dir() / "runs" / f"{run_id}.jsonl"
     for row in read_jsonl(run_file):
         if row.get("event") not in {"gate", "decision"}:
+            continue
+        if not event_matches_current_task(row):
             continue
         title = str(row.get("title") or "")
         if ("产品简报确认" in title or "前提确认" in title) and event_is_confirmed(row):
@@ -238,6 +260,7 @@ def location(row: dict) -> str:
 def command_add(args: argparse.Namespace) -> int:
     validate_formal_artifact_gate(args)
     run_id = args.run or current_run_id()
+    task_digest, input_revision, controller_verdict = current_task_context()
     row = {
         "ts": now(),
         "artifact_id": f"{now_fragment()}-{slugify(args.kind)}-{uuid.uuid4().hex[:6]}",
@@ -253,6 +276,9 @@ def command_add(args: argparse.Namespace) -> int:
         "upstream": split_values(args.upstream),
         "next_skill": split_values(args.next_skill),
         "run_id": run_id,
+        "task_digest": task_digest,
+        "input_revision": input_revision,
+        "controller_verdict": controller_verdict,
     }
     append_row(row)
     print(row["artifact_id"])

@@ -47,6 +47,15 @@ def project_meta() -> dict:
     return read_json(project_dir() / "project.json")
 
 
+def current_task_context() -> tuple[str, str, str]:
+    data = project_meta()
+    return (
+        str(data.get("current_task_digest") or ""),
+        str(data.get("current_input_revision") or ""),
+        str(data.get("last_controller_verdict") or ""),
+    )
+
+
 def current_run_id() -> str:
     data = project_meta()
     return str(data.get("current_run_id") or data.get("latest_run_id") or "")
@@ -140,6 +149,7 @@ def latest_visual_baseline(run_id: str = "") -> dict:
 
 
 def latest_item(run_id: str, scheme: str, screen: str) -> dict:
+    digest, revision, _verdict = current_task_context()
     for row in reversed(read_rows()):
         if row.get("record_type", "item") != "item":
             continue
@@ -147,6 +157,10 @@ def latest_item(run_id: str, scheme: str, screen: str) -> dict:
             continue
         row_run = str(row.get("run_id") or "")
         if run_id and row_run and row_run != run_id:
+            continue
+        if digest and str(row.get("task_digest") or "") != digest:
+            continue
+        if revision and str(row.get("input_revision") or "") != revision:
             continue
         return row
     return {}
@@ -195,6 +209,7 @@ def command_add(args: argparse.Namespace) -> int:
             return 2
     run_id = args.run or current_run_id()
     brief_path = args.brief_path or current_brief_path()
+    task_digest, input_revision, controller_verdict = current_task_context()
     baseline = latest_visual_baseline(run_id)
     generation_mode = args.generation_mode or ("screenshot_edit" if baseline else "redraw")
     base_image = args.base_image
@@ -248,6 +263,9 @@ def command_add(args: argparse.Namespace) -> int:
         "no_copy_boundary": args.no_copy_boundary,
         "image": args.image,
         "status": args.status,
+        "task_digest": task_digest,
+        "input_revision": input_revision,
+        "controller_verdict": controller_verdict,
     }
     append_row(row)
     print(board_path())
@@ -268,6 +286,14 @@ def command_score(args: argparse.Namespace) -> int:
         "note": args.note,
         "status": args.status,
     }
+    task_digest, input_revision, controller_verdict = current_task_context()
+    row.update(
+        {
+            "task_digest": task_digest,
+            "input_revision": input_revision,
+            "controller_verdict": controller_verdict,
+        }
+    )
     append_row(row)
     print(board_path())
     return 0
@@ -276,6 +302,12 @@ def command_score(args: argparse.Namespace) -> int:
 def command_image(args: argparse.Namespace) -> int:
     run_id = args.run or current_run_id()
     item = latest_item(run_id, args.scheme, args.screen)
+    if not item:
+        print(
+            "PROTOTYPE_IMAGE_UNBOUND: 当前 run / task revision 没有匹配的 prototype-board 输出单元；图片只能作为对话附件，不能登记为 PMW 原型产物。",
+            file=os.sys.stderr,
+        )
+        return 2
     baseline = latest_visual_baseline(run_id)
     audit_payload: dict = {}
     audit_exit = 0
@@ -314,6 +346,14 @@ def command_image(args: argparse.Namespace) -> int:
         "status": status,
         "note": args.note,
     }
+    task_digest, input_revision, controller_verdict = current_task_context()
+    row.update(
+        {
+            "task_digest": task_digest,
+            "input_revision": input_revision,
+            "controller_verdict": controller_verdict,
+        }
+    )
     if audit_payload:
         row.update(
             {

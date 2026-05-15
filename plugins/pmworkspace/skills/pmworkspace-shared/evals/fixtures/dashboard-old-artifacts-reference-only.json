@@ -1,0 +1,49 @@
+{
+  "id": "dashboard-old-artifacts-reference-only",
+  "title": "旧 aligned brief 和旧 completed run 只能参考，不能放行本轮出图",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-workspace",
+  "prompt": "当旧 run 已完成且存在已对齐 brief 时，Product Readiness Dashboard 不能把它当成本轮已对齐。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "不可出图",
+    "must_stop": true,
+    "gate": "当前任务",
+    "required_behaviors": [
+      "readiness 只读取当前 active run",
+      "terminal run 不得作为 active run",
+      "旧 brief 显示可参考不可放行",
+      "first_blocker 指向当前任务"
+    ],
+    "forbidden_behaviors": [
+      "因为 latest_brief 已对齐就返回可出图",
+      "复用已完成 run 的确认",
+      "把旧 artifact 当成本轮产物"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "旧简报可参考，不可放行"
+    },
+    {
+      "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
+      "contains": "可参考，不可放行"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=old-artifact; python3 - <<'PY'\nimport json, os, pathlib\nroot=pathlib.Path(os.environ['PMW_HOME'])/'projects'/os.environ['PMW_PROJECT_SLUG']; (root/'runs').mkdir(parents=True)\nbrief=root/'brief.md'; brief.write_text('确认状态：已对齐\\n', encoding='utf-8')\nproj={'slug':os.environ['PMW_PROJECT_SLUG'],'current_run_id':'run-old','latest_run_id':'run-old','latest_run_status':'已完成','current_task_digest':'old-digest','current_input_revision':'old-rev','latest_brief':str(brief),'latest_brief_version':'v1'}\n(root/'project.json').write_text(json.dumps(proj, ensure_ascii=False), encoding='utf-8')\n(root/'runs'/'run-old.jsonl').write_text(json.dumps({'event':'decision','run_id':'run-old','status':'已对齐','title':'产品简报确认','summary':'确认','task_digest':'old-digest','input_revision':'old-rev'}, ensure_ascii=False)+'\\n', encoding='utf-8')\n(root/'artifact-flow.jsonl').write_text(json.dumps({'kind':'product_brief','run_id':'run-old','status':'已对齐','path':str(brief),'task_digest':'old-digest','input_revision':'old-rev'}, ensure_ascii=False)+'\\n', encoding='utf-8')\nPY\nbin/pmw-dashboard readiness --target prototype --json"
+      ],
+      "exit_code": 0,
+      "contains": [
+        "\"ready\": false",
+        "\"first_blocker\": \"当前任务\"",
+        "旧简报可参考，不可放行"
+      ]
+    }
+  ]
+}

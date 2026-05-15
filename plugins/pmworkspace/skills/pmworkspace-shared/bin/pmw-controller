@@ -1,0 +1,428 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import pathlib
+import subprocess
+import sys
+from datetime import datetime, timezone
+from typing import Any
+
+
+SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
+
+TERMINAL_STATUS_TOKENS = [
+    "已完成",
+    "可交付",
+    "可进入原型复审",
+    "已结束",
+    "DONE",
+    "complete",
+]
+
+STOP_ACTIONS = {"ASK_CONFIRMATION", "NEEDS_BASELINE", "BRIEF_PENDING", "D_REQUIRED", "BLOCKED"}
+
+
+def now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def now_fragment() -> str:
+    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+
+def current_slug() -> str:
+    env_slug = os.environ.get("PMW_PROJECT_SLUG", "").strip()
+    if env_slug:
+        return env_slug
+    try:
+        return subprocess.check_output([str(SCRIPT_DIR / "pmw-slug")], text=True).strip()
+    except Exception:
+        return "local-project"
+
+
+def project_dir() -> pathlib.Path:
+    path = STATE_DIR / "projects" / current_slug()
+    path.mkdir(parents=True, exist_ok=True)
+    (path / "runs").mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def project_path() -> pathlib.Path:
+    return project_dir() / "project.json"
+
+
+def read_json(path: pathlib.Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+        return value if isinstance(value, dict) else {}
+    except Exception:
+        return {}
+
+
+def read_jsonl(path: pathlib.Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    if not path.exists():
+        return rows
+    for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        try:
+            value = json.loads(line)
+        except Exception:
+            continue
+        if isinstance(value, dict):
+            rows.append(value)
+    return rows
+
+
+def append_jsonl(path: pathlib.Path, row: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+
+
+def write_project(data: dict[str, Any]) -> None:
+    data["slug"] = current_slug()
+    data["updated_at"] = now()
+    project_path().write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    try:
+        (STATE_DIR / "current-project").write_text(str(data["slug"]) + "\n", encoding="utf-8")
+    except Exception:
+        pass
+
+
+def read_project() -> dict[str, Any]:
+    data = read_json(project_path())
+    data.setdefault("slug", current_slug())
+    return data
+
+
+def normalize_mode(value: str) -> str:
+    value = (value or "").strip().lower()
+    if value in {"quick", "快速", "快速成型", "10min"}:
+        return "quick"
+    return "deep"
+
+
+def is_terminal_status(value: str) -> bool:
+    return any(token in (value or "") for token in TERMINAL_STATUS_TOKENS)
+
+
+def digest_for(goal: str, materials: str, product_path: str, depth: str) -> str:
+    payload = "\n".join(
+        [
+            goal.strip(),
+            materials.strip(),
+            product_path.strip(),
+            normalize_mode(depth),
+        ]
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
+def start_run(skill: str, mode: str, goal: str) -> str:
+    command = [
+        str(SCRIPT_DIR / "pmw-run"),
+        "start",
+        "--skill",
+        skill or "pm-workspace",
+        "--mode",
+        normalize_mode(mode),
+        "--goal",
+        goal or "PMWorkspace task",
+    ]
+    result = subprocess.run(command, text=True, capture_output=True, check=False)
+    if result.returncode != 0:
+        raise SystemExit(result.stderr or result.stdout or "pmw-run start failed")
+    return result.stdout.strip().splitlines()[-1]
+
+
+def run_file(run_id: str) -> pathlib.Path:
+    return project_dir() / "runs" / f"{run_id}.jsonl"
+
+
+def append_event(event: str, run_id: str, status: str, title: str, summary: str, project: dict[str, Any]) -> None:
+    row = {
+        "ts": now(),
+        "event": event,
+        "run_id": run_id,
+        "status": status,
+        "title": title,
+        "summary": summary,
+        "task_digest": project.get("current_task_digest", ""),
+        "input_revision": project.get("current_input_revision", ""),
+        "controller_verdict": project.get("last_controller_verdict", ""),
+    }
+    append_jsonl(run_file(run_id), row)
+
+
+def task_context(project: dict[str, Any]) -> dict[str, str]:
+    return {
+        "task_digest": str(project.get("current_task_digest") or ""),
+        "input_revision": str(project.get("current_input_revision") or ""),
+        "controller_verdict": str(project.get("last_controller_verdict") or ""),
+    }
+
+
+def current_run_is_active(project: dict[str, Any]) -> bool:
+    run_id = str(project.get("current_run_id") or "")
+    if not run_id:
+        return False
+    if is_terminal_status(str(project.get("latest_run_status") or "")):
+        return False
+    return run_file(run_id).exists()
+
+
+def event_matches_current_task(row: dict[str, Any], project: dict[str, Any]) -> bool:
+    digest = str(project.get("current_task_digest") or "")
+    revision = str(project.get("current_input_revision") or "")
+    if not digest and not revision:
+        return True
+    return str(row.get("task_digest") or "") == digest and str(row.get("input_revision") or "") == revision
+
+
+def artifact_rows(kind: str = "") -> list[dict[str, Any]]:
+    rows = read_jsonl(project_dir() / "artifact-flow.jsonl")
+    if kind:
+        rows = [row for row in rows if row.get("kind") == kind]
+    return rows
+
+
+def current_artifact(kind: str, project: dict[str, Any]) -> dict[str, Any]:
+    digest = str(project.get("current_task_digest") or "")
+    revision = str(project.get("current_input_revision") or "")
+    run_id = str(project.get("current_run_id") or "")
+    for row in reversed(artifact_rows(kind)):
+        if run_id and row.get("run_id") != run_id:
+            continue
+        if digest and row.get("task_digest") != digest:
+            continue
+        if revision and row.get("input_revision") != revision:
+            continue
+        return row
+    return {}
+
+
+def board_items(project: dict[str, Any]) -> list[dict[str, Any]]:
+    digest = str(project.get("current_task_digest") or "")
+    revision = str(project.get("current_input_revision") or "")
+    run_id = str(project.get("current_run_id") or "")
+    rows = [row for row in read_jsonl(project_dir() / "prototype-board.jsonl") if row.get("record_type", "item") == "item"]
+    scoped = []
+    for row in rows:
+        if run_id and row.get("run_id") != run_id:
+            continue
+        if digest and row.get("task_digest") != digest:
+            continue
+        if revision and row.get("input_revision") != revision:
+            continue
+        scoped.append(row)
+    return scoped
+
+
+def latest_event(project: dict[str, Any], needles: list[str]) -> dict[str, Any]:
+    run_id = str(project.get("current_run_id") or "")
+    for row in reversed(read_jsonl(run_file(run_id))):
+        if not event_matches_current_task(row, project):
+            continue
+        text = f"{row.get('status', '')} {row.get('title', '')} {row.get('summary', '')}"
+        if any(needle in text for needle in needles):
+            return row
+    return {}
+
+
+def action_from_state(project: dict[str, Any]) -> tuple[str, str]:
+    if not current_run_is_active(project):
+        return "BLOCKED", "当前没有本轮 active run，或当前 run 已结束；先运行 pmw-controller intake。"
+    if not str(project.get("current_task_digest") or ""):
+        return "BLOCKED", "当前任务缺少 task_digest；先运行 pmw-controller intake。"
+    latest_brief = str(project.get("latest_brief") or "")
+    if not latest_brief:
+        return "WRITE_PENDING_BRIEF", "本轮还没有产品简报。"
+    brief_artifact = current_artifact("product_brief", project)
+    if not brief_artifact:
+        return "ASK_CONFIRMATION", "latest_brief 未绑定本轮 task revision，旧简报只能作为参考。"
+    brief_text = pathlib.Path(latest_brief).read_text(encoding="utf-8", errors="ignore") if pathlib.Path(latest_brief).exists() else ""
+    if "确认状态：已对齐" not in brief_text and "确认状态: 已对齐" not in brief_text:
+        return "BRIEF_PENDING", "产品简报不是已对齐。"
+    if not latest_event(project, ["产品简报确认", "前提确认"]):
+        return "ASK_CONFIRMATION", "当前 input_revision 尚未记录产品简报确认 / 前提确认。"
+    items = board_items(project)
+    if not items:
+        return "REGISTER_PROTOTYPE_UNITS", "产品简报已对齐，但本轮还没有 prototype-board 输出单元。"
+    return "ALLOW_IMAGE_PROMPT", "本轮已有已绑定输出单元，可继续运行出图前 readiness。"
+
+
+def command_intake(args: argparse.Namespace) -> int:
+    project = read_project()
+    mode = normalize_mode(args.depth)
+    task_digest = digest_for(args.goal, args.materials, args.product_path, mode)
+    active = current_run_is_active(project)
+    same_task = str(project.get("current_task_digest") or "") == task_digest
+    if args.force_new or not active or not same_task:
+        run_id = start_run(args.skill, mode, args.goal)
+        input_revision = f"{now_fragment()}-{task_digest[:8]}"
+        intake_status = "新建本轮 run"
+    else:
+        run_id = str(project.get("current_run_id") or project.get("latest_run_id") or "")
+        input_revision = str(project.get("current_input_revision") or f"{now_fragment()}-{task_digest[:8]}")
+        intake_status = "复用本轮 run"
+    project = read_project()
+    project["current_run_id"] = run_id
+    project["latest_run_id"] = run_id
+    project["latest_run_status"] = "已开始"
+    project["current_task_digest"] = task_digest
+    project["current_input_revision"] = input_revision
+    project["current_task_goal"] = args.goal
+    project["current_stage"] = args.stage or args.skill
+    project["current_product_path"] = args.product_path
+    project["current_execution_depth"] = mode
+    project["last_controller_verdict"] = intake_status
+    action, reason = action_from_state(project)
+    project["allowed_next_action"] = action
+    write_project(project)
+    append_event(
+        "task_intake",
+        run_id,
+        intake_status,
+        "PMW 任务入口",
+        f"goal={args.goal}；materials={args.materials or '未提供'}；action={action}；reason={reason}",
+        project,
+    )
+    payload = {
+        "ok": True,
+        "run_id": run_id,
+        "task_digest": task_digest,
+        "input_revision": input_revision,
+        "status": intake_status,
+        "allowed_next_action": action,
+        "reason": reason,
+        "stop": action in STOP_ACTIONS,
+    }
+    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else f"{action} {run_id} {input_revision}")
+    return 0
+
+
+def command_next(args: argparse.Namespace) -> int:
+    project = read_project()
+    action, reason = action_from_state(project)
+    project["allowed_next_action"] = action
+    project["last_controller_verdict"] = reason
+    write_project(project)
+    payload = {
+        "allowed_next_action": action,
+        "reason": reason,
+        "stop": action in STOP_ACTIONS,
+        **task_context(project),
+    }
+    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else f"{action}: {reason}")
+    return 0 if action not in {"BLOCKED"} else 2
+
+
+def dashboard_preflight(target: str) -> dict[str, Any]:
+    command = [str(SCRIPT_DIR / "pmw-dashboard"), "readiness", "--target", target, "--json"]
+    result = subprocess.run(command, text=True, capture_output=True, check=False)
+    if result.returncode not in {0, 1} and not result.stdout:
+        return {"ready": False, "reason": result.stderr or "pmw-dashboard failed", "next_action": "BLOCKED"}
+    try:
+        payload = json.loads(result.stdout)
+        return payload if isinstance(payload, dict) else {}
+    except Exception:
+        return {"ready": False, "reason": result.stdout or result.stderr or "pmw-dashboard returned non-json", "next_action": "BLOCKED"}
+
+
+def command_preflight(args: argparse.Namespace) -> int:
+    project = read_project()
+    action, action_reason = action_from_state(project)
+    payload = {"ready": action == "WRITE_PENDING_BRIEF", "reason": action_reason, "next_action": action} if args.target == "brief" else dashboard_preflight(args.target)
+    ready = bool(payload.get("ready")) and action != "BLOCKED"
+    if args.target == "prototype" and action not in {"ALLOW_IMAGE_PROMPT"}:
+        ready = False
+        first_blocker = action
+        next_action = action
+        reason = action_reason
+    else:
+        first_blocker = str(payload.get("first_blocker") or payload.get("reason") or "")
+        next_action = str(payload.get("next_action") or ("ALLOW_IMAGE_PROMPT" if ready else "BLOCKED"))
+        reason = str(payload.get("reason") or action_reason)
+    verdict = "ALLOW_IMAGE_PROMPT" if ready and args.target == "prototype" else ("ALLOW_HANDOFF" if ready else next_action)
+    project["allowed_next_action"] = verdict
+    project["last_controller_verdict"] = reason
+    write_project(project)
+    run_id = str(project.get("current_run_id") or "")
+    if run_id:
+        append_event(
+            "preflight_verdict",
+            run_id,
+            "通过" if ready else "阻断",
+            f"{args.target} preflight",
+            f"verdict={verdict}；reason={reason}",
+            project,
+        )
+    result_payload = {
+        "ready": ready,
+        "target": args.target,
+        "verdict": verdict,
+        "reason": reason,
+        "first_blocker": first_blocker,
+        "next_action": next_action,
+        **task_context(project),
+    }
+    print(json.dumps(result_payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else f"{verdict}: {reason}")
+    return 0 if ready else 2
+
+
+def command_stamp(args: argparse.Namespace) -> int:
+    project = read_project()
+    payload = {
+        "kind": args.kind,
+        "path": args.path,
+        **task_context(project),
+    }
+    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="pmw-controller")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    intake = sub.add_parser("intake")
+    intake.add_argument("--goal", required=True)
+    intake.add_argument("--materials", default="")
+    intake.add_argument("--skill", default="pm-workspace")
+    intake.add_argument("--product-path", default="待判断")
+    intake.add_argument("--depth", default="deep")
+    intake.add_argument("--stage", default="")
+    intake.add_argument("--force-new", action="store_true")
+    intake.add_argument("--json", action="store_true")
+    intake.set_defaults(func=command_intake)
+
+    next_cmd = sub.add_parser("next")
+    next_cmd.add_argument("--json", action="store_true")
+    next_cmd.set_defaults(func=command_next)
+
+    preflight = sub.add_parser("preflight")
+    preflight.add_argument("--target", choices=["prototype", "handoff", "brief"], required=True)
+    preflight.add_argument("--json", action="store_true")
+    preflight.set_defaults(func=command_preflight)
+
+    stamp = sub.add_parser("stamp")
+    stamp.add_argument("--kind", required=True)
+    stamp.add_argument("--path", default="")
+    stamp.set_defaults(func=command_stamp)
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

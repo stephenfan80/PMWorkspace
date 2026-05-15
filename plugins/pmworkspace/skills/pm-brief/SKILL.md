@@ -24,6 +24,7 @@ description: |
 
 - `_PMW_BIN`
 - `pmw-update-check`
+- `pmw-controller`
 - `usage`
 - `usage pm-brief`
 - `pmw-memory`
@@ -49,7 +50,10 @@ description: |
 
 - 真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。
 - 快速更新：每个 skill 运行前用 `pmw-update-check --quick`；如果输出 `UPGRADE_AVAILABLE`，先询问用户是否执行 `UPGRADE_COMMAND`，除非 `auto_upgrade` 为 `true`。
-- 摘要：中文本地化、复用 `current_run_id`、记忆不覆盖本轮事实、等待 Q/D/证据/确认时停住、禁止泄露 token/ownerSecret/私密资料。
+- 运行时入口：每个 PMW 产品任务先过 `pmw-controller intake`，由 controller 判定是否继承或新建 run，并写入 `task_digest` / `input_revision`。
+- STOP gate：`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能进入下游产物。
+- 当前任务绑定：brief、visual baseline、prototype-board、review、handoff 和用户确认必须匹配当前 run、`task_digest` 与 `input_revision`；旧产物只能参考，不能放行。
+- 摘要：中文本地化、记忆不覆盖本轮事实、出图前必须通过 prototype preflight、禁止泄露 token/ownerSecret/私密资料。
 
 ### 默认用户可见输出字段
 
@@ -105,6 +109,7 @@ if [ -n "$_PMW_BIN" ]; then
   [ -n "$_UPD" ] && echo "$_UPD"
 fi
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-brief >/dev/null 2>&1 || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-controller" ] && "$_PMW_BIN/pmw-controller" preflight --target brief --json 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" user-summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-artifact" ] && "$_PMW_BIN/pmw-artifact" flow 2>/dev/null || true
@@ -121,7 +126,9 @@ fi
 4. Read `../pmworkspace-shared/references/pm-eval-system.md` and preserve the brief gate contracts it lists.
 5. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 产品简报 stage fields.
 6. Read `../pmworkspace-shared/references/artifact-flow.md`; `$pm-brief` must turn upstream Q/D and strategy decisions into a downstream-readable `product_brief`.
-7. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-brief` 且没有当前 run，再创建 runtime run.
+7. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议 through `pmw-controller`. If called directly, run `pmw-controller intake --goal "<本轮产品简报目标>" --materials "<本轮用户材料摘要>" --skill pm-brief --product-path "<全新功能|已有功能迭代>" --depth "<quick|deep>" --stage brief` before writing the brief. Then run `pmw-controller preflight --target brief --json`.
+    - If `pmw-controller next` / brief preflight returns `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` or `BLOCKED`, stop and surface the first gate; do not save an `已对齐` brief.
+    - 用户对产品简报、关键前提或“按假设继续”的确认必须记录在当前 `input_revision` 下；旧 run 的确认不能让新 brief 变成 `已对齐`。
 8. Read `../pmworkspace-shared/references/decision-question-mode.md` and turn PM decision items into choice questions.
 9. Read `../pmworkspace-shared/references/internet-best-practice-research.md` and run lightweight internet best-practice research for the dominant scenario when tools are available.
 10. Read `../pmworkspace-shared/references/zoon-workflow.md`; Zoon is optional by default. Save the local candidate brief first, expose pending information and bias risk, then ask whether to sync to Zoon only after the brief is confirmed as `已对齐` unless the user already provided a Zoon URL or explicitly requested online collaboration.
@@ -147,7 +154,7 @@ fi
 23. 已对齐且用户要原型时，下一技能是 `$pm-prototype-shotgun`；已对齐且用户要交付时，下一技能是 `$pm-handoff`；未对齐时停在 `$pm-brief` 或回到上游缺失门槛。
 24. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
 25. 产品简报生成后必须先停在 `产品简报确认`：把 2-4 条关键前提、方案方向、反指标、不可虚构项、`风险 / 待验证` 压缩进短版业务简报，并在 `当前需要确认` 中逐项展示待确认问题卡。每张待确认问题卡必须包含 `还缺什么`、`为什么影响判断`、`不补齐的偏差风险`、`你现在可以怎么做`；禁止只问“是否认可这版简报，并允许按假设继续”。已有功能优化如果缺线上截图 / 关键节点截图 / 视觉基线，第一条待确认问题必须是 `线上截图 / 视觉基线`；如果用户主动提到其他页面或竞品平台但未给材料，第一条或紧随其后的待确认问题必须是 `线上 / 竞品基线`，要求截图、URL 或具体可借鉴点。用户可以上传材料后继续，或明确确认 `按当前假设先做可讨论原型`。只有用户明确确认产品简报、补齐关键待确认信息或批准按已标注假设继续后，当前 run 才能记录 `产品简报确认：已对齐`，并且产品简报确认状态才能写成 `已对齐`；未确认时保存为 `待确认`，不能把下一技能指向 `$pm-prototype-shotgun`，也不能询问 Zoon 同步。
-26. Save the brief with `pmw-log brief <name>` when platform scripts are available. It uses local-first, Zoon-optional publishing: save the business brief as latest brief, save the full input as a local audit copy, and automatically register `product_brief` in Product Artifact Flow. 完整审计副本保存在本地. It syncs to Zoon only when `PMW_ZOON_SYNC_ON_BRIEF=true` / `zoon_sync_on_brief: true` or the user explicitly chose online collaboration. 如果输入简报声明 `确认状态：已对齐`，但当前 run 没有 `产品简报确认 / 前提确认：已对齐` 记录，或 `pmw-discovery-gate check --target brief` 未通过，平台脚本会拒绝保存为已对齐。`pmw-log brief` 会把 `PM 判断摘要` 和 `产品作业` 写入 artifact-flow 的结构化字段；显式传入 `--pm-judgment-summary` / `--product-homework` 时优先使用参数，否则从 Markdown 章节提取。
+26. Save the brief with `pmw-log brief <name>` when platform scripts are available. It uses local-first, Zoon-optional publishing: save the business brief as latest brief, save the full input as a local audit copy, and automatically register `product_brief` in Product Artifact Flow. 完整审计副本保存在本地. It syncs to Zoon only when `PMW_ZOON_SYNC_ON_BRIEF=true` / `zoon_sync_on_brief: true` or the user explicitly chose online collaboration. 如果输入简报声明 `确认状态：已对齐`，但当前 run 没有与当前 `task_digest` / `input_revision` 匹配的 `产品简报确认 / 前提确认：已对齐` 记录，或 `pmw-discovery-gate check --target brief` 未通过，平台脚本会拒绝保存为已对齐。`pmw-log brief` / `pmw-artifact` 会把当前 controller verdict、`task_digest` 和 `input_revision` stamp 到 artifact-flow；显式传入 `--pm-judgment-summary` / `--product-homework` 时优先使用参数，否则从 Markdown 章节提取。
     - 如果保存的是 `待确认` 产品简报，用户可见 `下一步` 必须要求补齐待确认信息或确认假设偏差风险，不能默认推荐 Zoon。
     - 产品简报确认状态已对齐并且本地 Markdown 保存成功后，用户可见 `下一步` 必须默认推荐 Zoon，但不能自动同步：`Zoon 协作建议：这次已对齐简报适合多人评审 / 后续原型或 PRD 复用，建议同步到 Zoon；不同步也不影响继续使用本地 Markdown。`
     - 推荐必须说明 Zoon 的好处：多人协作、事实源统一、后续 image-2 原型 / PRD 防漂移；同时说明 `不自动同步，不作为出图或交付阻断`。

@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import pathlib
+import subprocess
+import sys
+from typing import Any
+
+
+SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
+
+
+def current_slug() -> str:
+    env_slug = os.environ.get("PMW_PROJECT_SLUG", "").strip()
+    if env_slug:
+        return env_slug
+    try:
+        return subprocess.check_output([str(SCRIPT_DIR / "pmw-slug")], text=True).strip()
+    except Exception:
+        return "local-project"
+
+
+def project_dir() -> pathlib.Path:
+    return STATE_DIR / "projects" / current_slug()
+
+
+def read_json(path: pathlib.Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+        return value if isinstance(value, dict) else {}
+    except Exception:
+        return {}
+
+
+def read_jsonl(path: pathlib.Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    if not path.exists():
+        return rows
+    for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        try:
+            value = json.loads(line)
+        except Exception:
+            continue
+        if isinstance(value, dict):
+            rows.append(value)
+    return rows
+
+
+def current_board_items(project: dict[str, Any]) -> list[dict[str, Any]]:
+    run_id = str(project.get("current_run_id") or "")
+    digest = str(project.get("current_task_digest") or "")
+    revision = str(project.get("current_input_revision") or "")
+    rows = [row for row in read_jsonl(project_dir() / "prototype-board.jsonl") if row.get("record_type", "item") == "item"]
+    scoped = []
+    for row in rows:
+        if run_id and row.get("run_id") != run_id:
+            continue
+        if digest and row.get("task_digest") != digest:
+            continue
+        if revision and row.get("input_revision") != revision:
+            continue
+        scoped.append(row)
+    return scoped
+
+
+def confirmed_less_than_three(project: dict[str, Any]) -> bool:
+    run_id = str(project.get("current_run_id") or "")
+    digest = str(project.get("current_task_digest") or "")
+    revision = str(project.get("current_input_revision") or "")
+    for row in read_jsonl(project_dir() / "runs" / f"{run_id}.jsonl"):
+        if digest and row.get("task_digest") != digest:
+            continue
+        if revision and row.get("input_revision") != revision:
+            continue
+        text = f"{row.get('status', '')} {row.get('title', '')} {row.get('summary', '')}"
+        if "少于 3" in text and ("豁免" in text or "例外" in text) and ("已确认" in text or "已批准" in text):
+            return True
+    return False
+
+
+def controller_preflight() -> tuple[int, dict[str, Any], str]:
+    result = subprocess.run(
+        [str(SCRIPT_DIR / "pmw-controller"), "preflight", "--target", "prototype", "--json"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    try:
+        payload = json.loads(result.stdout)
+    except Exception:
+        payload = {"ready": False, "reason": result.stdout or result.stderr or "controller preflight failed"}
+    return result.returncode, payload if isinstance(payload, dict) else {}, result.stderr
+
+
+def command_check(args: argparse.Namespace) -> int:
+    project = read_json(project_dir() / "project.json")
+    exit_code, payload, stderr = controller_preflight()
+    items = current_board_items(project)
+    failures = []
+    if exit_code != 0 or not payload.get("ready"):
+        failures.append(str(payload.get("reason") or stderr or "prototype preflight blocked"))
+    if not items:
+        failures.append("当前 run 没有已绑定 prototype-board 输出单元")
+    if len(items) < 3 and not confirmed_less_than_three(project):
+        failures.append("默认最少 3 个方案；少于 3 个必须有当前 run 的明确豁免原因")
+    allowed = not failures
+    result_payload = {
+        "ready": allowed,
+        "verdict": "ALLOW_IMAGE_PROMPT" if allowed else "BLOCKED",
+        "first_blocker": failures[0] if failures else "",
+        "failures": failures,
+        "output_units": len(items),
+        "task_digest": project.get("current_task_digest", ""),
+        "input_revision": project.get("current_input_revision", ""),
+    }
+    print(json.dumps(result_payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else result_payload["verdict"])
+    return 0 if allowed else 2
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="pmw-image-preflight")
+    sub = parser.add_subparsers(dest="command", required=True)
+    check = sub.add_parser("check")
+    check.add_argument("--json", action="store_true")
+    check.set_defaults(func=command_check)
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -5,7 +5,7 @@
   "primary_skill": "pm-prototype-shotgun",
   "prompt": "给我三个方案：蓝色版、橙色版、卡片圆角版。",
   "expected": {
-    "mode": "quick",
+    "mode": "deep",
     "status": "待确认",
     "must_stop": true,
     "gate": "方案差异质量不足",

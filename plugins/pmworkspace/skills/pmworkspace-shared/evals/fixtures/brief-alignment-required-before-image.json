@@ -1,0 +1,33 @@
+{
+  "id": "brief-alignment-required-before-image",
+  "title": "出图前必须完成当前产品简报对齐",
+  "category": "autoplan",
+  "primary_skill": "pm-autoplan",
+  "prompt": "使用 $pm-workspace 处理一个新 idea，先给 3 条产品路径并直接出图。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "产品简报确认",
+    "required_behaviors": [
+      "列出待确认项",
+      "列出不可虚构项",
+      "等待当前 input_revision 的产品简报确认"
+    ],
+    "forbidden_behaviors": [
+      "简报未对齐前生成图片",
+      "把方向选择写成最终 PRD",
+      "省略反指标"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "当前 `input_revision` 的产品简报尚未达到 `已对齐`"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-decision-principles.md",
+      "contains": "当前 `input_revision` 的产品简报尚未 `已对齐`，但即将生成 image-2 图片。"
+    }
+  ]
+}

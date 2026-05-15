@@ -1,0 +1,37 @@
+{
+  "id": "pmworkspace-direction-request-requires-brief-gate",
+  "title": "请求先看方案也必须保留产品简报对齐门槛",
+  "category": "pm-workspace-routing",
+  "primary_skill": "pm-workspace",
+  "prompt": "帮我处理一个新想法，先给 3 个方向并出图。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "产品简报确认",
+    "required_behaviors": [
+      "路由到深度产品对齐",
+      "列出待确认项",
+      "简报未对齐前不生成图片"
+    ],
+    "forbidden_behaviors": [
+      "跳过产品简报确认",
+      "把方向选择包装成最终 PRD",
+      "直接生成 image-2 图片"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "用户选择 `方案 A/B/C`、回答“按 A 继续”或确认某个方向，只代表方案方向选择，不能替代当前 `input_revision` 的产品简报对齐。"
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "当前 `input_revision` 的产品简报尚未达到 `已对齐`"
+    },
+    {
+      "path": "pmworkspace-shared/references/welcome-guide.md",
+      "contains": "A. 我要做全新功能"
+    }
+  ]
+}

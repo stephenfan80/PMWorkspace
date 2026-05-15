@@ -24,7 +24,68 @@ TERMINAL_STATUS_TOKENS = [
     "complete",
 ]
 
-STOP_ACTIONS = {"ASK_CONFIRMATION", "NEEDS_BASELINE", "BRIEF_PENDING", "D_REQUIRED", "BLOCKED"}
+STOP_ACTIONS = {"ASK_CONFIRMATION", "NEEDS_BASELINE", "WRITE_PENDING_BRIEF", "BRIEF_PENDING", "D_REQUIRED", "BLOCKED"}
+
+EXPLICIT_EXISTING_HINTS = [
+    "已有功能",
+    "已上线",
+    "线上",
+    "当前页面",
+    "当前链路",
+    "现有链路",
+    "现有页面",
+    "当前入口",
+    "迭代",
+    "优化",
+    "改造",
+]
+
+NEW_BUILD_HINTS = [
+    "全新",
+    "新的",
+    "新工具",
+    "新功能",
+    "构建",
+    "从 0",
+    "从0",
+]
+
+BUSINESS_METRIC_HINTS = [
+    "cvr",
+    "uv",
+    "转化",
+    "转化率",
+    "指标",
+    "漏斗",
+    "提升",
+    "增长",
+    "降低",
+    "留资",
+    "独号",
+    "线索",
+    "手机号",
+    "询价",
+    "查价",
+    "经销商",
+    "dcc",
+    "价格",
+    "补贴",
+    "金融",
+    "交易",
+    "订单",
+    "数据",
+]
+
+DEEP_DELIVERY_HINTS = [
+    "prd",
+    "研发",
+    "交付",
+    "设计评审",
+    "业务评审",
+    "上线",
+    "线上",
+    "生产",
+]
 
 
 def now() -> str:
@@ -103,10 +164,42 @@ def read_project() -> dict[str, Any]:
 
 
 def normalize_mode(value: str) -> str:
-    value = (value or "").strip().lower()
-    if value in {"quick", "快速", "快速成型", "10min"}:
-        return "quick"
     return "deep"
+
+
+def contains_hint(text: str, hints: list[str]) -> bool:
+    lowered = text.lower()
+    return any(hint.lower() in lowered for hint in hints)
+
+
+def route_authority(goal: str, materials: str, product_path: str, depth: str) -> tuple[str, str, list[str]]:
+    """Runtime routing guard.
+
+    Skills can suggest product path and depth, but the controller owns runtime
+    ambiguity detection. It should not hard-code a business domain. When a user
+    says "new tool" while also asking to move an existing business metric, the
+    safe next action is a product-path decision, not an automatic prototype.
+    """
+    raw_text = "\n".join([goal or "", materials or "", product_path or ""])
+    resolved_path = (product_path or "").strip() or "全新功能"
+    resolved_depth = normalize_mode(depth)
+    reasons: list[str] = []
+
+    explicit_existing_signal = contains_hint(raw_text, EXPLICIT_EXISTING_HINTS)
+    new_build_signal = contains_hint(raw_text, NEW_BUILD_HINTS)
+    business_metric_signal = contains_hint(raw_text, BUSINESS_METRIC_HINTS)
+    deep_signal = contains_hint(raw_text, DEEP_DELIVERY_HINTS) or business_metric_signal
+
+    if explicit_existing_signal and ("已有" not in resolved_path and "迭代" not in resolved_path):
+        resolved_path = "已有功能迭代"
+        reasons.append("命中明确的现有/线上/迭代信号，产品路径由 skill 建议改判为已有功能迭代")
+    if new_build_signal and business_metric_signal and not explicit_existing_signal:
+        reasons.append("同时命中新工具表述和业务指标优化信号，需要先确认产品路径，不能把方向选择当作产品简报对齐")
+    if deep_signal and resolved_depth != "deep":
+        resolved_depth = "deep"
+        reasons.append("命中业务指标/生产/交付风险信号，对齐深度保持 deep")
+
+    return resolved_path, resolved_depth, reasons
 
 
 def is_terminal_status(value: str) -> bool:
@@ -178,6 +271,25 @@ def current_run_is_active(project: dict[str, Any]) -> bool:
     return run_file(run_id).exists()
 
 
+def reference_required(project: dict[str, Any]) -> bool:
+    product_path = str(project.get("current_product_path") or "")
+    goal = str(project.get("current_task_goal") or "")
+    raw_text = "\n".join([product_path, goal])
+    return "已有" in product_path or "迭代" in product_path or contains_hint(raw_text, EXPLICIT_EXISTING_HINTS)
+
+
+def route_confirmation_required(project: dict[str, Any]) -> bool:
+    product_path = str(project.get("current_product_path") or "")
+    reasons = [str(item) for item in project.get("controller_route_reasons") or []]
+    if "已有" in product_path or "迭代" in product_path:
+        return False
+    return any("需要先确认产品路径" in reason for reason in reasons)
+
+
+def current_reference_artifact(project: dict[str, Any]) -> dict[str, Any]:
+    return current_artifact("visual_baseline", project) or current_artifact("browser_evidence", project)
+
+
 def event_matches_current_task(row: dict[str, Any], project: dict[str, Any]) -> bool:
     digest = str(project.get("current_task_digest") or "")
     revision = str(project.get("current_input_revision") or "")
@@ -241,6 +353,10 @@ def action_from_state(project: dict[str, Any]) -> tuple[str, str]:
         return "BLOCKED", "当前没有本轮 active run，或当前 run 已结束；先运行 pmw-controller intake。"
     if not str(project.get("current_task_digest") or ""):
         return "BLOCKED", "当前任务缺少 task_digest；先运行 pmw-controller intake。"
+    if route_confirmation_required(project):
+        return "D_REQUIRED", "本轮同时出现“新工具/新功能”和“业务指标优化”信号，需要先确认产品路径：是已有线上链路迭代、全新独立工具，还是经销商/销售侧承接工具。方向 A/B/C 不能替代产品简报对齐。"
+    if reference_required(project) and not current_reference_artifact(project):
+        return "NEEDS_BASELINE", "已有功能迭代 / 线上留资转化链路需要先绑定当前生产截图、关键节点截图、线上 URL、Figma / 设计稿或等价视觉基线。方向选择不能替代产品简报对齐。"
     latest_brief = str(project.get("latest_brief") or "")
     if not latest_brief:
         return "WRITE_PENDING_BRIEF", "本轮还没有产品简报。"
@@ -260,8 +376,10 @@ def action_from_state(project: dict[str, Any]) -> tuple[str, str]:
 
 def command_intake(args: argparse.Namespace) -> int:
     project = read_project()
-    mode = normalize_mode(args.depth)
-    task_digest = digest_for(args.goal, args.materials, args.product_path, mode)
+    requested_mode = normalize_mode(args.depth)
+    requested_product_path = args.product_path
+    resolved_product_path, mode, route_reasons = route_authority(args.goal, args.materials, requested_product_path, requested_mode)
+    task_digest = digest_for(args.goal, args.materials, resolved_product_path, mode)
     active = current_run_is_active(project)
     same_task = str(project.get("current_task_digest") or "") == task_digest
     if args.force_new or not active or not same_task:
@@ -280,8 +398,11 @@ def command_intake(args: argparse.Namespace) -> int:
     project["current_input_revision"] = input_revision
     project["current_task_goal"] = args.goal
     project["current_stage"] = args.stage or args.skill
-    project["current_product_path"] = args.product_path
+    project["current_product_path"] = resolved_product_path
     project["current_execution_depth"] = mode
+    project["requested_product_path"] = requested_product_path
+    project["requested_execution_depth"] = requested_mode
+    project["controller_route_reasons"] = route_reasons
     project["last_controller_verdict"] = intake_status
     action, reason = action_from_state(project)
     project["allowed_next_action"] = action
@@ -291,7 +412,7 @@ def command_intake(args: argparse.Namespace) -> int:
         run_id,
         intake_status,
         "PMW 任务入口",
-        f"goal={args.goal}；materials={args.materials or '未提供'}；action={action}；reason={reason}",
+        f"goal={args.goal}；materials={args.materials or '未提供'}；product_path={resolved_product_path}；depth={mode}；route_reasons={'；'.join(route_reasons) or '无'}；action={action}；reason={reason}",
         project,
     )
     payload = {
@@ -302,7 +423,13 @@ def command_intake(args: argparse.Namespace) -> int:
         "status": intake_status,
         "allowed_next_action": action,
         "reason": reason,
+        "requested_product_path": requested_product_path,
+        "requested_execution_depth": requested_mode,
+        "current_product_path": resolved_product_path,
+        "current_execution_depth": mode,
+        "route_reasons": route_reasons,
         "stop": action in STOP_ACTIONS,
+        "image_allowed": action == "ALLOW_IMAGE_PROMPT",
     }
     print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else f"{action} {run_id} {input_revision}")
     return 0
@@ -318,6 +445,7 @@ def command_next(args: argparse.Namespace) -> int:
         "allowed_next_action": action,
         "reason": reason,
         "stop": action in STOP_ACTIONS,
+        "image_allowed": action == "ALLOW_IMAGE_PROMPT",
         **task_context(project),
     }
     print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else f"{action}: {reason}")

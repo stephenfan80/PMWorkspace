@@ -9,7 +9,7 @@ PMWorkspace 的技能必须像一个产品运行系统，而不是独立 prompt�
 - `需要补充`：缺少会改变产品方向或交付质量的信息。
 - `待确认`：已有推荐、假设或选择题，等待用户确认。
 - `需要 PM 拍板`：存在会改变用户承诺、数据真实性、范围、实验口径、线索/交易/隐私/合规或验收标准的取舍。
-- `基于假设，可讨论`：快速成型轻量包可用于讨论，但不是最终 PRD 或已验证事实。
+- `待确认`：已有推荐或候选简报，但本轮产品事实、前提或视觉基线仍未确认，不能出图或交付。
 - `已对齐`：用户确认了产品简报、关键假设或最新 Zoon 内容。
 - `可进入原型复审`：已生成原型图片，下一步应复审。
 - `需要补充参考`：缺少线上截图、设计系统、输出单元绑定或真实数据边界，不能凭印象继续。
@@ -27,14 +27,16 @@ pmw-controller intake \
   --materials "<本轮用户材料摘要>" \
   --skill <skill> \
   --product-path "<全新功能|已有功能迭代>" \
-  --depth "<quick|deep>" \
+  --depth "deep" \
   --stage "<当前阶段>"
 pmw-controller next --json
 ```
 
 controller 会写入 `project.json` 的 `current_task_digest`、`current_input_revision`、`current_task_goal`、`current_stage`、`allowed_next_action` 和 `last_controller_verdict`。如果当前 active run 已完成、目标语义不匹配或材料 revision 变化，controller 必须创建新 run 或新 revision；旧 brief、旧 board、旧 review 只能作为参考，不能放行本轮。
 
-`pmw-controller next` 返回以下动作时是 STOP gate：`ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED`、`BLOCKED`。skill 必须停住并向用户展示当前最早门槛，不能继续写正式 brief、image-2 prompt、原型图、PRD 或交付稿。
+`pmw-controller next` 返回以下动作时是 STOP gate：`ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED`、`BLOCKED`。skill 必须停住并向用户展示当前最早门槛，不能继续进入下游产物、image-2 prompt、原型图、PRD 或交付稿。`WRITE_PENDING_BRIEF` 只表示下一步应进入 `$pm-brief` 写候选产品简报并等待用户对齐，不是原型许可。
+
+只有 `ALLOW_IMAGE_PROMPT` 是 image-2 出图许可。`方案方向确认`、用户回复 `A/B/C`、`按这些假设继续`、`REGISTER_PROTOTYPE_UNITS` 或 `WRITE_PENDING_BRIEF` 都不能替代当前 `input_revision` 下的产品简报确认。
 
 出图和交付前统一跑 preflight：
 
@@ -51,7 +53,7 @@ pmw-controller preflight --target brief --json
 平台脚本可用时，在选择模式后由 controller 启动或继承 run；不要绕过 controller 直接用 `pmw-run start` 放行产品任务。底层 run 命令仍用于记录事件和终态：
 
 ```bash
-pmw-controller intake --goal "<本轮目标>" --materials "<本轮材料摘要>" --skill <skill> --depth <quick|deep>
+pmw-controller intake --goal "<本轮目标>" --materials "<本轮材料摘要>" --skill <skill> --depth deep
 ```
 
 ### Run Owner 协议
@@ -68,7 +70,7 @@ pmw-controller intake --goal "<本轮目标>" --materials "<本轮材料摘要>"
 pmw-run event --type gate --status "待确认" --title "前提确认" --summary "<摘要>"
 pmw-run event --type decision --status "已对齐" --title "D1 <标题>" --summary "<用户选择>"
 pmw-run event --type evidence --status "需要补充" --title "线上参考" --summary "<缺口>"
-pmw-run event --type artifact --status "基于假设，可讨论" --title "轻量包" --summary "<产物>"
+pmw-run event --type artifact --status "待确认" --title "候选产物" --summary "<产物>"
 pmw-run event --type review --status "需要重出" --title "原型复审" --summary "<问题>"
 pmw-run event --type task_intake --status "已记录" --title "任务入口" --summary "<目标与材料摘要>"
 pmw-run event --type task_revision --status "已更新" --title "任务材料更新" --summary "<revision 摘要>"

@@ -86,7 +86,7 @@ def latest_run_id() -> str:
     runs = sorted((project_dir() / "runs").glob("*.jsonl"))
     if runs:
         return runs[-1].stem
-    print("NO_RUN: run `pmw-run start --skill <skill> --mode <quick|deep> --goal <目标>` first", file=sys.stderr)
+    print("NO_RUN: run `pmw-run start --skill <skill> --mode deep --goal <目标>` first", file=sys.stderr)
     raise SystemExit(1)
 
 
@@ -178,7 +178,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     start = sub.add_parser("start")
     start.add_argument("--skill", required=True)
-    start.add_argument("--mode", required=True, choices=["quick", "deep"])
+    start.add_argument("--mode", required=True, choices=["deep"])
     start.add_argument("--goal", required=True)
     start.add_argument("--run-id")
     start.set_defaults(func=command_start)

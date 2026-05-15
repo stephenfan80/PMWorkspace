@@ -2,10 +2,9 @@
 name: pm-workspace
 description: |
   PMWorkspace 主入口，面向产品经理和设计师。用于把产品想法、PRD、Zoon 文档、
-  截图、客户洞察或原型请求，先路由到全新功能或已有功能迭代，再由 Agent 判定
-  快速成型或深度交付：快速成型在 10 分钟内产出产品简述、至少 3 个方案方向和
-  移动端优先 image-2 原型图轻量包；深度交付继续推进产品方向审查内核、策略审查、
-  Zoon 对齐、原型复审、产品设计文档、PRD 或交付稿。负责首次引导、更新检查、
+  截图、客户洞察或原型请求，先路由到全新功能或已有功能迭代，再统一进入深度
+  产品对齐：先完成产品方向审查、产品简报确认和必要证据，再推进移动端优先
+  image-2 原型、原型复审、产品设计文档、PRD 或交付稿。负责首次引导、更新检查、
   本地使用记录，并路由到 pm-jobs、pm-strategy-review、pm-brief、
   pm-prototype-shotgun、pm-prototype-review、pm-autoplan 或 pm-handoff。
   也用于用户刚安装 PMWorkspace 后需要欢迎引导、启动话术或选择第一步。v0.2 起
@@ -14,7 +13,7 @@ description: |
 
 # PMWorkspace
 
-PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于把原始产品上下文沉淀成可复用资产：产品简述、方案方向、原型提示词、image-2 屏幕、产品设计文档、PRD 和交付稿。
+PMWorkspace 是产品方案工作台：先对齐，再出图，最后交付。它用于把原始产品上下文沉淀成可复用资产：产品简述、方案方向、原型提示词、image-2 屏幕、产品设计文档、PRD 和交付稿。
 
 <!-- PMW-GENERATED-CONTRACT:START -->
 ## PMWorkspace 生成契约
@@ -24,7 +23,7 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 - skill：`pm-workspace`
 - 契约版本：`2`
 - 阶段：主入口路由
-- 定位：先判断全新功能 / 已有功能迭代，再由 Agent 判定执行深度，创建或衔接 run，并路由到最小可用的下一技能。
+- 定位：先判断全新功能 / 已有功能迭代，统一进入深度产品对齐，创建或衔接 run，并路由到最小可用的下一技能。
 
 ### 统一前置检查
 
@@ -48,9 +47,9 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 - 真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。
 - 快速更新：每个 skill 运行前用 `pmw-update-check --quick`；如果输出 `UPGRADE_AVAILABLE`，先询问用户是否执行 `UPGRADE_COMMAND`，除非 `auto_upgrade` 为 `true`。
 - 运行时入口：每个 PMW 产品任务先过 `pmw-controller intake`，由 controller 判定是否继承或新建 run，并写入 `task_digest` / `input_revision`。
-- STOP gate：`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能进入下游产物。
+- STOP gate：`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能进入下游产物；`WRITE_PENDING_BRIEF` 只能路由到产品简报。
 - 当前任务绑定：brief、visual baseline、prototype-board、review、handoff 和用户确认必须匹配当前 run、`task_digest` 与 `input_revision`；旧产物只能参考，不能放行。
-- 摘要：中文本地化、记忆不覆盖本轮事实、出图前必须通过 prototype preflight、禁止泄露 token/ownerSecret/私密资料。
+- 摘要：中文本地化、记忆不覆盖本轮事实、只有 `ALLOW_IMAGE_PROMPT` 才能写 image-2 prompt，方向选择不能替代产品简报确认，禁止泄露 token/ownerSecret/私密资料。
 
 ### 默认用户可见输出字段
 
@@ -70,7 +69,7 @@ PMWorkspace 是产品方案工作台：快速成型，深度交付。它用于�
 - `当前模式`
 - `产品路径`
 - `产品信息对齐包`
-- `执行深度`
+- `对齐深度`
 - `当前门槛`
 - `下一技能`
 - `为什么`
@@ -95,7 +94,7 @@ Before user-facing output, read `../pmworkspace-shared/references/language-and-l
 
 ## Product Workbench State Machine
 
-PMWorkspace is not a prototype shortcut. In deep delivery mode, it must first clarify product value, goals, counter-metrics, constraints, and premises, then turn aligned product judgment into image-2 prototypes.
+PMWorkspace is not a prototype shortcut. Every product task must first clarify product value, goals, counter-metrics, constraints, and premises, then turn aligned product judgment into image-2 prototypes.
 
 Use this state machine for prototype-related work:
 
@@ -103,7 +102,7 @@ Use this state machine for prototype-related work:
 产品路径 -> 工作目标模式 -> 产品方向审查内核 -> 前提确认 -> 必要 Q/D -> 产品简述 / 产品简报 -> 三条产品路径 image-2 原型 -> 原型复审 -> 产品设计文档 / 产品交付
 ```
 
-If any required step is incomplete in deep delivery mode, route to `$pm-jobs` or `$pm-brief` instead of generating prototypes.
+If any required step is incomplete, route to `$pm-jobs` or `$pm-brief` instead of generating prototypes.
 
 ## Platform Preamble
 
@@ -126,7 +125,7 @@ fi
 
 If output contains `UPGRADE_AVAILABLE old new`, tell the user PMWorkspace has an update. If output also contains `UPGRADE_COMMAND <command>`, offer that exact command; otherwise offer `pmw-upgrade --host codex`. If `auto_upgrade` is `true`, upgrade automatically with the detected command and say what changed only after upgrade succeeds.
 
-After D0 and routing choose 产品路径 and 快速成型 / 深度交付模式, `$pm-workspace` must hand control to the runtime controller. Do not call `pmw-run start` directly for a product task; the controller decides whether the active project/run can be inherited or whether the new user materials require a new run / revision:
+After D0 and routing choose 产品路径, `$pm-workspace` must hand control to the runtime controller. Do not call `pmw-run start` directly for a product task; the controller decides whether the active project/run can be inherited or whether the new user materials require a new run / revision:
 
 ```bash
 "$_PMW_BIN/pmw-controller" intake \
@@ -134,18 +133,18 @@ After D0 and routing choose 产品路径 and 快速成型 / 深度交付模式, 
   --materials "<本轮用户材料摘要>" \
   --skill pm-workspace \
   --product-path "<全新功能|已有功能迭代>" \
-  --depth "<quick|deep>" \
+  --depth "deep" \
   --stage intake
 "$_PMW_BIN/pmw-controller" next --json
 ```
 
-If `pmw-controller next` returns `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` or `BLOCKED`, stop at that gate and show the work mode card plus the first needed confirmation/evidence. Use `pmw-run event` only after controller intake has stamped the run with the current `task_digest` and `input_revision`. If a child skill continues the workflow, do not finish the run in `$pm-workspace`; the child skill must reuse the current controller run/revision and finish only at a terminal readiness state. If scripts are unavailable, mark `运行审计：未启用`.
+If `pmw-controller next` returns `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED` or `BLOCKED`, stop at that gate and show the work mode card plus the first needed confirmation/evidence. Use `pmw-run event` only after controller intake has stamped the run with the current `task_digest` and `input_revision`. If a child skill continues the workflow, do not finish the run in `$pm-workspace`; the child skill must reuse the current controller run/revision and finish only at a terminal readiness state. If scripts are unavailable, mark `运行审计：未启用`.
 
 ## Routing Source
 
 Read `../pmworkspace-shared/references/routing.md`; it is the only route table and D0 source of truth.
 
-After routing, record the full routing contract from `routing.md` in local audit: `当前模式`、`当前门槛`、`下一技能`、`为什么`、`run_id`、`证据状态`. Default user-facing output should show a short `工作方式` card plus `业务判断`、`产品作业卡`、`当前需要确认` and `下一步`; it must now also include `本轮价值时刻` and `补齐后解锁`, so users can see whether they are in 10min 快速成型 or 深度交付, what product judgment PMW is helping them obtain now, and what product homework must be handled before brief or prototype.
+After routing, record the full routing contract from `routing.md` in local audit: `当前模式`、`当前门槛`、`下一技能`、`为什么`、`run_id`、`证据状态`. Default user-facing output should show a short `工作方式` card plus `业务判断`、`产品作业卡`、`当前需要确认` and `下一步`; it must now also include `本轮价值时刻` and `补齐后解锁`, so users can see the product path, the fixed deep alignment requirement, what product judgment PMW is helping them obtain now, and what product homework must be handled before brief or prototype.
 
 If platform scripts are available, read `pmw-artifact flow --details` for routing context, but do not include the flow table in default user output. A routed child skill should know the latest `上游产物`, expected `本轮产物`, and `下游可读` target from local audit instead of relying only on conversation memory.
 
@@ -161,9 +160,9 @@ If the user provides a product task in the same message, skip the welcome menu a
 
 ## Operating Rules
 
-- 深度交付模式写图片提示词或生成图片前，必须先完成产品简报对齐。
-- 深度交付模式中，产品简报不是 `已对齐` 时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
-- 快速成型模式中，出图前必须列出关键假设、反指标和不可虚构项，并获得用户确认“按这些假设继续”；输出状态写成 `基于假设，可讨论`，不能写成最终 PRD 或已验证事实。
+- 写图片提示词或生成图片前，必须先完成产品简报对齐。
+- 产品简报不是 `已对齐` 时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
+- 用户选择 `方案 A/B/C`、回答“按 A 继续”或确认某个方向，只代表方案方向选择，不能替代当前 `input_revision` 的产品简报对齐。
 - 每次进入产品任务，先输出或内部建立 `产品信息对齐包` 和 `产品作业卡`：已知事实、暂定判断、证据边界、当前主阻断、关键缺口队列、PMW 产品建议、PMW 信息架构建议、用户作业、补齐后解锁什么。不能只凭最后一句话继续下游。
 - 用户提供截图或线上参考时，只更新视觉基线和线上参考状态；不要自动产出完整 md 方案、HTML 或原型图。
 - 已有功能迭代缺线上截图、关键节点截图或等价视觉基线时，不输出 `方案 A / 方案 B / 方案 C` 或三条产品路径；只输出产品作业卡、证据请求、Agent 拿到材料后会如何拆解和补齐后解锁的下一步。用户提供录屏时，要求补关键节点截图，或先由外部工具转成截图后再进入 PMW。

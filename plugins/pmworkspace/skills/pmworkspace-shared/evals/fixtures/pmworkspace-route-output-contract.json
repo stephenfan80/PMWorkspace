@@ -3,9 +3,9 @@
   "title": "主入口路由后默认只输出业务摘要并把完整路由写入审计",
   "category": "pm-workspace-routing",
   "primary_skill": "pm-workspace",
-  "prompt": "使用 $pm-workspace 帮我快速成型一个新想法。",
+  "prompt": "使用 $pm-workspace 帮我梳理一个新想法。",
   "expected": {
-    "mode": "quick",
+    "mode": "deep",
     "status": "待确认",
     "must_stop": false,
     "gate": "路由输出契约",

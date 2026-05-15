@@ -5,7 +5,7 @@
   "primary_skill": "pm-prototype-shotgun",
   "prompt": "给同一个报名页做 3 条产品路径，只要换不同颜色和插画风格。",
   "expected": {
-    "mode": "quick",
+    "mode": "deep",
     "status": "待确认",
     "must_stop": true,
     "gate": "方案差异不足",

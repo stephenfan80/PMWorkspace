@@ -1,0 +1,77 @@
+{
+  "id": "autohome-lead-conversion-requires-brief-alignment",
+  "title": "新工具表述叠加转化指标时必须先确认产品路径",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-autoplan",
+  "prompt": "我想借鉴门店走访文章，构建新的汽车之家新能源留资转化工具，目的是提升独号转化率。用户选择方案 A 后也不能直接出图。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "产品路径确认",
+    "required_behaviors": [
+      "controller 识别新工具表述和业务指标优化信号冲突",
+      "保持 deep 对齐深度，但不自动把方向选择当作产品简报对齐",
+      "先返回 D_REQUIRED 让用户确认产品路径",
+      "用户选择方案 A/B/C 只算方案方向确认，不能算产品简报确认",
+      "只有 ALLOW_IMAGE_PROMPT 才能写 image-2 prompt"
+    ],
+    "forbidden_behaviors": [
+      "把方向 A 当作产品简报已对齐",
+      "pm-autoplan 在 WRITE_PENDING_BRIEF、NEEDS_BASELINE 或 BRIEF_PENDING 时直接调用 image-2",
+      "把方向假设确认当作高风险留资链路的出图许可"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-controller",
+      "contains": "DEEP_DELIVERY_HINTS"
+    },
+    {
+      "path": "bin/pmw-controller",
+      "contains": "同时命中新工具表述和业务指标优化信号，需要先确认产品路径"
+    },
+    {
+      "path": "bin/pmw-controller",
+      "contains": "方向选择不能替代产品简报对齐"
+    },
+    {
+      "path": "pmworkspace-shared/skill-docs/skill-docs.manifest.json",
+      "contains": "WRITE_PENDING_BRIEF"
+    },
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "只有 `ALLOW_IMAGE_PROMPT` 是出图许可"
+    },
+    {
+      "path": "pmworkspace-shared/references/runtime-kernel.md",
+      "contains": "只有 `ALLOW_IMAGE_PROMPT` 是 image-2 出图许可。"
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "只有 `ALLOW_IMAGE_PROMPT` 才能写 image-2 prompt"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=autohome-lead-runtime; bin/pmw-controller intake --goal '我想要借鉴文章中提到的用户需求和痛点，构建新的汽车之家新能源留资转化工具，目的是提升独号转化率。' --materials '文章提到门店承接、试驾、竞品应对、补贴政策、留资、经销商 DCC 承接。' --skill pm-autoplan --product-path 全新功能 --depth deep --stage autoplan --json; bin/pmw-controller next --json; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0,
+      "contains": [
+        "\"current_product_path\": \"全新功能\"",
+        "\"current_execution_depth\": \"deep\"",
+        "\"allowed_next_action\": \"D_REQUIRED\"",
+        "\"image_allowed\": false",
+        "\"stop\": true",
+        "需要先确认产品路径"
+      ],
+      "not_contains": [
+        "\"allowed_next_action\": \"ALLOW_IMAGE_PROMPT\"",
+        "\"image_allowed\": true"
+      ]
+    }
+  ]
+}

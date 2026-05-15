@@ -15,7 +15,7 @@
       "禁止未对齐直接出图"
     ],
     "forbidden_behaviors": [
-      "按快速成型假设直接推进",
+      "按未对齐假设直接推进",
       "忽略线上截图",
       "未对齐写 image-2 提示词"
     ]
@@ -23,15 +23,15 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/routing.md",
-      "contains": "PRD、Zoon、访谈、支持洞察、线上截图、关键节点截图、生产视觉基线"
+      "contains": "所有产品任务固定进入深度产品对齐"
     },
     {
       "path": "pmworkspace-shared/references/routing.md",
-      "contains": "深度交付分数高于快速成型分数时，默认深度交付"
+      "contains": "对齐深度固定为 `深度产品对齐`"
     },
     {
       "path": "pm-workspace/SKILL.md",
-      "contains": "深度交付模式写图片提示词或生成图片前，必须先完成产品简报对齐。"
+      "contains": "写图片提示词或生成图片前，必须先完成产品简报对齐。"
     }
   ]
 }

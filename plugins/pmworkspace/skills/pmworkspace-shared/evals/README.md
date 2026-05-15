@@ -5,7 +5,7 @@
 ```bash
 bin/pmw-eval list
 bin/pmw-eval run
-bin/pmw-eval run --fixture quick-assumption-confirmation-required
+bin/pmw-eval run --fixture brief-alignment-required-before-image
 bin/pmw-eval run --json
 ```
 

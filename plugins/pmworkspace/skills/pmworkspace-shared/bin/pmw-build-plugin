@@ -103,7 +103,7 @@ cat > "$PLUGIN_DIR/.codex-plugin/plugin.json" <<EOF
   "interface": {
     "displayName": "AI 产品工作站",
     "shortDescription": "Product briefs, image-2 prototypes, reviews, and PRDs",
-    "longDescription": "AI 产品工作站, powered by PMWorkspace, is a product workbench for product managers. It turns fuzzy ideas, PRDs, screenshots, customer insight, or prototype requests into quick shaping or deep delivery workflows. It captures assumptions, goals, counter-metrics, constraints, and non-fiction boundaries; produces aligned product briefs; supports mobile-first image-2 prototype directions; reviews prototypes against product intent; and prepares compact PRD or design handoff assets.",
+    "longDescription": "AI 产品工作站, powered by PMWorkspace, is a product workbench for product managers. It routes fuzzy ideas, PRDs, screenshots, customer insight, or prototype requests into new-feature or existing-feature product paths, then enforces deep product alignment before image-2 prototypes or handoff. It captures assumptions, goals, counter-metrics, constraints, and non-fiction boundaries; produces aligned product briefs; supports mobile-first image-2 prototype directions; reviews prototypes against product intent; and prepares compact PRD or design handoff assets.",
     "developerName": "Stephen Fan",
     "category": "Productivity",
     "capabilities": [
@@ -115,7 +115,7 @@ cat > "$PLUGIN_DIR/.codex-plugin/plugin.json" <<EOF
     "privacyPolicyURL": "https://github.com/stephenfan80/PMWorkspace#privacy",
     "termsOfServiceURL": "https://github.com/stephenfan80/PMWorkspace#license",
     "defaultPrompt": [
-      "用 AI 产品工作站把这个产品想法快速成型为产品简报、方案方向和移动端原型图。",
+      "用 AI 产品工作站把这个产品想法先对齐成产品简报，再输出方案方向和移动端原型图。",
       "用 AI 产品工作站把这份 PRD 或截图反馈整理成可出图产品简报。",
       "用 AI 产品工作站复审这批原型，并整理成精简 PRD 交付稿。"
     ],
@@ -278,9 +278,9 @@ screenshot(
     os.path.join(assets, "screenshot-onboarding.png"),
     (22, 119, 255),
     "PMWorkspace starts from the product goal",
-    "Quick shaping or deep delivery, chosen before output.",
+    "New feature or existing feature, then deep alignment before output.",
     "First-run choices",
-    ["10 min quick shaping", "PRD or screenshot to brief", "Prototype review and handoff"],
+    ["New feature alignment", "Existing feature baseline", "Prototype review and handoff"],
     "Visible workflow card",
     ["Current mode", "Earliest blocker", "One next action"],
     "Default prompt: use $pm-workspace to choose the right product workflow.",

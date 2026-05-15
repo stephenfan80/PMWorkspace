@@ -4,14 +4,14 @@
   "shared_gates": [
     "先读语言与本地化协议，中文用户默认使用中文字段、中文状态和中文建议。",
     "每个 PMW 产品任务必须先运行 `pmw-controller intake`，由 controller 生成或继承本轮 run、`task_digest` 和 `input_revision`；skill 不能直接信任全局 current-project 或旧 run。",
-    "`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能继续写 brief、image-2 prompt、原型图或交付稿。",
+    "`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能继续进入下游产物；`WRITE_PENDING_BRIEF` 只能路由到产品简报，不是出图许可。",
     "`product_brief`、`visual_baseline`、`prototype-board`、`prototype_review`、`handoff` 等正式产物必须匹配当前 run_id、`task_digest` 和 `input_revision`；旧产物只能标记为可参考，不能放行本轮。",
     "所有用户确认必须绑定当前 `input_revision`；旧 run、旧 brief 或旧方案方向的确认不能确认新材料。",
-    "写 image-2 prompt 前必须通过 `pmw-controller preflight --target prototype` 和 `pmw-image-preflight check`；未通过 preflight 的图片只能是对话附件，不能登记、复审或交付为 PMW 原型产物。",
+    "写 image-2 prompt 前必须通过 `pmw-controller preflight --target prototype` 和 `pmw-image-preflight check`；只有 `ALLOW_IMAGE_PROMPT` 才是出图许可，方向选择、假设确认、`REGISTER_PROTOTYPE_UNITS` 或 `WRITE_PENDING_BRIEF` 都不能触发图片生成；未通过 preflight 的图片只能是对话附件，不能登记、复审或交付为 PMW 原型产物。",
     "每个技能开始时先读取或建立统一产品上下文：产品信息对齐包、证据边界、最早门槛、产品作业卡、关键缺口队列和上游产物；不能只依赖当前对话片段继续下游。",
     "复用 runtime run：子 skill 发现已有 current_run_id 时不得重新创建 run。",
     "历史偏好、记忆和默认规则不能覆盖本轮事实、brief、Zoon、反指标、不可虚构项或证据门槛。",
-    "等待 Q、D、证据或用户确认时必须停住；不能假装已对齐、可出图或可交付。",
+    "等待 Q、D、证据或用户确认时必须停住；用户选择方案 A/B/C 只算方案方向确认，不能算产品简报确认；不能假装已对齐、可出图或可交付。",
     "不得把真实 token、ownerSecret、私密客户资料、内部录音、未脱敏截图或未脱敏 Zoon 内容写进公开仓库。"
   ],
   "common_preamble_checks": [
@@ -23,7 +23,7 @@
   "skills": {
     "pm-workspace": {
       "stage": "主入口路由",
-      "purpose": "先判断全新功能 / 已有功能迭代，再由 Agent 判定执行深度，创建或衔接 run，并路由到最小可用的下一技能。",
+      "purpose": "先判断全新功能 / 已有功能迭代，统一进入深度产品对齐，创建或衔接 run，并路由到最小可用的下一技能。",
       "preamble_checks": [
         "usage pm-workspace",
         "pmw-artifact"
@@ -51,7 +51,7 @@
         "当前模式",
         "产品路径",
         "产品信息对齐包",
-        "执行深度",
+        "对齐深度",
         "当前门槛",
         "下一技能",
         "为什么",
@@ -62,7 +62,7 @@
     },
     "pm-autoplan": {
       "stage": "自动产品评审",
-      "purpose": "作为靠谱产品负责人，总控快速成型或深度交付，只推进到当前最早门槛。",
+      "purpose": "作为靠谱产品负责人，总控全新功能或已有功能迭代的深度产品对齐，只推进到当前最早门槛。",
       "preamble_checks": [
         "usage pm-autoplan",
         "pmw-dashboard",

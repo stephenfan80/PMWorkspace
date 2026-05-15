@@ -5,7 +5,7 @@
   "primary_skill": "pm-prototype-shotgun",
   "prompt": "给我 3 个移动端方案。",
   "expected": {
-    "mode": "quick",
+    "mode": "deep",
     "status": "待确认",
     "must_stop": true,
     "gate": "产品路径或原型思考缺失",

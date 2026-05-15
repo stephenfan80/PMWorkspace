@@ -6,11 +6,11 @@ PMWorkspace 刚安装、用户只输入 `$pm-workspace`，或用户问“下一�
 
 ```text
 PMWorkspace
-快速成型，深度交付。
+先对齐，再出图，最后交付。
 
 把一句 idea、PRD、Zoon、截图或客户洞察，推进成可复用的产品简报、方案方向、移动端 image-2 原型图和交付稿。
 
-我会先判断本轮适合快速成型还是深度交付。默认只给业务判断、当前需要确认和下一步；完整路由、run 和证据状态会写入后台审计。
+我会先判断本轮是全新功能还是已有功能迭代，然后统一进入深度产品对齐。默认只给业务判断、当前需要确认和下一步；完整路由、run 和证据状态会写入后台审计。
 
 推荐第一步：发一句产品想法，或贴一份 PRD / Zoon / 截图。
 ```
@@ -22,11 +22,11 @@ Offer exactly these practical starts. The menu should feel like product home-pag
 ```text
 你可以这样开始：
 
-A. 我要快速成型
-   发一句话 idea。我会按产品方向审查内核补齐关键假设，确认后输出“产品简述 + 至少 3 条产品路径 + 原型图”轻量包。
+A. 我要做全新功能
+   发一句话 idea。我会先确认目标用户、触发场景、真实问题、主目标和反指标，再进入产品简报和方案方向。
 
-B. 我要深度交付
-   发 PRD、Zoon、访谈、支持洞察或业务背景。我会补齐产品事实、D 拍板、本地产品简报和原型准备度；需要团队在线协作时再同步 Zoon。
+B. 我要迭代已有功能
+   发当前线上截图、关键节点截图、URL 或 Figma。我会先建立视觉基线和线上参考，再判断能否进入方案。
 
 C. 我要生成产品简报
    发材料或链接。我会整理事实、假设、反指标、不可虚构项和确认状态，先保存本地 Markdown；需要时再同步到 Zoon。
@@ -44,7 +44,7 @@ G. 我要转 PRD / 研发交付
    发已确认方向或原型结果。我会整理目标、范围、不做什么、验收标准、风险和待决策项。
 ```
 
-Recommend A when the user gives no context. If the user already supplied PRD/Zoon/截图/生产流程/交付目标, recommend B.
+Recommend A when the user gives only a new idea. Recommend B when the user mentions current pages, online flows, metrics, CVR, leads, conversion, production screenshots, PRD, Zoon, delivery goals, or existing experience changes.
 
 ## Route Status Preview
 
@@ -66,7 +66,7 @@ When welcoming a user, also set expectation that future routed outputs will show
 ```
 
 ```text
-使用 $pm-workspace 快速成型这个产品想法，输出一套轻量包：产品简述、至少 3 条产品路径、每条路径 1 张移动端原型图。产品想法：<一句话想法>
+使用 $pm-workspace 帮我构建一个全新功能：先完成产品简报对齐，再输出至少 3 条产品路径和每条路径 1 张移动端原型图。产品想法：<一句话想法>
 ```
 
 ```text

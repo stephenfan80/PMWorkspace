@@ -50,7 +50,7 @@ PMWorkspace is a product solution workbench for PMs, designers, researchers, ope
 Use it when you have an idea, PRD, screenshot, user feedback, or collaboration doc that is not yet ready for design or engineering. PMWorkspace helps reframe the problem, align the core product judgment, generate mobile-first image-2 prototype screens, review the result, and produce compact delivery material.
 
 ```text
-Shape fast. Deliver deep.
+Align first. Prototype next. Deliver with evidence.
 ```
 
 ## Who It Helps
@@ -58,7 +58,7 @@ Shape fast. Deliver deep.
 - Product managers turning vague requests into aligned product direction.
 - Designers who need evidence, boundaries, and product intent before visual exploration.
 - Researchers, operators, and business teams turning insights or support signals into a product plan.
-- Founders and product leads who need a discussion-ready package quickly.
+- Founders and product leads who need a discussion-ready package with clear assumptions and gates.
 - Cross-functional teams that need reviewable artifacts instead of scattered context.
 
 ## The Pain It Solves
@@ -80,11 +80,13 @@ Shape fast. Deliver deep.
 - **Review conclusions:** strategy, trust/risk, design-system, and data-feasibility perspectives before final prototype review.
 - **Delivery assets:** compact PRD, design handoff, experiment seed, or engineering handoff.
 
-## Two Working Modes
+## Two Product Paths
 
-**Quick shaping** is for early ideas and discussion packages. PMWorkspace asks only the few clarifications that affect the shape of the solution, lists assumptions and non-fiction boundaries, and then creates a light package after approval.
+**New feature** is for a new page, tool, capability, or workflow. PMWorkspace still aligns the product brief before prototype images, even when the user only wants directions for discussion.
 
-**Deep delivery** is for PRDs, design reviews, engineering handoff, production-flow work, high-risk business promises, or AI collaboration document sync. PMWorkspace aligns the product brief before image generation or delivery writing, so the team does not move quickly in the wrong direction.
+**Existing feature iteration** is for online pages, current flows, production metrics, lead/CVR work, or any change that must protect the current experience. PMWorkspace requires a production screenshot, URL, Figma, or equivalent visual baseline before image generation.
+
+Both paths use the same deep alignment gate: no aligned product brief, no image-2 prompt, no prototype registration, and no handoff.
 
 ## How It Works
 
@@ -104,25 +106,26 @@ After installing through one of the three paths above, start with:
 Use $pm-workspace to show the welcome guide and help me choose the right PM workflow.
 ```
 
-Quick shaping prompt:
+New feature prompt:
 
 ```text
-Use $pm-workspace to quickly shape this product idea into a product brief, 2-3 solution directions, and one mobile prototype image per direction.
+Use $pm-workspace to build this new product idea into an aligned product brief, 3 solution directions, and one mobile prototype image per direction after alignment gates pass.
 
 Idea: <one sentence>
 Known context: <user / scenario / constraints / references>
-Requirement: proceed with clearly marked assumptions, but ask me to approve them before image generation.
+Requirement: align the product brief before image generation.
 ```
 
-Deep delivery prompt:
+Existing feature prompt:
 
 ```text
-Use $pm-workspace to turn this PRD / AI collaboration document / screenshot feedback into a product brief that is ready for prototype design.
+Use $pm-workspace to improve this existing feature. First inspect the current screenshot / URL / Figma baseline, then align the product brief before prototype design.
 
 Target user: <who>
 Core problem: <what is hard today>
 Goal: <behavior or metric>
 Constraints: <data / business / policy / design system / scope>
+Baseline: <screenshot / URL / Figma / equivalent visual reference>
 Output: <brief only / one screen / three directions / handoff>
 ```
 

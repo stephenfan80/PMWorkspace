@@ -27,6 +27,7 @@ description: |
 
 - `_PMW_BIN`
 - `pmw-update-check`
+- `pmw-controller`
 - `usage`
 - `usage pm-autoplan`
 - `pmw-dashboard`
@@ -49,7 +50,10 @@ description: |
 
 - 真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。
 - 快速更新：每个 skill 运行前用 `pmw-update-check --quick`；如果输出 `UPGRADE_AVAILABLE`，先询问用户是否执行 `UPGRADE_COMMAND`，除非 `auto_upgrade` 为 `true`。
-- 摘要：中文本地化、复用 `current_run_id`、记忆不覆盖本轮事实、等待 Q/D/证据/确认时停住、禁止泄露 token/ownerSecret/私密资料。
+- 运行时入口：每个 PMW 产品任务先过 `pmw-controller intake`，由 controller 判定是否继承或新建 run，并写入 `task_digest` / `input_revision`。
+- STOP gate：`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能进入下游产物。
+- 当前任务绑定：brief、visual baseline、prototype-board、review、handoff 和用户确认必须匹配当前 run、`task_digest` 与 `input_revision`；旧产物只能参考，不能放行。
+- 摘要：中文本地化、记忆不覆盖本轮事实、出图前必须通过 prototype preflight、禁止泄露 token/ownerSecret/私密资料。
 
 ### 默认用户可见输出字段
 
@@ -95,6 +99,7 @@ if [ -n "$_PMW_BIN" ]; then
   [ -n "$_UPD" ] && echo "$_UPD"
 fi
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-autoplan >/dev/null 2>&1 || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-controller" ] && "$_PMW_BIN/pmw-controller" next --json 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-question-tuning" ] && "$_PMW_BIN/pmw-question-tuning" summary 2>/dev/null || true
@@ -120,7 +125,9 @@ fi
 14. Read `../pmworkspace-shared/references/adversarial-review.md`.
 15. Read `../pmworkspace-shared/references/product-plan-handoff.md`.
 16. Read `../pmworkspace-shared/references/zoon-workflow.md` and `../pmworkspace-shared/references/zoon-drift-check.md`.
-15. Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run，不要重新 `pmw-run start`；如果用户直接调用 `$pm-autoplan` 且没有当前 run，再 start `pmw-run start --skill pm-autoplan --mode <quick|deep> --goal "<本轮目标>"`.
+15. Follow `runtime-kernel.md` Run Owner 协议 through `pmw-controller`: if `$pm-autoplan` was entered from `$pm-workspace`, read the current controller run/revision and inherit it only when `task_digest` matches the current user materials；匹配时复用当前 run，不要重新 `pmw-run start`。If called directly, run `pmw-controller intake --goal "<本轮目标>" --materials "<本轮用户材料摘要>" --skill pm-autoplan --product-path "<全新功能|已有功能迭代>" --depth "<quick|deep>" --stage autoplan`, then run `pmw-controller next --json`.
+    - If controller creates a new `input_revision`, old brief/board/review artifacts are only reference material until re-stamped or regenerated.
+    - If `pmw-controller next` returns `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` or `BLOCKED`, stop at that earliest gate and do not write downstream artifacts.
 16. 先建立 `产品信息对齐包` 和 `产品作业卡`，再 Build the automatic review control panel from `autoplan-workflow.md`: 靠谱产品负责人姿态、模式来源、事实来源优先级、当前阶段、产品信息对齐状态、当前主阻断、关键缺口队列、PMW 产品建议、PMW 信息架构建议、最早阻塞门槛、门槛等级、门槛来源、可自动采用项、必须 PM 拍板项、下一技能和交接上下文.
 17. 快速成型模式：先做生产/高风险升级检查；如果出现生产流程、高风险承诺、真实数据、线索/交易/隐私或研发交付信号，升级到深度交付门槛，不要继续轻量包。
 18. 快速成型模式：按产品方向审查内核检测会影响轻量包结构的缺口：产品路径、线上/竞品基线识别、证据收集、核心用户/场景、核心问题、当前替代/损失、主目标/反指标、不可虚构项、原型屏幕范围、三条产品路径差异、假设确认。Agent 可先整理材料、拆解截图、生成访谈提纲、梳理数据口径或做最佳实践摘要；只有卡在用户事实或取舍时才问 `Q` / `D`。已有功能迭代缺线上基线时，即使用户要求快速成型，也不能先给三条方案方向；先停在产品作业卡和截图 / 关键节点截图证据请求。用户主动提到其他页面或竞品平台时，必须在产品作业卡里要求截图、URL 或具体可借鉴点，不能等到出图前才问。

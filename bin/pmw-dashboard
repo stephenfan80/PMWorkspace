@@ -102,6 +102,47 @@ def read_run(run_id: Optional[str]) -> tuple[str, list[dict]]:
     return chosen, read_jsonl(project_dir() / "runs" / f"{chosen}.jsonl")
 
 
+TERMINAL_STATUS_TOKENS = [
+    "已完成",
+    "可交付",
+    "可进入原型复审",
+    "已结束",
+    "DONE",
+    "complete",
+]
+
+
+def is_terminal_status(value: str) -> bool:
+    return any(token in (value or "") for token in TERMINAL_STATUS_TOKENS)
+
+
+def active_run_id(project: dict) -> str:
+    run_id = str(project.get("current_run_id") or "")
+    if not run_id:
+        return ""
+    if is_terminal_status(str(project.get("latest_run_status") or "")):
+        return ""
+    return run_id
+
+
+def task_context(project: dict) -> tuple[str, str]:
+    return str(project.get("current_task_digest") or ""), str(project.get("current_input_revision") or "")
+
+
+def row_matches_task(row: dict, project: dict) -> bool:
+    digest, revision = task_context(project)
+    if digest and str(row.get("task_digest") or "") != digest:
+        return False
+    if revision and str(row.get("input_revision") or "") != revision:
+        return False
+    return True
+
+
+def task_is_controller_active(project: dict) -> bool:
+    digest, revision = task_context(project)
+    return bool(digest or revision)
+
+
 def latest_brief_summary(path_value: str) -> tuple[str, str]:
     if not path_value:
         return "未记录", "未记录"
@@ -181,9 +222,9 @@ def latest_browser_evidence(root: pathlib.Path) -> dict:
     return rows[-1] if rows else {}
 
 
-def latest_visual_baseline(root: pathlib.Path, run_id: str = "") -> dict:
+def latest_visual_baseline(root: pathlib.Path, run_id: str = "", project: Optional[dict] = None) -> dict:
     if run_id:
-        return current_artifact(root, "visual_baseline", run_id)
+        return current_artifact(root, "visual_baseline", run_id, project)
     rows = artifact_rows(root, "visual_baseline")
     return rows[-1] if rows else {}
 
@@ -601,33 +642,41 @@ def event_is_confirmed(event: dict) -> bool:
     )
 
 
-def current_brief_artifact(root: pathlib.Path, brief_path: str, run_id: str) -> dict:
+def current_brief_artifact(root: pathlib.Path, brief_path: str, run_id: str, project: Optional[dict] = None) -> dict:
     rows = artifact_rows(root, "product_brief")
     for row in reversed(rows):
         if run_id and row.get("run_id") and row.get("run_id") != run_id:
+            continue
+        if project and not row_matches_task(row, project):
             continue
         row_path = str(row.get("path") or "")
         if brief_path and row_path and same_path(row_path, brief_path):
             return row
     for row in reversed(rows):
+        if project and not row_matches_task(row, project):
+            continue
         row_path = str(row.get("path") or "")
         if brief_path and row_path and same_path(row_path, brief_path):
             return row
     return {}
 
 
-def current_artifact(root: pathlib.Path, kind: str, run_id: str) -> dict:
+def current_artifact(root: pathlib.Path, kind: str, run_id: str, project: Optional[dict] = None) -> dict:
     rows = artifact_rows(root, kind)
     for row in reversed(rows):
         if run_id and row.get("run_id") == run_id:
+            if project and not row_matches_task(row, project):
+                continue
             return row
     return {}
 
 
-def current_board_items(root: pathlib.Path, brief_path: str, brief_version: str, run_id: str) -> list[dict]:
+def current_board_items(root: pathlib.Path, brief_path: str, brief_version: str, run_id: str, project: Optional[dict] = None) -> list[dict]:
     rows = [r for r in read_jsonl(root / "prototype-board.jsonl") if r.get("record_type", "item") == "item"]
     scoped = []
     for row in rows:
+        if project and not row_matches_task(row, project):
+            continue
         row_run = str(row.get("run_id") or "")
         row_path = str(row.get("brief_path") or "")
         row_version = str(row.get("brief_version") or "")
@@ -667,20 +716,47 @@ def auto_readiness_target(project: dict, events: list[dict]) -> str:
 def product_readiness_rows(project: dict, events: list[dict], target: str) -> list[dict]:
     effective_target = auto_readiness_target(project, events) if target == "auto" else target
     root = project_dir()
-    run_id = str(events[-1].get("run_id") if events else "")
+    run_id = active_run_id(project)
+    if run_id:
+        events = read_jsonl(root / "runs" / f"{run_id}.jsonl")
+    else:
+        events = []
     brief_path = str(project.get("latest_brief", ""))
     brief_text = read_text(brief_path)
     brief_name, brief_meta = latest_brief_summary(brief_path)
     brief_version = str(project.get("latest_brief_version") or "")
     brief_status = extract_brief_status(brief_text)
-    product_brief = current_brief_artifact(root, brief_path, run_id)
+    product_brief = current_brief_artifact(root, brief_path, run_id, project)
     brief_status_text = f"{brief_meta} {brief_status}"
     brief_ready = bool(brief_path) and bool(brief_text) and status_is_aligned(brief_status_text)
+    controller_active = task_is_controller_active(project)
+    current_task_ready = bool(run_id) and (not controller_active or (bool(project.get("current_task_digest")) and bool(project.get("current_input_revision"))))
+    if controller_active and not current_task_ready:
+        current_task_status = "未通过"
+        current_task_evidence = "current_task_digest / current_input_revision 缺失，或当前 run 已结束"
+    elif controller_active:
+        current_task_status = "已绑定"
+        current_task_evidence = f"run={run_id}；task={project.get('current_task_digest')}；revision={project.get('current_input_revision')}"
+    elif run_id:
+        current_task_status = "legacy active run"
+        current_task_evidence = "当前项目未启用 controller task revision；保持兼容，但新 PMW 入口应先运行 pmw-controller intake"
+    else:
+        current_task_status = "无 active run"
+        current_task_evidence = "project.json 没有可用 current_run_id，或 latest_run_status 已是终态"
+    brief_current_ok = current_task_ready and brief_ready and (not controller_active or bool(product_brief))
     rows = [
+        gate_result(
+            "当前任务",
+            True,
+            current_task_status,
+            current_task_evidence,
+            "继续" if current_task_ready else "先运行 pmw-controller intake 创建 / 绑定本轮 run；旧 run 只能作为参考",
+            current_task_ready,
+        ),
         gate_result(
             "产品简报",
             True,
-            "已对齐" if brief_ready else ("未记录" if not brief_path else "未达已对齐"),
+            "已对齐" if brief_current_ok else ("旧简报可参考，不可放行" if brief_ready else ("未记录" if not brief_path else "未达已对齐")),
             "；".join(
                 item
                 for item in [
@@ -689,12 +765,14 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
                 ]
                 if item
             ),
-            "继续" if brief_ready else "退回 $pm-brief 完成已对齐产品核心信息契约",
-            brief_ready,
+            "继续" if brief_current_ok else "退回 $pm-brief 完成并确认本轮 task revision 的产品核心信息契约",
+            brief_current_ok,
         )
     ]
 
     brief_confirm = latest_event(events, ["产品简报确认", "前提确认"], {"gate", "decision"})
+    if brief_confirm and controller_active and not row_matches_task(brief_confirm, project):
+        brief_confirm = {}
     brief_confirm_ready = bool(brief_confirm) and event_is_confirmed(brief_confirm)
     rows.append(
         gate_result(
@@ -770,6 +848,8 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         )
     else:
         reference_event = latest_event(events, ["线上参考", "生产基线", "当前截图", "截图", "关键节点截图"], {"evidence", "gate"})
+        if reference_event and controller_active and not row_matches_task(reference_event, project):
+            reference_event = {}
         reference_has_visual_source = bool(reference_event) and contains_any(
             f"{reference_event.get('title', '')} {reference_event.get('summary', '')}",
             ["生产基线", "当前截图", "截图", "关键节点截图", "视觉基线"],
@@ -789,7 +869,7 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         )
     )
 
-    visual_baseline = latest_visual_baseline(root, run_id)
+    visual_baseline = latest_visual_baseline(root, run_id, project)
     visual_text = (
         f"{visual_baseline.get('status', '')} "
         f"{visual_baseline.get('title', '')} "
@@ -832,7 +912,9 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         )
     )
 
-    board = current_board_items(root, brief_path, brief_version, run_id)
+    board = current_board_items(root, brief_path, brief_version, run_id, project)
+    if not current_task_ready:
+        board = []
     if board:
         binding_failures = []
         normalized_latest_version = normalize_version(brief_version)
@@ -963,15 +1045,27 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
     )
 
     scheme_event = latest_event(events, ["方案差异", "方案方向", "方案比较板"], {"evidence", "gate", "artifact", "decision"})
+    if scheme_event and controller_active and not row_matches_task(scheme_event, project):
+        scheme_event = {}
     scheme_text = f"{scheme_event.get('status', '')} {scheme_event.get('summary', '')}"
-    scheme_ready = bool(board or scheme_event) and not contains_any(scheme_text, ["只换皮", "未通过", "缺失", "待确认"])
+    min_three_exemption = latest_event(events, ["少于 3", "少于三", "路径豁免"], {"gate", "decision"})
+    if min_three_exemption and controller_active and not row_matches_task(min_three_exemption, project):
+        min_three_exemption = {}
+    min_three_ready = (
+        len({str(item.get("scheme") or "") for item in board}) >= 3
+        or bool(min_three_exemption)
+        or (not board and bool(scheme_event) and event_is_confirmed(scheme_event))
+    )
+    scheme_ready = bool(board or scheme_event) and min_three_ready and not contains_any(scheme_text, ["只换皮", "未通过", "缺失", "待确认"])
+    scheme_status = "已登记" if board and min_three_ready else ("少于 3 个方案且无豁免" if board and not min_three_ready else (scheme_event.get("status") or "未登记"))
+    scheme_evidence = f"{len(board)} 个输出单元" if board and min_three_ready else (f"{len(board)} 个输出单元；缺少少于 3 个方案豁免" if board else (scheme_event.get("summary") or "prototype-board 暂无方案"))
     rows.append(
         gate_result(
             "方案差异",
             True,
-            "已登记" if board else (scheme_event.get("status") or "未登记"),
-            f"{len(board)} 个输出单元" if board else (scheme_event.get("summary") or "prototype-board 暂无方案"),
-            "继续" if scheme_ready else "先说明方案在页面结构、信息架构、交互路径、信任表达或关键任务上的差异",
+            scheme_status,
+            scheme_evidence,
+            "继续" if scheme_ready else "先登记默认 3 条产品路径；少于 3 条必须记录当前 run 的明确豁免原因，并说明方案在页面结构、信息架构、交互路径、信任表达或关键任务上的差异",
             scheme_ready,
         )
     )
@@ -1015,6 +1109,8 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
     design_spec_required = effective_target == "prototype" or bool(board)
     design_spec_fields_ready = (not design_spec_required) or (bool(board) and not design_spec_failures)
     design_spec_confirm = latest_event(events, ["设计规范目标确认", "设计规范目标卡", "设计规范目标"], {"gate", "decision"})
+    if design_spec_confirm and controller_active and not row_matches_task(design_spec_confirm, project):
+        design_spec_confirm = {}
     design_spec_confirm_text = f"{design_spec_confirm.get('status', '')} {design_spec_confirm.get('summary', '')}"
     design_spec_confirm_fresh = event_after_file(design_spec_confirm, brief_path) if design_spec_confirm else False
     design_spec_confirm_ready = (not design_spec_required) or (
@@ -1057,6 +1153,8 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
     )
 
     scheme_confirm = latest_event(events, ["方案方向确认", "方案方向", "原型出图判断"], {"gate", "decision"})
+    if scheme_confirm and controller_active and not row_matches_task(scheme_confirm, project):
+        scheme_confirm = {}
     scheme_confirm_text = f"{scheme_confirm.get('status', '')} {scheme_confirm.get('summary', '')}"
     scheme_confirm_fresh = event_after_file(scheme_confirm, brief_path) if scheme_confirm else False
     scheme_confirm_ready = bool(scheme_confirm) and scheme_confirm_fresh and contains_any(scheme_confirm_text, ["已确认", "已批准", "默认方向已批准", "可出图", "已对齐"]) and not contains_any(
@@ -1081,6 +1179,8 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         if row.get("record_type") != "image":
             continue
         if run_id and row.get("run_id") and row.get("run_id") != run_id:
+            continue
+        if controller_active and not row_matches_task(row, project):
             continue
         if scoped_screens and (row.get("scheme"), row.get("screen")) not in scoped_screens:
             continue
@@ -1118,7 +1218,7 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         )
     )
 
-    data_evidence = current_artifact(root, "data_evidence", run_id)
+    data_evidence = current_artifact(root, "data_evidence", run_id, project)
     data_text = f"{data_evidence.get('status', '')} {data_evidence.get('title', '')} {data_evidence.get('summary', '')}"
     data_ready = bool(data_evidence) and not contains_any(data_text, ["缺失", "待补充", "失败", "不可用"])
     if data_ready:
@@ -1239,6 +1339,10 @@ def render_readiness_section(run_id: Optional[str], target: str = "auto", headin
 
 
 READINESS_GATE_GUIDANCE: dict[str, tuple[str, str]] = {
+    "当前任务": (
+        "当前任务没有绑定本轮 run 和 task revision 时，PMW 可能误用旧 brief、旧方案或旧确认。",
+        "先运行 pmw-controller intake 创建 / 绑定本轮 run；之后再判断 brief、原型或交付准备度。",
+    ),
     "产品简报": (
         "缺少已对齐产品简报会让真实问题、目标用户、主目标、反指标和不可虚构项都停留在口头假设。",
         "回到 $pm-brief 对齐产品简报；对齐后才能把判断写入原型或交付契约。",
@@ -1373,7 +1477,7 @@ def render_status(run_id: Optional[str]) -> str:
     discovery_status, discovery_gap, discovery_action, discovery_covered, discovery_gap_queue, discovery_product_advice, discovery_ia_advice, discovery_next_question = discovery_alignment_summary(discovery_payload)
     decisions = read_jsonl(root / "decisions.jsonl")[-5:]
     questions = read_jsonl(root / "questions.jsonl")[-5:]
-    board = current_board_items(root, str(project.get("latest_brief", "")), str(project.get("latest_brief_version") or ""), chosen_run)
+    board = current_board_items(root, str(project.get("latest_brief", "")), str(project.get("latest_brief_version") or ""), active_run_id(project) or chosen_run, project)
     board_scores = {}
     for row in read_jsonl(root / "prototype-board.jsonl"):
         if row.get("record_type") == "score":
@@ -1477,7 +1581,7 @@ def render_status_summary(run_id: Optional[str]) -> str:
     discovery_status, discovery_gap, discovery_action, _discovery_covered, discovery_gap_queue, discovery_product_advice, discovery_ia_advice, discovery_next_question = discovery_alignment_summary(discovery_payload)
     target, verdict_cn, reason, impact, unlock, next_action, _rows = readiness_verdict(project, events, "auto")
     artifact_count = len(read_jsonl(root / "artifact-flow.jsonl"))
-    board_count = len(current_board_items(root, str(project.get("latest_brief", "")), str(project.get("latest_brief_version") or ""), chosen_run))
+    board_count = len(current_board_items(root, str(project.get("latest_brief", "")), str(project.get("latest_brief_version") or ""), active_run_id(project) or chosen_run, project))
     review = latest_review(events)
     zoon_sync_status = str(project.get("last_zoon_sync_status") or "")
     if zoon_sync_status == "synced":
@@ -1518,13 +1622,19 @@ def render_readiness_json(run_id: Optional[str], target: str = "auto") -> str:
     project = read_json(project_dir() / "project.json")
     chosen_run, events = read_run(run_id)
     effective_target, verdict_cn, reason, impact, unlock, next_action, rows = readiness_verdict(project, events, target)
+    first_blocker = ""
+    for row in rows:
+        if row.get("required") and not row.get("passed"):
+            first_blocker = str(row.get("name") or "")
+            break
     payload = {
         "target": effective_target,
         "target_label": readiness_target_label(effective_target),
-        "run_id": chosen_run,
+        "run_id": active_run_id(project) or chosen_run,
         "ready": verdict_cn in {"可出图", "可交付"},
         "verdict_cn": verdict_cn,
         "reason": reason,
+        "first_blocker": first_blocker,
         "impact": impact,
         "unlock": unlock,
         "next_action": next_action,

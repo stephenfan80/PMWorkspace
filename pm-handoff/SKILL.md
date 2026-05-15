@@ -24,6 +24,7 @@ description: |
 
 - `_PMW_BIN`
 - `pmw-update-check`
+- `pmw-controller`
 - `usage`
 - `usage pm-handoff`
 - `pmw-dashboard`
@@ -46,7 +47,10 @@ description: |
 
 - 真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。
 - 快速更新：每个 skill 运行前用 `pmw-update-check --quick`；如果输出 `UPGRADE_AVAILABLE`，先询问用户是否执行 `UPGRADE_COMMAND`，除非 `auto_upgrade` 为 `true`。
-- 摘要：中文本地化、复用 `current_run_id`、记忆不覆盖本轮事实、等待 Q/D/证据/确认时停住、禁止泄露 token/ownerSecret/私密资料。
+- 运行时入口：每个 PMW 产品任务先过 `pmw-controller intake`，由 controller 判定是否继承或新建 run，并写入 `task_digest` / `input_revision`。
+- STOP gate：`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能进入下游产物。
+- 当前任务绑定：brief、visual baseline、prototype-board、review、handoff 和用户确认必须匹配当前 run、`task_digest` 与 `input_revision`；旧产物只能参考，不能放行。
+- 摘要：中文本地化、记忆不覆盖本轮事实、出图前必须通过 prototype preflight、禁止泄露 token/ownerSecret/私密资料。
 
 ### 默认用户可见输出字段
 
@@ -95,6 +99,7 @@ if [ -n "$_PMW_BIN" ]; then
   [ -n "$_UPD" ] && echo "$_UPD"
 fi
 [ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-log" usage pm-handoff >/dev/null 2>&1 || true
+[ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-controller" ] && "$_PMW_BIN/pmw-controller" preflight --target handoff --json 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" user-summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-memory" ] && "$_PMW_BIN/pmw-memory" delivery-summary 2>/dev/null || true
 [ -n "$_PMW_BIN" ] && [ -x "$_PMW_BIN/pmw-dashboard" ] && "$_PMW_BIN/pmw-dashboard" status 2>/dev/null || true
@@ -119,7 +124,9 @@ fi
 13. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 产品交付 stage fields.
 14. Read `../pmworkspace-shared/references/artifact-flow.md` and read latest `product_brief` / `prototype_review` artifacts before writing delivery assets.
 15. Read `../pmworkspace-shared/references/pm-eval-system.md` and preserve delivery contracts.
-16. Follow `runtime-kernel.md` Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-handoff` 且没有当前 run，再创建 runtime run.
+16. Follow `runtime-kernel.md` Run Owner 协议 through `pmw-controller`. If called directly, run `pmw-controller intake --goal "<本轮交付目标>" --materials "<本轮用户材料摘要>" --skill pm-handoff --product-path "<全新功能|已有功能迭代>" --depth deep --stage handoff`, then run `pmw-controller preflight --target handoff --json`.
+    - If controller returns `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` or `BLOCKED`, stop and route to the first gate; do not write PRD、验收、实验口径 or交付稿.
+    - Handoff can only consume current-run/current-task `product_brief`、`prototype_review`、`prototype_manifest` and board units. Old artifacts are reference material until stamped to the current `task_digest` / `input_revision`.
 17. 如果用户要 PRD、研发交付、实验标准、埋点或接口梳理，先提示：`如果你有现成 PRD、接口文档、埋点方案、实验方案、Zoon 或截图，可以上传给我参考；没有的话，我会基于当前已对齐 brief 生成精简 PRD，并把缺失项留空待补充。`
 18. 建立交付控制器，记录 `交付目标`、`事实来源`、`Product Readiness Dashboard`、`交付前门槛`、`原型复审状态`、`未决拍板`、`交付类型`、`产品设计文档来源`、`产品判断对抗校验`、`原型可信度对抗复审`、`研发可行性反问`、`功能能力与研发依赖`、`PRD 缺口处理`、`验收写入边界`、`交付资产沉淀`、`上游产物`、`本轮产物`、`下游可读`、`产物流动`、`下一技能` 和 `证据状态`；这些默认写入审计，不能进入 PRD 正文。用户可见输出只保留交付结论、产品设计文档或精简 PRD、功能能力与研发依赖、待补充项、Zoon 协作建议、在线协作选择和下一步，不输出 `PRD 生成判断`。
 19. 如果 `pmw-project show` 中有 Zoon URL，先运行 `pmw-zoon drift`；若存在实质漂移，读取最新文档，作为交付事实来源，并退回 `$pm-brief` 或 `$pm-strategy-review`，不要沿用旧交付口径。

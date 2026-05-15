@@ -12,6 +12,8 @@ Product Readiness Dashboard 是 PMWorkspace 的出图 / 交付前总控面板。
 平台脚本可用时优先运行：
 
 ```bash
+pmw-controller preflight --target prototype --json
+pmw-controller preflight --target handoff --json
 pmw-dashboard readiness --target prototype
 pmw-dashboard readiness --target handoff
 pmw-dashboard status
@@ -25,12 +27,13 @@ pmw-dashboard status
 
 | 门槛 | 出图前 | 交付前 | 判断 |
 |---|---|---|---|
-| 产品简报 | Required | Required | 必须是 `已对齐`，且没有缺失门槛或实质漂移。 |
-| 产品简报确认 | Required | Required | 当前 run 必须记录用户确认产品简报或关键前提；不能只凭 Markdown 中出现 `已对齐` 放行。 |
+| 当前任务 | Required | Required | 必须存在 controller active run，且 run 不能是已完成 / 可交付等 terminal 状态；`current_task_digest` 和 `current_input_revision` 是本轮唯一合法上下文。 |
+| 产品简报 | Required | Required | 必须是当前 run / 当前 `task_digest` / 当前 `input_revision` 下的 `已对齐` brief，且没有缺失门槛或实质漂移；旧 aligned brief 显示为“可参考，不可放行”。 |
+| 产品简报确认 | Required | Required | 当前 run 必须记录与当前 `input_revision` 匹配的用户确认产品简报或关键前提；不能只凭 Markdown 中出现 `已对齐` 放行。 |
 | Zoon | Conditional | Conditional | 未启用时使用本地已对齐 Markdown，不阻断出图 / 交付；已启用、已有 URL 或用户选择在线协作时，必须已同步且无实质漂移。 |
 | 线上参考 | Required | Required | 已提供线上参考、已确认无线上参考，或明确不适用；未判断时不继续。优先读取最新 `browser_evidence` 产物，没有时回退到 run evidence / gate 事件。 |
 | 视觉基线 | Conditional | Conditional | 已采集线上截图或生产视觉参考时必须登记 `visual_baseline`，包含参考尺寸和目标输出像素；缺视觉基线或缺目标像素时不写 image-2 prompt。新概念页且用户确认无参考时显示不适用。 |
-| 输出单元绑定 | Conditional | Conditional | 已登记 prototype-board 输出单元时，`brief_path` 和 `brief_version` 必须等于当前 latest brief；旧 brief 版本的输出单元不能放行出图。 |
+| 输出单元绑定 | Conditional | Conditional | 已登记 prototype-board 输出单元时，必须匹配当前 run、`task_digest`、`input_revision`、`brief_path` 和 `brief_version`；旧 brief 版本的输出单元不能放行出图，旧任务的输出单元也不能放行出图。 |
 | 输出画布 | Conditional | Conditional | 有 `visual_baseline` 时，当前 run 的 prototype-board 输出单元必须写 `canvas_mode=physical_longboard` 和 `target_output_pixels`，且不得含 `pmw-prototype-prompt-check` 定义的短画布锚点。 |
 | 截图编辑模式 | Conditional | Conditional | 有 `visual_baseline` 且是已有功能迭代 / 视觉还原优先时，输出单元必须使用 `screenshot_edit`，绑定 `base_image`、`edit_scope`、`preserve_regions`；不能默认从零重画整页。 |
 | 生产基线改动证明 | Conditional | Conditional | 有 `visual_baseline` 时，输出单元必须说明当前线上问题、改动区域、为什么优于当前线上、保留 / 删除边界；证明不成立时不写 image-2 prompt。 |
@@ -51,6 +54,8 @@ pmw-dashboard status
 - `READY_FOR_PROTOTYPE / 可出图`：产品简报、产品简报确认、线上参考、必要的视觉基线、输出画布、截图编辑模式、生产基线改动证明、方案差异、原型设计完整度、设计规范目标及确认、方案方向确认和不可虚构项都通过；Zoon 未启用时使用本地简报，已启用时必须同步且无漂移；数据佐证缺失只提示未验证风险；复审状态仅展示，不阻断出图。
 - `READY_FOR_HANDOFF / 可交付`：出图前门槛全部通过，且原型复审为 `可通过`，研发可行性反问已完成，关键 D 已拍板，交付缺口不会改变承诺或验收。
 - `NOT_READY / 不可出图 / 不可交付`：任一 required 行未通过。输出必须给出第一条阻断行的行动建议，并路由到能补齐它的最早技能。
+
+Dashboard 只读取 controller 当前 active run。若只找到旧 run、旧 product_brief、旧 visual_baseline、旧 prototype-board 或旧 review，状态必须写成 `可参考，不可放行`；不得因为资料充足就推断本轮产品已对齐。
 
 ## 默认输出契约
 
@@ -81,6 +86,7 @@ PMWorkspace 产品准备度仪表盘：
 
 | 门槛 | Required | 状态 | 证据 | 行动 |
 |---|---|---|---|---|
+| 当前任务 | YES | ... | ... | ... |
 | 产品简报 | YES | ... | ... | ... |
 | 产品简报确认 | YES | ... | ... | ... |
 | Zoon | YES/no | ... | ... | ... |

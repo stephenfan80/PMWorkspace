@@ -76,8 +76,9 @@ brief_declares_aligned() {
 run_has_brief_confirmation() {
   local run_id="$1"
   local run_file="$PROJECT_DIR/runs/$run_id.jsonl"
+  local project_json="$PROJECT_DIR/project.json"
   [ -n "$run_id" ] && [ -f "$run_file" ] || return 1
-  python3 - "$run_file" <<'PY'
+  python3 - "$run_file" "$project_json" <<'PY'
 import json, sys
 
 def confirmed(row):
@@ -86,12 +87,22 @@ def confirmed(row):
     negative = any(token in text for token in ["待确认", "需要确认", "准备确认", "需要补充", "需要 PM 拍板", "不同意", "未确认"])
     return positive and not negative
 
+try:
+    project = json.load(open(sys.argv[2], encoding="utf-8"))
+except Exception:
+    project = {}
+digest = str(project.get("current_task_digest") or "")
+revision = str(project.get("current_input_revision") or "")
 ok = False
 with open(sys.argv[1], encoding="utf-8") as handle:
     for line in handle:
         try:
             row = json.loads(line)
         except Exception:
+            continue
+        if digest and str(row.get("task_digest") or "") != digest:
+            continue
+        if revision and str(row.get("input_revision") or "") != revision:
             continue
         title = str(row.get("title", ""))
         if row.get("event") not in {"gate", "decision"}:

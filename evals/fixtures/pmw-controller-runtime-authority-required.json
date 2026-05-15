@@ -1,0 +1,65 @@
+{
+  "id": "pmw-controller-runtime-authority-required",
+  "title": "PMW 任务必须先经过 controller intake 并绑定 task revision",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-workspace",
+  "prompt": "任何 PMW 任务都不能直接复用旧 run 或旧产物，必须先由 pmw-controller intake 判断是否继承或新建本轮 run/revision。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "Controller Runtime Authority",
+    "required_behaviors": [
+      "提供 pmw-controller intake/next/preflight/stamp 命令",
+      "project.json 写入 current_task_digest 和 current_input_revision",
+      "不同目标再次 intake 会创建新 run 或新 revision",
+      "skill 文档包含 controller preamble 和 STOP gate 文案"
+    ],
+    "forbidden_behaviors": [
+      "继续让 skill 直接信任 current-project",
+      "允许旧 completed run 自动放行新任务",
+      "用户确认不绑定 input_revision"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-controller",
+      "contains": "current_task_digest"
+    },
+    {
+      "path": "bin/pmw-controller",
+      "contains": "preflight_verdict"
+    },
+    {
+      "path": "pmworkspace-shared/skill-docs/skill-docs.manifest.json",
+      "contains": "pmw-controller intake"
+    },
+    {
+      "path": "pm-workspace/SKILL.md",
+      "contains": "pmw-controller intake"
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "ASK_CONFIRMATION"
+    },
+    {
+      "path": "pmworkspace-shared/references/runtime-kernel.md",
+      "contains": "Controller Authority"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=controller-runtime; bin/pmw-controller intake --goal A --materials one --skill pm-workspace --product-path 全新功能 --depth deep --json >/dev/null; bin/pmw-controller intake --goal B --materials two --skill pm-workspace --product-path 全新功能 --depth deep --json; python3 - <<'PY'\nimport os, pathlib, json\nroot=pathlib.Path(os.environ['PMW_HOME'])/'projects'/os.environ['PMW_PROJECT_SLUG']\nprint('runs', len(list((root/'runs').glob('*.jsonl'))))\nprint(json.loads((root/'project.json').read_text())['current_task_goal'])\nPY"
+      ],
+      "exit_code": 0,
+      "contains": [
+        "新建本轮 run",
+        "runs 2",
+        "B"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "id": "local-plugin-explicit-github-upgrade-required",
+  "title": "本地 Codex plugin 必须显式从 GitHub 源拉包安装",
+  "category": "release-maintenance",
+  "primary_skill": "pm-workspace",
+  "prompt": "PMWorkspace 作为本地 GitHub plugin 使用时，只能在用户明确升级后从 GitHub 拉取并安装，不能在普通产品工作流中静默更新。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "本地 plugin 显式升级",
+    "required_behaviors": [
+      "pmw-update-check 只发现更新并输出 UPGRADE_COMMAND",
+      "auto_upgrade 不为 true 时不静默执行升级",
+      "pmw-upgrade --host codex-plugin 从 repo_url / PMW_REPO_URL 克隆源码",
+      "pmw-upgrade --host codex-plugin 从克隆结果构建并安装本地 plugin 包",
+      "默认 repo_url 指向 https://github.com/stephenfan80/PMWorkspace.git"
+    ],
+    "forbidden_behaviors": [
+      "普通产品工作流静默 git pull 或覆盖本地 plugin",
+      "pmw-update-check 直接执行 pmw-upgrade",
+      "本地 plugin 升级只复用旧缓存而不读取配置的 Git 源",
+      "默认依赖 Codex 官方推荐插件更新入口"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-upgrade",
+      "contains": "PMW_UPGRADE_SOURCE $REPO_URL"
+    },
+    {
+      "path": "bin/pmw-upgrade",
+      "contains": "GIT_TERMINAL_PROMPT=0 git clone \"$REPO_URL\""
+    },
+    {
+      "path": "bin/pmw-config",
+      "contains": "repo_url) echo \"https://github.com/stephenfan80/PMWorkspace.git\""
+    },
+    {
+      "path": "pmworkspace-shared/references/update-workflow.md",
+      "contains": "The local GitHub plugin path is explicit-upgrade only"
+    },
+    {
+      "path": "pmworkspace-shared/references/update-workflow.md",
+      "contains": "pmw-upgrade --host codex-plugin"
+    },
+    {
+      "path": "pmworkspace-shared/references/update-workflow.md",
+      "contains": "It must not silently pull code"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); trap 'rm -rf \"$tmp\"' EXIT; git clone \"$PWD\" \"$tmp/src\" >/dev/null 2>&1; (cd \"$tmp/src\" && git config user.email pmw-eval@example.com && git config user.name 'PMW Eval' && printf '9.9.9\\n' > VERSION && git add VERSION && git commit -m 'Eval remote version' >/dev/null); PATH=\"/usr/bin:/bin:/usr/sbin:/sbin\" PMW_REPO_URL=\"$tmp/src\" CODEX_PLUGINS_DIR=\"$tmp/plugins\" CODEX_MARKETPLACE_PATH=\"$tmp/marketplace.json\" PMW_HOME=\"$tmp/state\" bin/pmw-upgrade --host codex-plugin > \"$tmp/out\" 2>&1; cat \"$tmp/out\"; grep -q \"PMW_UPGRADE_SOURCE $tmp/src\" \"$tmp/out\"; test \"$(tr -d '[:space:]' < \"$tmp/plugins/plugins/pmworkspace/skills/pmworkspace-shared/VERSION\")\" = '9.9.9'; test -f \"$tmp/plugins/plugins/pmworkspace/.codex-plugin/plugin.json\"; grep -q '\"name\": \"pmworkspace\"' \"$tmp/marketplace.json\""
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); trap 'rm -rf \"$tmp\"' EXIT; printf '99.0.0\\n' > \"$tmp/VERSION\"; printf 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\n' > \"$tmp/REVISION\"; out=$(PMW_HOME=\"$tmp/state\" PMW_REMOTE_VERSION_URL=\"file://$tmp/VERSION\" PMW_REMOTE_REVISION_URL=\"file://$tmp/REVISION\" PMW_REPO_URL=\"https://invalid.local/PMWorkspace.git\" bin/pmw-update-check --force); printf '%s\\n' \"$out\"; grep -q '^UPGRADE_AVAILABLE ' <<< \"$out\"; grep -q '^UPGRADE_COMMAND pmw-upgrade --host ' <<< \"$out\"; test ! -d \"$tmp/state/plugins\""
+      ],
+      "exit_code": 0
+    }
+  ]
+}

@@ -191,5 +191,5 @@ image-2
 用户更新路径：
 
 - 公开 Codex plugin 用户：从 Codex `Plugins` 页面更新 `AI 产品工作站`。
-- GitHub 本地 plugin 用户：运行 `pmw-upgrade --host codex-plugin`。
+- GitHub 本地 plugin 用户：运行 `pmw-upgrade --host codex-plugin`；该命令会从配置的 `repo_url` / `PMW_REPO_URL` 拉取最新 PMWorkspace 源码并重装本地 plugin 包，但不会在普通产品流程中静默执行。
 - 旧版 `~/.codex/skills` 用户：运行 `pmw-upgrade --host codex`。

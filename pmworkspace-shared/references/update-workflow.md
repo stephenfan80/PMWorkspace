@@ -75,6 +75,16 @@ Do not upgrade silently when `auto_upgrade` is not true. Ask the user first, and
 
 `pmw-upgrade` never deletes `~/.pmworkspace` project state, product briefs, prototypes, handoff assets, Zoon links, or local audit history.
 
+## Local GitHub Plugin Contract
+
+The local GitHub plugin path is explicit-upgrade only:
+
+- `pmw-update-check` can detect a newer `VERSION` or packaged `REVISION`, but it must only emit `UPGRADE_AVAILABLE` and `UPGRADE_COMMAND`.
+- When the user explicitly confirms upgrade, run the emitted command, normally `pmw-upgrade --host codex-plugin`.
+- `pmw-upgrade --host codex-plugin` must clone the configured `repo_url` / `PMW_REPO_URL` with `GIT_TERMINAL_PROMPT=0`, build the Codex plugin package from that clone, then install it into the local plugin package path.
+- The default `repo_url` is `https://github.com/stephenfan80/PMWorkspace.git`.
+- It must not silently pull code, overwrite the local plugin, or purge Codex plugin cache from a normal product workflow.
+
 ## Install Hosts
 
 - `codex`: legacy skill install under `~/.codex/skills`.

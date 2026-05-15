@@ -115,7 +115,8 @@ for version_file in \
   fi
 done
 
-git clone "$REPO_URL" "$tmp/PMWorkspace"
+echo "PMW_UPGRADE_SOURCE $REPO_URL" >&2
+GIT_TERMINAL_PROMPT=0 git clone "$REPO_URL" "$tmp/PMWorkspace"
 
 INSTALLED_REVISION_FILE=""
 

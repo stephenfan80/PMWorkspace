@@ -23,7 +23,7 @@ description: |
 
 出图前增加 `原型设计完整度内核`：每条产品路径必须先判断当前设计完整度 0-10，说明为什么不是 10/10，定义本屏的 10/10 原型标准，再把 image-2 prompt 写成设计修正指令。PMW 不接受只写“现代、简洁、高级”的氛围 prompt；必须把设计判断落到信息层级、状态覆盖、用户旅程、反 AI 模板味、设计系统 / 线上基线、移动端可用性和未决设计选择。
 
-出图前还要确定 `设计规范目标`：优先使用用户提供的设计规范 / Figma / 截图 / 品牌规则；命中汽车之家、AutoDesign、之家或 Autohome 时使用 AutoDesign；非汽车之家产品可按 Instagram（Ins）、YouTube、TikTok、抖音、大众点评、美团等平台模式库建立参考型规范；都没有时使用 PMW 默认移动端产品 UI 基线并标记 `基于假设，可讨论`。Dribbble、Pinterest 或平台参考只能作为设计启发，提炼布局、层级、交互、状态和信任模式，不能复制图片、文案、品牌素材或专有 UI。
+出图前还要确定 `设计规范目标`：优先使用用户提供的设计规范 / Figma / 截图 / 品牌规则；命中汽车之家、AutoDesign、之家或 Autohome 时使用 AutoDesign；非汽车之家产品可按 Instagram（Ins）、YouTube、TikTok、抖音、大众点评、美团等平台模式库建立参考型规范；都没有时使用 PMW 默认移动端产品 UI 基线并标记 `待确认设计规范`。Dribbble、Pinterest 或平台参考只能作为设计启发，提炼布局、层级、交互、状态和信任模式，不能复制图片、文案、品牌素材或专有 UI。
 
 <!-- PMW-GENERATED-CONTRACT:START -->
 ## PMWorkspace 生成契约
@@ -65,9 +65,9 @@ description: |
 - 真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。
 - 快速更新：每个 skill 运行前用 `pmw-update-check --quick`；如果输出 `UPGRADE_AVAILABLE`，先询问用户是否执行 `UPGRADE_COMMAND`，除非 `auto_upgrade` 为 `true`。
 - 运行时入口：每个 PMW 产品任务先过 `pmw-controller intake`，由 controller 判定是否继承或新建 run，并写入 `task_digest` / `input_revision`。
-- STOP gate：`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能进入下游产物。
+- STOP gate：`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能进入下游产物；`WRITE_PENDING_BRIEF` 只能路由到产品简报。
 - 当前任务绑定：brief、visual baseline、prototype-board、review、handoff 和用户确认必须匹配当前 run、`task_digest` 与 `input_revision`；旧产物只能参考，不能放行。
-- 摘要：中文本地化、记忆不覆盖本轮事实、出图前必须通过 prototype preflight、禁止泄露 token/ownerSecret/私密资料。
+- 摘要：中文本地化、记忆不覆盖本轮事实、只有 `ALLOW_IMAGE_PROMPT` 才能写 image-2 prompt，方向选择不能替代产品简报确认，禁止泄露 token/ownerSecret/私密资料。
 
 ### 默认用户可见输出字段
 
@@ -145,7 +145,7 @@ fi
 - Read `../pmworkspace-shared/references/prototype-shotgun-board.md`.
 - Read `../pmworkspace-shared/references/design-system-workflow.md`.
 - Read `../pmworkspace-shared/references/prototype-quality-review.md`.
-- Follow `runtime-kernel.md` Run Owner 协议 through `pmw-controller`. If called directly, run `pmw-controller intake --goal "<本轮原型目标>" --materials "<本轮用户材料摘要>" --skill pm-prototype-shotgun --product-path "<全新功能|已有功能迭代>" --depth "<quick|deep>" --stage prototype` before planning images. Then run `pmw-controller next --json` and `pmw-controller preflight --target prototype --json`.
+- Follow `runtime-kernel.md` Run Owner 协议 through `pmw-controller`. If called directly, run `pmw-controller intake --goal "<本轮原型目标>" --materials "<本轮用户材料摘要>" --skill pm-prototype-shotgun --product-path "<全新功能|已有功能迭代>" --depth "deep" --stage prototype` before planning images. Then run `pmw-controller next --json` and `pmw-controller preflight --target prototype --json`.
   - If controller returns `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` or `BLOCKED`, stop and do not write image-2 prompts.
   - Only current-run/current-task artifacts count. Old aligned briefs, old prototype-board units, old screenshots, or old scheme confirmations are reference material until they are updated and stamped to the current `task_digest` / `input_revision`.
 - 原型方案阶段必须先读取统一 `产品信息对齐包`：脚本可用时用 `pmw-dashboard status` 的产品信息对齐和当前产品缺口；脚本不可用时从最新 brief / artifact-flow / run 手动整理。若对齐包显示核心事实维度缺失、最新截图/数据未写回 brief、或产品判断对抗校验缺失，退回 `$pm-jobs` / `$pm-brief`，不能只靠当前对话继续写 prompt。
@@ -196,8 +196,8 @@ fi
 6. Use `pmw-memory user-summary` plus `pmw-memory taste-summary` when available so rejected directions are not repeated as “new”方案 and local product cognition can improve recommendations; if memory changes the recommendation, explicitly say `基于过往偏好，我建议...` or `基于本地产品认知...`, and never let memory override the current brief, Zoon, anti-metric, non-fiction boundary, design system, or reference gate.
 7. 输出 `原型出图判断`：先说明我建议这轮出哪些单图、暂时不出哪些屏、为什么这些图能帮助 PM 做产品选择，以及图片生成前门槛。必须展示 `产品简报确认`、`方案方向确认`、`数据佐证`、`视觉基线状态`、`目标输出像素` 和 `设计规范目标`；数据缺失时写明 `数据佐证：未提供，本方案存在未验证风险`。
 8. Propose concept directions with names and tradeoffs. 默认最少 3 条产品路径；少于 3 条路径必须记录豁免原因。方案差异必须通过 `方案差异质量`：至少说明每个方向在产品策略、信息架构、交互模型、信任模型或关键任务路径上的不同；如果只是视觉皮肤差异，停止并重拟方向。每个方案必须输出 `产品路径`、`用户行为假设`、`要赢过的现状替代`、`当前损失`、`删除 / 牺牲 / 后置项`、`验证信号`、`失败信号`、`原型思考`、`信息架构设计思考` 和 `用户问题解决逻辑`。
-9. 对每条产品路径运行 `原型设计完整度内核`：给出 0-10 评分，说明当前差距，定义本屏 10/10 原型标准，并判断是否存在 AI 模板味风险。检查维度包括信息架构、状态覆盖、用户旅程、反 AI 模板味、设计系统 / 线上基线、移动端可用性和未决设计选择。快速成型可以低分继续，但用户可见状态必须写 `基于假设，可讨论`；深度交付中缺 10/10 标准或反模板味约束时不写 image-2 prompt。
-10. 确定并确认 `设计规范目标`：用户提供规范优先；命中汽车之家、AutoDesign、之家或 Autohome 时默认载入 AutoDesign 约束，产品 UI 优先使用 AutoDesign token；非汽车之家产品按用户指定或产品形态选择 Instagram（Ins）、YouTube、TikTok、抖音、大众点评、美团等平台模式库；都没有时使用 PMW 默认移动端产品 UI 基线并标记 `基于假设，可讨论`。如果设计规范不明确，先输出设计规范目标卡并等待用户修改 / 确认，或得到按默认假设继续的批准；平台脚本可用时记录 `设计规范目标确认` gate / decision。
+9. 对每条产品路径运行 `原型设计完整度内核`：给出 0-10 评分，说明当前差距，定义本屏 10/10 原型标准，并判断是否存在 AI 模板味风险。检查维度包括信息架构、状态覆盖、用户旅程、反 AI 模板味、设计系统 / 线上基线、移动端可用性和未决设计选择。缺 10/10 标准、反模板味约束或当前产品简报未 `已对齐` 时不写 image-2 prompt。
+10. 确定并确认 `设计规范目标`：用户提供规范优先；命中汽车之家、AutoDesign、之家或 Autohome 时默认载入 AutoDesign 约束，产品 UI 优先使用 AutoDesign token；非汽车之家产品按用户指定或产品形态选择 Instagram（Ins）、YouTube、TikTok、抖音、大众点评、美团等平台模式库；都没有时使用 PMW 默认移动端产品 UI 基线并标记 `待确认设计规范`。如果设计规范不明确，先输出设计规范目标卡并等待用户修改 / 确认；平台脚本可用时记录 `设计规范目标确认` gate / decision。
 11. 如果使用 Dribbble、Pinterest、公开页面、平台模式库或用户截图做设计启发，登记为 `browser_evidence`，摘要必须写清可复用布局、信息层级、交互结构、状态表达、信任提示、不可照搬项和版权边界。不得把外部参考写成可复制图片、品牌素材、文案、专有 UI 或官方规范合规承诺。
 12. 若用户提供线上截图或等价视觉基线，截图基线优先于泛化设计 token，并且必须用 `visual_baseline` 锁定参考尺寸与目标输出像素；品牌 VI 和字体包只作为品牌露出、活动视觉或特殊场景参考，字体授权必须保留边界，不能写成生产可用承诺。
 13. 多方案生成前确认方案方向；如果用户已经明确批准默认方向，记录 `方案方向确认：默认方向已批准`，否则停在方向确认，不写 image-2 提示词。注意：方案方向确认不是产品简报确认；已有功能迭代在方向确认后如果新增截图 / 数据 / 线上参考，必须重新进入 `$pm-brief` 确认最新 brief。

@@ -1,6 +1,6 @@
 {
   "id": "autoplan-deep-earliest-gate-next-skill",
-  "title": "深度交付只推进到最早门槛并映射下一技能",
+  "title": "深度产品对齐只推进到最早门槛并映射下一技能",
   "category": "autoplan",
   "primary_skill": "pm-autoplan",
   "prompt": "一次自动跑完整产品评审：我有 PRD 草稿，但工作目标和场景还没有确认。",
@@ -24,11 +24,11 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/autoplan-workflow.md",
-      "contains": "深度交付不是每轮都把所有子流程跑完。每轮只推进到“最早仍不可靠的门槛”"
+      "contains": "不是每轮都把所有子流程跑完。每轮只推进到“最早仍不可靠的门槛”"
     },
     {
       "path": "pmworkspace-shared/references/autoplan-workflow.md",
-      "contains": "| 工作目标、场景、Q 诊断、前提确认 | `$pm-jobs` |"
+      "contains": "| 产品路径、工作目标、场景、Q 诊断、产品发现深度、前提确认 | `$pm-jobs` |"
     },
     {
       "path": "pm-autoplan/SKILL.md",
@@ -36,7 +36,7 @@
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "深度交付每轮只推进到最早仍不可靠的门槛，并映射到一个下一技能"
+      "contains": "所有输入都走深度产品对齐，每轮只推进到最早仍不可靠的门槛"
     }
   ]
 }

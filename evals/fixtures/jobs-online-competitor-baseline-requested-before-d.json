@@ -41,7 +41,7 @@
     },
     {
       "path": "pmworkspace-shared/references/autoplan-workflow.md",
-      "contains": "这里不再首次发现基线缺口"
+      "contains": "线上参考和设计系统基线复核"
     },
     {
       "path": "pmworkspace-shared/references/production-reference-gate.md",

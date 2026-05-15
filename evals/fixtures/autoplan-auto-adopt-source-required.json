@@ -3,9 +3,9 @@
   "title": "自动采用项必须说明来源和不需要拍板的理由",
   "category": "autoplan",
   "primary_skill": "pm-autoplan",
-  "prompt": "自动评审准备采用移动端优先、默认轻量包结构和已有 Zoon append。",
+  "prompt": "自动评审准备采用移动端优先、默认图片登记格式和已有 Zoon append。",
   "expected": {
-    "mode": "quick",
+    "mode": "deep",
     "status": "待确认",
     "must_stop": false,
     "gate": "自动采用来源",

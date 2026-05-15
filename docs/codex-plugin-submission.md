@@ -30,12 +30,12 @@ Product briefs, image-2 prototypes, reviews, and PRDs
 
 ## Long Description
 
-AI 产品工作站, powered by PMWorkspace, is a product workbench for product managers. It turns fuzzy ideas, PRDs, screenshots, customer insight, or prototype requests into quick shaping or deep delivery workflows. It captures assumptions, goals, counter-metrics, constraints, and non-fiction boundaries; produces aligned product briefs; supports mobile-first image-2 prototype directions; reviews prototypes against product intent; and prepares compact PRD or design handoff assets.
+AI 产品工作站, powered by PMWorkspace, is a product workbench for product managers. It routes fuzzy ideas, PRDs, screenshots, customer insight, or prototype requests into new-feature or existing-feature product paths, then enforces deep product alignment before image-2 prototypes or handoff. It captures assumptions, goals, counter-metrics, constraints, and non-fiction boundaries; produces aligned product briefs; supports mobile-first image-2 prototype directions; reviews prototypes against product intent; and prepares compact PRD or design handoff assets.
 
 ## 默认 Prompt
 
 ```text
-用 AI 产品工作站把这个产品想法快速成型为产品简报、方案方向和移动端原型图。
+用 AI 产品工作站把这个产品想法先对齐成产品简报，再输出方案方向和移动端原型图。
 用 AI 产品工作站把这份 PRD 或截图反馈整理成可出图产品简报。
 用 AI 产品工作站复审这批原型，并整理成精简 PRD 交付稿。
 ```
@@ -94,7 +94,7 @@ AI产品工作站
 
 第一目标用户是产品经理，尤其是这些场景：
 
-- 一句话产品想法需要快速变成可讨论方案。
+- 一句话产品想法需要先对齐真实问题，再变成可讨论方案。
 - PRD、截图反馈、用户洞察散落在不同地方，需要先压缩成产品简报。
 - 设计要出移动端原型图，但目标、反指标、边界和事实来源还没对齐。
 - 原型已经有了，需要用产品、风险、设计系统和数据可行性视角复审。
@@ -125,7 +125,7 @@ bin/pmw-upgrade --host codex-plugin
 安装后推荐触发：
 
 ```text
-使用 $pm-workspace 把这个产品想法快速成型为产品简报、方案方向和移动端原型图。
+使用 $pm-workspace 把这个产品想法先对齐成产品简报，再输出方案方向和移动端原型图。
 ```
 
 也可以搜索：

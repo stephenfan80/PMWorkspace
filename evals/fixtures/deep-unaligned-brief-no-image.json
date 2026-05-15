@@ -1,6 +1,6 @@
 {
   "id": "deep-unaligned-brief-no-image",
-  "title": "深度交付未对齐时禁止出图",
+  "title": "产品简报未对齐时禁止出图",
   "category": "pm-prototype-shotgun",
   "primary_skill": "pm-prototype-shotgun",
   "prompt": "使用 $pm-prototype-shotgun 直接为这个高风险交易结果页生成 image-2 原型，但当前只有草稿产品简报。",
@@ -27,7 +27,7 @@
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "深度交付：产品简报未 `已对齐` 时禁止 image-2 提示词和图片生成。"
+      "contains": "产品简报：当前 `input_revision` 的产品简报未 `已对齐` 时禁止 image-2 提示词和图片生成。"
     }
   ]
 }

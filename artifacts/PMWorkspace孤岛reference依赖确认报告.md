@@ -61,7 +61,7 @@ git ls-files pmworkspace-shared/references/<file> plugins/pmworkspace/skills/pmw
 
 - 原始发现：未发现显式引用。
 - 内容是用户可复制启动话术，适合作为示例，不适合作为运行时协议。
-- 与 README 的快速成型 / 深度交付示例和 `welcome-guide.md` 存在重叠。
+- 与 README 的全新功能 / 已有功能示例和 `welcome-guide.md` 存在重叠。
 
 执行结果：已移到 appendix / examples，并补充 `examples/prompt-recipes.md` 入口。
 

@@ -2,16 +2,16 @@
 name: pm-autoplan
 description: |
   PMWorkspace 自动产品评审流水线。用于用户希望“一次跑完整产品评审”“自动把
-  产品方向梳理到可出原型前”“按推荐推进但关键点让我拍板”，或希望快速产出
-  “产品简述 + 至少 3 个方案方向 + 原型图”轻量包时。支持快速成型模式和深度交付模式。
-  快速成型模式用最少追问确认假设后产出可讨论轻量包；深度交付模式顺序串联
+  产品方向梳理到可出原型前”“按推荐推进但关键点让我拍板”，或希望产出
+  “产品简述 + 至少 3 个方案方向 + 原型图”时。所有任务统一进入深度产品对齐，
+  顺序串联
   pm-jobs、pm-strategy-review、pm-brief、本地简报保存、可选 Zoon 同步、Zoon 漂移检查和原型
   准备度检查，只把会改变方向的 D 选择题交给用户确认。
 ---
 
 # 自动产品评审
 
-`$pm-autoplan` 是 PMWorkspace 的一键推进模式：把零散想法推进成可讨论轻量包，或推进到可确认的产品简报与交付资产。它不是跳过产品判断直接出图。
+`$pm-autoplan` 是 PMWorkspace 的一键推进模式：把零散想法推进到可确认的产品简报、方案方向与交付资产。它不是跳过产品判断直接出图。
 
 <!-- PMW-GENERATED-CONTRACT:START -->
 ## PMWorkspace 生成契约
@@ -21,7 +21,7 @@ description: |
 - skill：`pm-autoplan`
 - 契约版本：`2`
 - 阶段：自动产品评审
-- 定位：作为靠谱产品负责人，总控快速成型或深度交付，只推进到当前最早门槛。
+- 定位：作为靠谱产品负责人，总控全新功能或已有功能迭代的深度产品对齐，只推进到当前最早门槛。
 
 ### 统一前置检查
 
@@ -51,9 +51,9 @@ description: |
 - 真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。
 - 快速更新：每个 skill 运行前用 `pmw-update-check --quick`；如果输出 `UPGRADE_AVAILABLE`，先询问用户是否执行 `UPGRADE_COMMAND`，除非 `auto_upgrade` 为 `true`。
 - 运行时入口：每个 PMW 产品任务先过 `pmw-controller intake`，由 controller 判定是否继承或新建 run，并写入 `task_digest` / `input_revision`。
-- STOP gate：`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能进入下游产物。
+- STOP gate：`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能进入下游产物；`WRITE_PENDING_BRIEF` 只能路由到产品简报。
 - 当前任务绑定：brief、visual baseline、prototype-board、review、handoff 和用户确认必须匹配当前 run、`task_digest` 与 `input_revision`；旧产物只能参考，不能放行。
-- 摘要：中文本地化、记忆不覆盖本轮事实、出图前必须通过 prototype preflight、禁止泄露 token/ownerSecret/私密资料。
+- 摘要：中文本地化、记忆不覆盖本轮事实、只有 `ALLOW_IMAGE_PROMPT` 才能写 image-2 prompt，方向选择不能替代产品简报确认，禁止泄露 token/ownerSecret/私密资料。
 
 ### 默认用户可见输出字段
 
@@ -117,7 +117,7 @@ fi
 6. Read `../pmworkspace-shared/references/artifact-flow.md` and include Product Artifact Flow in the control panel when routing between skills.
 7. Read `../pmworkspace-shared/references/pm-decision-principles.md`.
 8. Read `../pmworkspace-shared/references/pm-eval-system.md` and treat its contracts as maintenance guardrails for PMWorkspace behavior.
-9. Read `../pmworkspace-shared/references/routing.md`; if `$pm-autoplan` was entered from `$pm-workspace`, inherit its mode and run. If called directly, use routing D0 to choose mode.
+9. Read `../pmworkspace-shared/references/routing.md`; if `$pm-autoplan` was entered from `$pm-workspace`, inherit its product path and run. If called directly, use routing D0 to choose product path; execution depth is always deep alignment.
 10. Read `../pmworkspace-shared/references/question-tuning.md`.
 11. Read `../pmworkspace-shared/references/product-office-hours.md`.
 12. Read `../pmworkspace-shared/references/product-discovery-gate.md`.
@@ -125,16 +125,13 @@ fi
 14. Read `../pmworkspace-shared/references/adversarial-review.md`.
 15. Read `../pmworkspace-shared/references/product-plan-handoff.md`.
 16. Read `../pmworkspace-shared/references/zoon-workflow.md` and `../pmworkspace-shared/references/zoon-drift-check.md`.
-15. Follow `runtime-kernel.md` Run Owner 协议 through `pmw-controller`: if `$pm-autoplan` was entered from `$pm-workspace`, read the current controller run/revision and inherit it only when `task_digest` matches the current user materials；匹配时复用当前 run，不要重新 `pmw-run start`。If called directly, run `pmw-controller intake --goal "<本轮目标>" --materials "<本轮用户材料摘要>" --skill pm-autoplan --product-path "<全新功能|已有功能迭代>" --depth "<quick|deep>" --stage autoplan`, then run `pmw-controller next --json`.
+15. Follow `runtime-kernel.md` Run Owner 协议 through `pmw-controller`: if `$pm-autoplan` was entered from `$pm-workspace`, read the current controller run/revision and inherit it only when `task_digest` matches the current user materials；匹配时复用当前 run，不要重新 `pmw-run start`。If called directly, run `pmw-controller intake --goal "<本轮目标>" --materials "<本轮用户材料摘要>" --skill pm-autoplan --product-path "<全新功能|已有功能迭代>" --depth "deep" --stage autoplan`, then run `pmw-controller next --json`.
     - If controller creates a new `input_revision`, old brief/board/review artifacts are only reference material until re-stamped or regenerated.
-    - If `pmw-controller next` returns `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` or `BLOCKED`, stop at that earliest gate and do not write downstream artifacts.
-16. 先建立 `产品信息对齐包` 和 `产品作业卡`，再 Build the automatic review control panel from `autoplan-workflow.md`: 靠谱产品负责人姿态、模式来源、事实来源优先级、当前阶段、产品信息对齐状态、当前主阻断、关键缺口队列、PMW 产品建议、PMW 信息架构建议、最早阻塞门槛、门槛等级、门槛来源、可自动采用项、必须 PM 拍板项、下一技能和交接上下文.
-17. 快速成型模式：先做生产/高风险升级检查；如果出现生产流程、高风险承诺、真实数据、线索/交易/隐私或研发交付信号，升级到深度交付门槛，不要继续轻量包。
-18. 快速成型模式：按产品方向审查内核检测会影响轻量包结构的缺口：产品路径、线上/竞品基线识别、证据收集、核心用户/场景、核心问题、当前替代/损失、主目标/反指标、不可虚构项、原型屏幕范围、三条产品路径差异、假设确认。Agent 可先整理材料、拆解截图、生成访谈提纲、梳理数据口径或做最佳实践摘要；只有卡在用户事实或取舍时才问 `Q` / `D`。已有功能迭代缺线上基线时，即使用户要求快速成型，也不能先给三条方案方向；先停在产品作业卡和截图 / 关键节点截图证据请求。用户主动提到其他页面或竞品平台时，必须在产品作业卡里要求截图、URL 或具体可借鉴点，不能等到出图前才问。
-19. 快速成型模式：列出关键假设、方案方向和每张图的不可虚构项，请用户确认“按这些假设继续”。确认前不生成图片，并用 `pmw-run event --type gate` 记录当前门槛。
-20. 快速成型模式：确认后输出轻量包：标注假设的产品简述、至少 3 个方案方向、每个方案 1 张移动端 image-2 原型图计划，并把状态写成 `基于假设，可讨论`。少于 3 个方案必须写豁免原因。
-21. 深度交付模式：按最早门槛顺序推进：工作目标模式、产品路径、产品方向审查内核（含线上/竞品基线识别）、证据收集、用户需求澄清、数据/现状佐证、路径机会判断、必要 Q/D、前提确认、策略审查、产品简述 / 产品简报、待确认问题卡、本地简报保存、产品简报确认、已对齐后 Zoon A/B 推荐、已启用 Zoon 的漂移检查、线上参考和设计系统基线、Product Readiness Dashboard 的原型准备度或交付准备度。
-22. 深度交付模式：Use `pm-decision-principles.md` to auto-decide only low-risk defaults that do not change product direction; surface any direction-changing item as a single `D` choice question and stop.
+    - If `pmw-controller next` returns `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED` or `BLOCKED`, stop at that earliest gate and do not write downstream artifacts.
+16. 先建立 `产品信息对齐包` 和 `产品作业卡`，再 Build the automatic review control panel from `autoplan-workflow.md`: 靠谱产品负责人姿态、产品路径、事实来源优先级、当前阶段、产品信息对齐状态、当前主阻断、关键缺口队列、PMW 产品建议、PMW 信息架构建议、最早阻塞门槛、门槛等级、门槛来源、可自动采用项、必须 PM 拍板项、下一技能和交接上下文.
+17. 按统一深度产品对齐门槛顺序推进：工作目标模式、产品路径、产品方向审查内核（含线上/竞品基线识别）、证据收集、用户需求澄清、数据/现状佐证、路径机会判断、必要 Q/D、前提确认、策略审查、产品简述 / 产品简报、待确认问题卡、本地简报保存、产品简报确认、已对齐后 Zoon A/B 推荐、已启用 Zoon 的漂移检查、线上参考和设计系统基线、Product Readiness Dashboard 的原型准备度或交付准备度。
+18. 用户说“先看方案”“直接出图”“快速给我”也不能绕过产品简报。只有当前 `input_revision` 的产品简报已对齐，并且 `pmw-controller preflight --target prototype` 与 `pmw-image-preflight check` 返回 `ALLOW_IMAGE_PROMPT`，才允许交给 `$pm-prototype-shotgun`。
+19. Use `pm-decision-principles.md` to auto-decide only low-risk defaults that do not change product direction; surface any direction-changing item as a single `D` choice question and stop.
 23. Give the user a conclusion-first review: first output `自动评审结论` with `我建议` and `理由`, include a short `工作方式` / progress card, and include `本轮价值时刻` plus `补齐后解锁`; then write the full `评审控制面板` to audit.
 24. For the earliest gate, always declare `门槛等级` as `阻断`、`高风险`、`可自动采用` or `可延后`, and declare `门槛来源`.
 25. Every item in `已自动采用` must include source and why no PM decision is needed, for example `默认移动端优先。来源：PMWorkspace 默认规则。原因：不改变产品方向或用户承诺。`
@@ -151,7 +148,7 @@ fi
 29. Map the earliest blocking gate to one next skill: `$pm-jobs`, `$pm-strategy-review`, `$pm-brief`, `$pm-prototype-shotgun`, `$pm-prototype-review`, or `$pm-handoff`. Do not pretend all downstream skills have completed when only the next gate is ready.
 30. `下一技能` cannot be only a skill id in audit; record `交接上下文` with 来源门槛、已确认事实、未决 Q/D、证据状态 and 交给它的原因. 交接上下文还必须追加上游产物、本轮产物、下游可读和产物流动，但默认不展示给用户。
 31. At each gate, record evidence, decisions, artifacts, or reviews with `pmw-run event`; before final output, run `pmw-dashboard status` when available and only surface its short business summary.
-32. End with a readiness state: `需要补充`、`待确认`、`基于假设，可讨论`、`已对齐`、`可进入原型复审`、or `可交付`. Call `pmw-run finish` only when the current run reaches a terminal readiness state; if waiting for Q/D/证据 or handing off to a child skill, keep the current run open for reuse.
+32. End with a readiness state: `需要补充`、`待确认`、`已对齐`、`可进入原型复审`、or `可交付`. Call `pmw-run finish` only when the current run reaches a terminal readiness state; if waiting for Q/D/证据 or handing off to a child skill, keep the current run open for reuse.
 
 ## Auto-Decide Rules
 
@@ -164,7 +161,6 @@ fi
 - 不影响方向的格式、标题、状态字段。输出时说明来源：PMWorkspace 输出协议；原因：不改变范围、承诺或验收。
 - 已有 Zoon URL 时优先 append，不新建文档。输出时说明来源：Zoon 协议；原因：保持在线事实来源连续。
 - 未启用 Zoon 时使用本地已对齐产品简报。输出时说明来源：PMWorkspace 默认规则；原因：减少在线协作卡点，不改变产品事实。
-- 快速成型模式中，不影响方案结构的轻量包格式和默认输出数量。输出时说明来源：快速成型协议；原因：不改变产品事实。
 
 必须提问：
 
@@ -173,9 +169,7 @@ fi
 - 线上参考需要但缺失。
 - Zoon 最新内容和本地产品简报冲突。
 - 用户承诺、数据真实性、线索/交易/隐私口径需要 PM 拍板。
-- 快速成型模式出图前，用户尚未确认“按这些假设继续”。
-- 快速成型输入出现生产流程、高风险承诺、真实数据、线索/交易/隐私或研发交付信号，需要升级到深度交付门槛。
-- 深度交付的最早门槛尚未通过，但用户要求跳到原型、HTML、交付稿或完整 PRD。
+- 当前 `input_revision` 的产品简报尚未达到 `已对齐`，但用户要求跳到原型、HTML、交付稿或完整 PRD。
 
 ## 输出
 
@@ -200,8 +194,8 @@ fi
 内部评审控制面板（默认不展示，写入审计）：
 - 状态：
 - run_id：
-- 模式：<快速成型 / 深度交付>
-- 模式来源：
+- 对齐深度：深度产品对齐
+- 路径来源：
 - 产品路径：<全新功能 / 已有功能迭代>
 - 当前任务流阶段：
 - 推进阶段：
@@ -224,7 +218,7 @@ fi
 - 产品简报：
 - 产品设计文档：
 - 方案方向：
-- 轻量包图片计划：
+- 原型图片计划：
 - Zoon 同步：
 - Zoon 漂移检查：
 - 原型准备度：

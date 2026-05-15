@@ -789,7 +789,7 @@
       <div class="route-map">
         <div class="scenario-list" role="tablist" aria-label="PMW 场景列表">
           <button class="scenario-btn active" data-scenario="idea" role="tab">一句话新 idea</button>
-          <button class="scenario-btn" data-scenario="quick" role="tab">10 分钟快速成型</button>
+          <button class="scenario-btn" data-scenario="quick" role="tab">全新功能深度对齐</button>
           <button class="scenario-btn" data-scenario="existing-missing" role="tab">已有功能缺截图</button>
           <button class="scenario-btn" data-scenario="existing-ready" role="tab">已有功能有基线</button>
           <button class="scenario-btn" data-scenario="screenshot" role="tab">只上传截图 / 参考</button>
@@ -807,7 +807,7 @@
               <span class="badge">默认 $pm-jobs</span>
             </div>
             <div class="mini-flow">
-              <div class="mini-step"><b>识别路径</b><span>全新功能；执行深度由风险判断。</span></div>
+              <div class="mini-step"><b>识别路径</b><span>全新功能；对齐深度固定为深度产品对齐。</span></div>
               <div class="mini-step"><b>产品作业卡</b><span>先收目标用户、触发场景、当前替代、当前损失，并给出 PMW 建议。</span></div>
               <div class="mini-step"><b>方向审查</b><span>前提挑战、现状替代、不做推演、路径对比。</span></div>
               <div class="mini-step"><b>下一步</b><span>事实足够才进入 brief；不足则给产品作业。</span></div>
@@ -822,20 +822,20 @@
 
           <article class="scenario-card" id="quick" role="tabpanel">
             <div class="scenario-title">
-              <div><h3>10 分钟快速成型</h3><p>用户想先拿可讨论材料，但没有生产流程、高风险承诺、真实交易或交付信号。</p></div>
+              <div><h3>全新功能深度对齐</h3><p>用户想先拿可讨论材料，也必须先完成当前产品简报对齐。</p></div>
               <span class="badge">默认 $pm-autoplan</span>
             </div>
             <div class="mini-flow">
-              <div class="mini-step"><b>轻量判断</b><span>快速成型，但仍要说明假设和不可虚构项。</span></div>
-              <div class="mini-step"><b>假设确认</b><span>用户确认“按这些假设继续”才可以出图。</span></div>
+              <div class="mini-step"><b>产品判断</b><span>压实目标用户、触发场景、当前替代、当前损失和不可虚构项。</span></div>
+              <div class="mini-step"><b>简报确认</b><span>当前 input_revision 的产品简报已对齐后才可以出图。</span></div>
               <div class="mini-step"><b>三条产品路径</b><span>路径差异来自产品判断，而不是换皮。</span></div>
-              <div class="mini-step"><b>轻量包</b><span>状态为“基于假设，可讨论”。</span></div>
+              <div class="mini-step"><b>准备度</b><span>readiness 与 image preflight 通过后才允许 image-2。</span></div>
             </div>
             <div class="info-grid">
               <div class="info"><b>必须保留</b><p>真实问题暂判、反指标、不可虚构项、证据缺口。</p></div>
-              <div class="info"><b>升级信号</b><p>线上流程、线索/交易/隐私、研发交付、真实数据承诺。</p></div>
-              <div class="info"><b>不能做</b><p>不能包装成最终 PRD 或已验证需求。</p></div>
-              <div class="info"><b>解锁产物</b><p>产品简述 + 三条产品路径 + 单图 image-2 原型。</p></div>
+              <div class="info"><b>路径冲突</b><p>新工具 + 指标优化信号同时出现时，先确认产品路径。</p></div>
+              <div class="info"><b>不能做</b><p>不能把方向选择包装成产品简报已对齐。</p></div>
+              <div class="info"><b>解锁产物</b><p>已对齐产品简报 + 三条产品路径 + 单图 image-2 原型。</p></div>
             </div>
           </article>
 
@@ -1131,8 +1131,8 @@
         <p>全新功能还是已有功能迭代？已有功能必须先要线上视觉基线；全新功能必须先压实目标用户、触发场景、当前替代和当前损失。</p>
       </div>
       <div class="decision">
-        <b>D0 执行深度</b>
-        <p>快速成型还是深度交付？生产流程、高风险承诺、线索/交易/隐私、真实数据或研发交付信号会升级深度交付。</p>
+        <b>D0 对齐深度</b>
+        <p>对齐深度固定为深度产品对齐；没有快速模式。生产流程、高风险承诺、线索/交易/隐私、真实数据或研发交付信号只会增加门槛，不会放行出图。</p>
       </div>
       <div class="decision">
         <b>范围模式</b>

@@ -45,7 +45,7 @@
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "摘要：中文本地化、记忆不覆盖本轮事实、出图前必须通过 prototype preflight、禁止泄露 token/ownerSecret/私密资料。"
+      "contains": "摘要：中文本地化、记忆不覆盖本轮事实、只有 `ALLOW_IMAGE_PROMPT` 才能写 image-2 prompt，方向选择不能替代产品简报确认，禁止泄露 token/ownerSecret/私密资料。"
     },
     {
       "path": "pm-brief/SKILL.md",

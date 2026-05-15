@@ -1,0 +1,38 @@
+{
+  "id": "autoplan-risk-stays-deep-alignment",
+  "title": "高风险或生产信号必须停在深度对齐门槛",
+  "category": "autoplan",
+  "primary_skill": "pm-autoplan",
+  "prompt": "给我出 3 条产品路径图：这是线上交易页改版，要展示真实最低价并收集手机号线索。",
+  "expected": {
+    "mode": "deep",
+    "status": "待确认",
+    "must_stop": true,
+    "gate": "深度对齐门槛",
+    "required_behaviors": [
+      "识别生产流程",
+      "识别真实数据和线索风险",
+      "保持深度产品对齐",
+      "禁止直接出图"
+    ],
+    "forbidden_behaviors": [
+      "直接生成图片",
+      "把真实最低价当作默认文案",
+      "跳过隐私或线索边界"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pmworkspace-shared/references/autoplan-workflow.md",
+      "contains": "所有输入都走深度产品对齐，每轮只推进到最早仍不可靠的门槛"
+    },
+    {
+      "path": "pm-autoplan/SKILL.md",
+      "contains": "所有任务统一进入深度产品对齐"
+    },
+    {
+      "path": "pmworkspace-shared/references/pm-eval-system.md",
+      "contains": "所有输入都走深度产品对齐，每轮只推进到最早仍不可靠的门槛"
+    }
+  ]
+}

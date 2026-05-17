@@ -41,6 +41,10 @@
 | Zoon 协作 | `zoon-workflow.md`、`zoon-drift-check.md` | 管理在线协作文档的创建、加入、同步和漂移检查。 |
 | 版本 / eval / 生成 | `update-workflow.md`、`pm-eval-system.md`、`skill-doc-template-system.md` | 管理更新、评估、skill 文档生成区块和 plugin 打包校验。 |
 
+## 维护顺序
+
+当 PMW 的用户心智、默认输出或产物命名要变化时，先改方法库 / 路由 / 欢迎引导中的产品表达；确认表达稳定后，再同步运行协议、生成契约和 eval fixture。`pm-eval-system.md` 和 `skill-doc-template-system.md` 负责防回退，不负责发明新的产品方法。
+
 ## 边界
 
 - 根目录 README 负责回答“PMW 是什么、怎么开始、怎么安装更新、四个动作怎么走”。

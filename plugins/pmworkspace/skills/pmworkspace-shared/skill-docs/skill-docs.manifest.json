@@ -1,6 +1,12 @@
 {
-  "version": 2,
+  "version": 3,
   "generated_section_title": "PMWorkspace 生成契约",
+  "product_expression_source_order": [
+    "先稳定用户可见产品表达：根 README、routing.md、welcome-guide.md 或对应方法 reference 说明 PMW 对外心智、默认输出和产物命名。",
+    "再同步 skill 正文和 manifest：生成契约只承接已稳定表达需要共享的阶段、定位、前置检查、必读协议、输出字段和审计字段。",
+    "然后运行 pmw-gen-skill-docs write/check：让 SKILL.md 生成区块镜像 manifest，防止手写漂移。",
+    "最后补 eval fixture：把已经稳定的表达锁成防回退断言；不要先写 eval 反向牵引产品表达。"
+  ],
   "shared_gates": [
     "先读语言与本地化协议，中文用户默认使用中文字段、中文状态和中文建议。",
     "每个 PMW 产品任务必须先运行 `pmw-controller intake`，由 controller 生成或继承本轮 run、`task_digest` 和 `input_revision`；skill 不能直接信任全局 current-project 或旧 run。",

@@ -4,7 +4,9 @@ PMWorkspace 的 `SKILL.md` 仍保留人工写作的工作流判断，但共享�
 
 ## 设计原则
 
+- **产品表达先于生成器**：先在 README、`routing.md`、`welcome-guide.md` 和对应方法 reference 中稳定用户心智、四动作、产物命名和默认输出，再同步 manifest 和生成区块。
 - **manifest 是共享契约源头**：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 定义每个 `$pm-*` skill 的阶段、定位、前置检查、必读共享协议、输出字段和共享门槛。
+- **manifest 不是第二套产品方法**：manifest 只镜像已稳定的共享字段、前置检查和审计字段；不要在 manifest 里发明新业务规则、用户话术或产品流程。
 - **SKILL.md 是提交产物**：生成后的契约区块直接提交到各 `SKILL.md`，运行时无需再生成。
 - **共享门槛压缩输出**：每个 `SKILL.md` 只写共享门槛真源和压缩摘要，完整条目留在 manifest，避免 8 个 skill 重复同一段长文。
 - **人工工作流仍人工维护**：复杂判断、Q/D 规则、Zoon 流程、image-2 规则和交付边界仍写在正文；生成器只维护容易漂移的共享结构。
@@ -22,10 +24,11 @@ bin/pmw-gen-skill-docs check
 
 ## 维护流程
 
-1. 修改 `skill-docs.manifest.json`，把新增门槛、输出字段或前置检查写到对应 skill。
-2. 运行 `bin/pmw-gen-skill-docs write` 更新所有 `SKILL.md` 的 `PMW-GENERATED-CONTRACT` 区块。
-3. 运行 `bin/pmw-gen-skill-docs check`，确认生成区块和正文契约一致。
-4. 新增或更新 eval fixture，确保关键行为不会回退。
+1. 先改用户可见产品表达：根 README、`routing.md`、`welcome-guide.md` 或对应方法 reference，确认 PMW 对外心智、默认输出和产物命名已经稳定。
+2. 再修改 `skill-docs.manifest.json`，只把已稳定表达需要共享的门槛、输出字段或前置检查写到对应 skill。
+3. 运行 `bin/pmw-gen-skill-docs write` 更新所有 `SKILL.md` 的 `PMW-GENERATED-CONTRACT` 区块。
+4. 运行 `bin/pmw-gen-skill-docs check`，确认生成区块和正文契约一致。
+5. 最后新增或更新 eval fixture，把已经稳定的产品表达锁成防回退断言；不要为了先让 eval 通过而反向改产品表达。
 
 ## 漂移处理
 

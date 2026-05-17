@@ -49,6 +49,13 @@ def bullet_list(items: Iterable[str]) -> list[str]:
     return rows or ["- 未配置"]
 
 
+def product_expression_source_order(manifest: dict) -> list[str]:
+    items = as_list(manifest.get("product_expression_source_order"))
+    if not items:
+        return ["- 未配置"]
+    return bullet_list(items)
+
+
 def shared_gate_summary(shared_gates: list[str]) -> list[str]:
     if not shared_gates:
         return ["- 未配置"]
@@ -88,6 +95,10 @@ def build_contract(skill: str, spec: dict, manifest: dict) -> str:
         "### 必读共享协议",
         "",
         *bullet_list(f"`../pmworkspace-shared/references/{item}`" for item in references),
+        "",
+        "### 产品表达真源顺序",
+        "",
+        *product_expression_source_order(manifest),
         "",
         "### 共享门槛",
         "",

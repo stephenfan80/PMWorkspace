@@ -31,7 +31,7 @@ description: |
 > 本区块由 `bin/pmw-gen-skill-docs` 根据 `pmworkspace-shared/skill-docs/skill-docs.manifest.json` 生成；不要手写修改。更新共享门槛、前置检查或输出字段后，运行 `bin/pmw-gen-skill-docs write`，再运行 `bin/pmw-gen-skill-docs check`。
 
 - skill：`pm-prototype-shotgun`
-- 契约版本：`2`
+- 契约版本：`3`
 - 阶段：原型方案
 - 定位：基于已对齐 brief 默认规划最少 3 条产品路径，逐张生成 image-2 原型图，并把每个方案 / 屏幕写入方案比较板。
 
@@ -59,6 +59,13 @@ description: |
 - `../pmworkspace-shared/references/prototype-shotgun-board.md`
 - `../pmworkspace-shared/references/design-system-workflow.md`
 - `../pmworkspace-shared/references/browser-evidence.md`
+
+### 产品表达真源顺序
+
+- 先稳定用户可见产品表达：根 README、routing.md、welcome-guide.md 或对应方法 reference 说明 PMW 对外心智、默认输出和产物命名。
+- 再同步 skill 正文和 manifest：生成契约只承接已稳定表达需要共享的阶段、定位、前置检查、必读协议、输出字段和审计字段。
+- 然后运行 pmw-gen-skill-docs write/check：让 SKILL.md 生成区块镜像 manifest，防止手写漂移。
+- 最后补 eval fixture：把已经稳定的表达锁成防回退断言；不要先写 eval 反向牵引产品表达。
 
 ### 共享门槛
 

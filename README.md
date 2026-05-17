@@ -4,28 +4,24 @@
 
 **PMWorkspace is AI 产品工作站: a product solution workbench that turns an idea, screenshot, PRD, or customer signal into an aligned product brief, image-2 prototype directions, review conclusions, and delivery assets.**
 
-Codex plugin display name: **AI 产品工作站**. `PMWorkspace` is the GitHub repository name, package name, and `$pm-workspace` skill entrypoint. Current version: `0.1.29`.
+- Codex plugin display name: **AI 产品工作站**
+- Skill entrypoint: `$pm-workspace`
+- Current version: `0.1.29`
 
-```text
-Align. Prototype. Review. Deliver.
-```
+## Start In One Minute
 
-PMWorkspace has four user-facing moves:
+After installation, say one of these in Codex:
 
-| Move | Outcome | Use it when |
-|---|---|---|
-| **Align** | Work mode, product homework, aligned brief, or discussion-ready directions. | The idea, screenshot, PRD, or signal still needs product judgment. |
-| **Prototype** | One image-2 output per scheme and screen. | The brief is aligned and you need mobile-first prototype images. |
-| **Review** | Product, risk, design-system, and data feasibility review. | Prototype images exist and need pass / regenerate / decide guidance. |
-| **Deliver** | Product design doc, compact PRD, experiment, or handoff asset. | The direction is ready for design, engineering, or business review. |
+| What you want to do | Say this |
+|---|---|
+| I have a new idea | `Use $pm-workspace to help me decide how to move this product idea forward: <one-line idea>` |
+| I want to improve an existing feature | `Use $pm-workspace to help me improve this existing feature. I can provide screenshots / URLs / feedback: <feature>` |
+| I want prototype images | `Use $pm-workspace to create 3 mobile-first prototype directions, one image per scheme: <feature>` |
+| I need a design / engineering handoff | `Use $pm-workspace to turn the confirmed direction into a product design doc / compact PRD: <materials>` |
 
-Start after installation:
+PMWorkspace moves through **Align -> Prototype -> Review -> Deliver**. If the product context is not aligned yet, it first clarifies the real problem, target user, current substitute, goal, counter-metric, and non-fiction boundaries. It does not turn "make me a prototype" directly into an image.
 
-```text
-Use $pm-workspace to show the welcome guide and help me choose the right PM workflow.
-```
-
-## Install
+## Not Installed Yet?
 
 ### Public Codex Plugin
 
@@ -53,6 +49,15 @@ git clone https://github.com/stephenfan80/PMWorkspace.git
 cd PMWorkspace
 bin/pmw-upgrade --host codex-plugin
 ```
+
+## Four Moves
+
+| Move | Outcome | Use it when |
+|---|---|---|
+| **Align** | Work mode, product homework, aligned brief, or discussion-ready directions. | The idea, screenshot, PRD, or signal still needs product judgment. |
+| **Prototype** | One image-2 output per scheme and screen. | The brief is aligned and you need mobile-first prototype images. |
+| **Review** | Product, risk, design-system, and data feasibility review. | Prototype images exist and need pass / regenerate / decide guidance. |
+| **Deliver** | Product design doc, compact PRD, experiment, or handoff asset. | The direction is ready for design, engineering, or business review. |
 
 ## Update
 

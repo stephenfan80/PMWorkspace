@@ -13,7 +13,7 @@ description: |
 
 # PMWorkspace
 
-PMWorkspace 是产品方案工作台：先对齐，再出图，最后交付。它用于把原始产品上下文沉淀成可复用资产：产品简述、方案方向、原型提示词、image-2 屏幕、产品设计文档、PRD 和交付稿。
+PMWorkspace 是产品方案工作台：对齐、出图、复审、交付。它用于把原始产品上下文沉淀成可复用资产：产品简述、方案方向、原型提示词、image-2 屏幕、原型复审结论、产品设计文档、PRD 和交付稿。
 
 <!-- PMW-GENERATED-CONTRACT:START -->
 ## PMWorkspace 生成契约
@@ -80,6 +80,19 @@ PMWorkspace 是产品方案工作台：先对齐，再出图，最后交付。�
 
 Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. For Chinese users, use Chinese headings, labels, status values, and recommendations; keep English only for skill ids, commands, file paths, and precise technical terms such as `token`, `API`, `PRD`, `Zoon`, `image-2`, and `URL`.
 
+## Public Action Model
+
+`$pm-workspace` 对用户默认只展示四个动作，不把 8 个底层 skill 当成第一层菜单：
+
+```text
+对齐：把想法、PRD、截图或反馈整理成可讨论产品判断和产品简报。
+出图：在产品简报已对齐后，逐个方案 / 屏幕生成 image-2 原型图。
+复审：检查原型是否符合 brief、反指标、不可虚构项、线上参考和设计系统。
+交付：把已确认方向整理成产品设计文档、精简 PRD 或研发交付稿。
+```
+
+如果用户说“给方案”“出原型”“转 PRD”，也先判断四个动作里当前最早门槛。未对齐时停在对齐；可出图时进入出图；已有图时进入复审；复审通过或方向明确时进入交付。底层路由仍由 `routing.md` 和 controller 决定。
+
 ## Frontloaded Protocol
 
 `$pm-workspace` 是入口协议，不是第二份业务规则表。用户有具体产品任务时，跳过欢迎菜单，先读取这些共享协议再路由：
@@ -96,13 +109,13 @@ Before user-facing output, read `../pmworkspace-shared/references/language-and-l
 
 PMWorkspace is not a prototype shortcut. Every product task must first clarify product value, goals, counter-metrics, constraints, and premises, then turn aligned product judgment into image-2 prototypes.
 
-Use this state machine for prototype-related work:
+Use this user-facing state machine for prototype-related work:
 
 ```text
-产品路径 -> 工作目标模式 -> 产品方向审查内核 -> 前提确认 -> 必要 Q/D -> 产品简述 / 产品简报 -> 三条产品路径 image-2 原型 -> 原型复审 -> 产品设计文档 / 产品交付
+对齐 -> 出图 -> 复审 -> 交付
 ```
 
-If any required step is incomplete, route to `$pm-jobs` or `$pm-brief` instead of generating prototypes.
+Internally, `对齐` still includes product path, work goal mode, product direction review, premise confirmation, required Q/D, and product brief. If any required alignment step is incomplete, route to `$pm-jobs` or `$pm-brief` instead of generating prototypes.
 
 ## Platform Preamble
 
@@ -154,7 +167,7 @@ Before routing to any downstream skill, establish the `产品信息对齐包` fr
 
 If the user invokes `$pm-workspace` with no concrete product task, asks what PMWorkspace does, or has just installed it, read `../pmworkspace-shared/references/welcome-guide.md` and give the welcome message plus the first choice menu.
 
-Do not make the user guess the command set. The first response should feel like an app onboarding screen: short orientation, clear paths, and one recommended next step.
+Do not make the user guess the command set. The first response should feel like an app onboarding screen: short orientation, the four actions `对齐 / 出图 / 复审 / 交付`, and one recommended next step.
 
 If the user provides a product task in the same message, skip the welcome menu and route directly.
 

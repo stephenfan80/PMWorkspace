@@ -16,6 +16,7 @@ PACKAGED_REVISION_PATHS=(
   pm-prototype-review
   pm-handoff
   pmworkspace-shared
+  examples
   bin
   evals
   assets/plugin-listing

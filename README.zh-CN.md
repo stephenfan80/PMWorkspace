@@ -296,6 +296,21 @@ bin/pmw-artifact latest --kind prototype_review
 bin/pmw-artifact add --kind browser_evidence --title "线上参考：结果页" --status "已采集" --source-skill pm-brief --path "<screenshot>" --url "<URL>" --summary "页面任务、视觉基线、交互模式、必须保留、可以挑战"
 ```
 
+## 资产样例库
+
+`examples/` 是 PMW 的公开资产样例库，对应 dbskill 的 Skill 知识包心智，但更贴近产品工作流。它不只是启动话术，而是展示一条任务如何沉淀为 `product_brief`、`visual_baseline`、`prototype_manifest`、`prototype_review` 和 `handoff`。
+
+优先阅读 `examples/asset-flows/`：
+
+| 样例 | 你能看到什么 |
+|---|---|
+| `examples/asset-flows/01-new-idea/` | 新想法如何先对齐产品判断，再登记 3 条产品路径和产品设计文档。 |
+| `examples/asset-flows/02-existing-feature/` | 已有功能如何先建立视觉基线，再出图、复审和交付。 |
+| `examples/asset-flows/03-screenshot-iteration/` | 标注截图如何只重出受影响单图，哪些变化必须回写 brief。 |
+| `examples/asset-flows/04-prd-handoff/` | 已确认方向如何从 brief / manifest / review 进入精简 PRD。 |
+
+轻量启动话术仍保留在 `examples/prompt-recipes.md`。如果你想理解 PMW 的内部规则，再读 `pmworkspace-shared/references/`；如果你只是想知道“产物长什么样”，先看 `examples/`。
+
 ## 原型输出规则
 
 - 默认移动端优先。

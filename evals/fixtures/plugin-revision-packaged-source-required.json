@@ -11,9 +11,10 @@
     "gate": "plugin revision source-of-truth",
     "required_behaviors": [
       "pmw-build-plugin 按插件打包输入路径计算 REVISION",
-      "REVISION 指向最近一次影响 source skill、references、bin、eval、README 或插件 listing assets 的提交",
+      "REVISION 指向最近一次影响 source skill、references、bin、eval、docs 白名单、README 或插件 listing assets 的提交",
       "artifact-only、审计报告、PPTX、讲稿、release note 或 revision-only 提交不刷新 REVISION",
-      "source/plugin 变化后仍必须运行 pmw-build-plugin 并同步插件副本"
+      "source/plugin 变化后仍必须运行 pmw-build-plugin 并同步插件副本",
+      "只有 docs 白名单文件作为公开文档进入插件 revision 计算和安装包"
     ],
     "forbidden_behaviors": [
       "pmw-build-plugin 直接把当前 HEAD 写入 REVISION",
@@ -30,6 +31,38 @@
     {
       "path": "bin/pmw-revision",
       "contains": "PACKAGED_REVISION_PATHS=("
+    },
+    {
+      "path": "bin/pmw-revision",
+      "contains": "docs/public-toolbox.md"
+    },
+    {
+      "path": "bin/pmw-revision",
+      "contains": "docs/codex-plugin-submission.md"
+    },
+    {
+      "path": "bin/pmw-build-plugin",
+      "contains": "PACKAGED_DOCS=("
+    },
+    {
+      "path": "bin/pmw-build-plugin",
+      "contains": "docs/public-toolbox.md"
+    },
+    {
+      "path": "bin/pmw-build-plugin",
+      "not_contains": "cp -R \"$ROOT/docs\" \"$PLUGIN_DIR/skills/pmworkspace-shared/docs\""
+    },
+    {
+      "path": "setup",
+      "contains": "PACKAGED_DOCS=("
+    },
+    {
+      "path": "setup",
+      "contains": "docs/public-toolbox.md"
+    },
+    {
+      "path": "setup",
+      "not_contains": "cp -R \"$ROOT/docs\" \"$DEST/pmworkspace-shared/docs\""
     },
     {
       "path": "bin/pmw-revision",
@@ -61,7 +94,7 @@
       "command": [
         "bash",
         "-lc",
-        "tmp=\"$(mktemp -d)\"; trap 'rm -rf \"$tmp\"' EXIT; paths=(VERSION README.md README.zh-CN.md pm-workspace pm-autoplan pm-jobs pm-strategy-review pm-brief pm-prototype-shotgun pm-prototype-review pm-handoff pmworkspace-shared bin evals assets/plugin-listing); existing=(); for p in \"${paths[@]}\"; do [ -e \"$p\" ] && existing+=(\"$p\"); done; expected=\"$(git log -n 1 --format=%H -- \"${existing[@]}\")\"; actual=\"$(bin/pmw-revision)\"; bin/pmw-build-plugin --dest \"$tmp/pmworkspace\" >/dev/null; built=\"$(tr -d '[:space:]' < \"$tmp/pmworkspace/skills/pmworkspace-shared/REVISION\")\"; test -n \"$expected\" && test \"$actual\" = \"$expected\" && test \"$built\" = \"$expected\""
+        "tmp=\"$(mktemp -d)\"; trap 'rm -rf \"$tmp\"' EXIT; paths=(VERSION README.md README.zh-CN.md setup docs/public-toolbox.md docs/codex-plugin-submission.md pm-workspace pm-autoplan pm-jobs pm-strategy-review pm-brief pm-prototype-shotgun pm-prototype-review pm-handoff pmworkspace-shared bin evals assets/plugin-listing); existing=(); for p in \"${paths[@]}\"; do [ -e \"$p\" ] && existing+=(\"$p\"); done; expected=\"$(git log -n 1 --format=%H -- \"${existing[@]}\")\"; actual=\"$(bin/pmw-revision)\"; bin/pmw-build-plugin --dest \"$tmp/pmworkspace\" >/dev/null; built=\"$(tr -d '[:space:]' < \"$tmp/pmworkspace/skills/pmworkspace-shared/REVISION\")\"; test -n \"$expected\" && test \"$actual\" = \"$expected\" && test \"$built\" = \"$expected\""
       ],
       "exit_code": 0
     },

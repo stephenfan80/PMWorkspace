@@ -139,6 +139,8 @@ bin/pmw-version --json
 
 ## 工具箱
 
+完整公开工具目录见 [`docs/public-toolbox.md`](docs/public-toolbox.md)。普通用户只需要 `$pm-*`，维护者或审计场景再看 `bin/pmw-*`。
+
 ### 四个用户动作
 
 | 用户说法 | PMWorkspace 会做什么 | 常用入口 |
@@ -161,21 +163,7 @@ bin/pmw-version --json
 | `$pm-prototype-review` | 原型复审。检查图片是否符合 brief、反指标、不可虚构项和设计系统。 | image-2 原型图生成后，进入评审或交付前。 |
 | `$pm-handoff` | 产品交付。生成产品设计文档、精简 PRD 或交付稿。 | 方向和原型已确认，需要交给设计、研发或评审会。 |
 
-### 维护 / 审计命令
-
-| 命令 | 用途 |
-|---|---|
-| `bin/pmw-version --json` | 查看本地 PMWorkspace 版本和 revision。 |
-| `bin/pmw-update-check --quick` | 快速检查是否有更新。 |
-| `bin/pmw-dashboard status` | 查看当前项目的简洁状态。 |
-| `bin/pmw-dashboard readiness --target prototype` | 出图前检查产品简报、线上参考、方案差异和不可虚构项；默认只输出一句人话 verdict。 |
-| `bin/pmw-dashboard readiness --target handoff` | 交付前检查 brief、复审和交付门槛；默认只输出一句人话 verdict。 |
-| `bin/pmw-artifact flow` | 查看产品资产流。 |
-| `bin/pmw-artifact latest --kind product_brief` | 读取最新产品简报资产。 |
-| `bin/pmw-prototype-board list` | 查看多方案原型比较板。 |
-| `bin/pmw-zoon drift --url "<Zoon URL>"` | 检查在线协作文档是否和本地 brief 漂移。 |
-| `bin/pmw-eval run` | 运行行为契约测试。 |
-| `bin/pmw-gen-skill-docs check` | 检查 skill 共享契约是否和 manifest 一致。 |
+维护 / 审计命令统一收在公开工具目录的维护者区，避免第一次来的用户把 `bin/pmw-*` 当成必学入口。
 
 ## 工具路径图
 
@@ -267,7 +255,7 @@ README 只保留用户能理解的路径图。完整端到端工作台地图、�
 
 ## PMW 的产品资产流
 
-dbskill 有“原子库”的概念；PMWorkspace 更适合叫 **产品资产流**。PMW 的最小可复用单元不是孤立知识点，而是一条能被下游 skill 读取的 Product Artifact Flow。
+PMWorkspace 不照搬 dbskill 的“原子库”，也不把孤立知识点当作第一层产品。PMW 的最小可复用单元是 **产品资产流**：一条能被下游 skill 读取的 Product Artifact Flow。
 
 普通用户只需要记住 5 个核心资产：
 
@@ -298,7 +286,9 @@ bin/pmw-artifact add --kind browser_evidence --title "线上参考：结果页" 
 
 ## 资产样例库
 
-`examples/` 是 PMW 的公开资产样例库，对应 dbskill 的 Skill 知识包心智，但更贴近产品工作流。它不只是启动话术，而是展示一条任务如何沉淀为 `product_brief`、`visual_baseline`、`prototype_manifest`、`prototype_review` 和 `handoff`。
+`examples/` 是 PMW 的公开产品资产样例库，不是知识原子集合。它最有价值的内容应该是真实匿名 / 脱敏的 `product_brief`、`visual_baseline`、`prototype_manifest`、`prototype_review` 和 `handoff` 样例；没有授权真实材料时，才使用虚构脱敏样例占位。
+
+它不只是启动话术，而是展示一条任务如何沉淀为下游可读的产品资产。
 
 优先阅读 `examples/asset-flows/`：
 
@@ -372,7 +362,7 @@ bin/pmw-gen-skill-docs check
 
 - 改 PMW 的用户心智、默认输出或产物命名时，先稳定 README / references 的产品表达，再更新生成契约，最后补 eval；不要先改 eval 反向牵着产品表达走。
 - 共享契约区块由 `bin/pmw-gen-skill-docs write` 从 manifest 生成，不要手写生成区块。
-- 改动 source skill、`pmworkspace-shared/references`、`bin`、`evals`、README 或插件 assets 后，运行 `bin/pmw-build-plugin`，并把插件副本变化一起提交。
+- 改动 source skill、`pmworkspace-shared/references`、`bin`、`evals`、进入插件包的 `docs` 白名单文件、README 或插件 assets 后，运行 `bin/pmw-build-plugin`，并把插件副本变化一起提交。
 - README 只讲用户入口、工具箱、路径图、方法库和资产流；完整路由和阶段字段由 `pmworkspace-shared/references/` 维护。
 - 发布、插件打包、旧版 skill 迁移和提交说明见 `docs/codex-plugin-submission.md`。
 

@@ -14,6 +14,7 @@
       "examples/asset-flows/ 包含新想法、已有功能、截图迭代和 PRD 交付四条完整样例",
       "每条完整样例至少展示 product_brief、prototype_manifest、prototype_review 和 handoff",
       "已有功能和截图迭代样例展示 visual_baseline",
+      "examples 明确不是原子库，优先承载真实匿名 / 脱敏产品资产样例",
       "README 说明 examples 和 references 的职责区别",
       "插件打包脚本复制 examples 到 pmworkspace-shared/examples",
       "本地 codex 安装脚本复制 examples 到 pmworkspace-shared/examples",
@@ -22,6 +23,7 @@
     "forbidden_behaviors": [
       "examples 只保留启动话术",
       "公开样例库缺少 handoff",
+      "把 examples 做成原子库或抽象知识条目集合",
       "把 references 当成公开样例库",
       "GitHub 有 examples 但插件包不复制 examples"
     ]
@@ -30,6 +32,14 @@
     {
       "path": "examples/README.md",
       "contains": "# PMW 资产样例库"
+    },
+    {
+      "path": "examples/README.md",
+      "contains": "更不是“原子库”"
+    },
+    {
+      "path": "examples/README.md",
+      "contains": "真实匿名 / 脱敏资产"
     },
     {
       "path": "examples/asset-flows/README.md",
@@ -72,12 +82,28 @@
       "contains": "## 资产样例库"
     },
     {
+      "path": "README.zh-CN.md",
+      "contains": "PMWorkspace 不照搬 dbskill 的“原子库”"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "不是知识原子集合"
+    },
+    {
       "path": "README.md",
       "contains": "## Example Asset Library"
     },
     {
+      "path": "README.md",
+      "contains": "not an atomic knowledge library"
+    },
+    {
       "path": "pmworkspace-shared/references/README.md",
       "contains": "公开样例库 vs 本目录"
+    },
+    {
+      "path": "pmworkspace-shared/references/README.md",
+      "contains": "references 的目录结构最后才考虑移动"
     },
     {
       "path": "bin/pmw-build-plugin",

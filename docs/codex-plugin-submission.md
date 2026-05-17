@@ -164,10 +164,10 @@ image-2
 
 ## 插件 REVISION 策略
 
-- `plugins/pmworkspace/skills/pmworkspace-shared/REVISION` 记录最近一次影响插件打包内容的 source commit，用来判断插件副本对应哪一次 source skill / references / bin / eval / README / 插件 listing assets 内容。
+- `plugins/pmworkspace/skills/pmworkspace-shared/REVISION` 记录最近一次影响插件打包内容的 source commit，用来判断插件副本对应哪一次 source skill / references / bin / eval / docs 白名单 / README / 插件 listing assets 内容。
 - `bin/pmw-revision` 会按插件打包输入路径计算 REVISION，`bin/pmw-build-plugin`、`setup` 和 `bin/pmw-upgrade` 必须复用它，不直接使用当前 `HEAD`；因此 artifact-only、审计报告、PPTX、讲稿、release note 或 revision-only 提交不会让插件 REVISION 追上维护性 HEAD。
 - `bin/pmw-upgrade` 不允许使用浅克隆；浅克隆看不到路径历史，会把维护性 HEAD 误判成最近一次打包内容提交。
-- 改动 source skill、`pmworkspace-shared/references`、`bin`、`evals`、README 或插件 assets 时，必须运行 `bin/pmw-build-plugin`，并把插件副本变化一起提交。
+- 改动 source skill、`pmworkspace-shared/references`、`bin`、`evals`、进入插件包的 `docs` 白名单文件、README 或插件 assets 时，必须运行 `bin/pmw-build-plugin`，并把插件副本变化一起提交。
 - 只修改本地交付 artifact、审计报告、PPTX、讲稿、release note 或不进入插件包的维护材料时，不刷新插件 REVISION，也不需要为了让 REVISION 追上 HEAD 单独提交。
 - 若先提交 source 变化再刷新插件包，可以允许一个 revision-only commit；该 commit 只更新插件打包元数据，REVISION 仍应指向上一条真正影响插件内容的 source commit。
 

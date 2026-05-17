@@ -14,6 +14,11 @@ esac
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 mkdir -p "$DEST"
 
+PACKAGED_DOCS=(
+  docs/public-toolbox.md
+  docs/codex-plugin-submission.md
+)
+
 for skill in pm-workspace pm-jobs pm-strategy-review pm-brief pm-prototype-shotgun pm-prototype-review pm-autoplan pm-handoff; do
   rm -rf "$DEST/$skill"
   cp -R "$ROOT/$skill" "$DEST/$skill"
@@ -23,6 +28,13 @@ rm -rf "$DEST/pmworkspace-shared"
 cp -R "$ROOT/pmworkspace-shared" "$DEST/pmworkspace-shared"
 for doc in README.md README.zh-CN.md; do
   [ -f "$ROOT/$doc" ] && cp "$ROOT/$doc" "$DEST/pmworkspace-shared/$doc"
+done
+rm -rf "$DEST/pmworkspace-shared/docs"
+for doc in "${PACKAGED_DOCS[@]}"; do
+  if [ -f "$ROOT/$doc" ]; then
+    mkdir -p "$DEST/pmworkspace-shared/$(dirname "$doc")"
+    cp "$ROOT/$doc" "$DEST/pmworkspace-shared/$doc"
+  fi
 done
 if [ -d "$ROOT/examples" ]; then
   rm -rf "$DEST/pmworkspace-shared/examples"

@@ -110,8 +110,8 @@ Detailed release, upgrade, and legacy skill notes live in `docs/codex-plugin-sub
 | `bin/pmw-version --json` | Show local PMWorkspace version identity. |
 | `bin/pmw-update-check --quick` | Check for updates quickly. |
 | `bin/pmw-dashboard status` | Show concise project state. |
-| `bin/pmw-dashboard readiness --target prototype` | Check prototype readiness. |
-| `bin/pmw-dashboard readiness --target handoff` | Check handoff readiness. |
+| `bin/pmw-dashboard readiness --target prototype` | Check prototype readiness; default output is one human verdict. |
+| `bin/pmw-dashboard readiness --target handoff` | Check handoff readiness; default output is one human verdict. |
 | `bin/pmw-artifact flow` | Show the Product Artifact Flow. |
 | `bin/pmw-prototype-board list` | Show registered prototype scheme units. |
 | `bin/pmw-eval run` | Run behavior contract evals. |

@@ -20,7 +20,7 @@ eval 默认以静态规则检查为主；对 `pmw-*` 本地脚本的关键输出
 - 防止用户反馈资产混淆：个人偏好、产品认知和 PMWorkspace 进化建议必须分开保存，GitHub 回流默认只生成脱敏本地待审稿。
 - 防止 PMWorkspace 主入口路由分散、run 重复创建，或把内部证据状态默认暴露给用户。
 - 防止产品交付退化成大而全 PRD：默认只输出精简 PRD 核心字段，接口、数据、埋点和实验缺口可留空但不能虚构，并沉淀为本地交付资产。
-- 防止出图 / 交付前缺少统一准备度判断：Product Readiness Dashboard 必须检查 brief、Zoon、线上参考、方案差异、设计规范目标、不可虚构项和复审状态，并默认只给 verdict、第一条阻断原因、阻断影响、解锁动作和下一步；完整表格只在审计 / 调试模式展示。
+- 防止出图 / 交付前缺少统一准备度判断：Product Readiness Dashboard 必须检查 brief、Zoon、线上参考、方案差异、设计规范目标、不可虚构项和复审状态，并默认只给一句人话 verdict，包含第一条阻断原因、阻断影响、解锁动作和下一步；完整表格只在审计 / 调试模式展示。
 - 防止下游技能重新猜上游事实：Product Artifact Flow 必须把产品简报、原型清单、复审结论和交付稿登记为下游可读产物。
 - 防止 PMWorkspace 退化为只跑流程的原型生成器：产品追问必须采用产品方向审查内核，每轮有前提挑战、现状替代、不做推演、路径对比、范围模式、PM 判断摘要和现实产品作业。
 - 防止多方案退化成三张视觉皮肤：多方案必须是三条产品路径，说明用户行为假设、要赢过的现状替代、当前损失、删除/牺牲/后置项、验证信号、失败信号、反指标保护和不可虚构边界。
@@ -181,7 +181,7 @@ fixture 使用 JSON，保存在 `evals/fixtures/`：
 - 产品简报：`pmw-log brief` 必须使用 local-first，Zoon-optional 同步；默认先保存业务简报和完整本地审计副本，并记录最终本地 brief 路径；如果产品简报仍是 `待确认`，用户可见 `下一步` 必须要求补齐待确认信息或确认偏差风险，不能询问 Zoon 同步；只有产品简报确认状态已对齐后，才在用户可见 `下一步` 推荐 Zoon，说明多人协作、事实源统一、后续 image-2 原型 / PRD 防漂移的好处，并用 A/B 让用户选择是否同步；只有用户选择在线协作、提供 Zoon URL 或配置显式开启且简报已对齐时，才推送或追加业务简报版到 Zoon，成功后让 `pmworkspace` agent 自动加入协作态，并记录 Zoon URL、同步状态和协作加入状态；未选择同步时不得自动创建 Zoon，且 Zoon 不作为出图或交付阻断；Zoon create payload 只能包含一次正文写入，append payload 只能通过 `operations[].markdown` 写入，同一 `PMWorkspace document sync hash` 已存在时必须跳过重复追加，同时兼容历史 `PMWorkspace brief sync hash`。
 - 产品简报：Zoon 漂移如果改变目标、反指标、不可虚构项、范围、用户承诺或方案方向，必须重新确认，不能继续沿用旧的已对齐状态。
 - 产品简报：只有确认状态已对齐、线上参考门槛通过且无未解决缺失门槛时，才能把下一技能指向 `$pm-prototype-shotgun` 或 `$pm-handoff`。
-- 产品准备度仪表盘：出图 / 交付前必须运行 Product Readiness Dashboard，至少检查产品简报、Zoon、线上参考、方案差异、设计规范目标、不可虚构项和复审状态；交付前还必须检查研发可行性反问，并默认只输出 `可出图`、`不可出图`、`可交付` 或 `不可交付` verdict、第一条阻断原因、阻断影响、解锁动作和下一步。
+- 产品准备度仪表盘：出图 / 交付前必须运行 Product Readiness Dashboard，至少检查产品简报、Zoon、线上参考、方案差异、设计规范目标、不可虚构项和复审状态；交付前还必须检查研发可行性反问，并默认只输出一句人话 verdict，包含 `可出图`、`不可出图`、`可交付` 或 `不可交付`、第一条阻断原因、阻断影响、解锁动作和下一步。
 - 产物流动：下游技能必须读取 Product Artifact Flow；`pmw-log brief`、`pmw-log prototype`、`pmw-log handoff` 必须把 product_brief、prototype_manifest、product_design_doc 和 handoff 登记为下游可读产物。
 - 浏览器证据：线上截图、状态页、竞品参考、设计启发或 Zoon 漂移证据必须登记为 `browser_evidence` 产物；`pmw-dashboard readiness` 的线上参考行优先读取它，没有时才回退 run evidence / gate 事件。
 - 视觉基线：线上截图或生产视觉参考必须登记为 `visual_baseline`，包含参考尺寸和目标输出像素；只凭 `browser_evidence` 或泛化 AutoDesign token 不能放行 image-2 prompt。

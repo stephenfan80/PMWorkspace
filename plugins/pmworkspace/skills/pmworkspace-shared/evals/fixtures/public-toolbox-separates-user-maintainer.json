@@ -1,0 +1,101 @@
+{
+  "id": "public-toolbox-separates-user-maintainer",
+  "title": "公开工具目录必须分开用户入口和维护者入口",
+  "category": "public-docs",
+  "primary_skill": "pm-workspace",
+  "prompt": "新用户只想知道该用哪个 $pm-*，维护者才需要 bin/pmw-* 命令目录。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "公开工具目录",
+    "required_behaviors": [
+      "docs/public-toolbox.md 第一层说明普通用户入口是 $pm-*",
+      "docs/public-toolbox.md 第一层说明维护者 / 审计入口是 bin/pmw-*",
+      "用户技能和维护命令分成不同章节",
+      "README 只保留用户技能入口并链接公开工具目录",
+      "public toolbox 作为 docs 白名单文件进入 plugin 打包和本地安装"
+    ],
+    "forbidden_behaviors": [
+      "把 bin/pmw-* 当成普通用户必学入口",
+      "README 继续把完整维护命令表放在工具箱主体",
+      "插件包缺少公开工具目录"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "docs/public-toolbox.md",
+      "contains": "# PMW 公开工具目录"
+    },
+    {
+      "path": "docs/public-toolbox.md",
+      "contains": "## 普通用户入口：$pm-*"
+    },
+    {
+      "path": "docs/public-toolbox.md",
+      "contains": "## 维护者 / 审计入口：bin/pmw-*"
+    },
+    {
+      "path": "docs/public-toolbox.md",
+      "contains": "$pm-workspace"
+    },
+    {
+      "path": "docs/public-toolbox.md",
+      "contains": "$pm-handoff"
+    },
+    {
+      "path": "docs/public-toolbox.md",
+      "contains": "bin/pmw-version --json"
+    },
+    {
+      "path": "docs/public-toolbox.md",
+      "contains": "bin/pmw-eval run --suite smoke"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "普通用户只需要 `$pm-*`"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "docs/public-toolbox.md"
+    },
+    {
+      "path": "README.md",
+      "contains": "Full public toolbox"
+    },
+    {
+      "path": "bin/pmw-build-plugin",
+      "contains": "PACKAGED_DOCS=("
+    },
+    {
+      "path": "bin/pmw-build-plugin",
+      "contains": "docs/public-toolbox.md"
+    },
+    {
+      "path": "bin/pmw-build-plugin",
+      "not_contains": "cp -R \"$ROOT/docs\" \"$PLUGIN_DIR/skills/pmworkspace-shared/docs\""
+    },
+    {
+      "path": "setup",
+      "contains": "PACKAGED_DOCS=("
+    },
+    {
+      "path": "setup",
+      "contains": "docs/public-toolbox.md"
+    },
+    {
+      "path": "bin/pmw-revision",
+      "contains": "docs/public-toolbox.md"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=\"$(mktemp -d)\"; trap 'rm -rf \"$tmp\"' EXIT; bin/pmw-build-plugin --dest \"$tmp/pmworkspace\" >/dev/null; test -f \"$tmp/pmworkspace/skills/pmworkspace-shared/docs/public-toolbox.md\" && test -f \"$tmp/pmworkspace/skills/pmworkspace-shared/docs/codex-plugin-submission.md\" && test ! -e \"$tmp/pmworkspace/skills/pmworkspace-shared/docs/releases\" && test ! -e \"$tmp/pmworkspace/skills/pmworkspace-shared/docs/pmw-execution-logic.html\""
+      ],
+      "exit_code": 0
+    }
+  ]
+}

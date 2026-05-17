@@ -8,6 +8,8 @@ PACKAGED_REVISION_PATHS=(
   README.md
   README.zh-CN.md
   setup
+  docs/public-toolbox.md
+  docs/codex-plugin-submission.md
   pm-workspace
   pm-autoplan
   pm-jobs

@@ -86,6 +86,8 @@ Detailed release, upgrade, and legacy skill notes live in `docs/codex-plugin-sub
 
 ## Toolbox
 
+Full public toolbox: [`docs/public-toolbox.md`](docs/public-toolbox.md). Regular users only need `$pm-*`; maintainer and audit commands live under the `bin/pmw-*` section there.
+
 ### Four User Moves
 
 | User intent | PMWorkspace action | Common entry |
@@ -108,19 +110,7 @@ Detailed release, upgrade, and legacy skill notes live in `docs/codex-plugin-sub
 | `$pm-prototype-review` | Prototype review. Checks product, risk, design-system, and data feasibility fit. | Images are generated and need review. |
 | `$pm-handoff` | Delivery writer. Produces product design docs, compact PRDs, and handoff assets. | The direction is ready for design, engineering, or review. |
 
-### Runtime Commands
-
-| Command | Purpose |
-|---|---|
-| `bin/pmw-version --json` | Show local PMWorkspace version identity. |
-| `bin/pmw-update-check --quick` | Check for updates quickly. |
-| `bin/pmw-dashboard status` | Show concise project state. |
-| `bin/pmw-dashboard readiness --target prototype` | Check prototype readiness; default output is one human verdict. |
-| `bin/pmw-dashboard readiness --target handoff` | Check handoff readiness; default output is one human verdict. |
-| `bin/pmw-artifact flow` | Show the Product Artifact Flow. |
-| `bin/pmw-prototype-board list` | Show registered prototype scheme units. |
-| `bin/pmw-eval run` | Run behavior contract evals. |
-| `bin/pmw-gen-skill-docs check` | Check generated skill contract blocks. |
+Maintainer / audit commands are intentionally not expanded here, so first-time users see the product workflow before the terminal workflow.
 
 ## Workflow Map
 
@@ -206,7 +196,7 @@ Runtime protocol anchors:
 
 ## Product Artifact Flow
 
-PMWorkspace's reusable units are product artifacts rather than isolated notes. Downstream skills read these artifacts instead of guessing from chat memory.
+PMWorkspace does not copy dbskill's "atomic library" mental model. Its reusable units are product artifacts rather than isolated notes. Downstream skills read these artifacts instead of guessing from chat memory.
 
 Most users only need five public artifacts:
 
@@ -231,7 +221,9 @@ bin/pmw-artifact latest --kind prototype_review
 
 ## Example Asset Library
 
-`examples/` is PMW's public example asset library. It is closer to a product-workflow knowledge pack than a prompt gallery: each full example shows how one task becomes `product_brief`, optional `visual_baseline`, `prototype_manifest`, `prototype_review`, and `handoff`.
+`examples/` is PMW's public product asset example library, not an atomic knowledge library. Its most valuable entries should be real anonymized / sanitized examples of `product_brief`, optional `visual_baseline`, `prototype_manifest`, `prototype_review`, and `handoff`; fictional sanitized examples are placeholders when real material is not approved for publication.
+
+It is more than a prompt gallery: each full example shows how one task becomes downstream-readable product assets.
 
 Start with `examples/asset-flows/`:
 
@@ -274,7 +266,7 @@ bin/pmw-gen-skill-docs check
 
 Use `smoke` for small docs / entry changes, `core` for skill / references / readiness changes, and `full` before GitHub / plugin releases. `bin/pmw-eval run` still defaults to `full`.
 
-Generated contract blocks in `SKILL.md` files are produced by `bin/pmw-gen-skill-docs write`; do not edit generated blocks by hand. After changing source skills, shared references, `bin`, `evals`, README, or plugin assets, run `bin/pmw-build-plugin` and include the plugin package changes in the commit.
+Generated contract blocks in `SKILL.md` files are produced by `bin/pmw-gen-skill-docs write`; do not edit generated blocks by hand. After changing source skills, shared references, `bin`, `evals`, packaged docs whitelist files, README, or plugin assets, run `bin/pmw-build-plugin` and include the plugin package changes in the commit.
 
 When changing PMW's user mental model, default output, or product asset naming, stabilize the product expression in README / references first, then regenerate skill contracts, and only then update eval fixtures. Evals are regression guards, not the starting point for product expression.
 

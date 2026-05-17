@@ -48,6 +48,11 @@ if ! printf '%s' "$VERSION" | grep -qE '^[0-9]+(\.[0-9]+){1,3}$'; then
   exit 1
 fi
 
+PACKAGED_DOCS=(
+  docs/public-toolbox.md
+  docs/codex-plugin-submission.md
+)
+
 REVISION="$("$ROOT/bin/pmw-revision" "$ROOT")"
 
 rm -rf "$PLUGIN_DIR"
@@ -146,6 +151,13 @@ done
 cp -R "$ROOT/pmworkspace-shared" "$PLUGIN_DIR/skills/pmworkspace-shared"
 for doc in README.md README.zh-CN.md; do
   [ -f "$ROOT/$doc" ] && cp "$ROOT/$doc" "$PLUGIN_DIR/skills/pmworkspace-shared/$doc"
+done
+rm -rf "$PLUGIN_DIR/skills/pmworkspace-shared/docs"
+for doc in "${PACKAGED_DOCS[@]}"; do
+  if [ -f "$ROOT/$doc" ]; then
+    mkdir -p "$PLUGIN_DIR/skills/pmworkspace-shared/$(dirname "$doc")"
+    cp "$ROOT/$doc" "$PLUGIN_DIR/skills/pmworkspace-shared/$doc"
+  fi
 done
 if [ -d "$ROOT/examples" ]; then
   rm -rf "$PLUGIN_DIR/skills/pmworkspace-shared/examples"

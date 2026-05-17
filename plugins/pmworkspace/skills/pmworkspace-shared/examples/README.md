@@ -1,8 +1,10 @@
 # PMW 资产样例库
 
-这些虚构样例展示 PMWorkspace 如何把一个产品任务沉淀成连续的产品资产流：`product_brief` -> `prototype_manifest` -> `prototype_review` -> `handoff`。已有功能和截图迭代还会展示 `visual_baseline` 如何约束出图。
+这些样例展示 PMWorkspace 如何把一个产品任务沉淀成连续的产品资产流：`product_brief` -> `prototype_manifest` -> `prototype_review` -> `handoff`。已有功能和截图迭代还会展示 `visual_baseline` 如何约束出图。
 
-样例不是运行协议，也不是模板生成器。它们的作用是让用户和维护者快速看懂：PMW 为什么先对齐、怎样记录多方案原型、复审怎么影响重出或交付、最终 PRD 应该读取哪些上游事实。
+样例不是运行协议，也不是模板生成器，更不是“原子库”。它们的作用是让用户和维护者快速看懂：PMW 为什么先对齐、怎样记录多方案原型、复审怎么影响重出或交付、最终 PRD 应该读取哪些上游事实。
+
+长期最有价值的样例是真实匿名 / 脱敏资产：真实项目里的 `product_brief`、`visual_baseline`、`prototype_review` 和 `handoff`。当前公开仓库里的样例可以使用虚构脱敏内容做安全占位，但新增样例应优先接近真实产品工作流，而不是抽象知识条目。
 
 ## 完整资产流样例
 

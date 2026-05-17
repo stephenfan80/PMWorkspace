@@ -7,8 +7,17 @@
 Codex plugin display name: **AI 产品工作站**. `PMWorkspace` is the GitHub repository name, package name, and `$pm-workspace` skill entrypoint. Current version: `0.1.29`.
 
 ```text
-Align first. Prototype next. Deliver with evidence.
+Align. Prototype. Review. Deliver.
 ```
+
+PMWorkspace has four user-facing moves:
+
+| Move | Outcome | Use it when |
+|---|---|---|
+| **Align** | Work mode, product homework, aligned brief, or discussion-ready directions. | The idea, screenshot, PRD, or signal still needs product judgment. |
+| **Prototype** | One image-2 output per scheme and screen. | The brief is aligned and you need mobile-first prototype images. |
+| **Review** | Product, risk, design-system, and data feasibility review. | Prototype images exist and need pass / regenerate / decide guidance. |
+| **Deliver** | Product design doc, compact PRD, experiment, or handoff asset. | The direction is ready for design, engineering, or business review. |
 
 Start after installation:
 
@@ -72,6 +81,15 @@ Detailed release, upgrade, and legacy skill notes live in `docs/codex-plugin-sub
 
 ## Toolbox
 
+### Four User Moves
+
+| User intent | PMWorkspace action | Common entry |
+|---|---|---|
+| "Help me think this through / make it discussable / decide whether it is worth doing." | **Align**: identify new feature vs existing feature iteration, then clarify problem, substitute, goal, counter-metric, and brief. | `$pm-workspace`, `$pm-autoplan`, `$pm-jobs`, `$pm-brief` |
+| "Give me prototype images / multiple directions / one image per scheme." | **Prototype**: run Product Readiness Dashboard, then generate image-2 outputs one scheme and one screen at a time. | `$pm-prototype-shotgun` |
+| "Check whether these prototype images are good enough." | **Review**: evaluate strategy, trust / risk, design-system fit, and data feasibility. | `$pm-prototype-review` |
+| "Turn this into a PRD / handoff / review doc." | **Deliver**: produce product design docs, compact PRDs, and handoff assets. | `$pm-handoff` |
+
 ### User Skills
 
 | Tool | What it does | When to use it |
@@ -101,10 +119,16 @@ Detailed release, upgrade, and legacy skill notes live in `docs/codex-plugin-sub
 
 ## Workflow Map
 
+User-facing flow:
+
+```text
+Align -> Prototype -> Review -> Deliver
+```
+
 New idea to discussion package:
 
 ```text
-Idea
+Align: idea
 -> $pm-workspace
 -> $pm-jobs
 -> $pm-strategy-review when scope risk matters
@@ -115,31 +139,38 @@ Idea
 New idea to image-2 prototypes:
 
 ```text
-Idea
+Align: idea
 -> Product direction review
 -> Aligned product brief
+Prototype:
 -> Product Readiness Dashboard: prototype-ready
 -> $pm-prototype-shotgun
+Review:
 -> $pm-prototype-review
 ```
 
 Existing feature iteration:
 
 ```text
-Current flow / screenshot / data
+Align: current flow / screenshot / data
 -> Production screenshot, URL, Figma, or visual baseline
 -> Baseline analysis
 -> Updated and aligned product brief
+Prototype:
 -> image-2 physical longboard or screenshot-edit prototype
+Review:
 -> Prototype review
 ```
 
 Delivery:
 
 ```text
-Aligned brief
+Align: aligned brief
+Prototype:
 -> Selected prototype direction
+Review:
 -> Prototype review: pass
+Deliver:
 -> $pm-handoff
 -> Product design doc / compact PRD
 ```

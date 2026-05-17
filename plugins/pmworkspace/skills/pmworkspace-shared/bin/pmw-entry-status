@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -u
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SKILL="pm-workspace"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --skill)
+      SKILL="${2:-pm-workspace}"
+      shift 2
+      ;;
+    -h|--help)
+      cat <<'EOF'
+Usage: pmw-entry-status [--skill pm-workspace]
+
+Runs the light PMWorkspace entry preamble: update check, usage log, current
+controller summary, dashboard status, and artifact flow. Missing tools are
+silently skipped so the entry skill can keep routing when local scripts are
+unavailable.
+EOF
+      exit 0
+      ;;
+    *)
+      echo "unknown option: $1" >&2
+      exit 2
+      ;;
+  esac
+done
+
+if [ -x "$SCRIPT_DIR/pmw-update-check" ]; then
+  "$SCRIPT_DIR/pmw-update-check" --quick 2>/dev/null || true
+fi
+
+if [ -x "$SCRIPT_DIR/pmw-log" ]; then
+  "$SCRIPT_DIR/pmw-log" usage "$SKILL" >/dev/null 2>&1 || true
+fi
+
+if [ -x "$SCRIPT_DIR/pmw-controller" ]; then
+  "$SCRIPT_DIR/pmw-controller" next --json 2>/dev/null || true
+fi
+
+if [ -x "$SCRIPT_DIR/pmw-dashboard" ]; then
+  "$SCRIPT_DIR/pmw-dashboard" status 2>/dev/null || true
+fi
+
+if [ -x "$SCRIPT_DIR/pmw-artifact" ]; then
+  "$SCRIPT_DIR/pmw-artifact" flow 2>/dev/null || true
+fi

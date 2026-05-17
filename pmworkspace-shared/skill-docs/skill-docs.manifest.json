@@ -30,6 +30,7 @@
     "pm-workspace": {
       "stage": "主入口路由",
       "purpose": "先判断全新功能 / 已有功能迭代，统一进入深度产品对齐，创建或衔接 run，并路由到最小可用的下一技能。",
+      "compact_contract": true,
       "preamble_checks": [
         "usage pm-workspace",
         "pmw-artifact"

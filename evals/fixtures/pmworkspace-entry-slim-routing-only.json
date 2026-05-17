@@ -12,7 +12,7 @@
     "required_behaviors": [
       "入口只负责判断动作、启动 controller、展示工作方式卡片和路由",
       "复杂协议回到共享 reference 或子 skill",
-      "保留平台 preamble、更新检查和 controller intake",
+      "保留平台 preamble、更新检查、controller intake 和 pmw-entry-status",
       "用 eval 防止入口重新膨胀"
     ],
     "forbidden_behaviors": [
@@ -40,6 +40,18 @@
       "not_contains": "## Product Workbench State Machine"
     },
     {
+      "path": "pm-workspace/SKILL.md",
+      "contains": "pmw-entry-status"
+    },
+    {
+      "path": "pm-workspace/SKILL.md",
+      "not_contains": "## Entry Hard Stops"
+    },
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "## 入口硬停规则"
+    },
+    {
       "path": "pmworkspace-shared/references/routing.md",
       "contains": "`$pm-workspace/SKILL.md` 只保留入口职责、平台 preamble、controller 衔接和工作方式卡片字段"
     }
@@ -49,7 +61,7 @@
       "command": [
         "bash",
         "-lc",
-        "test \"$(wc -l < pm-workspace/SKILL.md | tr -d ' ')\" -le 190"
+        "test \"$(wc -l < pm-workspace/SKILL.md | tr -d ' ')\" -le 125"
       ],
       "exit_code": 0
     }

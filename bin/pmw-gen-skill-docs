@@ -69,7 +69,69 @@ def shared_gate_summary(shared_gates: list[str]) -> list[str]:
     ]
 
 
+def inline_code_list(items: Iterable[str]) -> str:
+    rows = [f"`{item}`" for item in items]
+    return "、".join(rows) if rows else "`未配置`"
+
+
+def compact_shared_gate_summary(shared_gates: list[str]) -> list[str]:
+    if not shared_gates:
+        return ["- 未配置"]
+    return [
+        "- 真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。",
+        "- 摘要：运行前更新检查；产品任务先过 `pmw-controller intake`；STOP gate 必须停住；当前任务绑定 run / `task_digest` / `input_revision`；中文本地化、事实优先、等待门槛和隐私边界不能被跳过。",
+    ]
+
+
+def build_compact_contract(skill: str, spec: dict, manifest: dict) -> str:
+    version = manifest.get("version", 1)
+    title = manifest.get("generated_section_title", "PMWorkspace 生成契约")
+    shared_gates = as_list(manifest.get("shared_gates"))
+    preamble_checks = as_list(manifest.get("common_preamble_checks")) + as_list(spec.get("preamble_checks"))
+    references = as_list(spec.get("required_references"))
+    output_fields = as_list(spec.get("output_fields"))
+    audit_fields = as_list(spec.get("audit_fields"))
+    lines = [
+        START_MARKER,
+        f"## {title}",
+        "",
+        "> 本区块由 `bin/pmw-gen-skill-docs` 根据 manifest 生成；不要手写修改。",
+        "",
+        f"- skill：`{skill}`；契约版本：`{version}`；阶段：{spec.get('stage', '未配置')}",
+        f"- 定位：{spec.get('purpose', '未配置')}",
+        "",
+        "### 统一前置检查",
+        "",
+        f"- {inline_code_list(preamble_checks)}",
+        "",
+        "### 必读共享协议",
+        "",
+        f"- {inline_code_list(f'../pmworkspace-shared/references/{item}' for item in references)}",
+        "",
+        "### 产品表达真源顺序",
+        "",
+        *product_expression_source_order(manifest),
+        "",
+        "### 共享门槛",
+        "",
+        *compact_shared_gate_summary(shared_gates),
+        "",
+        "### 默认用户可见输出字段",
+        "",
+        f"- {inline_code_list(output_fields)}",
+        "",
+        "### 内部审计字段（默认不展示）",
+        "",
+        f"- {inline_code_list(audit_fields)}",
+        END_MARKER,
+    ]
+    return "\n".join(lines) + "\n"
+
+
 def build_contract(skill: str, spec: dict, manifest: dict) -> str:
+    if spec.get("compact_contract"):
+        return build_compact_contract(skill, spec, manifest)
+
     version = manifest.get("version", 1)
     title = manifest.get("generated_section_title", "PMWorkspace 生成契约")
     shared_gates = as_list(manifest.get("shared_gates"))

@@ -264,11 +264,15 @@ It should not store tokens, owner secrets, API keys, cookies, raw customer data,
 
 ```bash
 bin/pmw-eval list
-bin/pmw-eval run
+bin/pmw-eval run --suite smoke
+bin/pmw-eval run --suite core
+bin/pmw-eval run --suite full
 bin/pmw-build-plugin
 bin/pmw-gen-skill-docs write
 bin/pmw-gen-skill-docs check
 ```
+
+Use `smoke` for small docs / entry changes, `core` for skill / references / readiness changes, and `full` before GitHub / plugin releases. `bin/pmw-eval run` still defaults to `full`.
 
 Generated contract blocks in `SKILL.md` files are produced by `bin/pmw-gen-skill-docs write`; do not edit generated blocks by hand. After changing source skills, shared references, `bin`, `evals`, README, or plugin assets, run `bin/pmw-build-plugin` and include the plugin package changes in the commit.
 

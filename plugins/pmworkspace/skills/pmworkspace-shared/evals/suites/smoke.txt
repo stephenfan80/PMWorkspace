@@ -1,0 +1,17 @@
+# PMW smoke suite: fastest confidence that the public product flow is not broken.
+pmworkspace-welcome-homepage
+pmworkspace-entry-slim-routing-only
+pmworkspace-direction-request-requires-brief-gate
+jobs-value-judgment-first-output
+jobs-current-substitute-before-solution
+brief-compact-decision-first-required
+brief-aligned-routes-prototype-or-handoff
+existing-feature-reference-required
+deep-unaligned-brief-no-image
+prototype-min-three-schemes-required-v2
+prototype-single-image-call-contract
+readiness-default-human-verdict-only
+review-unresolved-product-decision
+handoff-compact-prd-core-sections
+handoff-requires-passed-prototype-review
+artifact-flow-required

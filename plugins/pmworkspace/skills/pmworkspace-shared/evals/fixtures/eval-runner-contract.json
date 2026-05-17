@@ -13,6 +13,7 @@
       "支持 list",
       "支持 run",
       "支持 run --fixture",
+      "支持 run --suite smoke / core / full",
       "支持 --json",
       "输出分类摘要",
       "支持 command_checks 轻量运行时断言"
@@ -27,6 +28,10 @@
     {
       "path": "bin/pmw-eval",
       "contains": "run_cmd.add_argument(\"--fixture\", \"--id\", dest=\"fixture\")"
+    },
+    {
+      "path": "bin/pmw-eval",
+      "contains": "run_cmd.add_argument(\"--suite\", default=\"full\""
     },
     {
       "path": "bin/pmw-eval",

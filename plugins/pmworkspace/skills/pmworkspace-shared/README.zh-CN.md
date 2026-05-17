@@ -358,11 +358,15 @@ PMWorkspace 默认把资产保存在本地 `~/.pmworkspace/`，包括业务简�
 
 ```bash
 bin/pmw-eval list
-bin/pmw-eval run
+bin/pmw-eval run --suite smoke
+bin/pmw-eval run --suite core
+bin/pmw-eval run --suite full
 bin/pmw-build-plugin
 bin/pmw-gen-skill-docs write
 bin/pmw-gen-skill-docs check
 ```
+
+`smoke` 用于日常小改，`core` 用于 skill / references / readiness 改动，`full` 用于发布 GitHub / plugin 前。`bin/pmw-eval run` 仍然默认等于 `full`。
 
 ### 维护规则
 

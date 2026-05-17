@@ -169,8 +169,8 @@ bin/pmw-version --json
 | `bin/pmw-version --json` | 查看本地 PMWorkspace 版本和 revision。 |
 | `bin/pmw-update-check --quick` | 快速检查是否有更新。 |
 | `bin/pmw-dashboard status` | 查看当前项目的简洁状态。 |
-| `bin/pmw-dashboard readiness --target prototype` | 出图前检查产品简报、线上参考、方案差异和不可虚构项。 |
-| `bin/pmw-dashboard readiness --target handoff` | 交付前检查 brief、复审和交付门槛。 |
+| `bin/pmw-dashboard readiness --target prototype` | 出图前检查产品简报、线上参考、方案差异和不可虚构项；默认只输出一句人话 verdict。 |
+| `bin/pmw-dashboard readiness --target handoff` | 交付前检查 brief、复审和交付门槛；默认只输出一句人话 verdict。 |
 | `bin/pmw-artifact flow` | 查看产品资产流。 |
 | `bin/pmw-artifact latest --kind product_brief` | 读取最新产品简报资产。 |
 | `bin/pmw-prototype-board list` | 查看多方案原型比较板。 |

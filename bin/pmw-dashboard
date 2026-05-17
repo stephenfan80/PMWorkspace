@@ -1446,24 +1446,29 @@ def readiness_verdict(project: dict, events: list[dict], target: str) -> tuple[s
     return effective_target, verdict_cn, reason, impact, unlock, next_action, rows
 
 
+def trim_clause(value: str) -> str:
+    return str(value or "").strip().rstrip("。；;.")
+
+
 def render_readiness_summary(run_id: Optional[str], target: str = "auto") -> str:
     project = read_json(project_dir() / "project.json")
     chosen_run, events = read_run(run_id)
     effective_target, verdict_cn, reason, impact, unlock, next_action, _rows = readiness_verdict(project, events, target)
-    lines = [
-        "# 产品准备度",
-        "",
-        f"- 目标：{readiness_target_label(effective_target)}",
-        f"- 结论：{verdict_cn}",
-        f"- 原因：{reason}",
-        f"- {'判断价值' if verdict_cn in {'可出图', '可交付'} else '阻断影响'}：{impact}",
-        f"- 解锁动作：{unlock}",
-        f"- 下一步：{next_action}",
-    ]
+    value_label = "判断价值" if verdict_cn in {"可出图", "可交付"} else "阻断影响"
+    reason = trim_clause(reason)
+    impact = trim_clause(impact)
+    unlock = trim_clause(unlock)
+    next_action = trim_clause(next_action)
+    line = (
+        f"产品准备度结论：{verdict_cn}（{readiness_target_label(effective_target)}）。"
+        f"{'关键门槛已通过' if verdict_cn in {'可出图', '可交付'} else f'卡在「{reason}」'}；"
+        f"{value_label}：{impact}；"
+        f"解锁动作：{unlock}；"
+        f"下一步：{next_action}。"
+    )
     if os.environ.get("PMW_DEBUG_OUTPUT") == "true":
-        lines.append(f"- 调试：run={chosen_run or '暂无'}，project={current_slug()}")
-    lines.append("")
-    return "\n".join(lines)
+        line += f" 调试：run={chosen_run or '暂无'}，project={current_slug()}。"
+    return line + "\n"
 
 
 def render_status(run_id: Optional[str]) -> str:

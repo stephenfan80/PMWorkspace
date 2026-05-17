@@ -8,47 +8,24 @@
 - Skill entrypoint: `$pm-workspace`
 - Current version: `0.1.29`
 
-## Start In One Minute
+## First Use
 
-After installation, say one of these in Codex:
+After installation, say this in Codex:
 
-| What you want to do | Say this |
-|---|---|
-| I have a new idea | `Use $pm-workspace to help me decide how to move this product idea forward: <one-line idea>` |
-| I want to improve an existing feature | `Use $pm-workspace to help me improve this existing feature. I can provide screenshots / URLs / feedback: <feature>` |
-| I want prototype images | `Use $pm-workspace to create 3 mobile-first prototype directions, one image per scheme: <feature>` |
-| I need a design / engineering handoff | `Use $pm-workspace to turn the confirmed direction into a product design doc / compact PRD: <materials>` |
+```text
+Use $pm-workspace to help me decide how to move this product idea forward: <idea / screenshot / PRD / feedback>
+```
 
 PMWorkspace moves through **Align -> Prototype -> Review -> Deliver**. If the product context is not aligned yet, it first clarifies the real problem, target user, current substitute, goal, counter-metric, and non-fiction boundaries. It does not turn "make me a prototype" directly into an image.
 
-## Not Installed Yet?
+## What Do You Want To Do?
 
-### Public Codex Plugin
-
-Install **AI 产品工作站** from Codex `Plugins`, then start with `$pm-workspace`.
-
-### Local GitHub Plugin / Team Testing
-
-```bash
-codex plugin marketplace add stephenfan80/PMWorkspace
-```
-
-If you previously added an older local path:
-
-```bash
-codex plugin marketplace remove pmworkspace
-codex plugin marketplace add stephenfan80/PMWorkspace
-```
-
-Then restart Codex, open `Plugins`, switch the filter to `All`, search **AI 产品工作站** or `PMWorkspace`, and enable it.
-
-### Developer Clone
-
-```bash
-git clone https://github.com/stephenfan80/PMWorkspace.git
-cd PMWorkspace
-bin/pmw-upgrade --host codex-plugin
-```
+| Goal | Say this | Common entry |
+|---|---|---|
+| New idea | `Use $pm-workspace to help me decide how to move this product idea forward: <one-line idea>` | Align / `$pm-workspace` |
+| Existing feature | `Use $pm-workspace to help me improve this existing feature. I can provide screenshots / URLs / feedback: <feature>` | Align / `$pm-workspace` |
+| Prototype images | `Use $pm-workspace to create 3 mobile-first prototype directions, one image per scheme: <feature>` | Prototype / `$pm-prototype-shotgun` |
+| Design / engineering handoff | `Use $pm-workspace to turn the confirmed direction into a product design doc / compact PRD: <materials>` | Deliver / `$pm-handoff` |
 
 ## Four Moves
 
@@ -59,26 +36,21 @@ bin/pmw-upgrade --host codex-plugin
 | **Review** | Product, risk, design-system, and data feasibility review. | Prototype images exist and need pass / regenerate / decide guidance. |
 | **Deliver** | Product design doc, compact PRD, experiment, or handoff asset. | The direction is ready for design, engineering, or business review. |
 
+## Install
+
+| User type | Install |
+|---|---|
+| Public Codex plugin | Install **AI 产品工作站** from Codex `Plugins`, then start with `$pm-workspace`. |
+| Local GitHub plugin / team testing | Run `codex plugin marketplace add stephenfan80/PMWorkspace`, restart Codex, then enable the plugin. |
+| Developer clone | Run `git clone https://github.com/stephenfan80/PMWorkspace.git`, then `bin/pmw-upgrade --host codex-plugin`. |
+
 ## Update
 
-Public Codex plugin users should update from the Codex `Plugins` UI.
-
-Local GitHub plugin users can check and upgrade with:
-
-```bash
-bin/pmw-version --check
-bin/pmw-update-check --quick
-bin/pmw-upgrade --host codex-plugin
-```
-
-Developer clone workflow:
-
-```bash
-git pull
-bin/pmw-build-plugin
-bin/pmw-upgrade --host codex-plugin
-bin/pmw-version --json
-```
+| User type | Update |
+|---|---|
+| Public Codex plugin | Update **AI 产品工作站** from Codex `Plugins`. |
+| Local GitHub plugin | Run `bin/pmw-version --check`, `bin/pmw-update-check --quick`, then `bin/pmw-upgrade --host codex-plugin` if needed. |
+| Developer clone | Run `git pull`, `bin/pmw-build-plugin`, `bin/pmw-upgrade --host codex-plugin`, and `bin/pmw-version --json`. |
 
 `pmw-upgrade` replaces the PMWorkspace install package, but does not delete project state, briefs, prototypes, handoff assets, or audit logs under `~/.pmworkspace/`.
 

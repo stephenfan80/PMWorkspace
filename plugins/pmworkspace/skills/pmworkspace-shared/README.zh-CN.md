@@ -2,64 +2,55 @@
 
 **AI 产品工作站：把产品想法、截图反馈、PRD 或用户洞察，推进成可讨论、可出图、可交付的产品方案。**
 
-- Codex 插件展示名：**AI 产品工作站**
-- 技能入口：`$pm-workspace`
+- 插件展示名：**AI 产品工作站**
+- 主入口：`$pm-workspace`
 - 当前版本：`0.1.29`
 
-## 一分钟开始
+## 第一次使用，先看这里
 
-已经安装后，直接在 Codex 里说：
+已安装后，直接在 Codex 里说：
 
-| 你现在想做什么 | 直接这样说 |
-|---|---|
-| 我有一个新想法 | `使用 $pm-workspace 帮我判断这个产品想法应该怎么推进：<一句话想法>` |
-| 我想优化已有功能 | `使用 $pm-workspace 帮我优化这个已有功能。我会补充截图 / URL / 反馈：<功能说明>` |
-| 我想出原型图 | `使用 $pm-workspace 帮我做 3 个移动端原型方向，每个方案单独出图：<功能说明>` |
-| 我想交给设计 / 研发 | `使用 $pm-workspace 把已确认方向整理成产品设计文档 / 精简 PRD：<材料>` |
-
-PMWorkspace 默认按 **对齐 -> 出图 -> 复审 -> 交付** 推进。如果还没对齐，它会先帮你找真实问题、目标用户、当前替代、主目标、反指标和不可虚构项；不会直接把一句“帮我做个原型”变成图片。
-
-简单说：**先用最少材料拿到可讨论方案；需要交付时，再把事实、截图、风险和复审补齐**，产出能评审、能交给设计 / 研发继续推进的文档。
-
-## 还没安装？
-
-### Codex 插件
-
-打开 Codex 的 `Plugins`，搜索并安装 **AI 产品工作站**，然后从 `$pm-workspace` 开始。
-
-### GitHub 本地插件 / 团队测试
-
-```bash
-codex plugin marketplace add stephenfan80/PMWorkspace
+```text
+使用 $pm-workspace 帮我判断这个产品想法应该怎么推进：<一句话想法 / 截图 / PRD / 反馈>
 ```
 
-如果之前添加过旧版本或本地路径：
+PMWorkspace 默认按 **对齐 -> 出图 -> 复审 -> 交付** 推进。还没对齐时，它会先找真实问题、目标用户、当前替代、主目标、反指标和不可虚构项；不会把一句“帮我做个原型”直接变成图片。简单说：**先用最少材料拿到可讨论方案；需要交付时，再把事实、截图、风险和复审补齐**。
 
-```bash
-codex plugin marketplace remove pmworkspace
-codex plugin marketplace add stephenfan80/PMWorkspace
-```
+## 你现在想做什么
 
-重启 Codex，在 `Plugins` 中把筛选切到 `All`，搜索 **AI 产品工作站** 或 `PMWorkspace`，安装 / 启用后使用 `$pm-workspace`。
-
-### 开发者本地仓库
-
-```bash
-git clone https://github.com/stephenfan80/PMWorkspace.git
-cd PMWorkspace
-bin/pmw-upgrade --host codex-plugin
-```
+| 目标 | 直接这样说 | 常用入口 |
+|---|---|---|
+| 新想法 | `使用 $pm-workspace 帮我判断这个产品想法应该怎么推进：<一句话想法>` | 对齐 / `$pm-workspace` |
+| 优化已有功能 | `使用 $pm-workspace 帮我优化这个已有功能。我会补充截图 / URL / 反馈：<功能说明>` | 对齐 / `$pm-workspace` |
+| 出原型图 | `使用 $pm-workspace 帮我做 3 个移动端原型方向，每个方案单独出图：<功能说明>` | 出图 / `$pm-prototype-shotgun` |
+| 交给设计 / 研发 | `使用 $pm-workspace 把已确认方向整理成产品设计文档 / 精简 PRD：<材料>` | 交付 / `$pm-handoff` |
 
 ## 四个动作
 
 | 动作 | 你得到什么 | 什么时候用 |
 |---|---|---|
-| **对齐** | 工作方式卡片、产品作业卡、产品简报或可讨论方向。 | 有想法、截图、PRD、用户洞察，但还不知道真实问题或范围。 |
+| **对齐** | 工作方式卡片、产品作业卡、产品简报或可讨论方向。 | 想法、截图、PRD 或用户洞察还没有收敛。 |
 | **出图** | 每个方案 / 每个屏幕单独生成一张 image-2 原型图。 | 产品简报已对齐，需要移动端优先原型方向。 |
 | **复审** | 判断原型是否可通过、重出、补参考或需要 PM 拍板。 | 已有原型图，准备进入交付前。 |
-| **交付** | 产品设计文档、精简 PRD、实验或研发交付材料。 | 方向和原型已确认，需要交给设计、研发、业务评审或后续协作。 |
+| **交付** | 产品设计文档、精简 PRD、实验或研发交付材料。 | 方向和原型已确认，需要交给设计、研发或评审。 |
 
-你可以只说想做哪一步，PMWorkspace 会自动判断当前最早门槛：如果还没对齐，就先对齐；如果可出图，就进入 image-2；如果图已生成，就先复审；如果复审通过，就进入交付。
+## 安装
+
+| 使用方式 | 怎么装 |
+|---|---|
+| Codex 插件 | 在 Codex `Plugins` 搜索并安装 **AI 产品工作站**，然后从 `$pm-workspace` 开始。 |
+| GitHub 本地插件 / 团队测试 | `codex plugin marketplace add stephenfan80/PMWorkspace`，重启 Codex 后在 `Plugins` 搜索启用。 |
+| 开发者本地仓库 | `git clone https://github.com/stephenfan80/PMWorkspace.git`，进入仓库后运行 `bin/pmw-upgrade --host codex-plugin`。 |
+
+## 更新
+
+| 使用方式 | 怎么更新 |
+|---|---|
+| 公开 Codex 插件 | 在 Codex `Plugins` 里更新 **AI 产品工作站**。 |
+| GitHub 本地插件 | 运行 `bin/pmw-version --check`、`bin/pmw-update-check --quick`，再按提示运行 `bin/pmw-upgrade --host codex-plugin`。 |
+| 开发者本地仓库 | `git pull` 后运行 `bin/pmw-build-plugin`、`bin/pmw-upgrade --host codex-plugin`、`bin/pmw-version --json`。 |
+
+普通用户只需要 `$pm-*`；完整公开工具目录见 [`docs/public-toolbox.md`](docs/public-toolbox.md)。详细升级契约见 `pmworkspace-shared/references/update-workflow.md` 和 `docs/codex-plugin-submission.md`。
 
 ## 适合谁
 
@@ -69,41 +60,7 @@ bin/pmw-upgrade --host codex-plugin
 - 创业者和负责人：快速得到可讨论的产品方向、假设和下一步验证。
 - 需要交付的团队：把已对齐 brief、原型和复审结论整理成 PRD 或设计交付。
 
-## 如何更新 PMWorkspace
-
-### 公开 Codex 插件用户
-
-在 Codex `Plugins` 里更新 **AI 产品工作站**。这是公开插件用户的默认更新方式。
-
-### GitHub 本地插件用户
-
-先检查版本：
-
-```bash
-bin/pmw-version --check
-bin/pmw-update-check --quick
-```
-
-如果检查输出 `UPGRADE_AVAILABLE` 和 `UPGRADE_COMMAND`，运行输出里的升级命令。常见命令是：
-
-```bash
-bin/pmw-upgrade --host codex-plugin
-```
-
-升级会替换 PMWorkspace 插件包，不会删除 `~/.pmworkspace/` 里的项目状态、产品简报、原型、交付稿或审计记录。
-
-### 开发者本地仓库
-
-```bash
-git pull
-bin/pmw-build-plugin
-bin/pmw-upgrade --host codex-plugin
-bin/pmw-version --json
-```
-
-详细升级契约见 `pmworkspace-shared/references/update-workflow.md` 和 `docs/codex-plugin-submission.md`。
-
-## 快速开始
+## 快速开始模板
 
 先选一个动作即可：**对齐、出图、复审、交付**。如果你不确定，就从 `$pm-workspace` 开始，它会把请求路由到当前最早该处理的门槛。
 

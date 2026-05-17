@@ -1,5 +1,6 @@
 # PMW core suite: covers the four user moves plus runtime gates.
 # Includes all smoke checks, then adds representative checks for align, prototype, review, deliver, and release safety.
+readme-first-60-closed-loop
 pmworkspace-welcome-homepage
 pmworkspace-entry-slim-routing-only
 pmworkspace-direction-request-requires-brief-gate

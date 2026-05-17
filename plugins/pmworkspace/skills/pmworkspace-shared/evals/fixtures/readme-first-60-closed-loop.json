@@ -1,0 +1,92 @@
+{
+  "id": "readme-first-60-closed-loop",
+  "title": "README 首屏 60 行必须完成第一次使用闭环",
+  "category": "public-docs",
+  "primary_skill": "pm-workspace",
+  "prompt": "新用户第一次打开 README，只看前 60 行，需要知道 PMW 是什么、怎么开始、怎么安装、怎么更新以及该用哪个 $pm-*。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "README 首屏闭环",
+    "required_behaviors": [
+      "README.zh-CN.md 前 60 行包含一句话定位、主入口和当前版本",
+      "README.zh-CN.md 前 60 行包含对齐、出图、复审、交付四个动作",
+      "README.zh-CN.md 前 60 行包含安装和更新入口",
+      "README.zh-CN.md 前 60 行说明 $pm-workspace、$pm-prototype-shotgun 和 $pm-handoff 的使用场景",
+      "高级内容只作为后文索引，不抢占首屏"
+    ],
+    "forbidden_behaviors": [
+      "前 60 行只讲安装而不讲更新",
+      "前 60 行只讲概念而不给最快开始命令",
+      "前 60 行把维护者 bin/pmw-* 命令当成普通用户必学入口"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "README.zh-CN.md",
+      "contains": "## 第一次使用，先看这里"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "## 你现在想做什么"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "## 安装"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "## 更新"
+    },
+    {
+      "path": "README.md",
+      "contains": "## First Use"
+    },
+    {
+      "path": "README.md",
+      "contains": "## What Do You Want To Do?"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "head -n 60 README.zh-CN.md"
+      ],
+      "contains": [
+        "AI 产品工作站",
+        "$pm-workspace",
+        "对齐",
+        "出图",
+        "复审",
+        "交付",
+        "## 安装",
+        "## 更新",
+        "$pm-prototype-shotgun",
+        "$pm-handoff",
+        "docs/public-toolbox.md"
+      ]
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "head -n 60 README.md"
+      ],
+      "contains": [
+        "AI 产品工作站",
+        "$pm-workspace",
+        "Align",
+        "Prototype",
+        "Review",
+        "Deliver",
+        "## Install",
+        "## Update",
+        "$pm-prototype-shotgun",
+        "$pm-handoff"
+      ]
+    }
+  ]
+}

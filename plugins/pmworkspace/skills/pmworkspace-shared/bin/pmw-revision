@@ -7,6 +7,7 @@ PACKAGED_REVISION_PATHS=(
   VERSION
   README.md
   README.zh-CN.md
+  setup
   pm-workspace
   pm-autoplan
   pm-jobs

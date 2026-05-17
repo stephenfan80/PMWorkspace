@@ -16,6 +16,7 @@
       "已有功能和截图迭代样例展示 visual_baseline",
       "README 说明 examples 和 references 的职责区别",
       "插件打包脚本复制 examples 到 pmworkspace-shared/examples",
+      "本地 codex 安装脚本复制 examples 到 pmworkspace-shared/examples",
       "插件 revision 计算包含 examples"
     ],
     "forbidden_behaviors": [
@@ -83,8 +84,16 @@
       "contains": "cp -R \"$ROOT/examples\" \"$PLUGIN_DIR/skills/pmworkspace-shared/examples\""
     },
     {
+      "path": "setup",
+      "contains": "cp -R \"$ROOT/examples\" \"$DEST/pmworkspace-shared/examples\""
+    },
+    {
       "path": "bin/pmw-revision",
       "contains": "examples"
+    },
+    {
+      "path": "bin/pmw-revision",
+      "contains": "setup"
     }
   ]
 }

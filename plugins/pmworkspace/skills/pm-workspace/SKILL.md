@@ -202,6 +202,7 @@ If the user provides a product task in the same message, skip the welcome menu a
 - 平台脚本可用时，保存可沉淀资产：使用日志、决策、产品简报 Markdown、原型清单和偏好反馈。
 - 平台脚本可用时，使用 `pmw-dashboard status` / `pmw-dashboard readiness --target prototype|handoff` 获取简洁 verdict；需要完整审计时才运行或展示 `--details` 表格。
 - 平台脚本可用时，使用 `pmw-artifact flow --details` 汇总产物流动给下游技能；默认用户输出不说明 `上游产物`、`本轮产物`、`下游可读` 和 `产物流动`。
+- 默认用户输出只解释 5 个公开产品资产：`product_brief`、`visual_baseline`、`prototype_manifest`、`prototype_review`、`handoff`。`browser_evidence`、`repair_brief`、`product_design_doc`、`acceptance_seed` 和 `release_doc_seed` 只在审计、调试或维护说明中展开。
 - 不要把真实 token、私密客户数据、内部录音、敏感截图或未脱敏 Zoon 内容保存到本地资产。
 
 ## Shared References

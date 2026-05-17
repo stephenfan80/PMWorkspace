@@ -1,4 +1,5 @@
 # PMW smoke suite: fastest confidence that the public product flow is not broken.
+readme-first-60-closed-loop
 pmworkspace-welcome-homepage
 pmworkspace-entry-slim-routing-only
 pmworkspace-direction-request-requires-brief-gate

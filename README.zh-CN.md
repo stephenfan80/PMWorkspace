@@ -352,6 +352,7 @@ bin/pmw-gen-skill-docs check
 
 ### 维护规则
 
+- 改 PMW 的用户心智、默认输出或产物命名时，先稳定 README / references 的产品表达，再更新生成契约，最后补 eval；不要先改 eval 反向牵着产品表达走。
 - 共享契约区块由 `bin/pmw-gen-skill-docs write` 从 manifest 生成，不要手写生成区块。
 - 改动 source skill、`pmworkspace-shared/references`、`bin`、`evals`、README 或插件 assets 后，运行 `bin/pmw-build-plugin`，并把插件副本变化一起提交。
 - README 只讲用户入口、工具箱、路径图、方法库和资产流；完整路由和阶段字段由 `pmworkspace-shared/references/` 维护。

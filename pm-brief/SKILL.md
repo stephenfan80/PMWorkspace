@@ -16,7 +16,7 @@ description: |
 > 本区块由 `bin/pmw-gen-skill-docs` 根据 `pmworkspace-shared/skill-docs/skill-docs.manifest.json` 生成；不要手写修改。更新共享门槛、前置检查或输出字段后，运行 `bin/pmw-gen-skill-docs write`，再运行 `bin/pmw-gen-skill-docs check`。
 
 - skill：`pm-brief`
-- 契约版本：`2`
+- 契约版本：`3`
 - 阶段：产品简报
 - 定位：把已完成的产品方向审查、价值判断、PM 判断摘要、产品作业和策略取舍写成出图前短版产品简述 / 产品简报，默认本地保存候选简报；确认已对齐后再按用户选择同步到 Zoon。
 
@@ -45,6 +45,13 @@ description: |
 - `../pmworkspace-shared/references/zoon-workflow.md`
 - `../pmworkspace-shared/references/zoon-drift-check.md`
 - `../pmworkspace-shared/references/product-readiness-dashboard.md`
+
+### 产品表达真源顺序
+
+- 先稳定用户可见产品表达：根 README、routing.md、welcome-guide.md 或对应方法 reference 说明 PMW 对外心智、默认输出和产物命名。
+- 再同步 skill 正文和 manifest：生成契约只承接已稳定表达需要共享的阶段、定位、前置检查、必读协议、输出字段和审计字段。
+- 然后运行 pmw-gen-skill-docs write/check：让 SKILL.md 生成区块镜像 manifest，防止手写漂移。
+- 最后补 eval fixture：把已经稳定的表达锁成防回退断言；不要先写 eval 反向牵引产品表达。
 
 ### 共享门槛
 

@@ -8,6 +8,8 @@ eval 默认以静态规则检查为主；对 `pmw-*` 本地脚本的关键输出
 
 本文件是 eval 合同，不是第二套业务流程说明。这里必须保留 fixture 分类、禁止项、验收断言和失败条件；具体业务规则以对应 reference 为真源：产品发现看 `product-discovery-gate.md` / `product-office-hours.md`，产品简报看 `product-manager-brief.md` / `product-plan-handoff.md`，原型长板看 `image-prompts.md` / `prototype-shotgun-board.md`，Zoon 看 `zoon-workflow.md`，准备度看 `product-readiness-dashboard.md`。瘦身时只能移除重复业务长解释，不能把本文件压缩成纯链接。
 
+Eval 后置原则：产品表达先在 README、`routing.md`、`welcome-guide.md` 或对应方法 reference 中稳定；随后同步 skill 正文和 `pmw-gen-skill-docs` 生成契约；最后再修改 fixture，把稳定后的表达锁成防回退断言。不要先写 eval 再反向牵引产品表达，也不要只改 fixture 让测试通过。
+
 ## 目标
 
 - 防止产品简报未对齐时写 image-2 提示词或生成原型。
@@ -114,6 +116,7 @@ fixture 使用 JSON，保存在 `evals/fixtures/`：
 
 - 端到端地图：README、routing、eval 分类和 skill 状态字段必须共同指向 `pm-workbench-map.md`，不能各自维护一套链路解释。
 - Skill 文档生成：共享 preamble、必读协议、输出字段和共享门槛必须进入 `skill-docs.manifest.json`，由 `pmw-gen-skill-docs write` 生成，且 `pmw-gen-skill-docs check` 能发现漂移。
+- 产品表达治理：先稳定用户可见表达，再同步生成契约，最后补 eval；eval 和生成器都不能成为第二套产品方法真源。
 - 产品简报：当前 `input_revision` 的产品简报未 `已对齐` 时禁止 image-2 提示词和图片生成。
 - 产品路径：用户选择方案 A/B/C、回答“按 A 继续”或确认某个方向，不能替代产品简报确认。
 - 现有功能迭代：缺生产截图或关键节点截图时必须停在参考门槛。
@@ -250,7 +253,7 @@ bin/pmw-eval run --json
 
 ## 维护规则
 
-- 新增或修改 PMWorkspace 门槛时，必须补一个 fixture。
+- 新增或修改 PMWorkspace 门槛时，先更新对应用户可见表达和 reference，再补一个 fixture。
 - 如果 skill 文档删掉关键短语，必须同步更新 fixture，不要只让 eval 通过。
 - fixture 里不要放真实客户资料、敏感截图、token、Zoon ownerSecret 或私密 PRD 原文。
 - eval 是维护工具，不是普通用户主入口；用户使用 PMWorkspace 时不需要先跑 eval。

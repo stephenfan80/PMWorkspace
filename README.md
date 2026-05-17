@@ -252,6 +252,8 @@ bin/pmw-gen-skill-docs check
 
 Generated contract blocks in `SKILL.md` files are produced by `bin/pmw-gen-skill-docs write`; do not edit generated blocks by hand. After changing source skills, shared references, `bin`, `evals`, README, or plugin assets, run `bin/pmw-build-plugin` and include the plugin package changes in the commit.
 
+When changing PMW's user mental model, default output, or product asset naming, stabilize the product expression in README / references first, then regenerate skill contracts, and only then update eval fixtures. Evals are regression guards, not the starting point for product expression.
+
 ## License
 
 MIT

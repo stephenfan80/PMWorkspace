@@ -11,6 +11,12 @@ bin/pmw-eval run --json
 
 fixture 放在 `evals/fixtures/`，每个 JSON 代表一个必须被 PMWorkspace 规则兜住的场景。
 
+## 维护顺序
+
+eval 是后置防回退工具，不是产品表达的起点。改 PMW 行为或用户心智时，先稳定 README、`routing.md`、`welcome-guide.md` 或对应方法 reference 中的产品表达；再同步 skill 正文和 `pmw-gen-skill-docs` 生成契约；最后新增或修改 fixture，把已经稳定的表达锁住。
+
+不要为了先让测试通过而反向修改产品表达，也不要只改 fixture 掩盖 reference、skill 或本地脚本的真实漂移。
+
 ## 分类地图
 
 eval 分类必须能映射回 `pmworkspace-shared/references/pm-workbench-map.md` 的端到端链路：

@@ -229,6 +229,21 @@ bin/pmw-artifact latest --kind product_brief
 bin/pmw-artifact latest --kind prototype_review
 ```
 
+## Example Asset Library
+
+`examples/` is PMW's public example asset library. It is closer to a product-workflow knowledge pack than a prompt gallery: each full example shows how one task becomes `product_brief`, optional `visual_baseline`, `prototype_manifest`, `prototype_review`, and `handoff`.
+
+Start with `examples/asset-flows/`:
+
+| Example | What it shows |
+|---|---|
+| `examples/asset-flows/01-new-idea/` | A new idea becoming an aligned brief, three product paths, review, and product design doc. |
+| `examples/asset-flows/02-existing-feature/` | Existing-feature iteration with a visual baseline before prototype and handoff. |
+| `examples/asset-flows/03-screenshot-iteration/` | Annotated screenshot feedback, affected-image regeneration, and brief update boundaries. |
+| `examples/asset-flows/04-prd-handoff/` | Brief / manifest / review becoming a compact PRD. |
+
+Prompt starters remain in `examples/prompt-recipes.md`. Read `pmworkspace-shared/references/` for internal methods and runtime protocols; read `examples/` when you want to see what PMW artifacts look like.
+
 ## Prototype Rules
 
 - An aligned product brief is required before image prompts or image generation.

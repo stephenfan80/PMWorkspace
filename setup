@@ -24,6 +24,10 @@ cp -R "$ROOT/pmworkspace-shared" "$DEST/pmworkspace-shared"
 for doc in README.md README.zh-CN.md; do
   [ -f "$ROOT/$doc" ] && cp "$ROOT/$doc" "$DEST/pmworkspace-shared/$doc"
 done
+if [ -d "$ROOT/examples" ]; then
+  rm -rf "$DEST/pmworkspace-shared/examples"
+  cp -R "$ROOT/examples" "$DEST/pmworkspace-shared/examples"
+fi
 if [ -d "$ROOT/evals" ]; then
   rm -rf "$DEST/pmworkspace-shared/evals"
   cp -R "$ROOT/evals" "$DEST/pmworkspace-shared/evals"

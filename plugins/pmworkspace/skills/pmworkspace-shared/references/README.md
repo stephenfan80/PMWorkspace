@@ -35,7 +35,7 @@
 
 | 分组 | 文件 | 用途 |
 |---|---|---|
-| 路由 / 工作台地图 | `routing.md`、`pm-workbench-map.md`、`autoplan-workflow.md` | 决定当前动作、下一技能、端到端阶段、共享状态字段和自动推进边界。 |
+| 路由 / 工作台地图 | `routing.md`、`pm-workbench-map.md`、`autoplan-workflow.md` | 决定入口职责边界、当前动作、下一技能、端到端阶段、共享状态字段和自动推进边界。 |
 | 运行状态 / 准备度 | `runtime-kernel.md`、`artifact-flow.md`、`product-readiness-dashboard.md`、`evidence-dashboard.md`、`state-and-telemetry.md`、`browser-evidence.md` | 管理 run、Product Artifact Flow、Product Readiness Dashboard、证据登记、本地状态和隐私边界。 |
 | 记忆 / 偏好 | `product-memory.md`、`question-tuning.md` | 管理可复用产品学习和 Q/D 追问偏好，但不能覆盖本轮事实。 |
 | Zoon 协作 | `zoon-workflow.md`、`zoon-drift-check.md` | 管理在线协作文档的创建、加入、同步和漂移检查。 |

@@ -80,46 +80,35 @@ PMWorkspace 是产品方案工作台：对齐、出图、复审、交付。它�
 
 Before user-facing output, read `../pmworkspace-shared/references/language-and-localization.md`. For Chinese users, use Chinese headings, labels, status values, and recommendations; keep English only for skill ids, commands, file paths, and precise technical terms such as `token`, `API`, `PRD`, `Zoon`, `image-2`, and `URL`.
 
-## Public Action Model
+## Entry Job
 
-`$pm-workspace` 对用户默认只展示四个动作，不把 8 个底层 skill 当成第一层菜单：
+`$pm-workspace` 是 PMWorkspace 的入口，不是第二份产品规则表。入口只负责四件事：判断动作、启动或衔接 controller、展示工作方式卡片、路由到下一技能。
 
-```text
-对齐：把想法、PRD、截图或反馈整理成可讨论产品判断和产品简报。
-出图：在产品简报已对齐后，逐个方案 / 屏幕生成 image-2 原型图。
-复审：检查原型是否符合 brief、反指标、不可虚构项、线上参考和设计系统。
-交付：把已确认方向整理成产品设计文档、精简 PRD 或研发交付稿。
-```
+默认只向用户暴露四个动作：
 
-如果用户说“给方案”“出原型”“转 PRD”，也先判断四个动作里当前最早门槛。未对齐时停在对齐；可出图时进入出图；已有图时进入复审；复审通过或方向明确时进入交付。底层路由仍由 `routing.md` 和 controller 决定。
+| 动作 | 用户想完成的事 | 入口默认处理 |
+|---|---|---|
+| 对齐 | 把想法、PRD、截图或反馈变成可讨论产品判断。 | 判断产品路径和最早门槛，路由到 `$pm-autoplan`、`$pm-jobs`、`$pm-strategy-review` 或 `$pm-brief`。 |
+| 出图 | 基于已对齐 brief 生成 image-2 原型图。 | 先交给 controller / readiness 判断；未放行时回到对齐门槛。 |
+| 复审 | 判断原型是否可通过、重出或补参考。 | 路由到 `$pm-prototype-review`。 |
+| 交付 | 生成产品设计文档、精简 PRD 或研发交付稿。 | 先确认复审和交付门槛，再路由到 `$pm-handoff`。 |
 
-## Frontloaded Protocol
+`$pm-workspace` 不做完整产品发现、不写产品简报正文、不写 image-2 prompt、不生成图片、不做原型复审、不写 PRD。复杂协议交给 `pmworkspace-shared/references/`、controller 和被路由到的子 skill。
 
-`$pm-workspace` 是入口协议，不是第二份业务规则表。用户有具体产品任务时，跳过欢迎菜单，先读取这些共享协议再路由：
+## Required Sources
 
-1. Read `../pmworkspace-shared/references/runtime-kernel.md`.
-2. Read `../pmworkspace-shared/references/pm-workbench-map.md` for the end-to-end stage map, shared state fields, and eval category alignment.
-3. Read `../pmworkspace-shared/references/artifact-flow.md` so routed skills preserve upstream artifacts and downstream-readable handoffs.
-4. Read `../pmworkspace-shared/references/pm-decision-principles.md`.
-5. Read `../pmworkspace-shared/references/pm-eval-system.md` and keep its contracts as maintenance guardrails.
-6. Read `../pmworkspace-shared/references/routing.md` as the only source for D0 工作方式判定、路由表、run 衔接和路由输出契约。
-7. Read `../pmworkspace-shared/references/welcome-guide.md` only when the user has no concrete product task, asks what PMWorkspace can do, or needs first-run onboarding.
+用户有具体产品任务时，跳过欢迎菜单，先读取共享真源再路由：
 
-## Product Workbench State Machine
-
-PMWorkspace is not a prototype shortcut. Every product task must first clarify product value, goals, counter-metrics, constraints, and premises, then turn aligned product judgment into image-2 prototypes.
-
-Use this user-facing state machine for prototype-related work:
-
-```text
-对齐 -> 出图 -> 复审 -> 交付
-```
-
-Internally, `对齐` still includes product path, work goal mode, product direction review, premise confirmation, required Q/D, and product brief. If any required alignment step is incomplete, route to `$pm-jobs` or `$pm-brief` instead of generating prototypes.
+1. Read `../pmworkspace-shared/references/routing.md` as the only source for D0 产品路径、四动作路由、run 衔接和路由输出契约。
+2. Read `../pmworkspace-shared/references/runtime-kernel.md` for controller authority, STOP gates, run owner rules, and audit boundaries.
+3. Read `../pmworkspace-shared/references/pm-workbench-map.md` for the end-to-end stage map, shared state fields, and eval category alignment.
+4. Read `../pmworkspace-shared/references/artifact-flow.md` so routed skills preserve upstream artifacts and downstream-readable handoffs.
+5. Read `../pmworkspace-shared/references/pm-eval-system.md` only as a maintenance guardrail when changing PMW behavior or docs.
+6. Read `../pmworkspace-shared/references/welcome-guide.md` only when the user has no concrete product task, asks what PMWorkspace can do, or needs first-run onboarding.
 
 ## Platform Preamble
 
-Run this before the workflow when shell access is available:
+Run this before routing when shell access is available:
 
 ```bash
 _PMW_BIN=""
@@ -138,6 +127,8 @@ fi
 
 If output contains `UPGRADE_AVAILABLE old new`, tell the user PMWorkspace has an update. If output also contains `UPGRADE_COMMAND <command>`, offer that exact command; otherwise offer `pmw-upgrade --host codex`. If `auto_upgrade` is `true`, upgrade automatically with the detected command and say what changed only after upgrade succeeds.
 
+## Routing Flow
+
 After D0 and routing choose 产品路径, `$pm-workspace` must hand control to the runtime controller. Do not call `pmw-run start` directly for a product task; the controller decides whether the active project/run can be inherited or whether the new user materials require a new run / revision:
 
 ```bash
@@ -151,17 +142,9 @@ After D0 and routing choose 产品路径, `$pm-workspace` must hand control to t
 "$_PMW_BIN/pmw-controller" next --json
 ```
 
-If `pmw-controller next` returns `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED` or `BLOCKED`, stop at that gate and show the work mode card plus the first needed confirmation/evidence. Use `pmw-run event` only after controller intake has stamped the run with the current `task_digest` and `input_revision`. If a child skill continues the workflow, do not finish the run in `$pm-workspace`; the child skill must reuse the current controller run/revision and finish only at a terminal readiness state. If scripts are unavailable, mark `运行审计：未启用`.
+If `pmw-controller next` returns `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED` or `BLOCKED`, stop at that gate and show the work mode card plus the first needed confirmation/evidence. If a child skill continues the workflow, do not finish the run in `$pm-workspace`; the child skill must reuse the current controller run/revision and finish only at a terminal readiness state. If scripts are unavailable, mark `运行审计：未启用`.
 
-## Routing Source
-
-Read `../pmworkspace-shared/references/routing.md`; it is the only route table and D0 source of truth.
-
-After routing, record the full routing contract from `routing.md` in local audit: `当前模式`、`当前门槛`、`下一技能`、`为什么`、`run_id`、`证据状态`. Default user-facing output should show a short `工作方式` card plus `业务判断`、`产品作业卡`、`当前需要确认` and `下一步`; it must now also include `本轮价值时刻` and `补齐后解锁`, so users can see the product path, the fixed deep alignment requirement, what product judgment PMW is helping them obtain now, and what product homework must be handled before brief or prototype.
-
-If platform scripts are available, read `pmw-artifact flow --details` for routing context, but do not include the flow table in default user output. A routed child skill should know the latest `上游产物`, expected `本轮产物`, and `下游可读` target from local audit instead of relying only on conversation memory.
-
-Before routing to any downstream skill, establish the `产品信息对齐包` from `pm-workbench-map.md`. If `pmw-dashboard status` is available, treat its `产品信息对齐` and `当前产品缺口` lines as the compact project context. If it says core product facts are missing, route to `$pm-jobs` / evidence intake instead of proposing方案方向 or prototypes.
+Record the full routing contract from `routing.md` in local audit: `当前模式`、`当前门槛`、`下一技能`、`为什么`、`run_id`、`证据状态`. Default user-facing output should show a short `工作方式` card plus `业务判断`、`产品作业卡`、`当前需要确认` and `下一步`; it must now also include `本轮价值时刻` and `补齐后解锁`, so users can see why PMW stops or routes.
 
 ## Welcome And First Run
 
@@ -171,65 +154,27 @@ Do not make the user guess the command set. The first response should feel like 
 
 If the user provides a product task in the same message, skip the welcome menu and route directly.
 
-## Operating Rules
+## Entry Hard Stops
+
+These are entrance guardrails, not the full protocol. When one applies, stop and route to the source file / child skill listed in the generated contract.
 
 - 写图片提示词或生成图片前，必须先完成产品简报对齐。
-- 产品简报不是 `已对齐` 时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
-- 用户选择 `方案 A/B/C`、回答“按 A 继续”或确认某个方向，只代表方案方向选择，不能替代当前 `input_revision` 的产品简报对齐。
-- 每次进入产品任务，先输出或内部建立 `产品信息对齐包` 和 `产品作业卡`：已知事实、暂定判断、证据边界、当前主阻断、关键缺口队列、PMW 产品建议、PMW 信息架构建议、用户作业、补齐后解锁什么。不能只凭最后一句话继续下游。
-- 用户提供截图或线上参考时，只更新视觉基线和线上参考状态；不要自动产出完整 md 方案、HTML 或原型图。
-- 已有功能迭代缺线上截图、关键节点截图或等价视觉基线时，不输出 `方案 A / 方案 B / 方案 C` 或三条产品路径；只输出产品作业卡、证据请求、Agent 拿到材料后会如何拆解和补齐后解锁的下一步。用户提供录屏时，要求补关键节点截图，或先由外部工具转成截图后再进入 PMW。
-- 用户选择某个方案方向后再上传截图时，只代表“方向选择 + 新证据输入”，不代表产品简报已对齐。必须先做线上基线接收：拆解当前线上优势、问题区域、必须保留、可以改、暂不应改、为什么新方案会优于当前线上；之后回到 `$pm-brief` 做产品简报确认，不能直接进入 `$pm-prototype-shotgun`。
-- 已有功能迭代默认先保护线上体验。若当前线上方案明显比 Agent 新方案更简洁、更符合信息密度或更可信，PMW 必须建议保留 / 微调线上方案，而不是为了出图重画。
-- `Q` / `D` 只作为关键卡点的交互方式，不是完整产品发现流程；Agent 可以先协助整理材料、拆解截图、生成访谈提纲、梳理数据口径、检索最佳实践和归纳路径机会。拍板问题使用 `D`，一次只展开一个，问完必须等待用户回答。
-- 产品简报前必须完成前提确认；未确认前只能保持 `待确认`。
-- 关键产品决策默认使用选择题拍板；读取 `decision-question-mode.md`。
-- 新页面也要判断线上参考需求；承接线上流程、结果页、状态页或生产样式时，缺截图、关键节点截图或相似页面参考要先问。
-- 产品简报阶段可以按主场景做轻量互联网最佳实践检索；检索结果只用于案例启发和原型重点建议，不增加 Q 数量。
-- 产品简报阶段默认先保存本地 Markdown 业务简报和本地审计副本；不要自动创建或更新 Zoon 在线文档。
-- 在产品简报保存后，用一个轻量选择询问是否同步到在线协作文档（Zoon）。只有用户选择同步、提供现有 Zoon URL 或任务明确需要多人在线协作时，才创建/更新 Zoon，并在成功后自动打开到 Codex 内置浏览器。
-- 用户在对话中调整产品简报后，必须重新保存本地简报；只有已启用 Zoon 时才重新同步到 Zoon，并在原型或交付前使用 Zoon 漂移检查。
-- 未启用 Zoon 时，后续原型/交付优先读取本地已对齐产品简报，Product Readiness Dashboard 不应把 Zoon 当作阻断门槛。
-- 原型图生成后，批量交付前默认使用 `$pm-prototype-review` 做产品一致性、设计系统、不可虚构项和反指标复审。
-- 面向用户展示中文项目名；技术 slug 只用于本地目录。
-- 默认原型画布移动端优先：无线上截图时用 iPhone 17 竖屏 `402 x 874`；有生产截图 / `visual_baseline` 时用截图物理像素长板。
-- 只有用户明确要求桌面端，或看板/内部工具明显需要大屏工作区，才使用桌面端。
-- 设计原型默认只能使用 image-2 / 图像生成；HTML 只在用户明确要求可交互网页、HTML 原型或前端实现时允许。
-- 一个方案 + 一个屏幕 = 一张图片。除非用户要求展示板，否则不要创建比较拼图。
-- 默认最少 3 个方案；少于 3 个必须有明确豁免原因。
-- 每个方案必须包含原型思考、信息架构设计思考、用户问题解决逻辑、反指标保护和不可虚构边界。
-- 每张图片必须绑定方案名、屏幕任务、主目标、反指标、不可虚构项和产品简报版本。
-- 平台脚本可用时，保存可沉淀资产：使用日志、决策、产品简报 Markdown、原型清单和偏好反馈。
-- 平台脚本可用时，使用 `pmw-dashboard status` / `pmw-dashboard readiness --target prototype|handoff` 获取简洁 verdict；需要完整审计时才运行或展示 `--details` 表格。
-- 平台脚本可用时，使用 `pmw-artifact flow --details` 汇总产物流动给下游技能；默认用户输出不说明 `上游产物`、`本轮产物`、`下游可读` 和 `产物流动`。
-- 默认用户输出只解释 5 个公开产品资产：`product_brief`、`visual_baseline`、`prototype_manifest`、`prototype_review`、`handoff`。`browser_evidence`、`repair_brief`、`product_design_doc`、`acceptance_seed` 和 `release_doc_seed` 只在审计、调试或维护说明中展开。
+- 用户提供截图或线上参考时，只更新视觉基线和线上参考状态；不要自动产出完整方案、HTML 或原型图。
+- 已有功能迭代缺线上截图、关键节点截图或等价视觉基线时，不输出 `方案 A / 方案 B / 方案 C`；先请求证据并解释补齐后解锁什么。
+- 用户选择某个方案方向后再上传截图时，只代表“方向选择 + 新证据输入”，不代表产品简报已对齐；先进入 `线上基线接收`，再回到 `$pm-brief` 确认。
+- 入口层默认只解释 5 个公开产品资产：`product_brief`、`visual_baseline`、`prototype_manifest`、`prototype_review`、`handoff`；完整 Product Artifact Flow 写入本地审计。
 - 不要把真实 token、私密客户数据、内部录音、敏感截图或未脱敏 Zoon 内容保存到本地资产。
 
-## Shared References
+## Shared Source Index
 
-Use `../pmworkspace-shared/references/` for:
+Use `../pmworkspace-shared/references/README.md` as the index. Keep detailed rules out of this entry file:
 
-- `language-and-localization.md` for output language and Chinese terminology.
-- `runtime-kernel.md` for run ids, shared statuses, audit events, and final run state.
-- `pm-workbench-map.md` for the end-to-end PMWorkspace map, shared state fields, and eval category alignment.
-- `artifact-flow.md` for Product Artifact Flow, upstream artifacts, downstream-readable outputs, and `pmw-artifact`.
-- `pm-decision-principles.md` for automatic decision priorities, stop gates, and memory boundaries.
-- `pm-eval-system.md` for maintenance eval fixtures and PMWorkspace behavior contracts.
-- `evidence-dashboard.md` for evidence status pages.
-- `product-readiness-dashboard.md` for the pre-image and pre-handoff readiness verdict.
-- `decision-question-mode.md` for PM decision questions.
-- `autoplan-workflow.md` for automatic product review sequencing.
-- `zoon-drift-check.md` for syncing adjusted briefs and detecting stale Zoon state.
-- `product-memory.md` for local preference and learning summaries.
-- `question-tuning.md` for user-specific Q/D questioning preferences.
-- `browser-evidence.md` for online reference capture.
-- `scenario-experts.md` for scenario-specific review lenses.
-- `internet-best-practice-research.md` for lightweight public UX/product case research.
-- `production-reference-gate.md` for online screenshot/reference checks before prototypes.
-- `prototype-shotgun-board.md` for multi-scheme comparison without merging images.
-- `pm-review-army.md` for structured multi-lens review.
-- `welcome-guide.md` for install success and first-run onboarding.
-- `routing.md` for route selection.
-- `state-and-telemetry.md` for durable asset rules.
-- `update-workflow.md` for update prompts.
-- Existing product references for gates, methods, prompt templates, AutoDesign, Zoon, and QA.
+| 真源 | 入口何时读取 |
+|---|---|
+| `routing.md` | 判断四动作、产品路径、下一技能和工作方式卡片。 |
+| `runtime-kernel.md` | controller 权威、STOP gate、run owner 和审计边界。 |
+| `pm-workbench-map.md` | 端到端阶段、共享状态字段和 eval 分类地图。 |
+| `product-discovery-gate.md`、`production-reference-gate.md` | 已有功能、线上截图、产品作业卡和线上基线接收门槛。 |
+| `artifact-flow.md`、`product-readiness-dashboard.md` | 产品资产流、出图 / 交付前 readiness 和默认简洁 verdict。 |
+| `welcome-guide.md` | 空泛请求、刚安装或用户问 PMWorkspace 能做什么时。 |
+| `pm-eval-system.md`、`skill-doc-template-system.md`、`update-workflow.md` | 维护、生成、评估、打包和升级时。 |

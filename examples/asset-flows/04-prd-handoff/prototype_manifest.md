@@ -1,6 +1,7 @@
 # prototype_manifest：课程试听报名流程
 
 来源 brief：`product_brief.md` / v1 / 已对齐
+视觉基线：`visual_baseline.md` / 无生产截图，默认移动端转化流程基线
 画布：iPhone 17 竖屏 `402 x 874`
 输出规则：一个方案 + 一个屏幕 = 一张 image-2 图
 

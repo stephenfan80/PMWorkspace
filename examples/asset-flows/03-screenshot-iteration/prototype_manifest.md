@@ -1,9 +1,10 @@
 # prototype_manifest：试听报名表单截图迭代
 
 来源 brief：`product_brief.md` / v2 / 已对齐
-视觉基线：`visual_baseline.md` / 已登记
+视觉基线：`visual_baseline.md` / 已登记 / 标注截图约束
 画布：`physical_longboard`，目标 `1179 x >=2556`
 输出规则：只重出受影响单图；需要结果页时单独登记结果页输出单元
+少于 3 方案豁免：本轮是用户确认过的局部截图迭代，不是重新探索产品路径；只登记受影响方案 A。
 
 ## 输出单元
 

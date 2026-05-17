@@ -1,0 +1,183 @@
+{
+  "id": "examples-realistic-anonymized-style-required",
+  "title": "examples 必须提供真实匿名风格的完整产品资产样例",
+  "category": "public-docs",
+  "primary_skill": "pm-workspace",
+  "prompt": "用户想照着 examples 学会如何组织 PMW 的完整产品资产流。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "真实匿名风格资产样例库",
+    "required_behaviors": [
+      "四个 asset-flow 样例都按 product_brief -> visual_baseline -> prototype_manifest -> prototype_review -> handoff 展示",
+      "每个样例 README 都说明匿名背景、用户输入材料、资产流、关键 PM 判断和脱敏边界",
+      "product_brief 必须有证据状态，区分已确认、假设和待补充",
+      "prototype_manifest 必须读取上游 brief 和 visual_baseline",
+      "prototype_review 必须检查上游一致性",
+      "handoff 必须读取上游来源，并保留待补充项、不可虚构边界和验收口径",
+      "没有生产截图的新想法和 PRD 交付样例也要保留 visual_baseline 资产位"
+    ],
+    "forbidden_behaviors": [
+      "新想法和 PRD 交付样例跳过 visual_baseline",
+      "样例只写结果不写输入材料和证据边界",
+      "handoff 脱离 brief / baseline / manifest / review 自行编造接口、埋点或验收",
+      "把公开样例写成真实客户、真实截图或内部数据"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "examples/asset-flows/README.md",
+      "contains": "真实匿名风格"
+    },
+    {
+      "path": "examples/asset-flows/README.md",
+      "contains": "product_brief` -> `visual_baseline` -> `prototype_manifest` -> `prototype_review` -> `handoff"
+    },
+    {
+      "path": "examples/asset-flows/README.md",
+      "contains": "匿名背景"
+    },
+    {
+      "path": "examples/asset-flows/README.md",
+      "contains": "脱敏边界"
+    },
+    {
+      "path": "examples/asset-flows/01-new-idea/README.md",
+      "contains": "## 匿名背景"
+    },
+    {
+      "path": "examples/asset-flows/01-new-idea/README.md",
+      "contains": "## 用户输入材料"
+    },
+    {
+      "path": "examples/asset-flows/01-new-idea/README.md",
+      "contains": "## 资产流"
+    },
+    {
+      "path": "examples/asset-flows/01-new-idea/README.md",
+      "contains": "## 脱敏边界 / 不能照搬"
+    },
+    {
+      "path": "examples/asset-flows/01-new-idea/product_brief.md",
+      "contains": "## 证据状态"
+    },
+    {
+      "path": "examples/asset-flows/01-new-idea/visual_baseline.md",
+      "contains": "参考资产策略：不适用生产截图"
+    },
+    {
+      "path": "examples/asset-flows/01-new-idea/prototype_manifest.md",
+      "contains": "视觉基线：`visual_baseline.md`"
+    },
+    {
+      "path": "examples/asset-flows/01-new-idea/prototype_review.md",
+      "contains": "## 上游一致性"
+    },
+    {
+      "path": "examples/asset-flows/01-new-idea/handoff.md",
+      "contains": "## 验收口径"
+    },
+    {
+      "path": "examples/asset-flows/01-new-idea/handoff.md",
+      "contains": "## 不可虚构边界"
+    },
+    {
+      "path": "examples/asset-flows/02-existing-feature/README.md",
+      "contains": "## 用户输入材料"
+    },
+    {
+      "path": "examples/asset-flows/02-existing-feature/product_brief.md",
+      "contains": "## 证据状态"
+    },
+    {
+      "path": "examples/asset-flows/02-existing-feature/visual_baseline.md",
+      "contains": "参考资产策略"
+    },
+    {
+      "path": "examples/asset-flows/02-existing-feature/prototype_manifest.md",
+      "contains": "视觉基线：`visual_baseline.md`"
+    },
+    {
+      "path": "examples/asset-flows/02-existing-feature/prototype_review.md",
+      "contains": "## 上游一致性"
+    },
+    {
+      "path": "examples/asset-flows/02-existing-feature/handoff.md",
+      "contains": "## 待补充项"
+    },
+    {
+      "path": "examples/asset-flows/02-existing-feature/handoff.md",
+      "contains": "## 不可虚构边界"
+    },
+    {
+      "path": "examples/asset-flows/03-screenshot-iteration/README.md",
+      "contains": "## 用户输入材料"
+    },
+    {
+      "path": "examples/asset-flows/03-screenshot-iteration/product_brief.md",
+      "contains": "## 证据状态"
+    },
+    {
+      "path": "examples/asset-flows/03-screenshot-iteration/visual_baseline.md",
+      "contains": "参考资产策略"
+    },
+    {
+      "path": "examples/asset-flows/03-screenshot-iteration/prototype_manifest.md",
+      "contains": "少于 3 方案豁免"
+    },
+    {
+      "path": "examples/asset-flows/03-screenshot-iteration/prototype_review.md",
+      "contains": "## 上游一致性"
+    },
+    {
+      "path": "examples/asset-flows/03-screenshot-iteration/handoff.md",
+      "contains": "## 不可虚构边界"
+    },
+    {
+      "path": "examples/asset-flows/04-prd-handoff/README.md",
+      "contains": "## 用户输入材料"
+    },
+    {
+      "path": "examples/asset-flows/04-prd-handoff/product_brief.md",
+      "contains": "## 证据状态"
+    },
+    {
+      "path": "examples/asset-flows/04-prd-handoff/visual_baseline.md",
+      "contains": "参考资产策略：不适用生产截图"
+    },
+    {
+      "path": "examples/asset-flows/04-prd-handoff/prototype_manifest.md",
+      "contains": "视觉基线：`visual_baseline.md`"
+    },
+    {
+      "path": "examples/asset-flows/04-prd-handoff/prototype_review.md",
+      "contains": "## 上游一致性"
+    },
+    {
+      "path": "examples/asset-flows/04-prd-handoff/handoff.md",
+      "contains": "## 上游来源"
+    },
+    {
+      "path": "examples/asset-flows/04-prd-handoff/handoff.md",
+      "contains": "## 验收口径"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "contains": "真实匿名风格"
+    },
+    {
+      "path": "README.md",
+      "contains": "realistic anonymized-style"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "for d in examples/asset-flows/01-new-idea examples/asset-flows/02-existing-feature examples/asset-flows/03-screenshot-iteration examples/asset-flows/04-prd-handoff; do test -f \"$d/product_brief.md\" && test -f \"$d/visual_baseline.md\" && test -f \"$d/prototype_manifest.md\" && test -f \"$d/prototype_review.md\" && test -f \"$d/handoff.md\"; done"
+      ]
+    }
+  ]
+}

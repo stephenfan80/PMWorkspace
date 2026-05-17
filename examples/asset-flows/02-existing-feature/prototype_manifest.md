@@ -1,7 +1,7 @@
 # prototype_manifest：订阅取消页优化
 
 来源 brief：`product_brief.md` / v1 / 已对齐
-视觉基线：`visual_baseline.md` / 已登记
+视觉基线：`visual_baseline.md` / 已登记 / 生产截图约束
 画布：`physical_longboard`，目标 `1179 x >=2556`
 输出规则：一个方案 + 一个屏幕 = 一张 image-2 图
 

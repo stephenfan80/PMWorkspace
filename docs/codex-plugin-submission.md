@@ -159,7 +159,7 @@ image-2
 - 8 个核心 skill 和 `pmworkspace-shared` 都已复制到 `plugins/pmworkspace/skills/`。
 - `assets/` 下存在 icon、logo 和 3 张 PNG screenshot。
 - `bin/pmw-gen-skill-docs check` 通过。
-- `bin/pmw-eval run` 通过。
+- `bin/pmw-eval run --suite full` 通过。`bin/pmw-eval run` 仍等价于 full，但发布清单显式写 full，避免误以为 smoke / core 足够发布。
 - README 中公开插件、本地 plugin、旧版 skill 三种安装 / 更新路径一致。
 
 ## 插件 REVISION 策略

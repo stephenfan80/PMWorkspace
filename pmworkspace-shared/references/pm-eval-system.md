@@ -10,6 +10,18 @@ eval 默认以静态规则检查为主；对 `pmw-*` 本地脚本的关键输出
 
 Eval 后置原则：产品表达先在 README、`routing.md`、`welcome-guide.md` 或对应方法 reference 中稳定；随后同步 skill 正文和 `pmw-gen-skill-docs` 生成契约；最后再修改 fixture，把稳定后的表达锁成防回退断言。不要先写 eval 再反向牵引产品表达，也不要只改 fixture 让测试通过。
 
+## 运行分层
+
+PMW eval 分成三层，目的是降低维护心理负担，不是降低发布标准：
+
+| 层级 | 作用 | 运行命令 | 使用时机 |
+|---|---|---|---|
+| `smoke` | 快速确认主链路没有断。 | `bin/pmw-eval run --suite smoke` | README、examples、入口文案或小范围规则说明改动。 |
+| `core` | 覆盖对齐、出图、复审、交付四个动作。 | `bin/pmw-eval run --suite core` | skill、references、readiness、artifact flow、controller 或打包脚本改动。 |
+| `full` | 全量检查所有 fixtures。 | `bin/pmw-eval run --suite full` | 发布 GitHub / plugin 前。 |
+
+`bin/pmw-eval run` 默认仍等于 `--suite full`，避免旧脚本因为新增分层而降低检查强度。`smoke` 和 `core` 的清单保存在 `evals/suites/`；清单只引用 fixture id，不复制规则内容，避免维护第二套 eval。
+
 ## 目标
 
 - 防止产品简报未对齐时写 image-2 提示词或生成原型。
@@ -244,12 +256,15 @@ fixture 使用 JSON，保存在 `evals/fixtures/`：
 
 ```bash
 bin/pmw-eval list
-bin/pmw-eval run
+bin/pmw-eval list --suite smoke
+bin/pmw-eval run --suite smoke
+bin/pmw-eval run --suite core
+bin/pmw-eval run --suite full
 bin/pmw-eval run --fixture brief-alignment-required-before-image
 bin/pmw-eval run --json
 ```
 
-`list` 默认输出 fixture 数量和分类摘要；`--json` 输出机器可读结果。eval 失败时返回非零退出码。
+`list` 默认输出 fixture 数量和分类摘要；`--suite` 可只列某一层；`--json` 输出机器可读结果。eval 失败时返回非零退出码。
 
 ## 维护规则
 

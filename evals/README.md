@@ -4,12 +4,26 @@
 
 ```bash
 bin/pmw-eval list
-bin/pmw-eval run
+bin/pmw-eval run --suite smoke
+bin/pmw-eval run --suite core
+bin/pmw-eval run --suite full
 bin/pmw-eval run --fixture brief-alignment-required-before-image
 bin/pmw-eval run --json
 ```
 
 fixture 放在 `evals/fixtures/`，每个 JSON 代表一个必须被 PMWorkspace 规则兜住的场景。
+
+## 三层检查
+
+PMW 的 eval 不少，维护时不要一上来就被全量吓住。先按改动风险选一层：
+
+| 层级 | 人话意思 | 什么时候跑 |
+|---|---|---|
+| `smoke` | 主链路有没有断。 | 改 README、examples、入口文案、小范围规则说明时。 |
+| `core` | 对齐、出图、复审、交付四个动作是否还稳。 | 改 skill、references、readiness、artifact flow、controller、打包脚本时。 |
+| `full` | 全量 eval。 | 发布 GitHub / plugin 前必须跑。 |
+
+`bin/pmw-eval run` 仍然等于 `bin/pmw-eval run --suite full`，避免老脚本悄悄降低检查强度。`smoke` 和 `core` 的清单在 `evals/suites/`，只放 fixture id，不复制 fixture 内容。
 
 ## 维护顺序
 

@@ -1,0 +1,57 @@
+{
+  "id": "pmworkspace-entry-slim-routing-only",
+  "title": "pm-workspace 入口必须只保留判断、路由和工作方式卡片",
+  "category": "pm-workspace-entry",
+  "primary_skill": "pm-workspace",
+  "prompt": "维护者要求瘦身 $pm-workspace/SKILL.md，让入口像 dbskill /dbs 一样只负责判断、路由和展示工作方式卡片。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": false,
+    "gate": "入口文件级治理",
+    "required_behaviors": [
+      "入口只负责判断动作、启动 controller、展示工作方式卡片和路由",
+      "复杂协议回到共享 reference 或子 skill",
+      "保留平台 preamble、更新检查和 controller intake",
+      "用 eval 防止入口重新膨胀"
+    ],
+    "forbidden_behaviors": [
+      "在 pm-workspace/SKILL.md 维护第二份产品发现规则",
+      "在入口重复原型、Zoon、交付和复审长规则",
+      "删除生成契约区块",
+      "入口绕过 controller 直接做下游产物"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "pm-workspace/SKILL.md",
+      "contains": "入口只负责四件事：判断动作、启动或衔接 controller、展示工作方式卡片、路由到下一技能。"
+    },
+    {
+      "path": "pm-workspace/SKILL.md",
+      "contains": "复杂协议交给 `pmworkspace-shared/references/`、controller 和被路由到的子 skill。"
+    },
+    {
+      "path": "pm-workspace/SKILL.md",
+      "not_contains": "## Operating Rules"
+    },
+    {
+      "path": "pm-workspace/SKILL.md",
+      "not_contains": "## Product Workbench State Machine"
+    },
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "`$pm-workspace/SKILL.md` 只保留入口职责、平台 preamble、controller 衔接和工作方式卡片字段"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "test \"$(wc -l < pm-workspace/SKILL.md | tr -d ' ')\" -le 190"
+      ],
+      "exit_code": 0
+    }
+  ]
+}

@@ -8,6 +8,8 @@ For Chinese users, use Chinese names in explanations and keep skill ids unchange
 
 `$pm-workspace` 只读取本文件作为路由唯一真源；不要在 `$pm-workspace/SKILL.md` 里维护第二份路由表。
 
+`$pm-workspace/SKILL.md` 只保留入口职责、平台 preamble、controller 衔接和工作方式卡片字段；产品发现、线上参考、原型、复审、交付、Zoon 和产物流动细则必须留在共享 reference 或对应子 skill，不回填到入口文件。
+
 PMWorkspace 对用户只暴露四个动作：`对齐`、`出图`、`复审`、`交付`。路由表可以映射到底层 skill，但默认用户输出先说明当前动作和价值，不先抛出 8 个 skill 名称。四个动作的含义：
 
 | 用户动作 | 用户想完成的事 | PMW 默认处理 |

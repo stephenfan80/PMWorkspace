@@ -4,6 +4,28 @@ PMWorkspace 产物流动层让每一步产物都能被下游技能读取，而�
 
 所有正式 artifact 必须绑定 controller 当前任务：`run_id`、`task_digest`、`input_revision` 和 `controller_verdict`。旧 artifact 可以继续读取为背景材料，但只要不匹配当前任务，就只能显示 `可参考，不可放行`，不能进入出图、复审或交付。
 
+## 公开表达
+
+对用户默认只讲 5 个核心产品资产，不把内部证据、修复说明和发布种子摆在第一层：
+
+| 公开资产 | 用户理解 | 下游读取 |
+|---|---|---|
+| `product_brief` | 已对齐产品简报，承载真实问题、目标、反指标、不可虚构项和确认状态。 | `$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` |
+| `visual_baseline` | 线上截图或视觉参考基线，约束目标像素、字号、间距、密度和保留区域。 | `$pm-prototype-shotgun`、`$pm-prototype-review` |
+| `prototype_manifest` | 原型清单，绑定方案、屏幕、主目标、反指标、不可虚构项和图片状态。 | `$pm-prototype-review`、`$pm-handoff` |
+| `prototype_review` | 原型复审结论，判断可通过、需要重出、需要补参考或需要 PM 拍板。 | `$pm-handoff` |
+| `handoff` | 交付资产，面向设计、研发、业务评审或后续协作。 | 后续评审、研发交付、文档同步 |
+
+内部 artifact kind 仍然可用，但默认只在审计 / 调试 / 维护说明中出现：
+
+- `browser_evidence`：线上页面、竞品、公开参考、截图或 Zoon 漂移证据。
+- `decision`、`strategy_review`：产品方向审查和策略取舍的结构化记录。
+- `repair_brief`：原型复审后给重出图使用的修复说明。
+- `product_design_doc`：`handoff` 阶段中面向产品 / 设计 / 研发评审的产品设计文档细分登记。
+- `acceptance_seed`、`release_doc_seed`：给 QA、发布或文档同步继续使用的种子记录。
+
+默认用户输出只说“已保存产品简报 / 已登记视觉基线 / 已生成原型清单 / 已保存复审结论 / 已生成交付稿”。完整 artifact kind、路径、run 绑定和 downstream 字段写入本地审计。
+
 ## 目标
 
 - 把 `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` 的输出串成一条可追溯链路。
@@ -11,6 +33,8 @@ PMWorkspace 产物流动层让每一步产物都能被下游技能读取，而�
 - 让 `pmw-dashboard status --details` 展示准备度和产物流动；默认状态摘要只给业务结论，避免用户被零散文件路径和内部链路打扰。
 
 ## 产物链路
+
+本表是内部实现表，维护者和下游 skill 使用；面向普通用户时优先使用上一节的 5 个公开资产。
 
 | 上游技能 | 登记产物 | 下游读取 | 用途 |
 |---|---|---|---|

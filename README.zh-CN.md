@@ -252,28 +252,35 @@ README 只保留用户能理解的路径图。完整端到端工作台地图、�
 | 运行状态 | `runtime-kernel.md`、`artifact-flow.md`、`product-readiness-dashboard.md`、`state-and-telemetry.md` | 管理 run、资产流、准备度检查、本地状态和隐私边界。 |
 | 协作与更新 | `zoon-workflow.md`、`zoon-drift-check.md`、`update-workflow.md` | 管理 Zoon 在线协作、漂移检查和版本升级。 |
 
-## PMW 的原子资产是什么
+## PMW 的产品资产流
 
-dbskill 有“原子库”的概念；PMWorkspace 更适合叫 **产品资产流**。PMW 的最小可复用单元不是孤立知识点，而是能被下游 skill 读取的 Product Artifact Flow。
+dbskill 有“原子库”的概念；PMWorkspace 更适合叫 **产品资产流**。PMW 的最小可复用单元不是孤立知识点，而是一条能被下游 skill 读取的 Product Artifact Flow。
 
-| 资产类型 | 由谁产生 | 下游怎么用 |
+普通用户只需要记住 5 个核心资产：
+
+| 公开资产 | 你可以怎么理解 | 什么时候出现 |
 |---|---|---|
-| `product_brief` | `$pm-brief` | 出图、复审和交付的事实源。 |
-| `visual_baseline` | 截图 / 线上参考接收流程 | 约束长板尺寸、字号、间距、密度和保留区域。 |
-| `browser_evidence` | 线上页面、竞品、Zoon 或公开参考采集 | 支撑线上参考、竞品启发和漂移判断。 |
-| `prototype_manifest` | `$pm-prototype-shotgun` | 记录方案名、屏幕任务、主目标、反指标、不可虚构项和图片状态。 |
-| `prototype_review` | `$pm-prototype-review` | 判断原型可通过、需要重出、需要 PM 拍板或补参考。 |
-| `repair_brief` | `$pm-prototype-review` | 给 `$pm-prototype-shotgun` 的重出说明。 |
-| `product_design_doc` | `$pm-handoff` | 面向评审、设计和研发的产品设计文档。 |
-| `handoff` | `$pm-handoff` | 精简 PRD、实验、验收或研发交付资产。 |
+| `product_brief` | 已对齐产品简报，是出图、复审和交付的事实源。 | 对齐完成后。 |
+| `visual_baseline` | 线上截图 / 视觉参考基线，约束尺寸、字号、间距、密度和保留区域。 | 已有功能迭代、截图编辑或需要贴近生产样式时。 |
+| `prototype_manifest` | 原型清单，记录每张图属于哪个方案、屏幕、目标和不可虚构边界。 | 出图前后。 |
+| `prototype_review` | 原型复审结论，判断可通过、重出、补参考或需要 PM 拍板。 | 图片生成后、交付前。 |
+| `handoff` | 交付资产，包含产品设计文档、精简 PRD、实验或研发交付材料。 | 复审通过或方向确认后。 |
 
-查看资产流：
+其他内部资产是辅助证据或维护记录，不作为用户第一层心智：`browser_evidence` 用来记录线上页面、竞品、Zoon 或公开参考；`repair_brief` 用来指导重出图；`product_design_doc`、`acceptance_seed` 和 `release_doc_seed` 是交付阶段的细分登记类型。它们仍在 Product Artifact Flow 里，但默认只出现在审计、调试或维护说明中。
+
+常用查看命令：
 
 ```bash
-bin/pmw-artifact add --kind browser_evidence --title "线上参考：结果页" --status "已采集" --source-skill pm-brief --path "<screenshot>" --url "<URL>" --summary "页面任务、视觉基线、交互模式、必须保留、可以挑战"
 bin/pmw-artifact flow
 bin/pmw-artifact flow --details
 bin/pmw-artifact latest --kind product_brief
+bin/pmw-artifact latest --kind prototype_review
+```
+
+维护者或证据采集场景可以手动登记辅助证据：
+
+```bash
+bin/pmw-artifact add --kind browser_evidence --title "线上参考：结果页" --status "已采集" --source-skill pm-brief --path "<screenshot>" --url "<URL>" --summary "页面任务、视觉基线、交互模式、必须保留、可以挑战"
 ```
 
 ## 原型输出规则

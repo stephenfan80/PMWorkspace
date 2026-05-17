@@ -195,16 +195,17 @@ Useful anchors:
 
 PMWorkspace's reusable units are product artifacts rather than isolated notes. Downstream skills read these artifacts instead of guessing from chat memory.
 
-| Artifact | Producer | Used by |
+Most users only need five public artifacts:
+
+| Public artifact | Meaning | Appears when |
 |---|---|---|
-| `product_brief` | `$pm-brief` | Prototype, review, handoff |
-| `visual_baseline` | Screenshot / reference intake | Prototype canvas and layout constraints |
-| `browser_evidence` | Online reference capture | Brief, prototype, review |
-| `prototype_manifest` | `$pm-prototype-shotgun` | Prototype review |
-| `prototype_review` | `$pm-prototype-review` | Handoff |
-| `repair_brief` | `$pm-prototype-review` | Prototype regeneration |
-| `product_design_doc` | `$pm-handoff` | Product/design/engineering review |
-| `handoff` | `$pm-handoff` | Compact PRD and delivery follow-up |
+| `product_brief` | The aligned source of truth for prototype, review, and handoff. | Alignment completes. |
+| `visual_baseline` | Screenshot or visual-reference baseline for size, spacing, density, and preserved regions. | Existing-feature iteration or screenshot-edit work needs production fidelity. |
+| `prototype_manifest` | Prototype manifest binding each image to a scheme, screen, goal, and non-fiction boundary. | Prototype planning and generation. |
+| `prototype_review` | Review result: pass, regenerate, add reference, or PM decision needed. | After images are generated. |
+| `handoff` | Delivery asset covering product design docs, compact PRDs, experiments, or engineering handoff. | Review passes or direction is confirmed. |
+
+Internal helper artifact kinds such as `browser_evidence`, `repair_brief`, `product_design_doc`, `acceptance_seed`, and `release_doc_seed` still exist for evidence, regeneration, and delivery bookkeeping, but they are not the first-level user mental model.
 
 Inspect the flow:
 
@@ -212,6 +213,7 @@ Inspect the flow:
 bin/pmw-artifact flow
 bin/pmw-artifact flow --details
 bin/pmw-artifact latest --kind product_brief
+bin/pmw-artifact latest --kind prototype_review
 ```
 
 ## Prototype Rules

@@ -1,8 +1,15 @@
 # handoff：产品设计文档 - 习惯匹配
 
 交付类型：产品设计文档
-上游来源：`product_brief.md`、`prototype_manifest.md`、`prototype_review.md`
+上游来源：`product_brief.md`、`visual_baseline.md`、`prototype_manifest.md`、`prototype_review.md`
 交付结论：可进入设计评审；研发验收前仍需确认推荐规则和历史打卡数据依赖。
+
+## 上游来源
+
+- `product_brief.md` v1：确认主目标、反指标和不可虚构边界。
+- `visual_baseline.md`：确认无生产截图，使用默认移动端首屏基线。
+- `prototype_manifest.md`：读取 A/B/C 三条产品路径。
+- `prototype_review.md`：采用 A+B 组合，C 保留为调整入口。
 
 ## 背景与现状
 
@@ -56,7 +63,20 @@
 | `habit_plan_activated` | 衡量第一周计划激活。 | 核心指标 |
 | `habit_plan_adjusted` | 观察推荐是否可信或过重。 | 反指标辅助 |
 
-## 不可虚构
+## 验收口径
+
+- 用户能在推荐结果页看到一个今天可开始的首周计划。
+- 推荐理由只能基于时间、目标和历史打卡三类输入。
+- 用户必须能调整可用时间或强度。
+- 数据不足时必须展示保守兜底，不得伪装成完整算法判断。
+
+## 待补充项
+
+1. 推荐规则阈值。
+2. 历史打卡是否必填。
+3. 数据不足时的推荐兜底文案。
+
+## 不可虚构边界
 
 - 不承诺健康结果。
 - 不展示可穿戴同步、睡眠、心率、饮食等未提供数据。

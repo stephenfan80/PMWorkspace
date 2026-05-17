@@ -243,18 +243,18 @@ bin/pmw-artifact add --kind browser_evidence --title "线上参考：结果页" 
 
 ## 资产样例库
 
-`examples/` 是 PMW 的公开产品资产样例库，不是知识原子集合。它最有价值的内容应该是真实匿名 / 脱敏的 `product_brief`、`visual_baseline`、`prototype_manifest`、`prototype_review` 和 `handoff` 样例；没有授权真实材料时，才使用虚构脱敏样例占位。
+`examples/` 是 PMW 的公开产品资产样例库，不是知识原子集合。它最有价值的内容应该是真实匿名 / 脱敏的 `product_brief`、`visual_baseline`、`prototype_manifest`、`prototype_review` 和 `handoff` 样例；没有授权真实材料时，使用真实匿名风格的虚构脱敏样例占位。
 
-它不只是启动话术，而是展示一条任务如何沉淀为下游可读的产品资产。
+它不只是启动话术，而是展示一条任务如何沉淀为下游可读的产品资产。四个完整样例都统一走 `brief -> visual_baseline -> manifest -> review -> handoff`，即使新想法没有生产截图，也会保留 baseline 资产位说明“不适用 / 使用默认基线”。
 
 优先阅读 `examples/asset-flows/`：
 
 | 样例 | 你能看到什么 |
 |---|---|
-| `examples/asset-flows/01-new-idea/` | 新想法如何先对齐产品判断，再登记 3 条产品路径和产品设计文档。 |
-| `examples/asset-flows/02-existing-feature/` | 已有功能如何先建立视觉基线，再出图、复审和交付。 |
-| `examples/asset-flows/03-screenshot-iteration/` | 标注截图如何只重出受影响单图，哪些变化必须回写 brief。 |
-| `examples/asset-flows/04-prd-handoff/` | 已确认方向如何从 brief / manifest / review 进入精简 PRD。 |
+| `examples/asset-flows/01-new-idea/` | 新想法如何先对齐产品判断，没有生产截图时如何登记 baseline 不适用，再进入 3 条产品路径。 |
+| `examples/asset-flows/02-existing-feature/` | 已有功能如何先建立生产视觉基线，再出图、复审和交付。 |
+| `examples/asset-flows/03-screenshot-iteration/` | 标注截图如何只重出受影响单图，哪些变化必须回写 brief，少于 3 方案何时可豁免。 |
+| `examples/asset-flows/04-prd-handoff/` | 已确认方向如何从 brief / baseline / manifest / review 进入精简 PRD。 |
 
 轻量启动话术仍保留在 `examples/prompt-recipes.md`。如果你想理解 PMW 的内部规则，再读 `pmworkspace-shared/references/`；如果你只是想知道“产物长什么样”，先看 `examples/`。
 

@@ -1,6 +1,7 @@
 # prototype_manifest：习惯匹配
 
 来源 brief：`product_brief.md` / v1 / 已对齐
+视觉基线：`visual_baseline.md` / 无生产截图，默认移动端基线
 画布：iPhone 17 竖屏 `402 x 874`
 输出规则：一个方案 + 一个屏幕 = 一张 image-2 图
 

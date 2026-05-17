@@ -96,6 +96,7 @@ product-design-doc-consumes-adversarial-review-results
 artifact-flow-pm-judgment-structured-fields
 browser-evidence-lite-required
 examples-asset-library-required
+examples-realistic-anonymized-style-required
 public-toolbox-separates-user-maintainer
 eval-runner-contract
 eval-suite-layering-required

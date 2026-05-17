@@ -193,18 +193,18 @@ bin/pmw-artifact latest --kind prototype_review
 
 ## Example Asset Library
 
-`examples/` is PMW's public product asset example library, not an atomic knowledge library. Its most valuable entries should be real anonymized / sanitized examples of `product_brief`, optional `visual_baseline`, `prototype_manifest`, `prototype_review`, and `handoff`; fictional sanitized examples are placeholders when real material is not approved for publication.
+`examples/` is PMW's public product asset example library, not an atomic knowledge library. Its most valuable entries should be real anonymized / sanitized examples of `product_brief`, `visual_baseline`, `prototype_manifest`, `prototype_review`, and `handoff`; realistic anonymized-style fictional examples are placeholders when real material is not approved for publication.
 
-It is more than a prompt gallery: each full example shows how one task becomes downstream-readable product assets.
+It is more than a prompt gallery: each full example shows how one task becomes downstream-readable product assets. All four complete examples use the same `brief -> visual_baseline -> manifest -> review -> handoff` path; when a new idea has no production screenshot, the baseline file explicitly says it is not applicable and records the default mobile baseline.
 
 Start with `examples/asset-flows/`:
 
 | Example | What it shows |
 |---|---|
-| `examples/asset-flows/01-new-idea/` | A new idea becoming an aligned brief, three product paths, review, and product design doc. |
-| `examples/asset-flows/02-existing-feature/` | Existing-feature iteration with a visual baseline before prototype and handoff. |
-| `examples/asset-flows/03-screenshot-iteration/` | Annotated screenshot feedback, affected-image regeneration, and brief update boundaries. |
-| `examples/asset-flows/04-prd-handoff/` | Brief / manifest / review becoming a compact PRD. |
+| `examples/asset-flows/01-new-idea/` | A new idea becoming an aligned brief, an explicit non-applicable baseline, three product paths, review, and product design doc. |
+| `examples/asset-flows/02-existing-feature/` | Existing-feature iteration with a production visual baseline before prototype and handoff. |
+| `examples/asset-flows/03-screenshot-iteration/` | Annotated screenshot feedback, affected-image regeneration, brief update boundaries, and the exception for fewer than 3 schemes. |
+| `examples/asset-flows/04-prd-handoff/` | Brief / baseline / manifest / review becoming a compact PRD. |
 
 Prompt starters remain in `examples/prompt-recipes.md`. Read `pmworkspace-shared/references/` for internal methods and runtime protocols; read `examples/` when you want to see what PMW artifacts look like.
 

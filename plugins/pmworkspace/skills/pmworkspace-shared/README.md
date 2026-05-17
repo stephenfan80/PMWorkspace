@@ -177,19 +177,27 @@ Deliver:
 
 The complete internal stage map lives in `pmworkspace-shared/references/pm-workbench-map.md`. The README keeps only the user-facing path.
 
-## Method Library
+## Method Library And Runtime Protocols
 
-`pmworkspace-shared/references/` is PMWorkspace's method library. It contains the product discovery gates, brief structure, image prompt rules, design-system workflow, prototype review rules, handoff rules, runtime state contracts, and update workflow used by the skills.
+`pmworkspace-shared/references/` is PMWorkspace's shared reference layer. Start with `pmworkspace-shared/references/README.md` when you need the internal map. It splits the folder into two mental models:
 
-Useful anchors:
+- **Method library**: how PMW makes product decisions, writes briefs, generates prototype directions, reviews outputs, and hands work off.
+- **Runtime protocols**: how PMW routes, records runs, manages artifacts, checks readiness, syncs Zoon, evaluates, and upgrades.
 
-- Product discovery: `product-office-hours.md`, `product-discovery-gate.md`
+Method library anchors:
+
+- Product discovery and alignment: `product-office-hours.md`, `product-discovery-gate.md`, `scenario-routing.md`
 - Product brief: `product-manager-brief.md`, `product-plan-handoff.md`
-- Prototype generation: `image-prompts.md`, `design-system-workflow.md`, `prototype-shotgun-board.md`
+- Prototype generation: `image-prompts.md`, `design-system-workflow.md`, `prototype-shotgun-board.md`, `production-reference-gate.md`
 - Prototype review: `prototype-quality-review.md`, `pm-review-army.md`
 - Delivery: `delivery-handoff.md`
-- Runtime: `runtime-kernel.md`, `artifact-flow.md`, `product-readiness-dashboard.md`
-- Collaboration and updates: `zoon-workflow.md`, `zoon-drift-check.md`, `update-workflow.md`
+
+Runtime protocol anchors:
+
+- Routing and workbench map: `routing.md`, `pm-workbench-map.md`, `autoplan-workflow.md`
+- Runtime and readiness: `runtime-kernel.md`, `artifact-flow.md`, `product-readiness-dashboard.md`, `evidence-dashboard.md`, `state-and-telemetry.md`
+- Evidence and references: `browser-evidence.md`, `production-reference-gate.md`
+- Collaboration and updates: `zoon-workflow.md`, `zoon-drift-check.md`, `update-workflow.md`, `pm-eval-system.md`, `skill-doc-template-system.md`
 
 ## Product Artifact Flow
 

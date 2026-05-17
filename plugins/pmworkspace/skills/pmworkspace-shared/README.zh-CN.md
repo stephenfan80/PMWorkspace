@@ -238,19 +238,33 @@ bin/pmw-version --json
 
 README 只保留用户能理解的路径图。完整端到端工作台地图、阶段索引和状态字段由 `pmworkspace-shared/references/pm-workbench-map.md` 维护。
 
-## 知识库 / 方法库
+## 知识库 / 方法库 / 运行协议
 
-`pmworkspace-shared/references/` 是 PMWorkspace 的方法库。它不是让普通用户逐个阅读的杂项文件，而是各个 skill 在运行时读取的产品方法、门槛和审计协议。
+`pmworkspace-shared/references/` 是 PMWorkspace 的方法库和运行协议层。它不是让普通用户逐个阅读的杂项文件；普通用户只需要从本 README 和 `$pm-workspace` 开始。需要理解内部文件时，先看 `pmworkspace-shared/references/README.md`，它已经把 references 拆成两层：
+
+- **方法库**：解释 PMW 如何做产品判断、写产品简报、设计原型、复审方案和交付 PRD。
+- **运行协议**：解释 PMW 如何路由、记录 run、管理资产流、检查准备度、同步 Zoon、评估和升级。
+
+### 方法库：PMW 怎么做产品判断和产出
 
 | 分类 | 代表文件 | 解决什么问题 |
 |---|---|---|
-| 产品发现 | `product-office-hours.md`、`product-discovery-gate.md`、`scenario-routing.md` | 判断真实问题、当前替代、当前损失、目标和反指标是否足够。 |
+| 产品发现 / 对齐 | `product-office-hours.md`、`product-discovery-gate.md`、`scenario-routing.md` | 判断真实问题、当前替代、当前损失、目标和反指标是否足够。 |
 | 产品简报 | `product-manager-brief.md`、`product-plan-handoff.md` | 把产品判断压缩成出图 / 交付前的产品契约。 |
-| 原型生成 | `image-prompts.md`、`design-system-workflow.md`、`prototype-shotgun-board.md` | 约束 image-2 单图生成、多方案差异、设计系统和视觉基线。 |
+| 原型生成 | `image-prompts.md`、`design-system-workflow.md`、`prototype-shotgun-board.md`、`production-reference-gate.md` | 约束 image-2 单图生成、多方案差异、设计系统和视觉基线。 |
 | 原型复审 | `prototype-quality-review.md`、`pm-review-army.md` | 检查原型是否忠实表达产品判断，是否违反不可虚构项。 |
 | 产品交付 | `delivery-handoff.md` | 把已对齐 brief 和复审结论整理成产品设计文档或精简 PRD。 |
-| 运行状态 | `runtime-kernel.md`、`artifact-flow.md`、`product-readiness-dashboard.md`、`state-and-telemetry.md` | 管理 run、资产流、准备度检查、本地状态和隐私边界。 |
-| 协作与更新 | `zoon-workflow.md`、`zoon-drift-check.md`、`update-workflow.md` | 管理 Zoon 在线协作、漂移检查和版本升级。 |
+| 语言与首次使用 | `language-and-localization.md`、`welcome-guide.md`、`first-use-onboarding.md` | 统一中文表达、欢迎引导和第一次使用的心智入口。 |
+
+### 运行协议：PMW 如何不跳步、不丢状态、不泄露隐私
+
+| 分类 | 代表文件 | 解决什么问题 |
+|---|---|---|
+| 路由 / 工作台地图 | `routing.md`、`pm-workbench-map.md`、`autoplan-workflow.md` | 决定当前动作、下一技能、端到端阶段、共享状态字段和自动推进边界。 |
+| 运行状态 / 准备度 | `runtime-kernel.md`、`artifact-flow.md`、`product-readiness-dashboard.md`、`evidence-dashboard.md`、`state-and-telemetry.md` | 管理 run、Product Artifact Flow、Product Readiness Dashboard、本地状态和隐私边界。 |
+| 证据 / 线上参考 | `browser-evidence.md`、`production-reference-gate.md` | 登记线上页面、截图、竞品或公开参考，避免已有功能迭代脱离真实视觉基线。 |
+| 记忆 / 偏好 | `product-memory.md`、`question-tuning.md` | 沉淀可复用产品学习和 Q/D 追问偏好，但不能覆盖本轮事实。 |
+| 协作 / 更新 / eval | `zoon-workflow.md`、`zoon-drift-check.md`、`update-workflow.md`、`pm-eval-system.md`、`skill-doc-template-system.md` | 管理 Zoon 在线协作、漂移检查、版本升级、评估和 skill 文档生成。 |
 
 ## PMW 的产品资产流
 

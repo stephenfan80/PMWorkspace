@@ -17,6 +17,24 @@ PMWorkspace 的技能必须像一个产品运行系统，而不是独立 prompt�
 - `可通过`：原型复审未发现硬违规，可进入交付准备。
 - `可交付`：产品事实、原型选择和待决策项足以生成交付稿。
 
+## PMW Trigger Guard
+
+PMWorkspace 的第一道门不是 `$pm-workspace` 里的口头路由，而是 `pmw-trigger-guard`。当用户请求命中 `AI 产品工作站`、`PMWorkspace`、`方案及原型`、`image-2`、`原型图`，或命中汽车之家 / 独号 / 线索 / 询价 / 查价 / 经销商 / 转化率 / 新能源等 PMW 业务信号时，Agent 必须先让 PMW runtime 接管：
+
+```bash
+pmw-trigger-guard --text "<本轮用户原话和材料摘要>" --skill <skill> --json
+```
+
+若返回 `pmw_required=true` 且 `runtime_available=true`，下一步只能是 `pmw-controller intake`。若返回 `pmw_required=true` 但 PMW runtime、controller 或专用动作不可用，必须停止并向用户说明：`PMW runtime 未接管当前任务，已阻断普通方案输出和出图`。这种情况下不能退回普通产品分析、不能先读数据后输出方案、不能生成 HTML 线框，也不能调用宿主级 `imagegen`。
+
+以下话术代表硬违规，eval 必须拦截：
+
+```text
+插件触发到了，但当前可发现工具里没有直接暴露 pmworkspace 的专用动作；我会继续用本地项目数据来做产品方案。
+```
+
+正确行为是停在入口守卫或 controller 最早门槛，展示工作方式卡片、当前阻断和下一步，而不是“先给方案 / 先出一张图”。
+
 ## Controller Authority
 
 PMWorkspace 的运行时真源是 `pmw-controller`，不是单个 skill 的口头判断、全局 `current-project` 或历史 latest artifact。每个产品任务进入 PMW 时都必须先完成 intake：
@@ -62,7 +80,7 @@ intake
 
 `pmw-controller next` 返回以下动作时是 STOP gate：`ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED`、`BLOCKED`、`GOAL_MODE_REQUIRED`、`AUTOPLAN_REQUIRED`、`PRODUCT_DIRECTION_REQUIRED`、`STRATEGY_REVIEW_REQUIRED`、`DESIGN_SPEC_REQUIRED`、`REGISTER_PROTOTYPE_UNITS`。skill 必须停住并向用户展示当前最早门槛，不能继续进入下游产物、image-2 prompt、原型图、PRD 或交付稿。`WRITE_PENDING_BRIEF` 只表示下一步应进入 `$pm-brief` 写候选产品简报并等待用户对齐，不是原型许可。
 
-只有 `ALLOW_IMAGE_PROMPT` 是 image-2 出图许可。实际生成前还必须基于它签发单图 `image_permit_id`。`方案方向确认`、用户回复 `A/B/C`、`按这些假设继续`、`REGISTER_PROTOTYPE_UNITS` 或 `WRITE_PENDING_BRIEF` 都不能替代当前 `input_revision` 下的产品简报确认。
+只有 `ALLOW_IMAGE_PROMPT` 是 image-2 出图许可。实际生成前还必须基于它签发单图 `image_permit_id`，并通过 `pmw-image-preflight assert-imagegen --scheme "<方案名>" --screen "<屏幕任务>" --image-permit-id "<image_permit_id>"`。缺 permit、permit 不匹配、permit 已使用或 assert 失败时，不能写 image-2 prompt，也不能调用宿主级 `imagegen`。`方案方向确认`、用户回复 `A/B/C`、`按这些假设继续`、`REGISTER_PROTOTYPE_UNITS` 或 `WRITE_PENDING_BRIEF` 都不能替代当前 `input_revision` 下的产品简报确认。
 
 出图和交付前统一跑 preflight：
 

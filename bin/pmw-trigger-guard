@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import pathlib
+from typing import Any
+
+
+SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+
+PMW_DIRECT_HINTS = [
+    "AI 产品工作站",
+    "AI产品工作站",
+    "PMWorkspace",
+    "PMW",
+    "$pm-workspace",
+    "$pm-autoplan",
+    "$pm-prototype-shotgun",
+]
+
+PMW_TASK_HINTS = [
+    "方案及原型",
+    "产品原型",
+    "原型图",
+    "image-2",
+    "出图",
+    "产品简报",
+    "PRD",
+    "产品设计文档",
+]
+
+AUTOHOME_HINTS = [
+    "汽车之家",
+    "之家",
+    "Autohome",
+    "AutoDesign",
+    "独号",
+    "线索",
+    "询价",
+    "查价",
+    "经销商",
+    "转化率",
+    "新能源",
+    "新能源车系页",
+    "排行榜",
+    "首页弹窗",
+]
+
+FORBIDDEN_FALLBACKS = [
+    "generic_product_plan",
+    "data_analysis_to_solution",
+    "imagegen_without_permit",
+    "html_wireframe_as_image2_substitute",
+]
+
+
+def contains_hint(text: str, hints: list[str]) -> list[str]:
+    lowered = text.lower()
+    return [hint for hint in hints if hint.lower() in lowered]
+
+
+def runtime_available(runtime_dir: pathlib.Path) -> bool:
+    return (runtime_dir / "pmw-controller").exists() and (runtime_dir / "pmw-controller").is_file()
+
+
+def evaluate(text: str, skill: str, runtime_dir: pathlib.Path) -> dict[str, Any]:
+    direct_hits = contains_hint(text, PMW_DIRECT_HINTS)
+    task_hits = contains_hint(text, PMW_TASK_HINTS)
+    autohome_hits = contains_hint(text, AUTOHOME_HINTS)
+    skill_hit = skill.startswith("pm-") or skill.startswith("$pm-")
+    pmw_required = bool(direct_hits or skill_hit or (task_hits and autohome_hits))
+    runtime_ok = runtime_available(runtime_dir)
+    if not pmw_required:
+        action = "NO_PMW_GUARD"
+        must_stop = False
+        first_blocker = ""
+    elif runtime_ok:
+        action = "RUN_CONTROLLER_INTAKE"
+        must_stop = False
+        first_blocker = ""
+    else:
+        action = "STOP_RUNTIME_UNAVAILABLE"
+        must_stop = True
+        first_blocker = "PMW runtime 未接管当前任务，已阻断普通方案输出和出图。"
+    return {
+        "pmw_required": pmw_required,
+        "skill": skill,
+        "trigger_hits": {
+            "direct": direct_hits,
+            "task": task_hits,
+            "autohome": autohome_hits,
+            "skill": [skill] if skill_hit else [],
+        },
+        "runtime_dir": str(runtime_dir),
+        "runtime_available": runtime_ok,
+        "action": action,
+        "must_stop": must_stop,
+        "first_blocker": first_blocker,
+        "required_next": "pmw-controller intake" if pmw_required and runtime_ok else "",
+        "allowed_fallback": not pmw_required,
+        "forbidden_fallbacks": FORBIDDEN_FALLBACKS if pmw_required else [],
+        "user_visible_stop": (
+            "PMW 已命中，但 runtime 未接管；不能退回普通产品分析、数据分析出方案或 imagegen。"
+            if pmw_required and not runtime_ok
+            else ""
+        ),
+    }
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="pmw-trigger-guard")
+    parser.add_argument("--text", default="", help="本轮用户请求或材料摘要")
+    parser.add_argument("--goal", default="", help="本轮目标，和 --text 合并判断")
+    parser.add_argument("--materials", default="", help="本轮材料摘要，和 --text 合并判断")
+    parser.add_argument("--skill", default="pm-workspace")
+    parser.add_argument("--runtime-dir", default=str(SCRIPT_DIR))
+    parser.add_argument("--json", action="store_true")
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    text = "\n".join([args.text, args.goal, args.materials]).strip()
+    payload = evaluate(text, args.skill, pathlib.Path(args.runtime_dir).expanduser())
+    if args.json:
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+    else:
+        print(payload["action"])
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

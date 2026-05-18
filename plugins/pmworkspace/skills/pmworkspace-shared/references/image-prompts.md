@@ -17,7 +17,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - `产品简报来源`：已对齐产品简报版本、Zoon URL / 快照状态、最新漂移检查结论。
 - `Controller Preflight`：用 `pmw-controller preflight --target prototype --json` 确认当前 run / `task_digest` / `input_revision` 可进入出图准备；返回 STOP gate 时停止。
 - `Product Readiness Dashboard`：用 `pmw-dashboard readiness --target prototype` 统一检查产品简报、Zoon、线上参考、方案差异、不可虚构项和复审状态；verdict 不是 `可出图` 时停止。默认只展示短 verdict 和第一阻断原因，完整表格只在审计 / 调试时展开。
-- `出图许可证`：每个输出单元调用 `pmw-image-preflight issue-permit --scheme "<方案名>" --screen "<屏幕任务>"` 签发一次性 `image_permit_id`；没有 permit 不能写 image-2 prompt。
+- `出图许可证`：每个输出单元调用 `pmw-image-preflight issue-permit --scheme "<方案名>" --screen "<屏幕任务>"` 签发一次性 `image_permit_id`，随后调用 `pmw-image-preflight assert-imagegen --scheme "<方案名>" --screen "<屏幕任务>" --image-permit-id "<image_permit_id>"`；没有 permit 或 assert 未通过时不能写 image-2 prompt，也不能调用宿主级 `imagegen`。
 - `图片生成前门槛`：产品简报已对齐、Zoon 无实质漂移、线上参考门槛通过、设计系统已载入、image-2 可用。
 - `视觉基线`：当用户提供线上截图或生产视觉参考时，必须登记 `visual_baseline`，记录参考图路径、像素尺寸、逻辑宽度推断、目标输出像素、核心字号层级、页面边距、模块间距、底部栏高度和参考优先级。
 - `生产基线改动证明`：当存在 `visual_baseline` 时，每个输出单元必须说明当前线上问题、改动区域、为什么优于当前线上、保留 / 删除边界。证明不成立时，不写 image-2 prompt。
@@ -74,7 +74,7 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - 产品方向审查中的实质改动已写回产品简报。
 - 已运行 Product Readiness Dashboard，且出图前 required 行的 verdict 是 `可出图`。
 - 已运行 `pmw-image-preflight check --json`，且返回 `ALLOW_IMAGE_PROMPT`。
-- 当前输出单元已签发一次性 `image_permit_id`；permit 必须匹配 run、`task_digest`、`input_revision`、方案和屏幕，且一张图使用后失效。
+- 当前输出单元已签发一次性 `image_permit_id`，并通过 `pmw-image-preflight assert-imagegen`；permit 必须匹配 run、`task_digest`、`input_revision`、方案和屏幕，且一张图使用后失效。
 - PMW 无法拦截宿主级 `imagegen` 工具；绕过 preflight 的图片不能登记为 prototype artifact、不能复审、不能交付；没有 permit 的图片同样只能作为普通对话附件。
 
 ## 媒介锁

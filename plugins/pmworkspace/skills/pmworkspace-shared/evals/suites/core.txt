@@ -19,6 +19,8 @@ handoff-requires-passed-prototype-review
 artifact-flow-required
 
 # Entry, routing, and runtime ownership.
+p0-trigger-guard-required
+p0-no-generic-fallback
 pmworkspace-d0-work-mode-scoring
 pmworkspace-deep-input-routes-to-deep-gate
 pmworkspace-route-output-contract
@@ -71,6 +73,7 @@ prototype-design-spec-target-required
 prototype-no-collage-or-storyboard
 prototype-image-baseline-requires-physical-longboard
 prototype-prompt-check-3x-target-match-required
+p0-imagegen-before-permit-blocked
 readiness-dashboard-required
 dashboard-concise-details-mode
 

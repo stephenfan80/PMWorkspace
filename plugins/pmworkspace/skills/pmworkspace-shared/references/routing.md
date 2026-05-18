@@ -23,6 +23,8 @@ PMWorkspace 对用户只暴露四个动作：`对齐`、`出图`、`复审`、`�
 
 路由前先建立 `产品信息对齐包`。脚本可用时，先运行 `pmw-controller intake` 生成或继承本轮 run / `task_digest` / `input_revision`，再读取 `pmw-dashboard status` 默认摘要；脚本不可用时，也要用当前对话、已对齐 brief、截图、Zoon、artifact-flow 和 run 事实手动整理同样字段。路由不能只看用户最后一句“要原型 / 使用方案 A / 参考截图”，必须先判断当前事实是否足以继续下游。
 
+路由前先运行 `pmw-trigger-guard --text "<本轮用户原话和材料摘要>" --skill pm-workspace --json`。只要返回 `pmw_required=true`，就不能退回普通 Agent 行为；如果 PMW runtime 或专用动作不可用，必须停止并说明 `PMW runtime 未接管当前任务，已阻断普通方案输出和出图`。禁止说“插件触发到了但没有直接暴露 pmworkspace 动作，所以我继续用本地数据做方案”；这类 fallback 会绕过工作方式卡片、自动产品评审、产品方向审查、brief 确认、设计规范 D、readiness 和 image permit。
+
 `pmw-controller next` 是路由后的唯一合法下一动作来源。返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时，路由必须停在当前门槛；不要因为历史资料充足、旧 brief 已对齐或旧 board 有 3 个方案就继续下游。
 
 路由前先完成产品路径识别：`全新功能` 或 `已有功能迭代`。PMWorkspace 不再提供轻量旁路对齐深度；所有产品任务都走深度产品对齐。只有产品路径不清、风险信号冲突或输入材料不足以判断时，才停在路径/证据卡点等待用户回答。

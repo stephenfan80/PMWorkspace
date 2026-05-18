@@ -1,6 +1,6 @@
 {
   "name": "pmworkspace",
-  "version": "0.1.30",
+  "version": "0.1.31",
   "description": "AI 产品工作站 helps product managers turn ideas, PRDs, screenshots, and feedback into aligned product briefs, image-2 prototype directions, reviews, and compact handoff assets.",
   "author": {
     "name": "Stephen Fan",
@@ -47,7 +47,7 @@
   "interface": {
     "displayName": "AI 产品工作站",
     "shortDescription": "Product briefs, image-2 prototypes, reviews, and PRDs",
-    "longDescription": "AI 产品工作站, powered by PMWorkspace, is a product workbench for product managers. It routes fuzzy ideas, PRDs, screenshots, customer insight, or prototype requests into new-feature or existing-feature product paths, then enforces deep product alignment before image-2 prototypes or handoff. It captures assumptions, goals, counter-metrics, constraints, and non-fiction boundaries; produces aligned product briefs; supports mobile-first image-2 prototype directions; reviews prototypes against product intent; and prepares compact PRD or design handoff assets.",
+    "longDescription": "AI 产品工作站, powered by PMWorkspace, is a product workbench for product managers. When this plugin or a PMW product/prototype signal is triggered, PMWorkspace must take over through its trigger guard and controller before any generic product analysis, data-only solutioning, HTML wireframe, image-2 prompt, or image generation. It routes fuzzy ideas, PRDs, screenshots, customer insight, or prototype requests into new-feature or existing-feature product paths, then enforces deep product alignment before image-2 prototypes or handoff. It captures assumptions, goals, counter-metrics, constraints, and non-fiction boundaries; produces aligned product briefs; supports mobile-first image-2 prototype directions; reviews prototypes against product intent; and prepares compact PRD or design handoff assets.",
     "developerName": "Stephen Fan",
     "category": "Productivity",
     "capabilities": [
@@ -59,6 +59,7 @@
     "privacyPolicyURL": "https://github.com/stephenfan80/PMWorkspace#privacy",
     "termsOfServiceURL": "https://github.com/stephenfan80/PMWorkspace#license",
     "defaultPrompt": [
+      "用 AI 产品工作站接管这个任务：先运行 PMW 入口守卫和 controller，不要退回普通方案输出或直接出图。",
       "用 AI 产品工作站把这个产品想法先对齐成产品简报，再输出方案方向和移动端原型图。",
       "用 AI 产品工作站把这份 PRD 或截图反馈整理成可出图产品简报。",
       "用 AI 产品工作站复审这批原型，并整理成精简 PRD 交付稿。"

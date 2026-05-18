@@ -9,6 +9,7 @@
   ],
   "shared_gates": [
     "先读语言与本地化协议，中文用户默认使用中文字段、中文状态和中文建议。",
+    "PMW 触发信号命中后必须先过 `pmw-trigger-guard` / `pmw-controller intake`；如果 PMW runtime 或专用动作未接管，必须停止并说明阻断，不能退回普通产品分析、数据分析出方案、HTML 线框或 imagegen。",
     "每个 PMW 产品任务必须先运行 `pmw-controller intake`，由 controller 生成或继承本轮 run、`task_digest` 和 `input_revision`；skill 不能直接信任全局 current-project 或旧 run。",
     "`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能继续进入下游产物；`WRITE_PENDING_BRIEF` 只能路由到产品简报，不是出图许可。",
     "`product_brief`、`visual_baseline`、`prototype-board`、`prototype_review`、`handoff` 等正式产物必须匹配当前 run_id、`task_digest` 和 `input_revision`；旧产物只能标记为可参考，不能放行本轮。",

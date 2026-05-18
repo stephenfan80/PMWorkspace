@@ -88,6 +88,39 @@ def current_board_item(project: dict[str, Any], scheme: str, screen: str) -> dic
     return {}
 
 
+def permit_rows() -> list[dict[str, Any]]:
+    return read_jsonl(project_dir() / "image-permits.jsonl")
+
+
+def permit_used(permit_id: str) -> bool:
+    for row in permit_rows():
+        if row.get("record_type") == "permit_use" and row.get("image_permit_id") == permit_id:
+            return True
+    return False
+
+
+def validate_permit(project: dict[str, Any], permit_id: str, scheme: str, screen: str) -> tuple[bool, str, dict[str, Any]]:
+    if not permit_id:
+        return False, "IMAGEGEN_BLOCKED_BEFORE_PERMIT: 缺少 image_permit_id；不能写 image-2 prompt 或调用 imagegen。", {}
+    matches = [row for row in permit_rows() if row.get("record_type") == "permit" and row.get("image_permit_id") == permit_id]
+    if not matches:
+        return False, "IMAGEGEN_BLOCKED_BEFORE_PERMIT: image_permit_id 不存在或不属于当前项目。", {}
+    permit = matches[-1]
+    if permit_used(permit_id):
+        return False, "IMAGEGEN_BLOCKED_BEFORE_PERMIT: image_permit_id 已使用；每张图必须重新签发。", permit
+    expected = {
+        "run_id": project.get("current_run_id", ""),
+        "task_digest": project.get("current_task_digest", ""),
+        "input_revision": project.get("current_input_revision", ""),
+        "scheme": scheme,
+        "screen": screen,
+    }
+    for key, value in expected.items():
+        if value and str(permit.get(key) or "") != str(value):
+            return False, f"IMAGEGEN_BLOCKED_BEFORE_PERMIT: image_permit_id 与当前 {key} 不匹配。", permit
+    return True, "", permit
+
+
 def confirmed_less_than_three(project: dict[str, Any]) -> bool:
     run_id = str(project.get("current_run_id") or "")
     digest = str(project.get("current_task_digest") or "")
@@ -202,6 +235,32 @@ def command_issue_permit(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_assert_imagegen(args: argparse.Namespace) -> int:
+    project = read_json(project_dir() / "project.json")
+    result_payload = evaluate_preflight(project)
+    item = current_board_item(project, args.scheme, args.screen)
+    failures = list(result_payload.get("failures") or [])
+    if not item:
+        failures.append("当前 run / task revision 没有匹配的 prototype-board 输出单元，不能写 image-2 prompt 或调用 imagegen")
+    permit_ok, permit_error, permit = validate_permit(project, args.image_permit_id, args.scheme, args.screen)
+    if not permit_ok:
+        failures.append(permit_error)
+    ready = not failures
+    payload = {
+        **result_payload,
+        "ready": ready,
+        "verdict": "IMAGEGEN_ALLOWED" if ready else "IMAGEGEN_BLOCKED_BEFORE_PERMIT",
+        "first_blocker": failures[0] if failures else "",
+        "failures": failures,
+        "scheme": args.scheme,
+        "screen": args.screen,
+        "image_permit_id": args.image_permit_id,
+        "permit": permit if ready else {},
+    }
+    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else payload["verdict"])
+    return 0 if ready else 2
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="pmw-image-preflight")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -213,6 +272,12 @@ def build_parser() -> argparse.ArgumentParser:
     permit.add_argument("--screen", required=True)
     permit.add_argument("--json", action="store_true")
     permit.set_defaults(func=command_issue_permit)
+    assert_imagegen = sub.add_parser("assert-imagegen")
+    assert_imagegen.add_argument("--scheme", required=True)
+    assert_imagegen.add_argument("--screen", required=True)
+    assert_imagegen.add_argument("--image-permit-id", default="")
+    assert_imagegen.add_argument("--json", action="store_true")
+    assert_imagegen.set_defaults(func=command_assert_imagegen)
     return parser
 
 

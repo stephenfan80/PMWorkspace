@@ -76,7 +76,7 @@ _PMW_BIN=""
 for _CANDIDATE in "$PWD/bin" "$PWD/pmworkspace-shared/bin" "$HOME/.codex/skills/pmworkspace-shared/bin" "$HOME/.agents/plugins/plugins/pmworkspace/skills/pmworkspace-shared/bin" $(find "$HOME/.codex/plugins/cache" -path "*/pmworkspace/*/skills/pmworkspace-shared/bin" -type d 2>/dev/null | sort -r); do
   if [ -x "$_CANDIDATE/pmw-entry-status" ]; then _PMW_BIN="$_CANDIDATE"; break; fi
 done
-[ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-entry-status" --skill pm-workspace # internally runs "pmw-update-check" --quick
+[ -n "$_PMW_BIN" ] && "$_PMW_BIN/pmw-entry-status" --skill pm-workspace --text "<本轮用户原话和材料摘要>" # trigger guard; internally runs "pmw-update-check" --quick
 ```
 
 If output contains `UPGRADE_AVAILABLE old new`, tell the user PMWorkspace has an update. If output also contains `UPGRADE_COMMAND <command>`, offer that exact command; otherwise offer `pmw-upgrade --host codex`. If `auto_upgrade` is `true`, upgrade automatically with the detected command and say what changed only after upgrade succeeds.

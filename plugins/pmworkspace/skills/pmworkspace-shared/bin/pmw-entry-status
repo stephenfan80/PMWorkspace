@@ -3,6 +3,9 @@ set -u
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILL="pm-workspace"
+TEXT=""
+GOAL=""
+MATERIALS=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -10,9 +13,21 @@ while [ "$#" -gt 0 ]; do
       SKILL="${2:-pm-workspace}"
       shift 2
       ;;
+    --text)
+      TEXT="${2:-}"
+      shift 2
+      ;;
+    --goal)
+      GOAL="${2:-}"
+      shift 2
+      ;;
+    --materials)
+      MATERIALS="${2:-}"
+      shift 2
+      ;;
     -h|--help)
       cat <<'EOF'
-Usage: pmw-entry-status [--skill pm-workspace]
+Usage: pmw-entry-status [--skill pm-workspace] [--text <request>]
 
 Runs the light PMWorkspace entry preamble: update check, usage log, current
 controller summary, dashboard status, and artifact flow. Missing tools are
@@ -34,6 +49,10 @@ fi
 
 if [ -x "$SCRIPT_DIR/pmw-log" ]; then
   "$SCRIPT_DIR/pmw-log" usage "$SKILL" >/dev/null 2>&1 || true
+fi
+
+if [ -x "$SCRIPT_DIR/pmw-trigger-guard" ]; then
+  "$SCRIPT_DIR/pmw-trigger-guard" --skill "$SKILL" --text "$TEXT" --goal "$GOAL" --materials "$MATERIALS" --json 2>/dev/null || true
 fi
 
 if [ -x "$SCRIPT_DIR/pmw-controller" ]; then

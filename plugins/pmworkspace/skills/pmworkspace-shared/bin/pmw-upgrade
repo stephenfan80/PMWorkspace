@@ -190,6 +190,11 @@ else
   "$tmp/PMWorkspace/setup" "$HOST" "$HOST_VALUE"
 fi
 
+if [ "${PMW_SKIP_GLOBAL_GUARD:-false}" != "true" ]; then
+  "$tmp/PMWorkspace/bin/pmw-install-global-guard" \
+    --path "${CODEX_GLOBAL_AGENTS:-$HOME/.codex/AGENTS.md}" >/dev/null
+fi
+
 mkdir -p "$STATE_DIR"
 [ -n "$old" ] && printf '%s' "$old" > "$STATE_DIR/just-upgraded-from"
 new="$(tr -d '[:space:]' < "$tmp/PMWorkspace/VERSION")"

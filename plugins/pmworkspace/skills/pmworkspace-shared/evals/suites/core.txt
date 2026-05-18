@@ -21,6 +21,7 @@ artifact-flow-required
 # Entry, routing, and runtime ownership.
 p0-trigger-guard-required
 p0-no-generic-fallback
+p0-global-guard-installed
 pmworkspace-d0-work-mode-scoring
 pmworkspace-deep-input-routes-to-deep-gate
 pmworkspace-route-output-contract

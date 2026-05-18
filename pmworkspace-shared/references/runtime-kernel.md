@@ -116,6 +116,52 @@ pmw-controller assert --capability handoff
 
 所有正式产物和确认都必须绑定当前 `task_digest` / `input_revision`。脚本可用时，`pmw-run event`、`pmw-artifact` 和 `pmw-prototype-board` 会自动 stamp 当前 controller verdict；脚本不可用时，助手也必须在审计中声明这些绑定，不能把旧 run 的确认搬到新任务上。
 
+### Runtime Recovery 与续跑
+
+PMW 的续跑真源是当前 run 的 `task_intake` snapshot。`project.json` current 指针只用于默认 active work；一旦命令显式传入 `--run <run_id>`，脚本必须从目标 run 的 `task_intake` 读取 `task_digest`、`input_revision` 和 controller verdict，不得借用当前 project 指针。缺少 snapshot 的旧 run 标记为 `legacy_no_snapshot`，只能作为候选上下文展示，不能放行正式产物。
+
+用户短回复不能重新触发 intake。当前门槛由 `pmw-controller next --json` 返回的 `pending_gate_id` 和 `expected_subject` 表示；用户回复“确认策略审查”“同意这个 brief”“按 A 继续”等短确认时，必须使用：
+
+```bash
+pmw-controller answer \
+  --gate-id current \
+  --value "<用户原话或选择>" \
+  --summary "<当前 gate 的结构化确认摘要>" \
+  --confirm-state confirmed \
+  --json
+```
+
+`answer` 只回答当前 pending gate，不创建新 run，不改变 `task_digest` / `input_revision`。如果没有唯一 current gate，必须返回 `AMBIGUOUS_ANSWER`，让 Agent 停住并展示诊断，而不是猜测用户在确认哪一段。
+
+确认事件使用结构化字段：
+
+```json
+{
+  "event": "controller_confirm",
+  "confirm_state": "confirmed|pending|rejected",
+  "confirm_subject": "strategy|brief|design_spec|...",
+  "subject_revision": "<input_revision>",
+  "gate_id": "<pending_gate_id>",
+  "confirmed_by_event_id": "<event_id>"
+}
+```
+
+新 runtime 只能用 `confirm_state` 判断确认是否通过；`summary` 只用于展示和审计。`summary` 中出现“待确认项”“需核验项”等产品边界词，不得反向污染 `confirmed` 状态。若 `confirm_state=rejected`，同一 subject revision 的下游 readiness、permit 和交付必须失效。
+
+产品简报确认使用原子命令，避免“latest_brief 已更新、artifact 没登记”或反过来的半成功状态：
+
+```bash
+pmw-controller confirm-brief \
+  --brief-path "<当前 brief.md>" \
+  --brief-version "<vN>" \
+  --summary "<关键前提已确认或按标注假设推进>" \
+  --json
+```
+
+该命令一次完成三件事：设置 `latest_brief` / `latest_brief_version`，写入结构化 `brief` confirmation，并登记当前 revision 的 `product_brief` artifact。命令按 `run_id / task_digest / input_revision / brief_path / brief_version` 幂等，重试不能产生重复 current artifact。
+
+preflight 连续卡在同一 blocker 时会进入恢复模式。`pmw-controller preflight --target prototype|handoff --json` 会记录 blocker fingerprint；相同 run、target 和 fingerprint 连续失败第二次返回 `RECOVERY_REQUIRED`。Agent 必须停止硬跑，展示 readiness diagnostics 和推荐恢复命令。
+
 历史资产默认分为 `candidate_context`，状态显示为 `历史资产：可参考，不可放行`。只有用户明确确认沿用、controller 记录当前 `input_revision` 的 `adopt_history` 事件、再运行 `pmw-controller adopt-history --kind <artifact-kind>` 把产物重新 stamp 当前 run / task / revision，并重新通过 readiness，才能成为 `current_artifact`。
 
 ## 运行审计

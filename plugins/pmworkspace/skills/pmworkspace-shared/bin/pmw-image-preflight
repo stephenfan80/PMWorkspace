@@ -11,6 +11,8 @@ import sys
 from datetime import datetime, timezone
 from typing import Any
 
+import pmw_runtime as rt
+
 
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
@@ -64,25 +66,18 @@ def append_jsonl(path: pathlib.Path, row: dict[str, Any]) -> None:
         handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
 
 
-def current_board_items(project: dict[str, Any]) -> list[dict[str, Any]]:
-    run_id = str(project.get("current_run_id") or "")
-    digest = str(project.get("current_task_digest") or "")
-    revision = str(project.get("current_input_revision") or "")
+def current_board_items(project: dict[str, Any], run_id: str = "") -> list[dict[str, Any]]:
+    context = rt.resolve_context(project, run_id or None)
     rows = [row for row in read_jsonl(project_dir() / "prototype-board.jsonl") if row.get("record_type", "item") == "item"]
     scoped = []
     for row in rows:
-        if run_id and row.get("run_id") != run_id:
-            continue
-        if digest and row.get("task_digest") != digest:
-            continue
-        if revision and row.get("input_revision") != revision:
-            continue
-        scoped.append(row)
+        if rt.row_matches_context(row, context):
+            scoped.append(row)
     return scoped
 
 
-def current_board_item(project: dict[str, Any], scheme: str, screen: str) -> dict[str, Any]:
-    for row in reversed(current_board_items(project)):
+def current_board_item(project: dict[str, Any], scheme: str, screen: str, run_id: str = "") -> dict[str, Any]:
+    for row in reversed(current_board_items(project, run_id)):
         if row.get("scheme") == scheme and row.get("screen") == screen:
             return row
     return {}
@@ -108,10 +103,11 @@ def validate_permit(project: dict[str, Any], permit_id: str, scheme: str, screen
     permit = matches[-1]
     if permit_used(permit_id):
         return False, "IMAGEGEN_BLOCKED_BEFORE_PERMIT: image_permit_id 已使用；每张图必须重新签发。", permit
+    context = rt.resolve_context(project, str(permit.get("run_id") or project.get("current_run_id") or ""))
     expected = {
-        "run_id": project.get("current_run_id", ""),
-        "task_digest": project.get("current_task_digest", ""),
-        "input_revision": project.get("current_input_revision", ""),
+        "run_id": context.get("run_id", ""),
+        "task_digest": context.get("task_digest", ""),
+        "input_revision": context.get("input_revision", ""),
         "scheme": scheme,
         "screen": screen,
     }
@@ -121,14 +117,11 @@ def validate_permit(project: dict[str, Any], permit_id: str, scheme: str, screen
     return True, "", permit
 
 
-def confirmed_less_than_three(project: dict[str, Any]) -> bool:
-    run_id = str(project.get("current_run_id") or "")
-    digest = str(project.get("current_task_digest") or "")
-    revision = str(project.get("current_input_revision") or "")
+def confirmed_less_than_three(project: dict[str, Any], run_id: str = "") -> bool:
+    run_id = run_id or str(project.get("current_run_id") or "")
+    context = rt.resolve_context(project, run_id)
     for row in read_jsonl(project_dir() / "runs" / f"{run_id}.jsonl"):
-        if digest and row.get("task_digest") != digest:
-            continue
-        if revision and row.get("input_revision") != revision:
+        if not rt.row_matches_context(row, context):
             continue
         text = f"{row.get('status', '')} {row.get('title', '')} {row.get('summary', '')}"
         if "少于 3" in text and ("豁免" in text or "例外" in text) and ("已确认" in text or "已批准" in text):
@@ -136,9 +129,13 @@ def confirmed_less_than_three(project: dict[str, Any]) -> bool:
     return False
 
 
-def controller_preflight() -> tuple[int, dict[str, Any], str]:
+def controller_preflight(run_id: str = "") -> tuple[int, dict[str, Any], str]:
+    if run_id:
+        command = [str(SCRIPT_DIR / "pmw-dashboard"), "readiness", "--target", "prototype", "--run", run_id, "--json"]
+    else:
+        command = [str(SCRIPT_DIR / "pmw-controller"), "preflight", "--target", "prototype", "--json"]
     result = subprocess.run(
-        [str(SCRIPT_DIR / "pmw-controller"), "preflight", "--target", "prototype", "--json"],
+        command,
         text=True,
         capture_output=True,
         check=False,
@@ -150,16 +147,17 @@ def controller_preflight() -> tuple[int, dict[str, Any], str]:
     return result.returncode, payload if isinstance(payload, dict) else {}, result.stderr
 
 
-def evaluate_preflight(project: dict[str, Any]) -> dict[str, Any]:
+def evaluate_preflight(project: dict[str, Any], run_id: str = "") -> dict[str, Any]:
     project = read_json(project_dir() / "project.json")
-    exit_code, payload, stderr = controller_preflight()
-    items = current_board_items(project)
+    context = rt.resolve_context(project, run_id or None)
+    exit_code, payload, stderr = controller_preflight(run_id)
+    items = current_board_items(project, run_id)
     failures = []
     if exit_code != 0 or not payload.get("ready"):
         failures.append(str(payload.get("reason") or stderr or "prototype preflight blocked"))
     if not items:
         failures.append("当前 run 没有已绑定 prototype-board 输出单元")
-    if len(items) < 3 and not confirmed_less_than_three(project):
+    if len(items) < 3 and not confirmed_less_than_three(project, run_id):
         failures.append("默认最少 3 个方案；少于 3 个必须有当前 run 的明确豁免原因")
     allowed = not failures
     return {
@@ -168,22 +166,25 @@ def evaluate_preflight(project: dict[str, Any]) -> dict[str, Any]:
         "first_blocker": failures[0] if failures else "",
         "failures": failures,
         "output_units": len(items),
-        "task_digest": project.get("current_task_digest", ""),
-        "input_revision": project.get("current_input_revision", ""),
+        "run_id": context.get("run_id", ""),
+        "task_digest": context.get("task_digest", ""),
+        "input_revision": context.get("input_revision", ""),
+        "diagnostics": payload.get("diagnostics", {}),
     }
 
 
 def command_check(args: argparse.Namespace) -> int:
     project = read_json(project_dir() / "project.json")
-    result_payload = evaluate_preflight(project)
+    result_payload = evaluate_preflight(project, args.run)
     print(json.dumps(result_payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else result_payload["verdict"])
     return 0 if result_payload["ready"] else 2
 
 
 def command_issue_permit(args: argparse.Namespace) -> int:
     project = read_json(project_dir() / "project.json")
-    result_payload = evaluate_preflight(project)
-    item = current_board_item(project, args.scheme, args.screen)
+    context = rt.resolve_context(project, args.run or None)
+    result_payload = evaluate_preflight(project, args.run)
+    item = current_board_item(project, args.scheme, args.screen, args.run)
     failures = list(result_payload.get("failures") or [])
     if not item:
         failures.append("当前 run / task revision 没有匹配的 prototype-board 输出单元，不能签发图片许可证")
@@ -202,9 +203,9 @@ def command_issue_permit(args: argparse.Namespace) -> int:
     seed = "|".join(
         [
             now(),
-            str(project.get("current_run_id") or ""),
-            str(project.get("current_task_digest") or ""),
-            str(project.get("current_input_revision") or ""),
+            str(context.get("run_id") or ""),
+            str(context.get("task_digest") or ""),
+            str(context.get("input_revision") or ""),
             args.scheme,
             args.screen,
         ]
@@ -214,9 +215,9 @@ def command_issue_permit(args: argparse.Namespace) -> int:
         "ts": now(),
         "record_type": "permit",
         "image_permit_id": permit_id,
-        "run_id": project.get("current_run_id", ""),
-        "task_digest": project.get("current_task_digest", ""),
-        "input_revision": project.get("current_input_revision", ""),
+        "run_id": context.get("run_id", ""),
+        "task_digest": context.get("task_digest", ""),
+        "input_revision": context.get("input_revision", ""),
         "scheme": args.scheme,
         "screen": args.screen,
         "brief_version": item.get("brief_version", ""),
@@ -237,8 +238,8 @@ def command_issue_permit(args: argparse.Namespace) -> int:
 
 def command_assert_imagegen(args: argparse.Namespace) -> int:
     project = read_json(project_dir() / "project.json")
-    result_payload = evaluate_preflight(project)
-    item = current_board_item(project, args.scheme, args.screen)
+    result_payload = evaluate_preflight(project, args.run)
+    item = current_board_item(project, args.scheme, args.screen, args.run)
     failures = list(result_payload.get("failures") or [])
     if not item:
         failures.append("当前 run / task revision 没有匹配的 prototype-board 输出单元，不能写 image-2 prompt 或调用 imagegen")
@@ -265,17 +266,20 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="pmw-image-preflight")
     sub = parser.add_subparsers(dest="command", required=True)
     check = sub.add_parser("check")
+    check.add_argument("--run", default="")
     check.add_argument("--json", action="store_true")
     check.set_defaults(func=command_check)
     permit = sub.add_parser("issue-permit")
     permit.add_argument("--scheme", required=True)
     permit.add_argument("--screen", required=True)
+    permit.add_argument("--run", default="")
     permit.add_argument("--json", action="store_true")
     permit.set_defaults(func=command_issue_permit)
     assert_imagegen = sub.add_parser("assert-imagegen")
     assert_imagegen.add_argument("--scheme", required=True)
     assert_imagegen.add_argument("--screen", required=True)
     assert_imagegen.add_argument("--image-permit-id", default="")
+    assert_imagegen.add_argument("--run", default="")
     assert_imagegen.add_argument("--json", action="store_true")
     assert_imagegen.set_defaults(func=command_assert_imagegen)
     return parser

@@ -1,0 +1,50 @@
+{
+  "id": "p0-failure-budget",
+  "title": "P0：相同 preflight 阻断连续失败两次必须进入 RECOVERY_REQUIRED",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-workspace",
+  "prompt": "Agent 不能反复硬跑同一个 blocker；第二次相同 fingerprint 要停止并展示诊断。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "required_behaviors": [
+      "controller preflight 记录 failure_fingerprint",
+      "同一 blocker 第二次返回 RECOVERY_REQUIRED",
+      "payload 包含 diagnostics"
+    ],
+    "gate": "P0 runtime recovery",
+    "must_stop": true,
+    "forbidden_behaviors": [
+      "短回复重新触发 intake 并创建新 revision",
+      "--run 写入混用 project current task context",
+      "summary 文本决定结构化确认是否通过",
+      "旧资产或错 revision 产物放行出图",
+      "重复 preflight 失败后继续硬跑"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-controller",
+      "contains": "preflight_failure_budget"
+    },
+    {
+      "path": "bin/pmw-controller",
+      "contains": "RECOVERY_REQUIRED"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=p0-budget; bin/pmw-controller intake --goal '做一个新页面原型' --materials '' --skill pm-workspace --product-path 全新功能 --depth deep --stage intake >/dev/null; set +e; bin/pmw-controller preflight --target prototype --json >/dev/null 2>&1; bin/pmw-controller preflight --target prototype --json; code=$?; exit $code"
+      ],
+      "exit_code": 2,
+      "contains": [
+        "\"verdict\": \"RECOVERY_REQUIRED\"",
+        "\"recovery_required\": true",
+        "\"failure_count\": 2"
+      ]
+    }
+  ]
+}

@@ -10,6 +10,8 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
+import pmw_runtime as rt
+
 
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
@@ -120,12 +122,13 @@ def current_project() -> dict:
     return read_json(project_dir() / "project.json")
 
 
-def current_task_context() -> tuple[str, str, str]:
+def current_task_context(run_id: str = "") -> tuple[str, str, str]:
     project = current_project()
+    context = rt.resolve_context(project, run_id or None)
     return (
-        str(project.get("current_task_digest") or ""),
-        str(project.get("current_input_revision") or ""),
-        str(project.get("last_controller_verdict") or ""),
+        str(context.get("task_digest") or ""),
+        str(context.get("input_revision") or ""),
+        str(context.get("controller_verdict") or ""),
     )
 
 
@@ -141,28 +144,23 @@ def status_is_nonformal(status: str) -> bool:
 
 
 def event_is_confirmed(row: dict) -> bool:
-    text = f"{row.get('status', '')} {row.get('summary', '')} {row.get('body', '')} {row.get('user_choice', '')}"
-    positive = any(token in text for token in ["已对齐", "已确认", "已同意", "批准", "用户确认", "用户同意"])
-    negative = any(token in text for token in ["待确认", "需要确认", "准备确认", "需要补充", "需要 PM 拍板", "不同意", "未确认"])
-    return positive and not negative
+    return rt.event_is_confirmed(row)
 
 
 def event_matches_current_task(row: dict) -> bool:
-    digest, revision, _verdict = current_task_context()
-    if not digest and not revision:
-        return True
-    return str(row.get("task_digest") or "") == digest and str(row.get("input_revision") or "") == revision
+    return rt.row_matches_context(row, rt.resolve_context(current_project()))
 
 
-def run_has_brief_confirmation() -> bool:
-    run_id = current_run_id()
+def run_has_brief_confirmation(run_id: str = "") -> bool:
+    run_id = run_id or current_run_id()
     if not run_id:
         return False
     run_file = project_dir() / "runs" / f"{run_id}.jsonl"
+    context = rt.resolve_context(current_project(), run_id)
     for row in read_jsonl(run_file):
         if row.get("event") not in {"gate", "decision"}:
             continue
-        if not event_matches_current_task(row):
+        if not rt.row_matches_context(row, context):
             continue
         title = str(row.get("title") or "")
         if ("产品简报确认" in title or "前提确认" in title) and event_is_confirmed(row):
@@ -272,7 +270,7 @@ def validate_formal_artifact_gate(args: argparse.Namespace) -> None:
         ok, detail = controller_capability("write_brief")
         if not ok:
             raise SystemExit(f"ARTIFACT_GATE_BLOCKED: product_brief 声明已对齐，但 controller 未放行 can_write_brief。{detail}")
-        if not run_has_brief_confirmation():
+        if not run_has_brief_confirmation(args.run or current_run_id()):
             raise SystemExit("ARTIFACT_GATE_BLOCKED: product_brief 声明已对齐，但当前 run 未记录产品简报确认 / 前提确认。")
         ok, detail = discovery_gate_ready(args.path)
         if not ok:
@@ -304,7 +302,7 @@ def location(row: dict) -> str:
 def command_add(args: argparse.Namespace) -> int:
     validate_formal_artifact_gate(args)
     run_id = args.run or current_run_id()
-    task_digest, input_revision, controller_verdict = current_task_context()
+    context = rt.resolve_context(current_project(), run_id)
     row = {
         "ts": now(),
         "artifact_id": f"{now_fragment()}-{slugify(args.kind)}-{uuid.uuid4().hex[:6]}",
@@ -319,11 +317,8 @@ def command_add(args: argparse.Namespace) -> int:
         "product_homework": redact_sensitive(args.product_homework),
         "upstream": split_values(args.upstream),
         "next_skill": split_values(args.next_skill),
-        "run_id": run_id,
-        "task_digest": task_digest,
-        "input_revision": input_revision,
-        "controller_verdict": controller_verdict,
     }
+    rt.stamp_row(row, context)
     append_row(row)
     print(row["artifact_id"])
     return 0

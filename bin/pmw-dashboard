@@ -1,17 +1,26 @@
 #!/usr/bin/env python3
+from __future__ import annotations
+
 import argparse
 import json
 import os
 import pathlib
 import re
 import subprocess
+import sys
 from datetime import datetime, timezone
 from typing import Optional
 
 
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+import pmw_runtime as rt
+
 STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
 PROJECT_OVERRIDE = ""
+ACTIVE_CONTEXT: dict | None = None
 
 
 def current_slug() -> str:
@@ -117,6 +126,10 @@ def is_terminal_status(value: str) -> bool:
 
 
 def active_run_id(project: dict) -> str:
+    if ACTIVE_CONTEXT:
+        if ACTIVE_CONTEXT.get("context_source") == "project_current" and is_terminal_status(str(project.get("latest_run_status") or "")):
+            return ""
+        return str(ACTIVE_CONTEXT.get("run_id") or "")
     run_id = str(project.get("current_run_id") or "")
     if not run_id:
         return ""
@@ -126,16 +139,14 @@ def active_run_id(project: dict) -> str:
 
 
 def task_context(project: dict) -> tuple[str, str]:
+    if ACTIVE_CONTEXT:
+        return str(ACTIVE_CONTEXT.get("task_digest") or ""), str(ACTIVE_CONTEXT.get("input_revision") or "")
     return str(project.get("current_task_digest") or ""), str(project.get("current_input_revision") or "")
 
 
 def row_matches_task(row: dict, project: dict) -> bool:
-    digest, revision = task_context(project)
-    if digest and str(row.get("task_digest") or "") != digest:
-        return False
-    if revision and str(row.get("input_revision") or "") != revision:
-        return False
-    return True
+    context = ACTIVE_CONTEXT or rt.resolve_context(project)
+    return rt.row_matches_context(row, context)
 
 
 def task_is_controller_active(project: dict) -> bool:
@@ -635,11 +646,7 @@ def status_is_aligned(text: str) -> bool:
 
 
 def event_is_confirmed(event: dict) -> bool:
-    text = f"{event.get('status', '')} {event.get('summary', '')}"
-    return contains_any(text, ["已对齐", "已确认", "已同意", "批准", "用户确认", "用户同意"]) and not contains_any(
-        text,
-        ["待确认", "需要确认", "准备确认", "需要补充", "需要 PM 拍板", "不同意", "未确认"],
-    )
+    return rt.event_is_confirmed(event)
 
 
 def current_brief_artifact(root: pathlib.Path, brief_path: str, run_id: str, project: Optional[dict] = None) -> dict:
@@ -730,13 +737,15 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
     brief_status_text = f"{brief_meta} {brief_status}"
     brief_ready = bool(brief_path) and bool(brief_text) and status_is_aligned(brief_status_text)
     controller_active = task_is_controller_active(project)
-    current_task_ready = bool(run_id) and (not controller_active or (bool(project.get("current_task_digest")) and bool(project.get("current_input_revision"))))
+    digest, revision = task_context(project)
+    current_task_ready = bool(run_id) and (not controller_active or (bool(digest) and bool(revision)))
     if controller_active and not current_task_ready:
         current_task_status = "未通过"
         current_task_evidence = "current_task_digest / current_input_revision 缺失，或当前 run 已结束"
     elif controller_active:
         current_task_status = "已绑定"
-        current_task_evidence = f"run={run_id}；task={project.get('current_task_digest')}；revision={project.get('current_input_revision')}"
+        digest, revision = task_context(project)
+        current_task_evidence = f"run={run_id}；task={digest}；revision={revision}"
     elif run_id:
         current_task_status = "legacy active run"
         current_task_evidence = "当前项目未启用 controller task revision；保持兼容，但新 PMW 入口应先运行 pmw-controller intake"
@@ -1305,8 +1314,10 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
 
 
 def render_readiness_section(run_id: Optional[str], target: str = "auto", heading_level: str = "#") -> str:
+    global ACTIVE_CONTEXT
     project = read_json(project_dir() / "project.json")
     chosen_run, events = read_run(run_id)
+    ACTIVE_CONTEXT = rt.resolve_context(project, chosen_run if run_id else None)
     effective_target = auto_readiness_target(project, events) if target == "auto" else target
     rows = product_readiness_rows(project, events, effective_target)
     blockers = [row for row in rows if row["required"] and not row["passed"]]
@@ -1446,13 +1457,92 @@ def readiness_verdict(project: dict, events: list[dict], target: str) -> tuple[s
     return effective_target, verdict_cn, reason, impact, unlock, next_action, rows
 
 
+def context_diagnostics(root: pathlib.Path, project: dict, run_id: str, target: str, rows: list[dict]) -> dict:
+    context = ACTIVE_CONTEXT or rt.resolve_context(project, run_id or None)
+    first_blocker = next((row for row in rows if row.get("required") and not row.get("passed")), {})
+    candidate_rows: list[dict] = []
+    for kind in ["product_brief", "visual_baseline", "browser_evidence", "prototype_manifest", "prototype_review"]:
+        for row in artifact_rows(root, kind)[-20:]:
+            status = rt.row_context_status(row, context)
+            if status == "current_artifact":
+                continue
+            candidate_rows.append(
+                {
+                    "source": "artifact-flow",
+                    "kind": kind,
+                    "title": row.get("title", ""),
+                    "run_id": row.get("run_id", ""),
+                    "task_digest": row.get("task_digest", ""),
+                    "input_revision": row.get("input_revision", ""),
+                    "context_status": status,
+                    "location": artifact_location(row),
+                }
+            )
+    for row in read_jsonl(root / "prototype-board.jsonl")[-30:]:
+        if row.get("record_type", "item") != "item":
+            continue
+        status = rt.row_context_status(row, context)
+        if status == "current_artifact":
+            continue
+        candidate_rows.append(
+            {
+                "source": "prototype-board",
+                "kind": "prototype_unit",
+                "title": f"{row.get('scheme', '')} / {row.get('screen', '')}",
+                "run_id": row.get("run_id", ""),
+                "task_digest": row.get("task_digest", ""),
+                "input_revision": row.get("input_revision", ""),
+                "context_status": status,
+                "location": row.get("brief_path", ""),
+            }
+        )
+    blocker_name = str(first_blocker.get("name") or "")
+    if "产品简报" in blocker_name:
+        recovery = "pmw-controller confirm-brief --brief-path <current-brief.md> --brief-version <vN> --summary <已确认前提> --json"
+    elif "视觉基线" in blocker_name or "线上参考" in blocker_name:
+        recovery = "pmw-artifact add --kind visual_baseline --status 已登记 --summary '<目标输出像素和基线边界>' --run <run_id>"
+    elif "方案" in blocker_name or "输出单元" in blocker_name:
+        recovery = "pmw-prototype-board add ... --run <run_id>"
+    else:
+        recovery = str(first_blocker.get("action") or "返回当前最早门槛")
+    mismatch_matrix = []
+    expected = {
+        "run_id": context.get("run_id", ""),
+        "task_digest": context.get("task_digest", ""),
+        "input_revision": context.get("input_revision", ""),
+    }
+    for candidate in candidate_rows[:20]:
+        mismatch_matrix.append(
+            {
+                "source": candidate.get("source"),
+                "title": candidate.get("title"),
+                "context_status": candidate.get("context_status"),
+                "run_id_match": str(candidate.get("run_id") or "") == expected["run_id"],
+                "task_digest_match": str(candidate.get("task_digest") or "") == expected["task_digest"],
+                "input_revision_match": str(candidate.get("input_revision") or "") == expected["input_revision"],
+            }
+        )
+    return {
+        "expected_context": expected,
+        "context_source": context.get("context_source", ""),
+        "legacy_context_status": context.get("legacy_context_status", ""),
+        "first_blocker_fingerprint": rt.fingerprint([target, first_blocker.get("name", ""), first_blocker.get("status", ""), expected]),
+        "first_blocker": first_blocker,
+        "candidate_context": candidate_rows[:20],
+        "mismatch_matrix": mismatch_matrix,
+        "recommended_recovery_command": recovery,
+    }
+
+
 def trim_clause(value: str) -> str:
     return str(value or "").strip().rstrip("。；;.")
 
 
 def render_readiness_summary(run_id: Optional[str], target: str = "auto") -> str:
+    global ACTIVE_CONTEXT
     project = read_json(project_dir() / "project.json")
     chosen_run, events = read_run(run_id)
+    ACTIVE_CONTEXT = rt.resolve_context(project, chosen_run if run_id else None)
     effective_target, verdict_cn, reason, impact, unlock, next_action, _rows = readiness_verdict(project, events, target)
     value_label = "判断价值" if verdict_cn in {"可出图", "可交付"} else "阻断影响"
     reason = trim_clause(reason)
@@ -1472,9 +1562,11 @@ def render_readiness_summary(run_id: Optional[str], target: str = "auto") -> str
 
 
 def render_status(run_id: Optional[str]) -> str:
+    global ACTIVE_CONTEXT
     root = project_dir()
     project = read_json(root / "project.json")
     chosen_run, events = read_run(run_id)
+    ACTIVE_CONTEXT = rt.resolve_context(project, chosen_run if run_id else None)
     latest_status = project.get("latest_run_status") or (events[-1].get("status") if events else "暂无")
     latest_brief_path = str(project.get("latest_brief", ""))
     brief_name, brief_meta = latest_brief_summary(latest_brief_path)
@@ -1576,9 +1668,11 @@ def render_status(run_id: Optional[str]) -> str:
 
 
 def render_status_summary(run_id: Optional[str]) -> str:
+    global ACTIVE_CONTEXT
     root = project_dir()
     project = read_json(root / "project.json")
     chosen_run, events = read_run(run_id)
+    ACTIVE_CONTEXT = rt.resolve_context(project, chosen_run if run_id else None)
     latest_status = project.get("latest_run_status") or (events[-1].get("status") if events else "暂无")
     latest_brief_path = str(project.get("latest_brief", ""))
     brief_name, brief_meta = latest_brief_summary(latest_brief_path)
@@ -1624,8 +1718,10 @@ def render_status_summary(run_id: Optional[str]) -> str:
 
 
 def render_readiness_json(run_id: Optional[str], target: str = "auto") -> str:
+    global ACTIVE_CONTEXT
     project = read_json(project_dir() / "project.json")
     chosen_run, events = read_run(run_id)
+    ACTIVE_CONTEXT = rt.resolve_context(project, chosen_run if run_id else None)
     effective_target, verdict_cn, reason, impact, unlock, next_action, rows = readiness_verdict(project, events, target)
     first_blocker = ""
     for row in rows:
@@ -1644,6 +1740,7 @@ def render_readiness_json(run_id: Optional[str], target: str = "auto") -> str:
         "unlock": unlock,
         "next_action": next_action,
         "rows": rows,
+        "diagnostics": context_diagnostics(project_dir(), project, active_run_id(project) or chosen_run, effective_target, rows),
     }
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 

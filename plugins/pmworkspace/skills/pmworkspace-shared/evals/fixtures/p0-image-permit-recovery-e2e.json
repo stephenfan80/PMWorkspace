@@ -1,0 +1,50 @@
+{
+  "id": "p0-image-permit-recovery-e2e",
+  "title": "P0：恢复链路最终能签发 image permit，且新 intake 后旧 permit 失效",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-workspace",
+  "prompt": "intake -> confirm -> visual baseline -> confirm-brief -> board -> readiness -> permit 是完整恢复路径。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "required_behaviors": [
+      "confirm-brief 后进入 prototype_units_pending",
+      "prototype-board 登记后 readiness 可出图",
+      "issue-permit 生成当前 revision permit",
+      "新 intake 后旧 permit 不再匹配"
+    ],
+    "gate": "P0 runtime recovery",
+    "must_stop": true,
+    "forbidden_behaviors": [
+      "短回复重新触发 intake 并创建新 revision",
+      "--run 写入混用 project current task context",
+      "summary 文本决定结构化确认是否通过",
+      "旧资产或错 revision 产物放行出图",
+      "重复 preflight 失败后继续硬跑"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-image-preflight",
+      "contains": "issue-permit"
+    },
+    {
+      "path": "bin/pmw-prototype-board",
+      "contains": "image_permit_id"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=p0-permit; brief=\"$tmp/brief.md\"; printf '确认状态：已对齐\\n不可虚构：不承诺真实价格\\n' > \"$brief\"; bin/pmw-controller intake --goal '做一个新页面原型' --materials '' --skill pm-workspace --product-path 全新功能 --depth deep --stage intake >/dev/null; bin/pmw-controller confirm --kind goal_mode --value 验证价值 >/dev/null; bin/pmw-controller confirm --kind autoplan --summary '我建议进入产品方向审查。当前最早门槛是确认问题价值。下一技能是 $pm-jobs。' >/dev/null; bin/pmw-controller confirm --kind product_direction --summary '前提：用户有明确问题。现状替代：手工解决。当前损失：效率低。PM 判断：推荐推进。' >/dev/null; bin/pmw-controller confirm-brief --brief-path \"$brief\" --brief-version v1 --summary '关键前提已确认，已对齐。' >/dev/null; for s in A B C; do bin/pmw-prototype-board add --scheme \"$s\" --screen 首屏 --brief-version v1 --brief-path \"$brief\" --goal 主目标 --anti-metric 反指标 --non-fiction 不可虚构 --product-path 路径 --behavior-assumption 假设 --current-loss 损失 --tradeoff 取舍 --prototype-thinking 思考 --information-architecture 架构 --user-problem-fit 解决逻辑 --anti-metric-protection 保护 --design-score 8 --design-gap 差距 --ten-out-of-ten-standard 标准 --prompt-design-fix 修正 --anti-ai-slop-constraints 约束 --state-coverage 状态 --first-second-third-hierarchy 层级 --design-spec-target PMW --design-system-profile 移动端 --platform-pattern 标准 --inspiration-sources 本地 --inspiration-patterns 模式 --no-copy-boundary 不照搬 >/dev/null; done; bin/pmw-controller preflight --target prototype --json >/dev/null; permit=$(bin/pmw-image-preflight issue-permit --scheme A --screen 首屏 --json | jq -r '.image_permit_id'); bin/pmw-controller intake --force-new --goal '另一个新任务' --materials '' --skill pm-workspace --product-path 全新功能 --depth deep --stage intake >/dev/null; bin/pmw-image-preflight assert-imagegen --scheme A --screen 首屏 --image-permit-id \"$permit\" --json"
+      ],
+      "exit_code": 2,
+      "contains": [
+        "IMAGEGEN_BLOCKED_BEFORE_PERMIT",
+        "image_permit_id"
+      ]
+    }
+  ]
+}

@@ -11,6 +11,8 @@ import sys
 from datetime import datetime, timezone
 from typing import Any
 
+import pmw_runtime as rt
+
 
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
@@ -37,6 +39,7 @@ STOP_ACTIONS = {
     "STRATEGY_REVIEW_REQUIRED",
     "DESIGN_SPEC_REQUIRED",
     "REGISTER_PROTOTYPE_UNITS",
+    "RECOVERY_REQUIRED",
 }
 
 EXPLICIT_EXISTING_HINTS = [
@@ -132,6 +135,7 @@ WORKFLOW_STAGES = {
     "REGISTER_PROTOTYPE_UNITS": "prototype_units_pending",
     "ALLOW_IMAGE_PROMPT": "image_prompt_allowed",
     "ALLOW_HANDOFF": "handoff_readiness_pending",
+    "RECOVERY_REQUIRED": "recovery_required",
 }
 
 NEXT_SKILLS = {
@@ -149,6 +153,7 @@ NEXT_SKILLS = {
     "REGISTER_PROTOTYPE_UNITS": "$pm-prototype-shotgun",
     "ALLOW_IMAGE_PROMPT": "$pm-prototype-shotgun",
     "ALLOW_HANDOFF": "$pm-handoff",
+    "RECOVERY_REQUIRED": "$pm-workspace",
 }
 
 DEEP_DELIVERY_HINTS = [
@@ -318,7 +323,15 @@ def run_file(run_id: str) -> pathlib.Path:
     return project_dir() / "runs" / f"{run_id}.jsonl"
 
 
-def append_event(event: str, run_id: str, status: str, title: str, summary: str, project: dict[str, Any]) -> None:
+def append_event(
+    event: str,
+    run_id: str,
+    status: str,
+    title: str,
+    summary: str,
+    project: dict[str, Any],
+    extra: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     row = {
         "ts": now(),
         "event": event,
@@ -326,19 +339,21 @@ def append_event(event: str, run_id: str, status: str, title: str, summary: str,
         "status": status,
         "title": title,
         "summary": summary,
-        "task_digest": project.get("current_task_digest", ""),
-        "input_revision": project.get("current_input_revision", ""),
-        "controller_verdict": project.get("last_controller_verdict", ""),
     }
+    row.update(extra or {})
+    rt.stamp_row(row, rt.resolve_context(project))
     append_jsonl(run_file(run_id), row)
+    return row
 
 
 def task_context(project: dict[str, Any]) -> dict[str, str]:
-    return {
+    context = {
         "task_digest": str(project.get("current_task_digest") or ""),
         "input_revision": str(project.get("current_input_revision") or ""),
         "controller_verdict": str(project.get("last_controller_verdict") or ""),
     }
+    context["run_id"] = str(project.get("current_run_id") or "")
+    return context
 
 
 def current_run_is_active(project: dict[str, Any]) -> bool:
@@ -372,11 +387,7 @@ def current_reference_artifact(project: dict[str, Any]) -> dict[str, Any]:
 
 
 def event_matches_current_task(row: dict[str, Any], project: dict[str, Any]) -> bool:
-    digest = str(project.get("current_task_digest") or "")
-    revision = str(project.get("current_input_revision") or "")
-    if not digest and not revision:
-        return True
-    return str(row.get("task_digest") or "") == digest and str(row.get("input_revision") or "") == revision
+    return rt.row_matches_context(row, rt.resolve_context(project))
 
 
 def artifact_rows(kind: str = "") -> list[dict[str, Any]]:
@@ -387,34 +398,20 @@ def artifact_rows(kind: str = "") -> list[dict[str, Any]]:
 
 
 def current_artifact(kind: str, project: dict[str, Any]) -> dict[str, Any]:
-    digest = str(project.get("current_task_digest") or "")
-    revision = str(project.get("current_input_revision") or "")
-    run_id = str(project.get("current_run_id") or "")
+    context = rt.resolve_context(project)
     for row in reversed(artifact_rows(kind)):
-        if run_id and row.get("run_id") != run_id:
-            continue
-        if digest and row.get("task_digest") != digest:
-            continue
-        if revision and row.get("input_revision") != revision:
-            continue
-        return row
+        if rt.row_matches_context(row, context):
+            return row
     return {}
 
 
 def board_items(project: dict[str, Any]) -> list[dict[str, Any]]:
-    digest = str(project.get("current_task_digest") or "")
-    revision = str(project.get("current_input_revision") or "")
-    run_id = str(project.get("current_run_id") or "")
+    context = rt.resolve_context(project)
     rows = [row for row in read_jsonl(project_dir() / "prototype-board.jsonl") if row.get("record_type", "item") == "item"]
     scoped = []
     for row in rows:
-        if run_id and row.get("run_id") != run_id:
-            continue
-        if digest and row.get("task_digest") != digest:
-            continue
-        if revision and row.get("input_revision") != revision:
-            continue
-        scoped.append(row)
+        if rt.row_matches_context(row, context):
+            scoped.append(row)
     return scoped
 
 
@@ -451,10 +448,7 @@ def latest_event(project: dict[str, Any], needles: list[str]) -> dict[str, Any]:
 
 
 def confirmed_status(row: dict[str, Any]) -> bool:
-    text = f"{row.get('status', '')} {row.get('summary', '')}"
-    positive = any(token in text for token in ["已确认", "已对齐", "批准", "用户确认", "用户同意"])
-    negative = any(token in text for token in ["待确认", "未确认", "需要确认", "需要补充", "不同意"])
-    return positive and not negative
+    return rt.event_is_confirmed(row)
 
 
 def latest_confirm(project: dict[str, Any], kind: str) -> dict[str, Any]:
@@ -465,7 +459,8 @@ def latest_confirm(project: dict[str, Any], kind: str) -> dict[str, Any]:
             continue
         if not event_matches_current_task(row, project):
             continue
-        if row.get("title") == title and confirmed_status(row):
+        subject = str(row.get("confirm_subject") or "")
+        if (subject == kind or row.get("title") == title) and confirmed_status(row):
             return row
     return {}
 
@@ -587,8 +582,38 @@ def capability_flags(action: str) -> dict[str, bool]:
     }
 
 
-def workflow_payload(project: dict[str, Any], action: str, reason: str) -> dict[str, Any]:
+ACTION_SUBJECTS = {
+    "D_REQUIRED": "path",
+    "GOAL_MODE_REQUIRED": "goal_mode",
+    "AUTOPLAN_REQUIRED": "autoplan",
+    "PRODUCT_DIRECTION_REQUIRED": "product_direction",
+    "STRATEGY_REVIEW_REQUIRED": "strategy",
+    "WRITE_PENDING_BRIEF": "brief",
+    "ASK_CONFIRMATION": "brief",
+    "BRIEF_PENDING": "brief",
+    "DESIGN_SPEC_REQUIRED": "design_spec",
+    "REGISTER_PROTOTYPE_UNITS": "prototype_units",
+    "NEEDS_BASELINE": "visual_baseline",
+    "RECOVERY_REQUIRED": "recovery",
+}
+
+
+def pending_gate(project: dict[str, Any], action: str, reason: str) -> dict[str, Any]:
+    subject = ACTION_SUBJECTS.get(action, "")
+    if not subject:
+        return {}
+    context = rt.resolve_context(project)
     return {
+        "pending_gate_id": rt.gate_id(subject, context),
+        "expected_subject": subject,
+        "subject_revision": context.get("input_revision", ""),
+        "expected_action": action,
+        "required_user_action": required_user_action(action, reason),
+    }
+
+
+def workflow_payload(project: dict[str, Any], action: str, reason: str) -> dict[str, Any]:
+    payload = {
         "workflow_stage": workflow_stage(action),
         "allowed_next_skill": allowed_next_skill(action),
         "allowed_user_visible_action": user_visible_action(action),
@@ -601,6 +626,8 @@ def workflow_payload(project: dict[str, Any], action: str, reason: str) -> dict[
         "early_design_spec_decision": early_design_spec_decision(project),
         **capability_flags(action),
     }
+    payload.update(pending_gate(project, action, reason))
+    return payload
 
 
 def action_from_state(project: dict[str, Any]) -> tuple[str, str]:
@@ -720,8 +747,10 @@ def command_next(args: argparse.Namespace) -> int:
     return 0 if action not in {"BLOCKED"} else 2
 
 
-def dashboard_preflight(target: str) -> dict[str, Any]:
+def dashboard_preflight(target: str, run_id: str = "") -> dict[str, Any]:
     command = [str(SCRIPT_DIR / "pmw-dashboard"), "readiness", "--target", target, "--json"]
+    if run_id:
+        command.extend(["--run", run_id])
     result = subprocess.run(command, text=True, capture_output=True, check=False)
     if result.returncode not in {0, 1} and not result.stdout:
         return {"ready": False, "reason": result.stderr or "pmw-dashboard failed", "next_action": "BLOCKED"}
@@ -735,7 +764,8 @@ def dashboard_preflight(target: str) -> dict[str, Any]:
 def command_preflight(args: argparse.Namespace) -> int:
     project = read_project()
     action, action_reason = action_from_state(project)
-    payload = {"ready": action == "WRITE_PENDING_BRIEF", "reason": action_reason, "next_action": action} if args.target == "brief" else dashboard_preflight(args.target)
+    run_id = str(project.get("current_run_id") or "")
+    payload = {"ready": action == "WRITE_PENDING_BRIEF", "reason": action_reason, "next_action": action} if args.target == "brief" else dashboard_preflight(args.target, run_id)
     ready = bool(payload.get("ready")) and action != "BLOCKED"
     if args.target == "prototype" and action not in {"ALLOW_IMAGE_PROMPT"}:
         ready = False
@@ -758,10 +788,26 @@ def command_preflight(args: argparse.Namespace) -> int:
         next_action = str(payload.get("next_action") or ("ALLOW_IMAGE_PROMPT" if ready else "BLOCKED"))
         reason = str(payload.get("reason") or action_reason)
     verdict = "ALLOW_IMAGE_PROMPT" if ready and args.target == "prototype" else ("ALLOW_HANDOFF" if ready and args.target == "handoff" else next_action)
+    fingerprint = rt.fingerprint([args.target, first_blocker, reason, project.get("current_task_digest", ""), project.get("current_input_revision", "")])
+    failure_state = dict(project.get("preflight_failure_budget") or {})
+    target_state = dict(failure_state.get(args.target) or {})
+    if ready:
+        failure_state.pop(args.target, None)
+        failure_count = 0
+    elif target_state.get("fingerprint") == fingerprint:
+        failure_count = int(target_state.get("count") or 0) + 1
+        failure_state[args.target] = {"fingerprint": fingerprint, "count": failure_count, "first_seen_at": target_state.get("first_seen_at") or now()}
+    else:
+        failure_count = 1
+        failure_state[args.target] = {"fingerprint": fingerprint, "count": failure_count, "first_seen_at": now()}
+    recovery_required = (not ready) and failure_count >= 2
+    if recovery_required:
+        verdict = "RECOVERY_REQUIRED"
+        next_action = "RECOVERY_REQUIRED"
     project["allowed_next_action"] = verdict
     project["last_controller_verdict"] = reason
+    project["preflight_failure_budget"] = failure_state
     write_project(project)
-    run_id = str(project.get("current_run_id") or "")
     if run_id:
         append_event(
             "preflight_verdict",
@@ -778,6 +824,10 @@ def command_preflight(args: argparse.Namespace) -> int:
         "reason": reason,
         "first_blocker": first_blocker,
         "next_action": next_action,
+        "failure_fingerprint": fingerprint,
+        "failure_count": failure_count,
+        "recovery_required": recovery_required,
+        "diagnostics": payload.get("diagnostics", {}),
         **workflow_payload(project, verdict if ready else next_action, reason),
         **task_context(project),
     }
@@ -837,6 +887,46 @@ def validate_confirm_payload(kind: str, value: str, summary: str) -> str:
     return ""
 
 
+def status_for_confirm_state(state: str, fallback: str = "已确认") -> str:
+    if state == "confirmed":
+        return fallback if fallback else "已确认"
+    if state == "rejected":
+        return "已拒绝"
+    return "待确认"
+
+
+def append_controller_confirm(
+    project: dict[str, Any],
+    run_id: str,
+    kind: str,
+    value: str,
+    summary: str,
+    status: str,
+    confirm_state: str = "confirmed",
+    gate_id: str = "",
+) -> dict[str, Any]:
+    title = CONFIRM_TITLES.get(kind, kind)
+    context = rt.resolve_context(project)
+    event_id = f"evt_{rt.now_fragment()}_{hashlib.sha256((run_id + kind + summary).encode('utf-8')).hexdigest()[:8]}"
+    return append_event(
+        "controller_confirm",
+        run_id,
+        status_for_confirm_state(confirm_state, status),
+        title,
+        summary,
+        project,
+        {
+            "event_id": event_id,
+            "value": value,
+            "confirm_state": confirm_state,
+            "confirm_subject": kind,
+            "subject_revision": context.get("input_revision", ""),
+            "gate_id": gate_id or rt.gate_id(kind, context),
+            "confirmed_by_event_id": event_id,
+        },
+    )
+
+
 def command_confirm(args: argparse.Namespace) -> int:
     project = read_project()
     run_id = str(project.get("current_run_id") or "")
@@ -859,14 +949,7 @@ def command_confirm(args: argparse.Namespace) -> int:
     if args.kind == "adopt_history":
         project["history_adoption_status"] = "已确认"
     project["last_controller_verdict"] = f"{title}：{summary}"
-    append_event(
-        "controller_confirm",
-        run_id,
-        args.status,
-        title,
-        summary,
-        project,
-    )
+    append_controller_confirm(project, run_id, args.kind, value, summary, args.status, "confirmed")
     action, reason = action_from_state(project)
     project["allowed_next_action"] = action
     write_project(project)
@@ -885,6 +968,64 @@ def command_confirm(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_answer(args: argparse.Namespace) -> int:
+    project = read_project()
+    run_id = str(project.get("current_run_id") or "")
+    if not run_id or not run_file(run_id).exists():
+        print("ANSWER_BLOCKED: 当前没有 active run；短回复不能创建新任务，请先运行 pmw-controller intake。", file=sys.stderr)
+        return 2
+    action, reason = action_from_state(project)
+    gate = pending_gate(project, action, reason)
+    if not gate:
+        print("AMBIGUOUS_ANSWER: 当前没有唯一 pending gate，短回复不能被自动归因。", file=sys.stderr)
+        return 2
+    requested_gate = str(args.gate_id or "current")
+    current_gate_id = str(gate.get("pending_gate_id") or "")
+    if requested_gate not in {"", "current", current_gate_id}:
+        print(f"ANSWER_GATE_MISMATCH: expected {current_gate_id}, got {requested_gate}", file=sys.stderr)
+        return 2
+    subject = str(gate.get("expected_subject") or "")
+    if subject not in CONFIRM_TITLES:
+        print(f"AMBIGUOUS_ANSWER: 当前 gate={subject} 不能用 answer 确认，请使用对应 artifact/board 命令。", file=sys.stderr)
+        return 2
+    value = str(args.value or "").strip()
+    summary = str(args.summary or "").strip() or value or "用户确认当前 gate。"
+    confirm_state = str(args.confirm_state or "confirmed")
+    append_controller_confirm(
+        project,
+        run_id,
+        subject,
+        value,
+        summary,
+        status_for_confirm_state(confirm_state),
+        confirm_state,
+        current_gate_id,
+    )
+    if subject == "path" and value:
+        project["current_product_path"] = value
+    if subject == "goal_mode" and value:
+        project["current_goal_mode"] = value
+    if subject == "design_spec" and confirm_state == "confirmed":
+        project["design_spec_status"] = "已确认"
+        project["design_spec_target"] = value or "汽车之家 AutoDesign"
+    action, reason = action_from_state(project)
+    project["allowed_next_action"] = action
+    project["last_controller_verdict"] = reason
+    write_project(project)
+    payload = {
+        "ok": True,
+        "kind": subject,
+        "gate_id": current_gate_id,
+        "confirm_state": confirm_state,
+        "allowed_next_action": action,
+        "reason": reason,
+        **workflow_payload(project, action, reason),
+        **task_context(project),
+    }
+    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else f"{subject}: {confirm_state}")
+    return 0
+
+
 def command_stamp(args: argparse.Namespace) -> int:
     project = read_project()
     payload = {
@@ -898,6 +1039,81 @@ def command_stamp(args: argparse.Namespace) -> int:
 
 def append_artifact_row(row: dict[str, Any]) -> None:
     append_jsonl(project_dir() / "artifact-flow.jsonl", row)
+
+
+def command_confirm_brief(args: argparse.Namespace) -> int:
+    project = read_project()
+    run_id = str(project.get("current_run_id") or "")
+    if not run_id or not run_file(run_id).exists():
+        print("CONFIRM_BRIEF_BLOCKED: 当前没有 active run；先运行 pmw-controller intake。", file=sys.stderr)
+        return 2
+    brief_path = str(pathlib.Path(args.brief_path).expanduser())
+    brief_version = str(args.brief_version or "").strip() or "v1"
+    summary = str(args.summary or "").strip() or "产品简报关键前提已确认。"
+    project["latest_brief"] = brief_path
+    project["latest_brief_version"] = brief_version
+    project["last_controller_verdict"] = "产品简报确认：已对齐"
+    write_project(project)
+    project = read_project()
+    context = rt.resolve_context(project)
+    idempotency_key = "|".join(
+        [
+            "confirm_brief",
+            run_id,
+            context.get("task_digest", ""),
+            context.get("input_revision", ""),
+            brief_path,
+            brief_version,
+        ]
+    )
+    append_controller_confirm(project, run_id, "brief", "已对齐", summary, "已对齐", "confirmed")
+    existing = {}
+    for row in reversed(artifact_rows("product_brief")):
+        if row.get("idempotency_key") == idempotency_key and rt.row_matches_context(row, context):
+            existing = row
+            break
+    if existing:
+        artifact_id = str(existing.get("artifact_id") or "")
+        created = False
+    else:
+        artifact_id = f"{now_fragment()}-product-brief-{hashlib.sha256(idempotency_key.encode('utf-8')).hexdigest()[:8]}"
+        row: dict[str, Any] = {
+            "ts": now(),
+            "artifact_id": artifact_id,
+            "kind": "product_brief",
+            "title": "当前 revision 产品简报",
+            "status": "已对齐",
+            "source_skill": "pm-brief",
+            "path": brief_path,
+            "url": "",
+            "summary": summary,
+            "pm_judgment_summary": "由 pmw-controller confirm-brief 原子确认。",
+            "product_homework": "",
+            "upstream": ["autoplan", "product_direction", "strategy"],
+            "next_skill": ["pm-prototype-shotgun"],
+            "brief_version": brief_version,
+            "idempotency_key": idempotency_key,
+        }
+        rt.stamp_row(row, context)
+        append_artifact_row(row)
+        created = True
+    action, reason = action_from_state(project)
+    project["allowed_next_action"] = action
+    project["last_controller_verdict"] = reason
+    write_project(project)
+    payload = {
+        "ok": True,
+        "brief_path": brief_path,
+        "brief_version": brief_version,
+        "artifact_id": artifact_id,
+        "created": created,
+        "allowed_next_action": action,
+        "reason": reason,
+        **workflow_payload(project, action, reason),
+        **task_context(project),
+    }
+    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else artifact_id)
+    return 0
 
 
 def append_board_row(row: dict[str, Any]) -> None:
@@ -1075,6 +1291,21 @@ def build_parser() -> argparse.ArgumentParser:
     confirm.add_argument("--status", default="已确认")
     confirm.add_argument("--json", action="store_true")
     confirm.set_defaults(func=command_confirm)
+
+    answer = sub.add_parser("answer")
+    answer.add_argument("--gate-id", default="current")
+    answer.add_argument("--value", default="")
+    answer.add_argument("--summary", default="")
+    answer.add_argument("--confirm-state", choices=["confirmed", "pending", "rejected"], default="confirmed")
+    answer.add_argument("--json", action="store_true")
+    answer.set_defaults(func=command_answer)
+
+    confirm_brief = sub.add_parser("confirm-brief")
+    confirm_brief.add_argument("--brief-path", required=True)
+    confirm_brief.add_argument("--brief-version", required=True)
+    confirm_brief.add_argument("--summary", default="")
+    confirm_brief.add_argument("--json", action="store_true")
+    confirm_brief.set_defaults(func=command_confirm_brief)
 
     stamp = sub.add_parser("stamp")
     stamp.add_argument("--kind", required=True)

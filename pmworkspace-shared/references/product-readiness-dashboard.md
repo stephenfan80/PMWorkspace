@@ -21,6 +21,26 @@ pmw-dashboard status
 
 `pmw-dashboard status` 默认输出简洁状态摘要，`pmw-dashboard status --details` 才内嵌完整 `PMWorkspace 产品准备度仪表盘`，避免用户只看到后台证据表。
 
+`pmw-dashboard readiness --json` 还必须输出 `diagnostics`，用于恢复而不是继续硬跑：
+
+```json
+{
+  "diagnostics": {
+    "expected_context": {
+      "run_id": "...",
+      "task_digest": "...",
+      "input_revision": "..."
+    },
+    "first_blocker_fingerprint": "...",
+    "candidate_context": [],
+    "mismatch_matrix": [],
+    "recommended_recovery_command": "..."
+  }
+}
+```
+
+`candidate_context` 只展示旧 brief、旧 board、错 run artifact 等可参考材料；只有匹配 expected context 的 row 才能放行。`mismatch_matrix` 用来解释为什么某个看似存在的产物没有被识别为当前产物。若同一 blocker 连续失败并由 controller 返回 `RECOVERY_REQUIRED`，Agent 必须停住展示 diagnostics，不能继续尝试补写随机事件或重跑出图。
+
 ## 固定门槛
 
 仪表盘至少展示以下门槛：

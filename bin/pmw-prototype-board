@@ -6,6 +6,8 @@ import pathlib
 import subprocess
 from datetime import datetime, timezone
 
+import pmw_runtime as rt
+
 
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
@@ -47,12 +49,13 @@ def project_meta() -> dict:
     return read_json(project_dir() / "project.json")
 
 
-def current_task_context() -> tuple[str, str, str]:
+def current_task_context(run_id: str = "") -> tuple[str, str, str]:
     data = project_meta()
+    context = rt.resolve_context(data, run_id or None)
     return (
-        str(data.get("current_task_digest") or ""),
-        str(data.get("current_input_revision") or ""),
-        str(data.get("last_controller_verdict") or ""),
+        str(context.get("task_digest") or ""),
+        str(context.get("input_revision") or ""),
+        str(context.get("controller_verdict") or ""),
     )
 
 
@@ -124,7 +127,7 @@ def permit_used(permit_id: str) -> bool:
 def valid_permit(permit_id: str, run_id: str, scheme: str, screen: str) -> tuple[bool, str, dict]:
     if not permit_id:
         return False, "缺少 image_permit_id；图片只能作为对话附件，不能登记为 PMW 原型产物。", {}
-    task_digest, input_revision, _verdict = current_task_context()
+    task_digest, input_revision, _verdict = current_task_context(run_id)
     permits = [row for row in read_jsonl(permits_path()) if row.get("record_type") == "permit" and row.get("image_permit_id") == permit_id]
     if not permits:
         return False, "image_permit_id 不存在或不属于当前项目。", {}
@@ -230,7 +233,7 @@ def latest_visual_baseline(run_id: str = "") -> dict:
 
 
 def latest_item(run_id: str, scheme: str, screen: str) -> dict:
-    digest, revision, _verdict = current_task_context()
+    digest, revision, _verdict = current_task_context(run_id)
     for row in reversed(read_rows()):
         if row.get("record_type", "item") != "item":
             continue
@@ -298,7 +301,7 @@ def command_add(args: argparse.Namespace) -> int:
             return 2
     run_id = args.run or current_run_id()
     brief_path = args.brief_path or current_brief_path()
-    task_digest, input_revision, controller_verdict = current_task_context()
+    context = rt.resolve_context(project_meta(), run_id)
     baseline = latest_visual_baseline(run_id)
     generation_mode = args.generation_mode or ("screenshot_edit" if baseline else "redraw")
     base_image = args.base_image
@@ -310,7 +313,6 @@ def command_add(args: argparse.Namespace) -> int:
     row = {
         "ts": now(),
         "record_type": "item",
-        "run_id": run_id,
         "brief_path": brief_path,
         "scheme": args.scheme,
         "screen": args.screen,
@@ -352,10 +354,8 @@ def command_add(args: argparse.Namespace) -> int:
         "no_copy_boundary": args.no_copy_boundary,
         "image": args.image,
         "status": args.status,
-        "task_digest": task_digest,
-        "input_revision": input_revision,
-        "controller_verdict": controller_verdict,
     }
+    rt.stamp_row(row, context)
     if not formal_controller_context():
         row["prototype_unit_status"] = "legacy_uncontrolled"
     append_row(row)
@@ -399,7 +399,7 @@ def command_image(args: argparse.Namespace) -> int:
             file=os.sys.stderr,
         )
         return 2
-    task_digest, input_revision, _controller_verdict = current_task_context()
+    task_digest, input_revision, _controller_verdict = current_task_context(run_id)
     formal_context = bool(task_digest or input_revision)
     permit: dict = {}
     if formal_context:
@@ -449,7 +449,7 @@ def command_image(args: argparse.Namespace) -> int:
         "status": status,
         "note": args.note,
     }
-    task_digest, input_revision, controller_verdict = current_task_context()
+    task_digest, input_revision, controller_verdict = current_task_context(run_id)
     row.update(
         {
             "task_digest": task_digest,

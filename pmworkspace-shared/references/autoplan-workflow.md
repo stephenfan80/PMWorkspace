@@ -52,6 +52,7 @@
 - 如果信息足以低风险推进，就自动采用默认项并记录；如果会改变产品方向、承诺、实验口径、范围或交付责任，就停在一个 `D`。
 - 如果缺少事实导致无法形成有意义选项，先问一个 `Q`，不要用 `D` 假装可以拍板。
 - 如果 `pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED`，必须停止；只有 `ALLOW_IMAGE_PROMPT` 是出图许可。
+- 如果 `pmw-controller next/intake --json` 返回 `early_design_spec_decision`，在工作方式卡片或自动评审结论里先露出这个 D。它不阻断 `$pm-jobs` 产品方向审查，但会阻断后续原型出图。
 
 ## 用户可见进度引导
 
@@ -113,13 +114,13 @@
 2. 工作目标模式。
 3. 场景路由。
 4. Q 诊断缺口。
-5. 产品发现深度：必须覆盖产品定位与链路角色、目标用户与触发时刻、用户现状与当前替代、真实痛点与当前损失、主目标与反指标；如果用户提到当前链路、其他页面、线上替代路径或竞品平台，必须先在产品作业卡展示线上/竞品基线缺口，不能等到 brief 或出图前才问；最终确认产品简报前通常至少完成 2 个方向性 D；一个 `Q` 加一个 `D` 不能代表产品发现完成。
+5. 产品发现深度：必须覆盖产品定位与链路角色、目标用户与触发时刻、用户现状与当前替代、真实痛点与当前损失、主目标与反指标；如果用户提到当前链路、其他页面、线上替代路径或竞品平台，先在产品作业卡展示线上/竞品基线缺口，但不要让缺基线挡住 `$pm-jobs` 的方向审查；最终确认产品简报前通常至少完成 2 个方向性 D；一个 `Q` 加一个 `D` 不能代表产品发现完成。
 6. 前提确认。
 7. 必要 D 拍板。
 8. 策略审查：只有范围、价值交换、风险或定位会 materially 改变方向时才进入。
 9. 产品简报：生成后必须展示逐项待确认问题卡；必须达到 `已对齐` 才能进入图片提示词。
 10. 本地简报保存；如果仍是 `待确认`，先让用户补齐或确认偏差风险；只有已对齐且用户选择 Zoon 或已有 Zoon URL 时，再做 Zoon 同步和漂移检查。
-11. 线上参考和设计系统基线复核：已有功能迭代、承接线上流程、结果页 / 状态页 / 活动页 / 表单页或生产样式时，缺当前生产截图、关键节点截图、线上 URL、Figma / 设计稿或等价视觉基线，必须停在 `NEEDS_BASELINE`。
+11. 线上参考和设计系统基线复核：已有功能迭代、承接线上流程、结果页 / 状态页 / 活动页 / 表单页或生产样式时，缺当前生产截图、关键节点截图、线上 URL、Figma / 设计稿或等价视觉基线，必须停在 `NEEDS_BASELINE`；这个门槛位于产品方向审查和策略审查之后、已对齐 brief 之前。
 12. 运行 Product Readiness Dashboard，统一检查 brief、Zoon、线上参考、方案差异、不可虚构项和复审状态；默认只展示短 verdict 和第一阻断原因。
 13. 原型准备度或交付准备度。
 
@@ -134,7 +135,7 @@
 | 原型已生成且需要验收 | `$pm-prototype-review` |
 | 方向已选定且要交给下一团队 | `$pm-handoff` |
 
-进入 `$pm-prototype-shotgun` 前，`pmw-dashboard readiness --target prototype` 的 verdict 必须是 `可出图`，并且 `pmw-image-preflight check` 必须返回 `ALLOW_IMAGE_PROMPT`；进入 `$pm-handoff` 前，`pmw-dashboard readiness --target handoff` 的 verdict 必须是 `可交付`。若不是，下一技能指向仪表盘第一条阻断门槛对应的技能。
+进入 `$pm-prototype-shotgun` 前，`pmw-dashboard readiness --target prototype` 的 verdict 必须是 `可出图`，并且 `pmw-image-preflight check` 必须返回 `ALLOW_IMAGE_PROMPT`；进入 `$pm-handoff` 前，`pmw-dashboard readiness --target handoff` 的 verdict 必须是 `可交付`，且 `pmw-controller preflight --target handoff` 必须返回 `can_handoff=true`。若不是，下一技能指向仪表盘或 controller 第一条阻断门槛对应的技能。
 
 ## 下一技能交接
 

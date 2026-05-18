@@ -1,0 +1,73 @@
+{
+  "id": "p1-hardening-regression",
+  "title": "P1 硬约束必须防止薄确认、跳过能力位和旧资产直接沿用",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-workspace",
+  "prompt": "P1 修复后，controller confirm 必须有质量校验，下游脚本必须读取能力位，旧资产必须先确认再重新 stamp。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": true,
+    "gate": "P1 hardening",
+    "required_behaviors": [
+      "pmw-controller assert 暴露能力位断言",
+      "空泛 autoplan/product_direction/strategy confirm 被拒绝",
+      "prototype-board add 在当前 controller 未放行时拒绝登记",
+      "adopt-history 未确认前不能把旧资产升级为当前产物",
+      "prototype manifest 拒绝无 permit 的正式图片记录"
+    ],
+    "forbidden_behaviors": [
+      "用一句已确认伪造自动产品评审完成",
+      "can_register_prototype_units=false 时仍登记输出单元",
+      "未确认 adopt_history 就重新 stamp 旧资产",
+      "legacy_audit_only 图片进入正式 prototype manifest"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-controller",
+      "contains": "CONFIRM_PAYLOAD_INVALID"
+    },
+    {
+      "path": "bin/pmw-controller",
+      "contains": "adopt-history"
+    },
+    {
+      "path": "bin/pmw-prototype-board",
+      "contains": "PROTOTYPE_UNIT_GATE_BLOCKED"
+    },
+    {
+      "path": "bin/pmw-log",
+      "contains": "PROTOTYPE_MANIFEST_PERMIT_BLOCKED"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=p1-confirm; bin/pmw-controller intake --goal '提升汽车之家新能源独号转化率方案及原型' --materials '' --skill pm-workspace --product-path 待判断 --depth deep --stage intake >/dev/null; bin/pmw-controller confirm --kind goal_mode --value '优化线上指标' >/dev/null; bin/pmw-controller confirm --kind autoplan --summary '已确认'"
+      ],
+      "exit_code": 2,
+      "contains": "CONFIRM_PAYLOAD_INVALID"
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=p1-board; bin/pmw-controller intake --goal '做一个新页面原型' --materials '' --skill pm-workspace --product-path 全新功能 --depth deep --stage intake >/dev/null; bin/pmw-prototype-board add --scheme A --screen 首屏 --brief-version v1 --product-path 路径A --behavior-assumption 用户会点 --current-loss 当前损失 --tradeoff 不做复杂配置"
+      ],
+      "exit_code": 2,
+      "contains": "PROTOTYPE_UNIT_GATE_BLOCKED"
+    },
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=p1-adopt; bin/pmw-controller intake --goal '新任务' --materials '' --skill pm-workspace --product-path 全新功能 --depth deep --stage intake >/dev/null; bin/pmw-controller adopt-history --kind product_brief --path /tmp/old.md --json"
+      ],
+      "exit_code": 2,
+      "contains": "ADOPT_HISTORY_BLOCKED"
+    }
+  ]
+}

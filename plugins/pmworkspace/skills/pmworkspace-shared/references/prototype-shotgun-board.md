@@ -65,16 +65,23 @@ pmw-prototype-board add \
 
 ```bash
 pmw-image-preflight check --json
+pmw-image-preflight issue-permit \
+  --scheme "<方案名>" \
+  --screen "<屏幕任务>" \
+  --json
 pmw-prototype-board image \
   --scheme "<方案名>" \
   --screen "<屏幕任务>" \
+  --image-permit-id "<image_permit_id>" \
   --image "<图片路径或 URL>" \
   --status "已生成"
 ```
 
+`image_permit_id` 是一次性的出图许可证（image_permit_id 是一次性的出图许可证）；每张图一个，必须匹配当前 run、`task_digest`、`input_revision`、方案名和屏幕任务。没有 permit、permit 不匹配或 permit 已使用时，图片只能作为普通对话附件，不能进入 prototype manifest、原型复审或交付。
+
 如果当前 run 有 `visual_baseline` 且输出单元是 `physical_longboard`，`pmw-prototype-board image` 会自动调用 `pmw-image-audit`。审计失败时图片状态必须写成 `需要重出`，命令返回非 0；助手不能把这张图展示为交付结果。
 
-`pmw-prototype-board image` 必须绑定回同一个当前 run / 当前 `task_digest` / 当前 `input_revision` 的输出单元。若没有 `ALLOW_IMAGE_PROMPT` preflight，或当前任务没有匹配输出单元，图片标为 `对话附件，不是 PMW 原型产物`：不能写入 prototype_manifest，不能进入 `$pm-prototype-review`，也不能被 `$pm-handoff` 当作交付依据。
+`pmw-prototype-board image` 必须绑定回同一个当前 run / 当前 `task_digest` / 当前 `input_revision` 的输出单元。若没有 `ALLOW_IMAGE_PROMPT` preflight、没有 `image_permit_id`、或当前任务没有匹配输出单元，图片标为 `对话附件，不是 PMW 原型产物`：不能写入 prototype_manifest，不能进入 `$pm-prototype-review`，也不能被 `$pm-handoff` 当作交付依据。
 
 用户反馈后记录评分：
 

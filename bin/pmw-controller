@@ -24,7 +24,20 @@ TERMINAL_STATUS_TOKENS = [
     "complete",
 ]
 
-STOP_ACTIONS = {"ASK_CONFIRMATION", "NEEDS_BASELINE", "WRITE_PENDING_BRIEF", "BRIEF_PENDING", "D_REQUIRED", "BLOCKED"}
+STOP_ACTIONS = {
+    "ASK_CONFIRMATION",
+    "NEEDS_BASELINE",
+    "WRITE_PENDING_BRIEF",
+    "BRIEF_PENDING",
+    "D_REQUIRED",
+    "BLOCKED",
+    "GOAL_MODE_REQUIRED",
+    "AUTOPLAN_REQUIRED",
+    "PRODUCT_DIRECTION_REQUIRED",
+    "STRATEGY_REVIEW_REQUIRED",
+    "DESIGN_SPEC_REQUIRED",
+    "REGISTER_PROTOTYPE_UNITS",
+}
 
 EXPLICIT_EXISTING_HINTS = [
     "已有功能",
@@ -75,6 +88,68 @@ BUSINESS_METRIC_HINTS = [
     "订单",
     "数据",
 ]
+
+AUTO_DESIGN_HINTS = [
+    "汽车之家",
+    "之家",
+    "autohome",
+    "autodesign",
+    "独号",
+    "线索",
+    "询价",
+    "查价",
+    "经销商",
+    "转化率",
+    "新能源车系页",
+    "排行榜",
+    "搜索",
+    "首页弹窗",
+]
+
+AUTO_DESIGN_DECISION = {
+    "question": "D：本轮原型使用哪个设计规范目标？",
+    "timing": "入口 / 自动产品评审阶段先露出；不阻断产品方向审查，但会阻断已对齐 brief 后的出图。",
+    "recommended": "A. 使用汽车之家 AutoDesign（推荐）",
+    "options": [
+        "A. 使用汽车之家 AutoDesign（推荐）",
+        "B. 使用你提供的 Figma / 截图 / 线上页面作为视觉基线",
+        "C. 不使用汽车之家规范，由 PMW 推荐更适合的产品 UI 规范",
+    ],
+}
+
+WORKFLOW_STAGES = {
+    "BLOCKED": "intake",
+    "D_REQUIRED": "path_pending",
+    "GOAL_MODE_REQUIRED": "goal_mode_pending",
+    "AUTOPLAN_REQUIRED": "autoplan_review",
+    "NEEDS_BASELINE": "discovery_pending",
+    "PRODUCT_DIRECTION_REQUIRED": "product_direction_review",
+    "STRATEGY_REVIEW_REQUIRED": "strategy_review",
+    "WRITE_PENDING_BRIEF": "brief_pending",
+    "ASK_CONFIRMATION": "brief_confirmation_pending",
+    "BRIEF_PENDING": "brief_confirmation_pending",
+    "DESIGN_SPEC_REQUIRED": "design_spec_pending",
+    "REGISTER_PROTOTYPE_UNITS": "prototype_units_pending",
+    "ALLOW_IMAGE_PROMPT": "image_prompt_allowed",
+    "ALLOW_HANDOFF": "handoff_readiness_pending",
+}
+
+NEXT_SKILLS = {
+    "BLOCKED": "$pm-workspace",
+    "D_REQUIRED": "$pm-workspace",
+    "GOAL_MODE_REQUIRED": "$pm-autoplan",
+    "AUTOPLAN_REQUIRED": "$pm-autoplan",
+    "NEEDS_BASELINE": "$pm-autoplan",
+    "PRODUCT_DIRECTION_REQUIRED": "$pm-jobs",
+    "STRATEGY_REVIEW_REQUIRED": "$pm-strategy-review",
+    "WRITE_PENDING_BRIEF": "$pm-brief",
+    "ASK_CONFIRMATION": "$pm-brief",
+    "BRIEF_PENDING": "$pm-brief",
+    "DESIGN_SPEC_REQUIRED": "$pm-prototype-shotgun",
+    "REGISTER_PROTOTYPE_UNITS": "$pm-prototype-shotgun",
+    "ALLOW_IMAGE_PROMPT": "$pm-prototype-shotgun",
+    "ALLOW_HANDOFF": "$pm-handoff",
+}
 
 DEEP_DELIVERY_HINTS = [
     "prd",
@@ -188,11 +263,15 @@ def route_authority(goal: str, materials: str, product_path: str, depth: str) ->
     explicit_existing_signal = contains_hint(raw_text, EXPLICIT_EXISTING_HINTS)
     new_build_signal = contains_hint(raw_text, NEW_BUILD_HINTS)
     business_metric_signal = contains_hint(raw_text, BUSINESS_METRIC_HINTS)
+    auto_design_signal = contains_hint(raw_text, AUTO_DESIGN_HINTS)
     deep_signal = contains_hint(raw_text, DEEP_DELIVERY_HINTS) or business_metric_signal
 
     if explicit_existing_signal and ("已有" not in resolved_path and "迭代" not in resolved_path):
         resolved_path = "已有功能迭代"
         reasons.append("命中明确的现有/线上/迭代信号，产品路径由 skill 建议改判为已有功能迭代")
+    if auto_design_signal and business_metric_signal and not new_build_signal and not explicit_existing_signal:
+        resolved_path = "已有功能迭代"
+        reasons.append("命中汽车之家/线索转化业务信号，默认判定为已有功能迭代，需要线上/设计基线确认")
     if new_build_signal and business_metric_signal and not explicit_existing_signal:
         reasons.append("同时命中新工具表述和业务指标优化信号，需要先确认产品路径，不能把方向选择当作产品简报对齐")
     if deep_signal and resolved_depth != "deep":
@@ -281,6 +360,8 @@ def reference_required(project: dict[str, Any]) -> bool:
 def route_confirmation_required(project: dict[str, Any]) -> bool:
     product_path = str(project.get("current_product_path") or "")
     reasons = [str(item) for item in project.get("controller_route_reasons") or []]
+    if latest_confirm(project, "path"):
+        return False
     if "已有" in product_path or "迭代" in product_path:
         return False
     return any("需要先确认产品路径" in reason for reason in reasons)
@@ -337,6 +418,27 @@ def board_items(project: dict[str, Any]) -> list[dict[str, Any]]:
     return scoped
 
 
+def prototype_review_passed(row: dict[str, Any]) -> bool:
+    if not row:
+        return False
+    text = f"{row.get('status', '')} {row.get('title', '')} {row.get('summary', '')}"
+    passed = any(token in text for token in ["可通过", "可交付"])
+    blocked = any(token in text for token in ["需要重出", "需要 PM 拍板", "需要补充参考", "未复审", "待确认", "未确认"])
+    return passed and not blocked
+
+
+def handoff_artifacts_ready(project: dict[str, Any]) -> tuple[bool, str]:
+    manifest = current_artifact("prototype_manifest", project)
+    if not manifest:
+        return False, "HANDOFF_ARTIFACTS_REQUIRED: 当前 revision 缺少 prototype_manifest，不能进入交付。"
+    review = current_artifact("prototype_review", project)
+    if not review:
+        return False, "HANDOFF_ARTIFACTS_REQUIRED: 当前 revision 缺少 prototype_review=可通过，不能进入交付。"
+    if not prototype_review_passed(review):
+        return False, "HANDOFF_ARTIFACTS_REQUIRED: 当前 revision 的 prototype_review 不是可通过 / 可交付，或仍有需要重出、PM 拍板、补参考项。"
+    return True, "当前 revision 已绑定 prototype_manifest 和可通过的 prototype_review。"
+
+
 def latest_event(project: dict[str, Any], needles: list[str]) -> dict[str, Any]:
     run_id = str(project.get("current_run_id") or "")
     for row in reversed(read_jsonl(run_file(run_id))):
@@ -348,6 +450,159 @@ def latest_event(project: dict[str, Any], needles: list[str]) -> dict[str, Any]:
     return {}
 
 
+def confirmed_status(row: dict[str, Any]) -> bool:
+    text = f"{row.get('status', '')} {row.get('summary', '')}"
+    positive = any(token in text for token in ["已确认", "已对齐", "批准", "用户确认", "用户同意"])
+    negative = any(token in text for token in ["待确认", "未确认", "需要确认", "需要补充", "不同意"])
+    return positive and not negative
+
+
+def latest_confirm(project: dict[str, Any], kind: str) -> dict[str, Any]:
+    run_id = str(project.get("current_run_id") or "")
+    title = CONFIRM_TITLES.get(kind, kind)
+    for row in reversed(read_jsonl(run_file(run_id))):
+        if row.get("event") != "controller_confirm":
+            continue
+        if not event_matches_current_task(row, project):
+            continue
+        if row.get("title") == title and confirmed_status(row):
+            return row
+    return {}
+
+
+def task_text(project: dict[str, Any]) -> str:
+    pieces = [
+        str(project.get("current_task_goal") or ""),
+        str(project.get("current_task_materials") or ""),
+        str(project.get("current_product_path") or ""),
+        str(project.get("requested_product_path") or ""),
+        "\n".join(str(item) for item in project.get("controller_route_reasons") or []),
+    ]
+    return "\n".join(pieces)
+
+
+def design_spec_required(project: dict[str, Any]) -> bool:
+    if str(project.get("design_spec_required") or "").lower() in {"true", "1", "yes"}:
+        return True
+    return contains_hint(task_text(project), AUTO_DESIGN_HINTS)
+
+
+def design_spec_current_status(project: dict[str, Any]) -> str:
+    if latest_confirm(project, "design_spec") or str(project.get("design_spec_status") or "") == "已确认":
+        return "已确认"
+    if design_spec_required(project):
+        return "待确认"
+    return "不适用"
+
+
+def early_design_spec_decision(project: dict[str, Any]) -> dict[str, Any]:
+    if not design_spec_required(project) or design_spec_current_status(project) == "已确认":
+        return {}
+    return {
+        "status": "待确认",
+        **AUTO_DESIGN_DECISION,
+    }
+
+
+def strategy_review_required(project: dict[str, Any]) -> bool:
+    return contains_hint(task_text(project), BUSINESS_METRIC_HINTS) or contains_hint(task_text(project), DEEP_DELIVERY_HINTS)
+
+
+def candidate_context(project: dict[str, Any]) -> dict[str, Any]:
+    digest = str(project.get("current_task_digest") or "")
+    revision = str(project.get("current_input_revision") or "")
+    run_id = str(project.get("current_run_id") or "")
+    candidates = []
+    for row in artifact_rows():
+        same_run = not run_id or row.get("run_id") == run_id
+        same_digest = not digest or str(row.get("task_digest") or "") == digest
+        same_revision = not revision or str(row.get("input_revision") or "") == revision
+        if same_run and same_digest and same_revision:
+            continue
+        candidates.append(str(row.get("kind") or row.get("artifact_kind") or "artifact"))
+    board_candidates = 0
+    for row in read_jsonl(project_dir() / "prototype-board.jsonl"):
+        if row.get("record_type", "item") != "item":
+            continue
+        same_run = not run_id or row.get("run_id") == run_id
+        same_digest = not digest or str(row.get("task_digest") or "") == digest
+        same_revision = not revision or str(row.get("input_revision") or "") == revision
+        if not (same_run and same_digest and same_revision):
+            board_candidates += 1
+    summary = {
+        "status": "历史资产：可参考，不可放行" if candidates or board_candidates else "未发现历史资产",
+        "artifact_kinds": sorted(set(candidates))[:12],
+        "prototype_board_items": board_candidates,
+        "adopted": bool(latest_confirm(project, "adopt_history")),
+    }
+    return summary
+
+
+def workflow_stage(action: str) -> str:
+    return WORKFLOW_STAGES.get(action, "intake")
+
+
+def allowed_next_skill(action: str) -> str:
+    return NEXT_SKILLS.get(action, "$pm-workspace")
+
+
+def user_visible_action(action: str) -> str:
+    mapping = {
+        "D_REQUIRED": "请用户拍板产品路径 D",
+        "GOAL_MODE_REQUIRED": "确认工作目标模式",
+        "AUTOPLAN_REQUIRED": "进入自动产品评审，输出最早门槛",
+        "NEEDS_BASELINE": "补充线上/设计基线或确认按缺口推进",
+        "PRODUCT_DIRECTION_REQUIRED": "进入产品方向审查内核",
+        "STRATEGY_REVIEW_REQUIRED": "进入策略 / 范围审查",
+        "WRITE_PENDING_BRIEF": "生成待确认产品简报",
+        "ASK_CONFIRMATION": "确认当前 revision 产品简报关键前提",
+        "BRIEF_PENDING": "把产品简报对齐到已确认状态",
+        "DESIGN_SPEC_REQUIRED": "确认本轮原型设计规范目标",
+        "REGISTER_PROTOTYPE_UNITS": "登记 prototype-board 输出单元",
+        "ALLOW_IMAGE_PROMPT": "可申请单图 image-2 出图许可证",
+        "ALLOW_HANDOFF": "可进入产品交付",
+        "BLOCKED": "重新进入 PMW intake",
+    }
+    return mapping.get(action, action)
+
+
+def required_user_action(action: str, reason: str) -> str:
+    if action == "ALLOW_IMAGE_PROMPT":
+        return "无需新的用户动作；先签发每张图的一次性 image_permit_id。"
+    if action == "GOAL_MODE_REQUIRED":
+        return "让用户在验证价值 / 优化线上指标 / 业务评审 / 设计评审 / 研发交付中确认本轮工作目标。"
+    if action == "DESIGN_SPEC_REQUIRED":
+        return "让用户确认使用汽车之家 AutoDesign、用户提供的 Figma/截图/线上页面，或改用 PMW 推荐的其他 UI 规范。"
+    if action == "REGISTER_PROTOTYPE_UNITS":
+        return "按已对齐 brief 登记每个方案 + 屏幕任务的 prototype-board 输出单元。"
+    return reason
+
+
+def capability_flags(action: str) -> dict[str, bool]:
+    return {
+        "can_write_brief": action == "WRITE_PENDING_BRIEF",
+        "can_register_prototype_units": action in {"REGISTER_PROTOTYPE_UNITS", "ALLOW_IMAGE_PROMPT"},
+        "can_issue_image_permit": action == "ALLOW_IMAGE_PROMPT",
+        "can_handoff": action == "ALLOW_HANDOFF",
+    }
+
+
+def workflow_payload(project: dict[str, Any], action: str, reason: str) -> dict[str, Any]:
+    return {
+        "workflow_stage": workflow_stage(action),
+        "allowed_next_skill": allowed_next_skill(action),
+        "allowed_user_visible_action": user_visible_action(action),
+        "stop": action in STOP_ACTIONS,
+        "first_blocker": "" if action == "ALLOW_IMAGE_PROMPT" else reason,
+        "required_user_action": required_user_action(action, reason),
+        "candidate_context": candidate_context(project),
+        "design_spec_required": design_spec_required(project),
+        "design_spec_status": design_spec_current_status(project),
+        "early_design_spec_decision": early_design_spec_decision(project),
+        **capability_flags(action),
+    }
+
+
 def action_from_state(project: dict[str, Any]) -> tuple[str, str]:
     if not current_run_is_active(project):
         return "BLOCKED", "当前没有本轮 active run，或当前 run 已结束；先运行 pmw-controller intake。"
@@ -355,8 +610,16 @@ def action_from_state(project: dict[str, Any]) -> tuple[str, str]:
         return "BLOCKED", "当前任务缺少 task_digest；先运行 pmw-controller intake。"
     if route_confirmation_required(project):
         return "D_REQUIRED", "本轮同时出现“新工具/新功能”和“业务指标优化”信号，需要先确认产品路径：是已有线上链路迭代、全新独立工具，还是经销商/销售侧承接工具。方向 A/B/C 不能替代产品简报对齐。"
+    if not latest_confirm(project, "goal_mode"):
+        return "GOAL_MODE_REQUIRED", "还没有确认本轮工作目标模式；需要先确认是验证价值、优化线上指标、业务评审、设计评审还是研发交付。"
+    if not latest_confirm(project, "autoplan"):
+        return "AUTOPLAN_REQUIRED", "入口之后必须先完成自动产品评审，输出当前最早门槛、理由、补齐后解锁项和下一技能。"
+    if not latest_confirm(project, "product_direction"):
+        return "PRODUCT_DIRECTION_REQUIRED", "还没有完成产品方向审查内核；数据分析、历史材料或方案方向选择不能替代“为什么做、赢在哪里、不做会怎样”的产品判断。"
+    if strategy_review_required(project) and not latest_confirm(project, "strategy"):
+        return "STRATEGY_REVIEW_REQUIRED", "本轮涉及指标、线索、交易、承诺或实验口径，需要完成策略 / 范围审查并记录当前 D。"
     if reference_required(project) and not current_reference_artifact(project):
-        return "NEEDS_BASELINE", "已有功能迭代 / 线上留资转化链路需要先绑定当前生产截图、关键节点截图、线上 URL、Figma / 设计稿或等价视觉基线。方向选择不能替代产品简报对齐。"
+        return "NEEDS_BASELINE", "产品方向审查和策略审查可以先推进；但已有功能迭代 / 线上留资转化链路在写已对齐 brief、登记原型或出图前，必须绑定当前生产截图、关键节点截图、线上 URL、Figma / 设计稿或等价视觉基线。缺基线会进入产品作业卡；方向选择不能替代产品简报对齐。"
     latest_brief = str(project.get("latest_brief") or "")
     if not latest_brief:
         return "WRITE_PENDING_BRIEF", "本轮还没有产品简报。"
@@ -368,6 +631,8 @@ def action_from_state(project: dict[str, Any]) -> tuple[str, str]:
         return "BRIEF_PENDING", "产品简报不是已对齐。"
     if not latest_event(project, ["产品简报确认", "前提确认"]):
         return "ASK_CONFIRMATION", "当前 input_revision 尚未记录产品简报确认 / 前提确认。"
+    if design_spec_required(project) and not latest_confirm(project, "design_spec"):
+        return "DESIGN_SPEC_REQUIRED", "命中汽车之家 / AutoDesign / 线索转化相关信号，出图前必须确认本轮设计规范目标；默认推荐汽车之家 AutoDesign，但允许用户选择截图/Figma/线上基线或其他规范。"
     items = board_items(project)
     if not items:
         return "REGISTER_PROTOTYPE_UNITS", "产品简报已对齐，但本轮还没有 prototype-board 输出单元。"
@@ -397,12 +662,15 @@ def command_intake(args: argparse.Namespace) -> int:
     project["current_task_digest"] = task_digest
     project["current_input_revision"] = input_revision
     project["current_task_goal"] = args.goal
+    project["current_task_materials"] = args.materials
     project["current_stage"] = args.stage or args.skill
     project["current_product_path"] = resolved_product_path
     project["current_execution_depth"] = mode
     project["requested_product_path"] = requested_product_path
     project["requested_execution_depth"] = requested_mode
     project["controller_route_reasons"] = route_reasons
+    project["design_spec_required"] = design_spec_required(project)
+    project["design_spec_status"] = "待确认" if project["design_spec_required"] else "不适用"
     project["last_controller_verdict"] = intake_status
     action, reason = action_from_state(project)
     project["allowed_next_action"] = action
@@ -428,8 +696,8 @@ def command_intake(args: argparse.Namespace) -> int:
         "current_product_path": resolved_product_path,
         "current_execution_depth": mode,
         "route_reasons": route_reasons,
-        "stop": action in STOP_ACTIONS,
         "image_allowed": action == "ALLOW_IMAGE_PROMPT",
+        **workflow_payload(project, action, reason),
     }
     print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else f"{action} {run_id} {input_revision}")
     return 0
@@ -444,8 +712,8 @@ def command_next(args: argparse.Namespace) -> int:
     payload = {
         "allowed_next_action": action,
         "reason": reason,
-        "stop": action in STOP_ACTIONS,
         "image_allowed": action == "ALLOW_IMAGE_PROMPT",
+        **workflow_payload(project, action, reason),
         **task_context(project),
     }
     print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else f"{action}: {reason}")
@@ -474,11 +742,22 @@ def command_preflight(args: argparse.Namespace) -> int:
         first_blocker = action
         next_action = action
         reason = action_reason
+    elif args.target == "handoff":
+        controller_ready, controller_reason = handoff_artifacts_ready(project)
+        if not controller_ready:
+            ready = False
+            first_blocker = "HANDOFF_ARTIFACTS_REQUIRED"
+            next_action = action if action != "BLOCKED" else "BLOCKED"
+            reason = controller_reason
+        else:
+            first_blocker = str(payload.get("first_blocker") or payload.get("reason") or "")
+            next_action = str(payload.get("next_action") or ("ALLOW_HANDOFF" if ready else "BLOCKED"))
+            reason = str(payload.get("reason") or controller_reason)
     else:
         first_blocker = str(payload.get("first_blocker") or payload.get("reason") or "")
         next_action = str(payload.get("next_action") or ("ALLOW_IMAGE_PROMPT" if ready else "BLOCKED"))
         reason = str(payload.get("reason") or action_reason)
-    verdict = "ALLOW_IMAGE_PROMPT" if ready and args.target == "prototype" else ("ALLOW_HANDOFF" if ready else next_action)
+    verdict = "ALLOW_IMAGE_PROMPT" if ready and args.target == "prototype" else ("ALLOW_HANDOFF" if ready and args.target == "handoff" else next_action)
     project["allowed_next_action"] = verdict
     project["last_controller_verdict"] = reason
     write_project(project)
@@ -499,10 +778,111 @@ def command_preflight(args: argparse.Namespace) -> int:
         "reason": reason,
         "first_blocker": first_blocker,
         "next_action": next_action,
+        **workflow_payload(project, verdict if ready else next_action, reason),
         **task_context(project),
     }
     print(json.dumps(result_payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else f"{verdict}: {reason}")
     return 0 if ready else 2
+
+
+CONFIRM_TITLES = {
+    "path": "产品路径确认",
+    "goal_mode": "工作目标模式确认",
+    "autoplan": "自动产品评审",
+    "product_direction": "产品方向审查",
+    "strategy": "策略审查",
+    "design_spec": "设计规范目标确认",
+    "brief": "产品简报确认",
+    "adopt_history": "历史资产沿用确认",
+    "scheme_direction": "方案方向确认",
+}
+
+
+GOAL_MODES = {"验证价值", "优化线上指标", "业务评审", "设计评审", "研发交付"}
+PRODUCT_PATHS = {"全新功能", "已有功能迭代", "待确认"}
+
+
+def missing_tokens(text: str, tokens: list[str]) -> list[str]:
+    return [token for token in tokens if token not in text]
+
+
+def validate_confirm_payload(kind: str, value: str, summary: str) -> str:
+    text = f"{value}\n{summary}".strip()
+    if kind in {"autoplan", "product_direction", "strategy", "brief", "adopt_history"} and len(summary.strip()) < 16:
+        return f"{CONFIRM_TITLES.get(kind, kind)} 不能只写空确认；summary 需要记录本轮判断和证据边界。"
+    if kind == "path" and value not in PRODUCT_PATHS:
+        return "产品路径确认必须使用：全新功能 / 已有功能迭代 / 待确认。"
+    if kind == "goal_mode" and value not in GOAL_MODES:
+        return "工作目标模式必须使用：验证价值 / 优化线上指标 / 业务评审 / 设计评审 / 研发交付。"
+    if kind == "autoplan":
+        missing = missing_tokens(text, ["我建议", "当前最早门槛", "下一技能"])
+        if missing:
+            return "自动产品评审确认缺少字段：" + "、".join(missing)
+    if kind == "product_direction":
+        missing = missing_tokens(text, ["前提", "现状替代", "当前损失", "PM 判断"])
+        if missing:
+            return "产品方向审查确认缺少字段：" + "、".join(missing)
+    if kind == "strategy":
+        missing = missing_tokens(text, ["范围模式", "最大策略矛盾", "策略 D"])
+        if missing:
+            return "策略审查确认缺少字段：" + "、".join(missing)
+    if kind == "design_spec" and not value:
+        return "设计规范确认必须写 value，例如：汽车之家 AutoDesign / 用户截图视觉基线 / PMW 默认任务型产品 UI 基线。"
+    if kind == "brief":
+        if "关键前提" not in text and "按标注假设推进" not in text and "已对齐" not in text:
+            return "产品简报确认必须说明关键前提已确认，或用户批准按标注假设推进。"
+    if kind == "adopt_history":
+        if "沿用" not in text or ("重新 stamp" not in text and "重新stamp" not in text):
+            return "历史资产沿用确认必须说明沿用范围，并承诺重新 stamp 当前 run/task/revision。"
+    return ""
+
+
+def command_confirm(args: argparse.Namespace) -> int:
+    project = read_project()
+    run_id = str(project.get("current_run_id") or "")
+    if not run_id or not run_file(run_id).exists():
+        print("当前没有 active run；先运行 pmw-controller intake。", file=sys.stderr)
+        return 2
+    title = CONFIRM_TITLES.get(args.kind, args.kind)
+    value = str(args.value or "").strip()
+    summary = str(args.summary or "").strip() or value or "已确认"
+    if error := validate_confirm_payload(args.kind, value, summary):
+        print(f"CONFIRM_PAYLOAD_INVALID: {error}", file=sys.stderr)
+        return 2
+    if args.kind == "path" and value:
+        project["current_product_path"] = value
+    if args.kind == "goal_mode" and value:
+        project["current_goal_mode"] = value
+    if args.kind == "design_spec":
+        project["design_spec_status"] = "已确认"
+        project["design_spec_target"] = value or "汽车之家 AutoDesign"
+    if args.kind == "adopt_history":
+        project["history_adoption_status"] = "已确认"
+    project["last_controller_verdict"] = f"{title}：{summary}"
+    append_event(
+        "controller_confirm",
+        run_id,
+        args.status,
+        title,
+        summary,
+        project,
+    )
+    action, reason = action_from_state(project)
+    project["allowed_next_action"] = action
+    write_project(project)
+    payload = {
+        "ok": True,
+        "kind": args.kind,
+        "title": title,
+        "value": value,
+        "status": args.status,
+        "allowed_next_action": action,
+        "reason": reason,
+        **workflow_payload(project, action, reason),
+        **task_context(project),
+    }
+    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else f"{title}: {summary}")
+    return 0
 
 
 def command_stamp(args: argparse.Namespace) -> int:
@@ -514,6 +894,135 @@ def command_stamp(args: argparse.Namespace) -> int:
     }
     print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
     return 0
+
+
+def append_artifact_row(row: dict[str, Any]) -> None:
+    append_jsonl(project_dir() / "artifact-flow.jsonl", row)
+
+
+def append_board_row(row: dict[str, Any]) -> None:
+    append_jsonl(project_dir() / "prototype-board.jsonl", row)
+
+
+def command_adopt_history(args: argparse.Namespace) -> int:
+    project = read_project()
+    if not current_run_is_active(project):
+        print("当前没有 active run；先运行 pmw-controller intake。", file=sys.stderr)
+        return 2
+    if not latest_confirm(project, "adopt_history"):
+        print("ADOPT_HISTORY_BLOCKED: 旧资产默认只能参考；先让用户确认沿用范围并记录 adopt_history。", file=sys.stderr)
+        return 2
+    digest = str(project.get("current_task_digest") or "")
+    revision = str(project.get("current_input_revision") or "")
+    run_id = str(project.get("current_run_id") or "")
+    if args.kind == "prototype_board":
+        candidates = []
+        for row in read_jsonl(project_dir() / "prototype-board.jsonl"):
+            if row.get("record_type", "item") != "item":
+                continue
+            if args.scheme and row.get("scheme") != args.scheme:
+                continue
+            if args.screen and row.get("screen") != args.screen:
+                continue
+            if row.get("run_id") == run_id and row.get("task_digest") == digest and row.get("input_revision") == revision:
+                continue
+            candidates.append(row)
+        if not candidates:
+            print("ADOPT_HISTORY_NOT_FOUND: 没有找到可沿用的旧 prototype-board item。", file=sys.stderr)
+            return 2
+        source = candidates[-1]
+        adopted = dict(source)
+        adopted.update(
+            {
+                "ts": now(),
+                "run_id": run_id,
+                "task_digest": digest,
+                "input_revision": revision,
+                "controller_verdict": project.get("last_controller_verdict", ""),
+                "adopted_context": True,
+                "adopted_from_run_id": source.get("run_id", ""),
+                "adopted_from_task_digest": source.get("task_digest", ""),
+                "adopted_from_input_revision": source.get("input_revision", ""),
+            }
+        )
+        append_board_row(adopted)
+        payload = {"ok": True, "adopted_kind": args.kind, "scheme": adopted.get("scheme", ""), "screen": adopted.get("screen", ""), **task_context(project)}
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else "ADOPTED")
+        return 0
+    candidates = []
+    for row in artifact_rows(args.kind):
+        if args.artifact_id and row.get("artifact_id") != args.artifact_id:
+            continue
+        if args.path and row.get("path") != args.path:
+            continue
+        if row.get("run_id") == run_id and row.get("task_digest") == digest and row.get("input_revision") == revision:
+            continue
+        candidates.append(row)
+    if not candidates:
+        print("ADOPT_HISTORY_NOT_FOUND: 没有找到可沿用的旧 artifact。", file=sys.stderr)
+        return 2
+    source = candidates[-1]
+    adopted = dict(source)
+    source_id = str(source.get("artifact_id") or f"{source.get('kind', args.kind)}-{source.get('ts', '')}")
+    adopted.update(
+        {
+            "ts": now(),
+            "artifact_id": f"{now_fragment()}-{args.kind}-adopted-{hashlib.sha256(source_id.encode('utf-8')).hexdigest()[:6]}",
+            "run_id": run_id,
+            "task_digest": digest,
+            "input_revision": revision,
+            "controller_verdict": project.get("last_controller_verdict", ""),
+            "adopted_context": True,
+            "adopted_from_artifact_id": source.get("artifact_id", ""),
+            "adopted_from_run_id": source.get("run_id", ""),
+            "adopted_from_task_digest": source.get("task_digest", ""),
+            "adopted_from_input_revision": source.get("input_revision", ""),
+        }
+    )
+    append_artifact_row(adopted)
+    payload = {"ok": True, "adopted_kind": args.kind, "artifact_id": adopted.get("artifact_id", ""), **task_context(project)}
+    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else str(adopted.get("artifact_id", "")))
+    return 0
+
+
+CAPABILITY_KEYS = {
+    "write_brief": "can_write_brief",
+    "register_prototype_units": "can_register_prototype_units",
+    "issue_image_permit": "can_issue_image_permit",
+    "handoff": "can_handoff",
+}
+
+
+def command_assert(args: argparse.Namespace) -> int:
+    project = read_project()
+    if args.capability == "handoff":
+        payload = dashboard_preflight("handoff")
+        controller_ready, controller_reason = handoff_artifacts_ready(project)
+        ready = bool(payload.get("ready")) and controller_ready
+        reason = str(payload.get("reason") or payload.get("first_blocker") or "handoff preflight blocked") if controller_ready else controller_reason
+        result = {
+            "ok": ready,
+            "capability": args.capability,
+            "reason": "" if ready else reason,
+            "can_handoff": ready,
+            **task_context(project),
+        }
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) if args.json else ("OK" if ready else reason))
+        return 0 if ready else 2
+    action, reason = action_from_state(project)
+    flags = capability_flags(action)
+    key = CAPABILITY_KEYS[args.capability]
+    ok = bool(flags.get(key))
+    payload = {
+        "ok": ok,
+        "capability": args.capability,
+        "allowed_next_action": action,
+        "reason": "" if ok else reason,
+        **workflow_payload(project, action, reason),
+        **task_context(project),
+    }
+    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else ("OK" if ok else reason))
+    return 0 if ok else 2
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -540,10 +1049,46 @@ def build_parser() -> argparse.ArgumentParser:
     preflight.add_argument("--json", action="store_true")
     preflight.set_defaults(func=command_preflight)
 
+    assert_cmd = sub.add_parser("assert")
+    assert_cmd.add_argument("--capability", choices=sorted(CAPABILITY_KEYS), required=True)
+    assert_cmd.add_argument("--json", action="store_true")
+    assert_cmd.set_defaults(func=command_assert)
+
+    confirm = sub.add_parser("confirm")
+    confirm.add_argument(
+        "--kind",
+        choices=[
+            "path",
+            "goal_mode",
+            "autoplan",
+            "product_direction",
+            "strategy",
+            "design_spec",
+            "brief",
+            "adopt_history",
+            "scheme_direction",
+        ],
+        required=True,
+    )
+    confirm.add_argument("--value", default="")
+    confirm.add_argument("--summary", default="")
+    confirm.add_argument("--status", default="已确认")
+    confirm.add_argument("--json", action="store_true")
+    confirm.set_defaults(func=command_confirm)
+
     stamp = sub.add_parser("stamp")
     stamp.add_argument("--kind", required=True)
     stamp.add_argument("--path", default="")
     stamp.set_defaults(func=command_stamp)
+
+    adopt = sub.add_parser("adopt-history")
+    adopt.add_argument("--kind", required=True)
+    adopt.add_argument("--artifact-id", default="")
+    adopt.add_argument("--path", default="")
+    adopt.add_argument("--scheme", default="")
+    adopt.add_argument("--screen", default="")
+    adopt.add_argument("--json", action="store_true")
+    adopt.set_defaults(func=command_adopt_history)
     return parser
 
 

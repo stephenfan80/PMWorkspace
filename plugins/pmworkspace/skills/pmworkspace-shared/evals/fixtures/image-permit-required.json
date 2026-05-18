@@ -1,0 +1,52 @@
+{
+  "id": "image-permit-required",
+  "title": "图片登记必须绑定一次性 image_permit_id",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "即使已有 prototype-board 输出单元，没有 permit 的 image-2 图片也不能成为 PMW 正式原型产物。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "不可出图",
+    "must_stop": true,
+    "gate": "image_permit_id",
+    "required_behaviors": [
+      "pmw-image-preflight 提供 issue-permit",
+      "pmw-prototype-board image 校验 image_permit_id",
+      "permit 必须匹配 run/task/revision/scheme/screen",
+      "permit 使用后失效"
+    ],
+    "forbidden_behaviors": [
+      "有 board item 但没有 permit 仍允许登记图片",
+      "复用同一个 permit 登记多张图",
+      "permit 不匹配仍进入 prototype_manifest"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-image-preflight",
+      "contains": "issue-permit"
+    },
+    {
+      "path": "bin/pmw-prototype-board",
+      "contains": "PROTOTYPE_IMAGE_UNPERMITTED"
+    },
+    {
+      "path": "pmworkspace-shared/references/prototype-shotgun-board.md",
+      "contains": "image_permit_id 是一次性的出图许可证"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=image-permit; bin/pmw-controller intake --goal '做一个新页面原型' --materials '' --skill pm-workspace --product-path 全新功能 --depth deep --stage intake >/dev/null; python3 - <<'PY'\nimport json, os, pathlib\nroot=pathlib.Path(os.environ['PMW_HOME'])/'projects'/os.environ['PMW_PROJECT_SLUG']\nproject=json.loads((root/'project.json').read_text())\nrow={'record_type':'item','run_id':project['current_run_id'],'task_digest':project['current_task_digest'],'input_revision':project['current_input_revision'],'scheme':'A','screen':'首屏','brief_version':'v1','product_path':'路径A','behavior_assumption':'用户会点击','current_loss':'当前损失','tradeoff':'不做复杂配置'}\nwith (root/'prototype-board.jsonl').open('a', encoding='utf-8') as f:\n    f.write(json.dumps(row, ensure_ascii=False)+'\\n')\nPY\nbin/pmw-prototype-board image --scheme A --screen 首屏 --image /tmp/fake.png"
+      ],
+      "exit_code": 2,
+      "contains": [
+        "PROTOTYPE_IMAGE_UNPERMITTED",
+        "缺少 image_permit_id"
+      ]
+    }
+  ]
+}

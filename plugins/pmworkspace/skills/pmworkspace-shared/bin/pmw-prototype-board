@@ -61,6 +61,11 @@ def current_run_id() -> str:
     return str(data.get("current_run_id") or data.get("latest_run_id") or "")
 
 
+def formal_controller_context() -> bool:
+    digest, revision, _verdict = current_task_context()
+    return bool(digest or revision)
+
+
 def current_brief_path() -> str:
     return str(project_meta().get("latest_brief") or "")
 
@@ -71,6 +76,10 @@ def board_path() -> pathlib.Path:
 
 def artifact_log() -> pathlib.Path:
     return project_dir() / "artifact-flow.jsonl"
+
+
+def permits_path() -> pathlib.Path:
+    return project_dir() / "image-permits.jsonl"
 
 
 def read_jsonl(path: pathlib.Path) -> list[dict]:
@@ -94,8 +103,80 @@ def append_row(row: dict) -> None:
         f.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
 
 
+def append_permit_row(row: dict) -> None:
+    path = permits_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+
+
 def read_rows() -> list[dict]:
     return read_jsonl(board_path())
+
+
+def permit_used(permit_id: str) -> bool:
+    for row in read_jsonl(permits_path()):
+        if row.get("record_type") == "permit_use" and row.get("image_permit_id") == permit_id:
+            return True
+    return False
+
+
+def valid_permit(permit_id: str, run_id: str, scheme: str, screen: str) -> tuple[bool, str, dict]:
+    if not permit_id:
+        return False, "缺少 image_permit_id；图片只能作为对话附件，不能登记为 PMW 原型产物。", {}
+    task_digest, input_revision, _verdict = current_task_context()
+    permits = [row for row in read_jsonl(permits_path()) if row.get("record_type") == "permit" and row.get("image_permit_id") == permit_id]
+    if not permits:
+        return False, "image_permit_id 不存在或不属于当前项目。", {}
+    permit = permits[-1]
+    if permit_used(permit_id):
+        return False, "image_permit_id 已使用；每张图需要单独签发一次性许可证。", permit
+    checks = [
+        ("run_id", run_id),
+        ("task_digest", task_digest),
+        ("input_revision", input_revision),
+        ("scheme", scheme),
+        ("screen", screen),
+    ]
+    for key, expected in checks:
+        if expected and str(permit.get(key) or "") != str(expected):
+            return False, f"image_permit_id 与当前 {key} 不匹配。", permit
+    return True, "", permit
+
+
+def controller_allows(capability: str) -> tuple[bool, str]:
+    controller = SCRIPT_DIR / "pmw-controller"
+    if not controller.exists():
+        return False, "缺少 pmw-controller"
+    result = subprocess.run(
+        [str(controller), "assert", "--capability", capability, "--json"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    try:
+        payload = json.loads(result.stdout)
+    except Exception:
+        return False, result.stdout or result.stderr or "pmw-controller assert returned non-json"
+    if result.returncode == 0 and payload.get("ok"):
+        return True, ""
+    return False, str(payload.get("reason") or payload.get("first_blocker") or result.stderr or "")
+
+
+def record_permit_use(permit: dict, image: str) -> None:
+    row = {
+        "ts": now(),
+        "record_type": "permit_use",
+        "image_permit_id": permit.get("image_permit_id", ""),
+        "run_id": permit.get("run_id", ""),
+        "task_digest": permit.get("task_digest", ""),
+        "input_revision": permit.get("input_revision", ""),
+        "scheme": permit.get("scheme", ""),
+        "screen": permit.get("screen", ""),
+        "image": image,
+        "status": "used",
+    }
+    append_permit_row(row)
 
 
 def artifact_location(row: dict) -> str:
@@ -185,6 +266,14 @@ def audit_image(image: str, reference: str) -> tuple[int, dict, str]:
 
 
 def command_add(args: argparse.Namespace) -> int:
+    if formal_controller_context():
+        allowed, detail = controller_allows("register_prototype_units")
+        if not allowed:
+            print(
+                f"PROTOTYPE_UNIT_GATE_BLOCKED: controller 未放行 can_register_prototype_units。{detail}",
+                file=os.sys.stderr,
+            )
+            return 2
     required_fields = {
         "product_path": "product path",
         "behavior_assumption": "behavior assumption",
@@ -267,6 +356,8 @@ def command_add(args: argparse.Namespace) -> int:
         "input_revision": input_revision,
         "controller_verdict": controller_verdict,
     }
+    if not formal_controller_context():
+        row["prototype_unit_status"] = "legacy_uncontrolled"
     append_row(row)
     print(board_path())
     return 0
@@ -308,6 +399,17 @@ def command_image(args: argparse.Namespace) -> int:
             file=os.sys.stderr,
         )
         return 2
+    task_digest, input_revision, _controller_verdict = current_task_context()
+    formal_context = bool(task_digest or input_revision)
+    permit: dict = {}
+    if formal_context:
+        permit_ok, permit_error, permit = valid_permit(args.image_permit_id, run_id, args.scheme, args.screen)
+        if not permit_ok:
+            print(
+                f"PROTOTYPE_IMAGE_UNPERMITTED: {permit_error}",
+                file=os.sys.stderr,
+            )
+            return 2
     baseline = latest_visual_baseline(run_id)
     audit_payload: dict = {}
     audit_exit = 0
@@ -343,6 +445,7 @@ def command_image(args: argparse.Namespace) -> int:
         "scheme": args.scheme,
         "screen": args.screen,
         "image": args.image,
+        "image_permit_id": args.image_permit_id,
         "status": status,
         "note": args.note,
     }
@@ -366,7 +469,11 @@ def command_image(args: argparse.Namespace) -> int:
                 "audit_note": audit_note.strip(),
             }
         )
+    if not formal_context:
+        row["image_permit_status"] = "legacy_audit_only"
     append_row(row)
+    if permit:
+        record_permit_use(permit, args.image)
     print(board_path())
     return 0 if audit_exit == 0 else 2
 
@@ -509,6 +616,7 @@ def build_parser() -> argparse.ArgumentParser:
     image.add_argument("--scheme", required=True)
     image.add_argument("--screen", required=True)
     image.add_argument("--image", required=True)
+    image.add_argument("--image-permit-id", default="")
     image.add_argument("--status", default="已生成")
     image.add_argument("--note", default="")
     image.add_argument("--run")

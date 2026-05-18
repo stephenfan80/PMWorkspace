@@ -2,11 +2,13 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import pathlib
 import subprocess
 import sys
+from datetime import datetime, timezone
 from typing import Any
 
 
@@ -26,6 +28,10 @@ def current_slug() -> str:
 
 def project_dir() -> pathlib.Path:
     return STATE_DIR / "projects" / current_slug()
+
+
+def now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def read_json(path: pathlib.Path) -> dict[str, Any]:
@@ -52,6 +58,12 @@ def read_jsonl(path: pathlib.Path) -> list[dict[str, Any]]:
     return rows
 
 
+def append_jsonl(path: pathlib.Path, row: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+
+
 def current_board_items(project: dict[str, Any]) -> list[dict[str, Any]]:
     run_id = str(project.get("current_run_id") or "")
     digest = str(project.get("current_task_digest") or "")
@@ -67,6 +79,13 @@ def current_board_items(project: dict[str, Any]) -> list[dict[str, Any]]:
             continue
         scoped.append(row)
     return scoped
+
+
+def current_board_item(project: dict[str, Any], scheme: str, screen: str) -> dict[str, Any]:
+    for row in reversed(current_board_items(project)):
+        if row.get("scheme") == scheme and row.get("screen") == screen:
+            return row
+    return {}
 
 
 def confirmed_less_than_three(project: dict[str, Any]) -> bool:
@@ -98,7 +117,7 @@ def controller_preflight() -> tuple[int, dict[str, Any], str]:
     return result.returncode, payload if isinstance(payload, dict) else {}, result.stderr
 
 
-def command_check(args: argparse.Namespace) -> int:
+def evaluate_preflight(project: dict[str, Any]) -> dict[str, Any]:
     project = read_json(project_dir() / "project.json")
     exit_code, payload, stderr = controller_preflight()
     items = current_board_items(project)
@@ -110,7 +129,7 @@ def command_check(args: argparse.Namespace) -> int:
     if len(items) < 3 and not confirmed_less_than_three(project):
         failures.append("默认最少 3 个方案；少于 3 个必须有当前 run 的明确豁免原因")
     allowed = not failures
-    result_payload = {
+    return {
         "ready": allowed,
         "verdict": "ALLOW_IMAGE_PROMPT" if allowed else "BLOCKED",
         "first_blocker": failures[0] if failures else "",
@@ -119,8 +138,68 @@ def command_check(args: argparse.Namespace) -> int:
         "task_digest": project.get("current_task_digest", ""),
         "input_revision": project.get("current_input_revision", ""),
     }
+
+
+def command_check(args: argparse.Namespace) -> int:
+    project = read_json(project_dir() / "project.json")
+    result_payload = evaluate_preflight(project)
     print(json.dumps(result_payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else result_payload["verdict"])
-    return 0 if allowed else 2
+    return 0 if result_payload["ready"] else 2
+
+
+def command_issue_permit(args: argparse.Namespace) -> int:
+    project = read_json(project_dir() / "project.json")
+    result_payload = evaluate_preflight(project)
+    item = current_board_item(project, args.scheme, args.screen)
+    failures = list(result_payload.get("failures") or [])
+    if not item:
+        failures.append("当前 run / task revision 没有匹配的 prototype-board 输出单元，不能签发图片许可证")
+    if failures:
+        blocked = {
+            **result_payload,
+            "ready": False,
+            "verdict": "BLOCKED",
+            "first_blocker": failures[0],
+            "failures": failures,
+            "scheme": args.scheme,
+            "screen": args.screen,
+        }
+        print(json.dumps(blocked, ensure_ascii=False, indent=2, sort_keys=True) if args.json else "BLOCKED")
+        return 2
+    seed = "|".join(
+        [
+            now(),
+            str(project.get("current_run_id") or ""),
+            str(project.get("current_task_digest") or ""),
+            str(project.get("current_input_revision") or ""),
+            args.scheme,
+            args.screen,
+        ]
+    )
+    permit_id = "imgp_" + hashlib.sha256(seed.encode("utf-8")).hexdigest()[:20]
+    row = {
+        "ts": now(),
+        "record_type": "permit",
+        "image_permit_id": permit_id,
+        "run_id": project.get("current_run_id", ""),
+        "task_digest": project.get("current_task_digest", ""),
+        "input_revision": project.get("current_input_revision", ""),
+        "scheme": args.scheme,
+        "screen": args.screen,
+        "brief_version": item.get("brief_version", ""),
+        "design_spec_target": item.get("design_spec_target") or project.get("design_spec_target", ""),
+        "task_digest_source": "current_revision",
+        "status": "issued",
+        "expires_after_use": True,
+    }
+    append_jsonl(project_dir() / "image-permits.jsonl", row)
+    payload = {
+        "ready": True,
+        "verdict": "IMAGE_PERMIT_ISSUED",
+        **row,
+    }
+    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else permit_id)
+    return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -129,6 +208,11 @@ def build_parser() -> argparse.ArgumentParser:
     check = sub.add_parser("check")
     check.add_argument("--json", action="store_true")
     check.set_defaults(func=command_check)
+    permit = sub.add_parser("issue-permit")
+    permit.add_argument("--scheme", required=True)
+    permit.add_argument("--screen", required=True)
+    permit.add_argument("--json", action="store_true")
+    permit.set_defaults(func=command_issue_permit)
     return parser
 
 

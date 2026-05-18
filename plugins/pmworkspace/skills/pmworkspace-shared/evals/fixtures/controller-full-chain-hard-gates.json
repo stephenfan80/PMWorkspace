@@ -1,0 +1,54 @@
+{
+  "id": "controller-full-chain-hard-gates",
+  "title": "controller 必须暴露完整 PMW 执行链路和能力位",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-workspace",
+  "prompt": "用户要求方案和原型时，controller 不能只给下一动作，还必须给出阶段、下一技能、最早门槛和能力位。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": true,
+    "gate": "workflow_stage",
+    "required_behaviors": [
+      "next --json 返回 workflow_stage",
+      "next --json 返回 allowed_next_skill",
+      "next --json 返回 can_write_brief/can_register_prototype_units/can_issue_image_permit/can_handoff",
+      "汽车之家线索转化场景先进入目标模式或自动评审门槛，不能直接出图"
+    ],
+    "forbidden_behaviors": [
+      "入口后直接 WRITE_PENDING_BRIEF",
+      "入口后直接 ALLOW_IMAGE_PROMPT",
+      "把历史资产自动视为 current_artifact"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-controller",
+      "contains": "workflow_stage"
+    },
+    {
+      "path": "bin/pmw-controller",
+      "contains": "can_issue_image_permit"
+    },
+    {
+      "path": "pmworkspace-shared/references/runtime-kernel.md",
+      "contains": "正式阶段顺序固定"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=controller-chain; bin/pmw-controller intake --goal '提升汽车之家新能源独号转化率方案及原型' --materials '' --skill pm-workspace --product-path 待判断 --depth deep --stage intake --json"
+      ],
+      "exit_code": 0,
+      "contains": [
+        "\"current_product_path\": \"已有功能迭代\"",
+        "\"workflow_stage\": \"goal_mode_pending\"",
+        "\"allowed_next_skill\": \"$pm-autoplan\"",
+        "\"can_issue_image_permit\": false"
+      ]
+    }
+  ]
+}

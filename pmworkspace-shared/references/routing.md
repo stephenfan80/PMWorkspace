@@ -154,6 +154,7 @@ run_id：
 - `run_id`：平台脚本可用时由 `pmw-controller intake` 创建或继承；脚本不可用时写 `未启用`。
 - `task_revision`：平台脚本可用时记录 `task_digest` / `input_revision`；旧产物若不匹配只能写 `可参考，不可放行`。
 - `证据状态`：至少说明产品简报、Zoon、线上参考、原型清单、待决策项和 Product Readiness Dashboard 的当前状态；未知项写 `未提供`、`未运行` 或 `待检查`。
+- `设计规范待确认`：如果 controller 返回 `early_design_spec_decision`，工作方式卡片里先露出“本轮原型使用哪个设计规范目标”的 D。汽车之家 / AutoDesign / 独号 / 线索 / 询价 / 查价 / 经销商 / 新能源车系页等信号默认推荐汽车之家 AutoDesign；这个 D 可以先露出，不阻断产品方向审查，但会阻断出图。
 
 ## Run 衔接
 

@@ -11,7 +11,7 @@
     "gate": "单图生成协议",
     "required_behaviors": [
       "一次 image-2 调用只对应一张图",
-      "一次 image-2 调用只对应一个产品路径",
+      "一次 image-2 调用只对应一个页面方案 / 页面实验版本",
       "一次 image-2 调用只对应一个屏幕任务"
     ],
     "forbidden_behaviors": [
@@ -23,15 +23,15 @@
   "contract_checks": [
     {
       "path": "pm-prototype-shotgun/SKILL.md",
-      "contains": "一次 image-2 调用 = 一张图 = 一个产品路径 + 一个屏幕任务"
+      "contains": "一次 image-2 调用 = 一张图 = 一个页面方案 / 页面实验版本 + 一个屏幕任务"
     },
     {
       "path": "pmworkspace-shared/references/image-prompts.md",
-      "contains": "一次 image-2 调用只能对应一张图、一个产品路径和一个屏幕任务"
+      "contains": "一次 image-2 调用只能对应一张完整页面图、一个页面方案 / 页面实验版本和一个屏幕任务"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "一次 image-2 调用只能对应一张图、一个产品路径和一个屏幕任务"
+      "contains": "一次 image-2 调用只能对应一张完整页面图、一个页面方案 / 页面实验版本和一个屏幕任务"
     }
   ]
 }

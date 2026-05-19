@@ -11,6 +11,7 @@ brief-aligned-routes-prototype-or-handoff
 existing-feature-reference-required
 deep-unaligned-brief-no-image
 prototype-min-three-schemes-required-v2
+prototype-single-page-confirmed-mode
 prototype-single-image-call-contract
 readiness-default-human-verdict-only
 review-unresolved-product-decision
@@ -72,6 +73,8 @@ prototype-output-units-board-write-required
 prototype-scheme-difference-quality-gate
 prototype-screenshot-edit-mode-required
 prototype-screenshot-edit-scope-required
+prototype-screenshot-path-analysis-required
+prototype-screenshot-abc-same-base-required
 prototype-image2-unavailable-no-fallback
 prototype-visual-baseline-redraw-blocked
 prototype-production-baseline-change-proof-required

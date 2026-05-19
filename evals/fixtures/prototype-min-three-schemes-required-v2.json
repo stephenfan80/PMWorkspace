@@ -1,6 +1,6 @@
 {
   "id": "prototype-min-three-schemes-required-v2",
-  "title": "原型方案默认最少三条产品路径",
+  "title": "原型方案默认三页实验模式",
   "category": "pm-prototype-shotgun",
   "primary_skill": "pm-prototype-shotgun",
   "prompt": "帮我出两个原型方向就行。",
@@ -8,14 +8,15 @@
     "mode": "deep",
     "status": "待确认",
     "must_stop": true,
-    "gate": "三条路径数量检查",
+    "gate": "三页实验数量检查",
     "required_behaviors": [
-      "默认要求最少 3 条产品路径",
-      "少于 3 条必须有明确豁免原因",
+      "brief 锁定后默认 three_page_experiment",
+      "默认要求 3 个完整页面输出单元",
+      "只有 single_page_confirmed 允许 1 个页面",
       "不能无理由只给两个方案"
     ],
     "forbidden_behaviors": [
-      "无豁免原因生成两个方案",
+      "无 single_page_confirmed 生成两个方案",
       "把两个配色当两个方案",
       "把多个方案合成一张图"
     ]
@@ -23,15 +24,15 @@
   "contract_checks": [
     {
       "path": "pm-prototype-shotgun/SKILL.md",
-      "contains": "默认最少 3 条产品路径；少于 3 条必须写明确豁免原因"
+      "contains": "brief 锁定后默认是 `three_page_experiment`"
     },
     {
       "path": "pmworkspace-shared/references/prototype-shotgun-board.md",
-      "contains": "默认最少 3 条产品路径；少于 3 条必须写明确豁免原因"
+      "contains": "三页探索 / 三页实验需要 3 个页面输出单元"
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "多方案：默认最少 3 条产品路径；少于 3 条必须有明确豁免原因。"
+      "contains": "多方案：默认由 `brief_lock.image_output_mode` 决定"
     }
   ]
 }

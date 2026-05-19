@@ -27,7 +27,7 @@
     },
     {
       "path": "pmworkspace-shared/references/image-prompts.md",
-      "contains": "Directions must include at least 3 product paths by default and differ by product strategy, information architecture, interaction model, trust model, or key task path."
+      "contains": "每个页面版本差异来自产品策略、信息架构、交互模型、信任模型或关键任务路径"
     },
     {
       "path": "pmworkspace-shared/references/prototype-shotgun-board.md",

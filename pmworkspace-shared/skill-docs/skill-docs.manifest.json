@@ -271,7 +271,7 @@
     },
     "pm-prototype-shotgun": {
       "stage": "原型方案",
-      "purpose": "基于已对齐 brief 默认规划最少 3 条产品路径，逐张生成 image-2 原型图，并把每个方案 / 屏幕写入方案比较板。",
+      "purpose": "基于已锁定 brief 的 image_output_mode 规划完整页面输出单元，逐张生成 image-2 原型图，并把每个页面方案 / 屏幕写入方案比较板。",
       "preamble_checks": [
         "usage pm-prototype-shotgun",
         "pmw-dashboard",

@@ -12,7 +12,7 @@
     "required_behaviors": [
       "prototype-board 过滤 current task_digest/input_revision",
       "旧输出单元不计入当前方案数量",
-      "readiness 显示 prototype-board 暂无方案"
+      "readiness 显示 prototype-board 暂无当前页面输出单元"
     ],
     "forbidden_behaviors": [
       "用旧 board 的 3 个方案满足本轮",
@@ -40,7 +40,7 @@
       "exit_code": 0,
       "contains": [
         "\"ready\": false",
-        "prototype-board 暂无方案",
+        "prototype-board 暂无页面输出单元",
         "prototype-board 暂无当前 run 输出单元"
       ]
     }

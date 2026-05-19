@@ -10,8 +10,8 @@
     "must_stop": true,
     "gate": "原型设计完整度",
     "required_behaviors": [
-      "每条产品路径出图前输出 0-10 设计完整度评分",
-      "每条产品路径说明距离 10/10 的主要设计差距",
+      "每个页面输出单元出图前输出 0-10 设计完整度评分",
+      "每个页面输出单元说明距离 10/10 的主要设计差距",
       "每个 image-2 输出单元包含 10/10 原型标准",
       "prompt 必须包含反 AI 模板味约束",
       "三条路径必须同时是三种设计判断"
@@ -45,7 +45,7 @@
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "原型方案：每条产品路径出图前必须运行原型设计完整度判断"
+      "contains": "原型方案：每个页面输出单元出图前必须运行原型设计完整度判断"
     },
     {
       "path": "pmworkspace-shared/references/product-readiness-dashboard.md",

@@ -3,7 +3,7 @@
 仅在产品简报已对齐、产品路径已确认，并且当前任务通过 `pmw-controller preflight --target prototype`、`pmw-image-preflight check` 与单图 `pmw-image-preflight issue-permit` 后，才把这些模板用于 `imagegen` / 内置图像生成。`$pm-prototype-shotgun` 是 image-2 原型出图导演：每个提示词只对应一个屏幕，每张图只对应一个产品路径。
 
 ```text
-一次 image-2 调用 = 一张图 = 一个产品路径 + 一个屏幕任务
+一次 image-2 调用 = 一张图 = 一个页面方案 / 页面实验版本 + 一个屏幕任务
 ```
 
 批量生成只是顺序执行多个单图任务，不是一次生成多图。每次 image-2 调用必须独立提示、独立产物、独立记录状态。
@@ -20,14 +20,15 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - `出图许可证`：每个输出单元调用 `pmw-image-preflight issue-permit --scheme "<方案名>" --screen "<屏幕任务>"` 签发一次性 `image_permit_id`，随后调用 `pmw-image-preflight assert-imagegen --scheme "<方案名>" --screen "<屏幕任务>" --image-permit-id "<image_permit_id>"`；没有 permit 或 assert 未通过时不能写 image-2 prompt，也不能调用宿主级 `imagegen`。
 - `图片生成前门槛`：产品简报已对齐、Zoon 无实质漂移、线上参考门槛通过、设计系统已载入、image-2 可用。
 - `视觉基线`：当用户提供线上截图或生产视觉参考时，必须登记 `visual_baseline`，记录参考图路径、像素尺寸、逻辑宽度推断、目标输出像素、核心字号层级、页面边距、模块间距、底部栏高度和参考优先级。
+- `线上截图路径分析`：当存在 `visual_baseline` 时，每个输出单元必须先说明线上截图信息架构、用户浏览路径、用户完成任务路径；这三项决定后续局部 `edit_scope`。没有路径分析时，不写 image-2 prompt。
 - `生产基线改动证明`：当存在 `visual_baseline` 时，每个输出单元必须说明当前线上问题、改动区域、为什么优于当前线上、保留 / 删除边界。证明不成立时，不写 image-2 prompt。
-- `生成模式`：视觉还原优先、现有生产截图或截图修改任务默认使用 `screenshot_edit`；不得从零重绘整页。若产品探索或大幅重构确实需要 `redraw`，先回到 `$pm-brief` / `$pm-strategy-review` 让用户显式确认重构范围，再作为新的产品简报版本推进。
-- `方案差异质量`：默认最少 3 条产品路径；每条路径差异来自产品策略、信息架构、交互模型、信任模型或关键任务路径；如果只是配色、圆角、插画、卡片皮肤不同，停止并重拟方向。少于 3 条路径必须有明确豁免原因。
-- `产品路径 / 原型思考`：每条路径必须写明它相信什么用户行为、要赢过哪个现状替代、解决什么当前损失、主动删除 / 牺牲 / 后置什么、验证信号、失败信号、为什么这样设计、信息架构如何组织、如何帮助用户解决问题、解决哪个反指标风险，以及哪些内容不可虚构。
+- `生成模式`：视觉还原优先、现有生产截图或截图修改任务必须使用 `screenshot_edit`；以线上截图为底，只修改目标区域，未调整区域必须与线上截图保持对齐，不得从零重绘整页。若产品探索或大幅重构确实需要 `redraw`，先回到 `$pm-brief` / `$pm-strategy-review` 让用户显式确认重构范围，再作为新的产品简报版本推进。
+- `方案差异质量`：出图数量来自 `brief_lock.image_output_mode`。未选方向是三页探索，brief 锁定后默认三页实验，只有 `single_page_confirmed` 允许单页主方案。每个页面版本差异来自产品策略、信息架构、交互模型、信任模型或关键任务路径；如果只是配色、圆角、插画、卡片皮肤不同，停止并重拟方向。
+- `产品路径 / 原型思考`：每个页面输出单元必须写明它相信什么用户行为、要赢过哪个现状替代、解决什么当前损失、主动删除 / 牺牲 / 后置什么、验证信号、失败信号、为什么这样设计、信息架构如何组织、如何帮助用户解决问题、解决哪个反指标风险，以及哪些内容不可虚构。
 - `原型设计完整度`：每条产品路径在写 image-2 prompt 前必须给出 0-10 评分、为什么是这个分数、距离 10/10 的最大设计差距、10/10 原型标准、本轮 prompt 如何补齐、反 AI 模板味约束、状态覆盖策略和第一眼 / 第二眼 / 第三眼信息层级。当前产品简报未 `已对齐`、没有 10/10 标准或缺反模板味约束时，不写 image-2 prompt。
 - `设计规范目标`：每个输出单元必须声明目标来自用户提供规范、AutoDesign、平台模式库或 PMW 默认假设，并写清平台模式、灵感来源摘要、不可照搬项和版权边界。Dribbble / Pinterest / 平台参考只能转成抽象设计原则，不能复制图片、文案、品牌素材或专有 UI。
 - `方案方向确认`：用户已确认方向，或明确批准使用默认方向；未确认时只输出方向和取舍，不写图片提示词。
-- `输出单元清单`：把每个 `方案 + 屏幕任务` 拆成一张独立图片，并绑定当前 run、`task_digest`、`input_revision`、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统、image-2 状态和画布。
+- `输出单元清单`：把每个 `页面方案 + 屏幕任务` 拆成一张独立完整页面图片，并绑定当前 run、`task_digest`、`input_revision`、出图模式、页面实验角色、实验假设、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统、image-2 状态和画布。
 - `方案比较板写入`：生成前用 `pmw-prototype-board add` 登记计划单元，生成后补充图片路径或 URL；脚本不可用时在输出中标记原因。
 - `生成后复审`：每批图片后运行 `prototype-quality-review.md`，实质问题交给 `$pm-prototype-review`。
 - `证据状态`：产品简报、Zoon、线上参考、设计系统、方案方向、输出单元、方案比较板和图片资产的状态。
@@ -36,9 +37,9 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 
 ## 单图生成协议
 
-- 一次 image-2 调用只能对应一张图、一个产品路径和一个屏幕任务。
-- `3 条产品路径` 必须拆成 3 个输出单元并连续执行 3 次 image-2。
-- `3 条产品路径 x 2 个屏幕` 必须拆成 6 个输出单元并连续执行 6 次 image-2。
+- 一次 image-2 调用只能对应一张完整页面图、一个页面方案 / 页面实验版本和一个屏幕任务。
+- `three_page_exploration` / `three_page_experiment` 必须拆成 3 个完整页面输出单元并连续执行 3 次 image-2。
+- `single_page_confirmed` 必须拆成 1 个完整页面输出单元并执行 1 次 image-2。
 - 每个输出单元单独写 prompt，不能把多个方案或多个屏幕合成一个 prompt。
 - 每次 prompt 必须写明：只生成一张独立移动端产品界面，禁止拼图、三联图、并排比较、一图多屏、一图多方案和故事板。
 - 每张图独立记录状态：`计划生成`、`已生成`、`生成失败`、`待重试` 或 `需要重出`；批量成功不能掩盖单张失败。
@@ -53,22 +54,24 @@ For Chinese users, keep planning notes, output contracts, final summaries, and g
 - 变化类型已判断为新功能或现有功能迭代。
 - 现有功能迭代已包含当前生产截图或等价基线证据。
 - 已提供线上截图或生产视觉参考时，已登记 `visual_baseline`，且其中包含目标输出像素；缺视觉基线或缺目标像素时，不写 image-2 prompt。
-- 已提供线上截图或生产视觉参考时，已完成 `线上基线接收` 和 `生产基线改动证明`；截图上传只代表有参考，不代表新方案已经比线上更好。
+- 已提供线上截图或生产视觉参考时，已完成 `线上基线接收`、`线上截图路径分析` 和 `生产基线改动证明`；截图上传只代表有参考，不代表新方案已经比线上更好。
 - 已读取 `production-reference-gate.md`，并判断新页面是否承接线上流程、结果状态或生产样式。
 - 如果新页面需要线上参考，用户已提供参考，或已明确确认没有线上参考并批准按概念稿推进。
 - 对话或 Zoon 中已有快速版、标准版或深度版产品简报。
 - 产品简报已通过用户确认、最新 Zoon 编辑确认，或明确批准假设而达到“已对齐”。
 - 产品简报、用户确认、visual_baseline、prototype-board 输出单元都匹配当前 run / `task_digest` / `input_revision`；旧产物只能参考，不能放行本轮。
-- 多方案任务已有至少 3 条命名产品路径，并得到用户确认或批准作为默认方向；少于 3 条路径时已记录豁免原因。
-- 输出计划已经把每个方案/屏幕映射为一张独立图片，不把多个方案合成一张比较图。
-- 每张图片已经绑定方案名、屏幕任务、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统和 image-2 状态。
-- 每条路径已经写入 `产品路径`、`用户行为假设`、`要赢过的现状替代`、`当前损失`、`删除 / 牺牲 / 后置项`、`验证信号`、`失败信号`、`原型思考`、`信息架构设计思考`、`用户问题解决逻辑`、`反指标保护` 和 `不可虚构边界`。
-- 每条路径已经写入 `设计完整度评分`、`主要设计差距`、`10/10 原型标准`、`prompt 设计修正方向`、`反 AI 模板味约束`、`状态覆盖` 和 `第一眼 / 第二眼 / 第三眼信息层级`；如果缺失，先补原型设计完整度，不写 image-2 prompt。
+- 当前 `brief_lock.image_output_mode` 已确定，输出单元数量满足模式要求：三页探索 / 三页实验为 3 张完整页面，单页主方案为 1 张完整页面。
+- 有线上截图时，三页实验必须使用同一张 `base_image` 做 A/B/C 局部实验；三张完整页面只改各自 `edit_scope`，未调整区域必须与线上截图保持对齐。
+- 输出计划已经把每个页面方案/屏幕映射为一张独立图片，不把多个方案合成一张比较图。
+- 每张图片已经绑定页面方案名、屏幕任务、出图模式、页面实验角色、实验假设、主目标、反指标、不可虚构项、产品简报版本、线上参考状态、设计系统和 image-2 状态。
+- 每个页面输出单元已经写入 `产品路径`、`用户行为假设`、`要赢过的现状替代`、`当前损失`、`删除 / 牺牲 / 后置项`、`验证信号`、`失败信号`、`原型思考`、`信息架构设计思考`、`用户问题解决逻辑`、`反指标保护` 和 `不可虚构边界`。
+- 每个页面输出单元已经写入 `设计完整度评分`、`主要设计差距`、`10/10 原型标准`、`prompt 设计修正方向`、`反 AI 模板味约束`、`状态覆盖` 和 `第一眼 / 第二眼 / 第三眼信息层级`；如果缺失，先补原型设计完整度，不写 image-2 prompt。
 - 每个输出单元已经写入 `设计规范目标`、`设计系统 / 平台模式`、`灵感来源摘要` 和 `禁止照搬项`；如果设计规范不明确，先给用户设计规范目标卡，或得到用户确认后按 PMW 默认假设继续。
 - 每个输出单元已经登记到 Prototype Shotgun Board，或已说明脚本不可用的原因。
 - 画布决策遵循移动端优先但必须二选一：无线上截图时使用 `standard_first_screen` 模板；有线上截图 / `visual_baseline` 时使用 `physical_longboard` 模板。最终 image-2 prompt 只写当前模式的正向画布字段，不复制另一种模式的短画布锚点。
 - 汽车之家 / AutoDesign 生产页必须声明 `参考截图尺寸`、截图倍率和 `目标输出画布`；线上截图基线覆盖泛化 token。目标默认使用参考截图原始物理像素长板，例如 `1179 x 2556 = 393pt @3x`；字体、间距、卡片和底部栏按参考物理像素比例等比执行。只有显式 override 目标宽度时才允许改宽，并必须同步等比缩放字号、间距和组件。
-- 视觉还原优先的线上截图任务必须使用 `screenshot_edit`：以参考截图为底，只修改目标区域，保留状态栏、顶部导航、车系头图、车型切换、tab 和底部吸底 CTA；不得从零重绘整页。
+- 视觉还原优先的线上截图任务必须使用 `screenshot_edit`：以参考截图为底，先分析线上截图信息架构、用户浏览路径和用户完成任务路径，再只修改目标区域，保留状态栏、顶部导航、车系头图、车型切换、tab 和底部吸底 CTA；未调整区域必须与线上截图保持对齐，不得从零重绘整页。
+- 视觉基线下的每个输出单元必须写清：线上截图信息架构、用户浏览路径、用户完成任务路径。不能用“直接改 / 照着改 / 重新设计整页”替代路径分析。
 - 视觉基线下的每个输出单元必须写清：当前线上问题、改动区域、为什么优于当前线上、保留 / 删除边界。不能只写“更现代、更清爽、更高级”，也不能把线上已经更好的方案替换成 Agent 自己想象的重设计。
 - 已通过 `design-system-workflow.md` 确定并确认设计规范目标。
 - 产品方向审查中的实质改动已写回产品简报。
@@ -94,7 +97,7 @@ B. <名称> - <产品路径；相信的用户行为；要赢过的现状替代�
 C. <名称> - <产品路径；相信的用户行为；要赢过的现状替代；解决的当前损失；删除 / 牺牲 / 后置项；验证信号；失败信号；信息架构依据；用户问题解决逻辑>
 ```
 
-Directions must include at least 3 product paths by default and differ by product strategy, information architecture, interaction model, trust model, or key task path. Do not offer three visual skins of the same idea. After confirmation, generate each direction/screen as a separate image, even when several images are generated in one batch.
+Directions follow `brief_lock.image_output_mode`: three-page exploration / experiment uses 3 complete page output units; single-page confirmed uses 1 page output unit. Page versions must differ by product strategy, information architecture, interaction model, trust model, or key task path. Do not offer three visual skins of the same idea. After confirmation, generate each page as a separate image, even when several images are generated in one batch.
 
 Each direction must also be a different design judgment. At least one of these must differ materially: information hierarchy, interaction model, trust model, state strategy, or subtraction / de-noising strategy. Do not treat three color palettes, three illustration styles, or three card treatments as three directions.
 
@@ -104,12 +107,15 @@ The scheme quality rule is business-agnostic: it applies to lead forms, communit
 
 ## 图片输出契约
 
-For every image generation request, declare the output unit before prompting:
+For every image generation request, declare one complete page output unit before prompting:
 
 ```text
 图片输出单元：
-- 方案：<A/B/C 或方案名>
+- 页面方案：<A/B/C 或方案名；一个页面方案 = 一张完整页面图>
 - 屏幕任务：<屏幕名 + 这个屏幕要帮用户完成什么>
+- 出图模式：<three_page_exploration / three_page_experiment / single_page_confirmed>
+- 页面实验角色：<A/B/C 的局部实验角色；单页时写主方案>
+- 实验假设：<这个页面版本验证什么局部模块策略、信息层级、信任表达或任务路径>
 - 产品路径：<这个方案相信什么产品判断会成立>
 - 用户行为假设：<它相信什么用户行为会发生>
 - 要赢过的现状替代：<用户当前靠什么完成任务，这条路径要比它强在哪里>
@@ -121,6 +127,9 @@ For every image generation request, declare the output unit before prompting:
 - 信息架构设计思考：<信息如何组织，优先级如何排序>
 - 用户问题解决逻辑：<如何帮助用户解决当前替代/损失>
 - 反指标保护：<保护哪个信任、质量或体验风险>
+- 线上截图信息架构：<有 visual_baseline 时必填；线上截图当前页面模块、层级、信息流和关键入口>
+- 用户浏览路径：<有 visual_baseline 时必填；用户从进入截图到关注目标模块的浏览顺序>
+- 用户完成任务路径：<有 visual_baseline 时必填；用户完成当前任务需要经过的动作、判断点和出口>
 - 生产基线问题：<有 visual_baseline 时必填；当前线上具体哪里影响理解、信任、转化或反指标>
 - 改动区域：<有 visual_baseline 时必填；只改哪些模块 / 字段 / 层级>
 - 为什么优于当前线上：<有 visual_baseline 时必填；基于截图、数据、用户反馈或 PM 判断说明，不得只写审美词>
@@ -147,6 +156,9 @@ For every image generation request, declare the output unit before prompting:
 - 目标输出像素：<例如 1179 x 自适应长板；若有参考截图，写参考尺寸、截图倍率和目标宽高>
 - 生成模式：<screenshot_edit / redraw；有线上截图且视觉还原优先默认 screenshot_edit>
 - base_image：<screenshot_edit 时写当前 visual_baseline 的参考截图路径>
+- baseline_information_architecture：<线上截图当前信息架构；必须先分析再改>
+- baseline_browse_path：<用户浏览路径>
+- baseline_task_path：<用户完成任务路径>
 - edit_scope：<screenshot_edit 时写本次只修改的目标区域 / 目标模块>
 - preserve_regions：<screenshot_edit 时默认保留：状态栏、顶部导航、车系头图、车型切换、tab、底部吸底 CTA>
 - 设计系统：<用户提供设计系统 / AutoDesign / 截图基线 / 平台模式库 / PMW 默认移动端产品 UI 基线>
@@ -187,6 +199,9 @@ image-2 prompt 必须是设计修正指令，不是界面氛围描述。禁止�
 - 目标输出画布：<目标宽度>px 宽，内容自适应长图，高度不得低于 <参考或换算高度>px，可随内容增长；字体、间距和组件按参考物理像素等比绘制
 - 生成模式：screenshot_edit
 - base_image：<当前 visual_baseline 参考截图路径>
+- baseline_information_architecture：<线上截图当前信息架构>
+- baseline_browse_path：<用户浏览路径>
+- baseline_task_path：<用户完成任务路径>
 - edit_scope：<只修改的目标区域 / 目标模块>
 - preserve_regions：状态栏、顶部导航、车系头图、车型切换、tab、底部吸底 CTA
 ```
@@ -199,7 +214,7 @@ Rules:
 - `standard_first_screen` 和 `physical_longboard` 模板互斥；不要在同一个最终 prompt 字段里同时出现短画布锚点和物理长板字段。
 - 线上截图物理长板必须是一张连续移动端界面；不要为了塞进短画布缩小字体、压缩间距、裁切内容、遮挡底部操作区，或拆成多图 / 拼图 / 多屏故事板。
 - 有线上截图时，图片输出契约必须同时保留内部逻辑宽度和物理像素输出：逻辑宽度只写在审计或视觉基线摘要里，不能进入最终 image-2 prompt 的画布字段。汽车之家生产页默认写 `参考截图尺寸：<w x h>`、`识别为 <逻辑宽度>pt @<scale>x`、`目标输出画布：默认使用参考截图物理像素长板，高度不得低于参考图高度，可随内容增长；字体、间距和组件按参考物理像素等比绘制`。
-- `screenshot_edit` prompt 必须写：以参考截图为底、只修改 `edit_scope`、保留 `preserve_regions`、不得从零重绘整页。若 prompt 出现“从零 / 重新设计整页 / 重绘整页 / 改写所有模块”，必须显式写 `generation_mode=redraw`，否则检查失败。
+- `screenshot_edit` prompt 必须写：以参考截图为底、先基于 `baseline_information_architecture` / `baseline_browse_path` / `baseline_task_path` 确定局部改造，再只修改 `edit_scope`、保留 `preserve_regions`、未调整区域必须与线上截图保持对齐、不得从零重绘整页。若 prompt 出现“从零 / 重新设计整页 / 重绘整页 / 改写所有模块”，检查失败。
 - 视觉基线下不要默认 `redraw`。如果用户只说“使用方案 A”或“参考这些截图”，仍然停在产品简报 / 基线改动证明，不进入最终 prompt。
 - 桌面端输出单元必须说明为什么移动端不合适。
 - 除非用户明确要展示板，否则不要创建拼贴图、三联图、并排比较图、一图多屏、一图多方案或多屏故事板。

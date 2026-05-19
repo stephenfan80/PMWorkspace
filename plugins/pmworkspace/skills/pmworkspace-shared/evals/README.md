@@ -42,7 +42,7 @@ eval 分类必须能映射回 `pmworkspace-shared/references/pm-workbench-map.md
 | `pm-jobs` | 产品方向审查内核 |
 | `pm-strategy-review` | 策略审查 |
 | `pm-brief` | 产品简述 / 产品简报契约 |
-| `pm-prototype-shotgun`、`prototype-output-contract`、`production-reference`、`screenshot-feedback` | 原型方案：image-2 前门槛、单图协议、默认最少 3 条产品路径、方案差异质量、原型思考、输出单元、线上参考、设计系统 |
+| `pm-prototype-shotgun`、`prototype-output-contract`、`production-reference`、`screenshot-feedback` | 原型方案：image-2 前门槛、单图协议、`brief_lock.image_output_mode` 出图数量、页面实验差异质量、原型思考、输出单元、线上参考、设计系统 |
 | `prototype-review` | 原型复审 |
 | `review-specialists` | 原型复审：四个可插拔专家独立短结论、最高严重度合并、专家汇总 |
 | `pm-handoff` | 产品交付：产品设计文档、精简 PRD、现成文档入口、未复审不交付、未拍板不写验收、交付资产沉淀 |

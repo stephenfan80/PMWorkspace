@@ -215,10 +215,12 @@ def target_mismatch(item: dict, baseline: dict) -> str:
     baseline_width, baseline_height = parse_target_size(str(baseline.get("summary") or ""))
     if not baseline_width and not baseline_height:
         return ""
-    item_width, item_height = parse_target_size(f"目标输出：{item.get('target_output_pixels') or ''}")
+    target_text = f"目标输出：{item.get('target_output_pixels') or ''}"
+    item_width, item_height = parse_target_size(target_text)
     if baseline_width and item_width != baseline_width:
         return f"输出单元目标宽度 {item_width or '未记录'} 与 visual_baseline {baseline_width} 不一致"
-    if baseline_height and (item_height is None or item_height < baseline_height):
+    adaptive_height = any(token in target_text for token in ["内容自适应长图", "高度可随内容增长", "高度随内容增长", "可随内容增长"])
+    if baseline_height and not adaptive_height and (item_height is None or item_height < baseline_height):
         return f"输出单元目标高度 {item_height or '未记录'} 低于 visual_baseline {baseline_height}"
     return ""
 
@@ -301,7 +303,12 @@ def command_add(args: argparse.Namespace) -> int:
             return 2
     run_id = args.run or current_run_id()
     brief_path = args.brief_path or current_brief_path()
-    context = rt.resolve_context(project_meta(), run_id)
+    project = project_meta()
+    context = rt.resolve_context(project, run_id)
+    lock = rt.latest_brief_lock(project)
+    output_mode = args.output_mode or rt.image_output_mode_from_lock(lock)
+    page_variant_role = args.page_variant_role or args.scheme
+    experiment_hypothesis = args.experiment_hypothesis or args.product_path
     baseline = latest_visual_baseline(run_id)
     generation_mode = args.generation_mode or ("screenshot_edit" if baseline else "redraw")
     base_image = args.base_image
@@ -316,6 +323,9 @@ def command_add(args: argparse.Namespace) -> int:
         "brief_path": brief_path,
         "scheme": args.scheme,
         "screen": args.screen,
+        "output_mode": output_mode,
+        "page_variant_role": page_variant_role,
+        "experiment_hypothesis": experiment_hypothesis,
         "brief_version": args.brief_version,
         "main_goal": args.goal,
         "anti_metric": args.anti_metric,
@@ -334,6 +344,9 @@ def command_add(args: argparse.Namespace) -> int:
         "information_architecture": args.information_architecture,
         "user_problem_fit": args.user_problem_fit,
         "anti_metric_protection": args.anti_metric_protection,
+        "baseline_information_architecture": args.baseline_information_architecture,
+        "baseline_browse_path": args.baseline_browse_path,
+        "baseline_task_path": args.baseline_task_path,
         "baseline_problem": args.baseline_problem,
         "changed_regions": args.changed_regions,
         "why_better_than_current": args.why_better_than_current,
@@ -495,8 +508,8 @@ def command_list(_args: argparse.Namespace) -> int:
     if not items:
         print("暂无方案。")
         return 0
-    print("| 方案 | 屏幕任务 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 产品路径 | 设计评分 | 主要设计差距 | 10/10 原型标准 | prompt 设计修正 | 状态覆盖 | 第一眼 / 第二眼 / 第三眼 | 反 AI 模板味约束 | 未决设计选择 | 设计规范目标 | 设计系统 / 平台配置 | 平台模式 | 灵感来源 | 灵感模式 | 禁止照搬项 | 用户行为假设 | 当前损失 | 牺牲项 | 原型思考 | 信息架构 | 用户问题解决逻辑 | 反指标保护 | 生产基线问题 | 改动区域 | 为什么优于当前线上 | 保留 / 删除边界 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
-    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+    print("| 页面方案 | 屏幕任务 | 出图模式 | 页面实验角色 | 实验假设 | brief 版本 | 主目标 | 反指标 | 不可虚构 | 产品路径 | 设计评分 | 主要设计差距 | 10/10 原型标准 | prompt 设计修正 | 状态覆盖 | 第一眼 / 第二眼 / 第三眼 | 反 AI 模板味约束 | 未决设计选择 | 设计规范目标 | 设计系统 / 平台配置 | 平台模式 | 灵感来源 | 灵感模式 | 禁止照搬项 | 用户行为假设 | 当前损失 | 牺牲项 | 原型思考 | 信息架构 | 用户问题解决逻辑 | 反指标保护 | 线上截图信息架构 | 用户浏览路径 | 用户完成任务路径 | 生产基线问题 | 改动区域 | 为什么优于当前线上 | 保留 / 删除边界 | 画布模式 | 生成模式 | 编辑范围 | 保留区域 | 目标输出像素 | 图片 | 评分 | 状态 |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
     for item in items:
         key = (item.get("scheme", ""), item.get("screen", ""))
         scheme_key = (item.get("scheme", ""), "")
@@ -511,6 +524,9 @@ def command_list(_args: argparse.Namespace) -> int:
         values = [
             item.get("scheme", ""),
             item.get("screen", ""),
+            item.get("output_mode") or "未记录",
+            item.get("page_variant_role") or "未记录",
+            item.get("experiment_hypothesis") or "未记录",
             item.get("brief_version", ""),
             item.get("main_goal", ""),
             item.get("anti_metric", ""),
@@ -537,6 +553,9 @@ def command_list(_args: argparse.Namespace) -> int:
             item.get("information_architecture", ""),
             item.get("user_problem_fit", ""),
             item.get("anti_metric_protection", ""),
+            item.get("baseline_information_architecture") or "未记录",
+            item.get("baseline_browse_path") or "未记录",
+            item.get("baseline_task_path") or "未记录",
             item.get("baseline_problem") or "未记录",
             item.get("changed_regions") or "未记录",
             item.get("why_better_than_current") or "未记录",
@@ -561,6 +580,9 @@ def build_parser() -> argparse.ArgumentParser:
     add = sub.add_parser("add")
     add.add_argument("--scheme", required=True)
     add.add_argument("--screen", required=True)
+    add.add_argument("--output-mode", choices=["", "three_page_exploration", "three_page_experiment", "single_page_confirmed"], default="")
+    add.add_argument("--page-variant-role", default="")
+    add.add_argument("--experiment-hypothesis", default="")
     add.add_argument("--brief-version", required=True)
     add.add_argument("--goal", default="")
     add.add_argument("--anti-metric", default="")
@@ -579,6 +601,9 @@ def build_parser() -> argparse.ArgumentParser:
     add.add_argument("--information-architecture", default="")
     add.add_argument("--user-problem-fit", default="")
     add.add_argument("--anti-metric-protection", default="")
+    add.add_argument("--baseline-information-architecture", default="")
+    add.add_argument("--baseline-browse-path", default="")
+    add.add_argument("--baseline-task-path", default="")
     add.add_argument("--baseline-problem", default="")
     add.add_argument("--changed-regions", default="")
     add.add_argument("--why-better-than-current", default="")

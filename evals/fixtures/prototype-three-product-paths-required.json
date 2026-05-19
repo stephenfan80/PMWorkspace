@@ -1,6 +1,6 @@
 {
   "id": "prototype-three-product-paths-required",
-  "title": "多方案必须升级为三条产品路径",
+  "title": "多方案必须升级为页面输出单元",
   "category": "pm-prototype-shotgun",
   "primary_skill": "pm-prototype-shotgun",
   "prompt": "基于已对齐 brief 给我三个方案。",
@@ -8,9 +8,9 @@
     "mode": "deep",
     "status": "待确认",
     "must_stop": true,
-    "gate": "三条产品路径",
+    "gate": "页面输出模式",
     "required_behaviors": [
-      "默认最少 3 条产品路径",
+      "按 brief_lock.image_output_mode 决定页面输出数量",
       "每个方案说明用户行为假设",
       "每个方案说明要赢过的现状替代",
       "每个方案说明当前损失",
@@ -27,11 +27,11 @@
   "contract_checks": [
     {
       "path": "pm-prototype-shotgun/SKILL.md",
-      "contains": "多方案不是三种视觉风格，而是三条产品路径"
+      "contains": "多方案不是三种视觉风格，而是三张页面输出单元"
     },
     {
       "path": "pmworkspace-shared/references/prototype-shotgun-board.md",
-      "contains": "比较对象首先是产品路径"
+      "contains": "比较对象首先是产品路径和实验假设"
     },
     {
       "path": "bin/pmw-prototype-board",

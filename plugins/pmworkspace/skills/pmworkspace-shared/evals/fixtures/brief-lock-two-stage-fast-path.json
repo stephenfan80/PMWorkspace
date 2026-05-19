@@ -62,6 +62,8 @@
       "exit_code": 0,
       "contains": [
         "\"brief_lock_status\": \"locked\"",
+        "\"image_output_mode\": \"three_page_experiment\"",
+        "\"expected_output_units\": 3",
         "\"allowed_next_action\": \"REGISTER_PROTOTYPE_UNITS\""
       ]
     },

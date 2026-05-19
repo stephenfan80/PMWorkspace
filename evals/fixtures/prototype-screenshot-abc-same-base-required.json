@@ -1,0 +1,47 @@
+{
+  "id": "prototype-screenshot-abc-same-base-required",
+  "title": "线上截图三页实验必须使用同一张 base_image",
+  "category": "readiness-dashboard",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "有线上截图时，brief 锁定后的三页实验必须围绕同一张线上截图做 A/B/C 局部实验，不能换不同页面扩散范围。",
+  "expected": {
+    "mode": "deep",
+    "status": "不可出图",
+    "must_stop": true,
+    "gate": "截图同源实验",
+    "required_behaviors": [
+      "visual_baseline 下三页实验检查 3 个输出单元的 base_image",
+      "发现多个 base_image 时阻断 readiness",
+      "三页差异必须是同一截图上的局部模块策略 / 信息层级 / 信任表达 / 任务路径差异"
+    ],
+    "forbidden_behaviors": [
+      "把 3 张不同线上页面当同一局部 A/B/C 实验",
+      "用不同 base_image 扩大范围",
+      "为了做三页实验重画整页"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-dashboard",
+      "contains": "截图同源实验"
+    },
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "围绕同一个已锁定方案做 A/B/C 局部实验"
+    },
+    {
+      "path": "pmworkspace-shared/references/image-prompts.md",
+      "contains": "三页实验"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=screenshot-same-base; root=\"$PMW_HOME/projects/$PMW_PROJECT_SLUG\"; brief=\"$tmp/brief.md\"; mkdir -p \"$root\"; cat > \"$brief\" <<'EOF'\n目标用户：线上用户\n核心问题：当前页面局部模块价值表达弱\n推荐方案：局部优化当前模块\n原型范围：当前截图里的一个模块\n本轮不做：不重画整页\n主目标：提升入口点击\n反指标：不增加误导\n不可虚构项：不承诺真实价格\nEOF\ntouch -t 200001010000 \"$brief\"\nbin/pmw-controller intake --goal '优化线上页面局部模块' --materials '用户提供线上截图' --skill pm-workspace --product-path 已有功能迭代 --depth deep --stage intake >/dev/null\nbin/pmw-controller confirm --kind goal_mode --value 优化线上指标 >/dev/null\nbin/pmw-controller confirm --kind autoplan --summary '我建议进入产品方向审查。当前最早门槛是确认问题价值。下一技能是 $pm-jobs。' >/dev/null\nbin/pmw-controller confirm --kind product_direction --summary '前提：用户有明确问题。现状替代：继续使用当前线上页面。当前损失：入口价值表达弱。PM 判断：推荐推进。' >/dev/null\nbin/pmw-controller confirm --kind strategy --value 选择性扩大 --summary '范围模式：保持局部优化。最大策略矛盾：提升点击但不扩大范围。策略 D：只改当前截图模块。' >/dev/null\nbin/pmw-artifact add --kind browser_evidence --title 当前截图 --status 已采集 --source-skill pm-brief --summary '当前截图 生产基线' >/dev/null\nbin/pmw-artifact add --kind visual_baseline --title 当前截图组视觉基线 --status 已登记 --source-skill pm-prototype-shotgun --summary '目标输出 1179 x 2556；线上截图视觉基线；三页实验应使用同一张 base_image' >/dev/null\nbin/pmw-controller lock-brief --brief-path \"$brief\" --brief-version v1 --user-confirmed true --summary '用户确认候选简报没有问题。' >/dev/null\nbin/pmw-run event --type gate --status 已确认 --title 设计规范目标确认 --summary '已确认使用线上截图视觉基线。' >/dev/null\nbin/pmw-run event --type decision --status 已确认 --title 方案方向确认 --summary '已确认围绕同一模块做 A/B/C 局部实验。' >/dev/null\nfor s in A B C; do base=\"$tmp/ref1.png\"; [ \"$s\" = B ] && base=\"$tmp/ref2.png\"; bin/pmw-prototype-board add --scheme \"$s\" --screen 当前页面 --brief-version v1 --goal 提升入口点击 --anti-metric 不扩大页面范围 --non-fiction 不承诺真实价格 --canvas-mode physical_longboard --target-output-pixels '目标输出 1179 x 2556' --generation-mode screenshot_edit --base-image \"$base\" --edit-scope '只改当前模块' --preserve-regions '保留状态栏、导航、主体内容和底部 CTA' --product-path 局部实验 --behavior-assumption 用户愿意理解模块价值 --current-loss 当前模块点击理由弱 --tradeoff 不新增整页流程 --prototype-thinking 局部对比 --information-architecture 信息层级 --user-problem-fit 解决当前模块理解 --anti-metric-protection 不扩大承诺 --baseline-information-architecture '顶部导航、主体内容、目标模块、底部 CTA' --baseline-browse-path '用户自上而下浏览到目标模块' --baseline-task-path '用户识别模块价值后点击 CTA' --baseline-problem '目标模块价值表达弱' --changed-regions '只改目标模块' --why-better-than-current '更清楚表达点击前价值' --baseline-preservation '未调整区域与线上截图保持一致' --design-score 8 --design-gap 需验证 --ten-out-of-ten-standard 局部清楚 --prompt-design-fix 保持线上密度 --anti-ai-slop-constraints 禁止重画整页 --state-coverage 默认态 --first-second-third-hierarchy '第一眼模块价值，第二眼依据，第三眼 CTA' --design-spec-target 线上截图 --design-system-profile 生产密度 --platform-pattern screenshot_edit --inspiration-sources 用户截图 --inspiration-patterns 局部模块 --no-copy-boundary 不照搬 >/dev/null; done\nout=$(bin/pmw-dashboard readiness --target prototype --details); printf '%s\\n' \"$out\"; grep -q '不可出图' <<< \"$out\"; grep -q '截图同源实验' <<< \"$out\"; grep -q '发现 2 个 base_image' <<< \"$out\"; rm -rf \"$tmp\""
+      ],
+      "exit_code": 0
+    }
+  ]
+}

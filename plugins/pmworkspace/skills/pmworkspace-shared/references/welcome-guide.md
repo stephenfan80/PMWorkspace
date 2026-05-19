@@ -63,7 +63,7 @@ When welcoming a user, also set expectation that future routed outputs will show
 ```
 
 ```text
-使用 $pm-workspace 帮我先对齐这个全新功能：先判断是否值得做，再整理产品简报和至少 3 条产品路径。产品想法：<一句话想法>
+使用 $pm-workspace 帮我先对齐这个全新功能：先判断是否值得做，再整理产品简报和页面输出模式。产品想法：<一句话想法>
 ```
 
 ```text

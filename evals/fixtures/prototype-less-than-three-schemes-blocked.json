@@ -1,33 +1,34 @@
 {
   "id": "prototype-less-than-three-schemes-blocked",
-  "title": "少于 3 个方案且无当前豁免时不可出图",
+  "title": "默认三页模式少于 3 个完整页面时不可出图",
   "category": "pm-workspace-runtime",
   "primary_skill": "pm-prototype-shotgun",
-  "prompt": "单图或少于三条产品路径的原型计划，除非当前 run 明确确认豁免原因，否则不能写 image-2 prompt。",
+  "prompt": "brief lock 没有 single_page_confirmed 时，单图或少于三张完整页面的原型计划不能写 image-2 prompt。",
   "expected": {
     "mode": "maintenance",
     "status": "不可出图",
     "must_stop": true,
-    "gate": "三条方案数量检查",
+    "gate": "三页输出数量检查",
     "required_behaviors": [
       "image preflight 检查当前输出单元数量",
-      "少于 3 个方案需要当前 run 的明确豁免事件",
-      "dashboard 也显示少于 3 个方案且无豁免"
+      "少于 3 个完整页面时必须被 image preflight 阻断",
+      "只有 brief_lock.image_output_mode=single_page_confirmed 才允许 1 个页面",
+      "旧的少于 3 豁免文本不能放行"
     ],
     "forbidden_behaviors": [
       "默认单图直接出图",
-      "用旧豁免确认新任务",
+      "用旧豁免文本确认新任务",
       "把一个方案换配色当三方案"
     ]
   },
   "contract_checks": [
     {
       "path": "bin/pmw-image-preflight",
-      "contains": "默认最少 3 个方案"
+      "contains": "single_page_confirmed"
     },
     {
       "path": "bin/pmw-dashboard",
-      "contains": "少于 3 个方案且无豁免"
+      "contains": "页面输出单元不足"
     },
     {
       "path": "pmworkspace-shared/references/product-readiness-dashboard.md",
@@ -44,7 +45,7 @@
       "exit_code": 2,
       "contains": [
         "\"output_units\": 1",
-        "默认最少 3 个方案；少于 3 个必须有当前 run 的明确豁免原因"
+        "三页实验模式 要求 3 个完整页面输出单元"
       ]
     }
   ]

@@ -654,7 +654,11 @@ def required_user_action(action: str, reason: str) -> str:
     if action == "DESIGN_SPEC_REQUIRED":
         return "让用户确认使用汽车之家 AutoDesign、用户提供的 Figma/截图/线上页面，或改用 PMW 推荐的其他 UI 规范。"
     if action == "REGISTER_PROTOTYPE_UNITS":
-        return "按已对齐 brief 登记每个方案 + 屏幕任务的 prototype-board 输出单元。"
+        project = read_project()
+        lock = rt.latest_brief_lock(project)
+        mode = rt.image_output_mode_from_lock(lock)
+        expected = rt.expected_output_units(mode)
+        return f"按已对齐 brief 登记 {expected} 个完整页面输出单元；当前出图模式：{rt.image_output_mode_label(mode)}。"
     return reason
 
 
@@ -746,7 +750,9 @@ def action_from_state(project: dict[str, Any]) -> tuple[str, str]:
         return "DESIGN_SPEC_REQUIRED", "命中汽车之家 / AutoDesign / 线索转化相关信号，出图前必须确认本轮设计规范目标；默认推荐汽车之家 AutoDesign，但允许用户选择截图/Figma/线上基线或其他规范。"
     items = board_items(project)
     if not items:
-        return "REGISTER_PROTOTYPE_UNITS", "产品简报已对齐，但本轮还没有 prototype-board 输出单元。"
+        mode = rt.image_output_mode_from_lock(brief_lock)
+        expected = rt.expected_output_units(mode)
+        return "REGISTER_PROTOTYPE_UNITS", f"产品简报已对齐，当前是{rt.image_output_mode_label(mode)}，需要登记 {expected} 个完整页面输出单元。"
     return "ALLOW_IMAGE_PROMPT", "本轮已有已绑定输出单元，可继续运行出图前 readiness。"
 
 
@@ -1138,6 +1144,12 @@ def command_lock_brief(args: argparse.Namespace) -> int:
     brief_path = str(pathlib.Path(args.brief_path).expanduser())
     brief_version = str(args.brief_version or "").strip() or "v1"
     summary = str(args.summary or "").strip() or "用户确认候选产品简报没有问题。"
+    image_output_mode = rt.normalize_image_output_mode(
+        str(getattr(args, "image_output_mode", "") or ""),
+        summary,
+        locked=True,
+    )
+    expected_output_units = rt.expected_output_units(image_output_mode)
     if hasattr(args, "user_confirmed") and not bool_arg(str(args.user_confirmed)):
         print("LOCK_BRIEF_BLOCKED: 产品简报还未获得用户确认，不能锁定。", file=sys.stderr)
         return 2
@@ -1165,6 +1177,8 @@ def command_lock_brief(args: argparse.Namespace) -> int:
                 "brief_fingerprint": rt.brief_fingerprint(text),
                 "first_blocker": blocker,
                 "user_confirmed": True,
+                "image_output_mode": image_output_mode,
+                "expected_output_units": expected_output_units,
             },
         )
         project["brief_lock_status"] = "blocked"
@@ -1183,7 +1197,13 @@ def command_lock_brief(args: argparse.Namespace) -> int:
         print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else f"BRIEF_LOCK_BLOCKED: {blocker}")
         return 2
     existing_lock = rt.latest_brief_lock(project)
-    if rt.brief_lock_is_locked(existing_lock) and str(existing_lock.get("brief_path") or "") == brief_path and str(existing_lock.get("brief_version") or "") == brief_version:
+    existing_mode = rt.image_output_mode_from_lock(existing_lock) if existing_lock else ""
+    if (
+        rt.brief_lock_is_locked(existing_lock)
+        and str(existing_lock.get("brief_path") or "") == brief_path
+        and str(existing_lock.get("brief_version") or "") == brief_version
+        and existing_mode == image_output_mode
+    ):
         lock_id = str(existing_lock.get("lock_id") or "")
         lock_created = False
     else:
@@ -1202,10 +1222,14 @@ def command_lock_brief(args: argparse.Namespace) -> int:
                 "brief_version": brief_version,
                 "brief_fingerprint": rt.brief_fingerprint(text),
                 "user_confirmed": True,
+                "image_output_mode": image_output_mode,
+                "expected_output_units": expected_output_units,
             },
         )
         lock_created = True
     project["brief_lock_status"] = "locked"
+    project["image_output_mode"] = image_output_mode
+    project["expected_output_units"] = expected_output_units
     project["last_controller_verdict"] = "简报已锁定，可进入原型"
     write_project(project)
     project = read_project()
@@ -1221,6 +1245,9 @@ def command_lock_brief(args: argparse.Namespace) -> int:
         "brief_version": brief_version,
         "brief_lock_id": lock_id,
         "brief_lock_status": "locked",
+        "image_output_mode": image_output_mode,
+        "image_output_mode_label": rt.image_output_mode_label(image_output_mode),
+        "expected_output_units": expected_output_units,
         "artifact_id": artifact_id,
         "created": lock_created or artifact_created,
         "artifact_created": artifact_created,
@@ -1482,6 +1509,7 @@ def build_parser() -> argparse.ArgumentParser:
     lock_brief.add_argument("--brief-path", required=True)
     lock_brief.add_argument("--brief-version", required=True)
     lock_brief.add_argument("--user-confirmed", default="false")
+    lock_brief.add_argument("--image-output-mode", choices=["", "auto", "three_page_exploration", "three_page_experiment", "single_page_confirmed"], default="")
     lock_brief.add_argument("--summary", default="")
     lock_brief.add_argument("--json", action="store_true")
     lock_brief.set_defaults(func=command_lock_brief)

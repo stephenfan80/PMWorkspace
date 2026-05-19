@@ -1,0 +1,52 @@
+{
+  "id": "prototype-single-page-confirmed-mode",
+  "title": "明确单页确认时允许 1 个完整页面输出单元",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "用户明确说只要 1 个方案时，brief_lock.image_output_mode 应写入 single_page_confirmed，并允许 1 个完整页面出图。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可出图",
+    "must_stop": false,
+    "gate": "single_page_confirmed",
+    "required_behaviors": [
+      "lock-brief 支持 single_page_confirmed",
+      "readiness 和 image preflight 读取 brief_lock.image_output_mode",
+      "单页确认模式下 1 个完整页面输出单元即可通过数量门"
+    ],
+    "forbidden_behaviors": [
+      "用旧的少于 3 豁免文本放行",
+      "没有 brief_lock.image_output_mode 也允许单页",
+      "把一个页面内的多个卡片当多个方案"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-controller",
+      "contains": "single_page_confirmed"
+    },
+    {
+      "path": "bin/pmw-image-preflight",
+      "contains": "expected_output_units"
+    },
+    {
+      "path": "bin/pmw-prototype-board",
+      "contains": "page_variant_role"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=single-mode; brief=\"$tmp/brief.md\"; cat > \"$brief\" <<'EOF'\n目标用户：测试用户\n核心问题：用户不知道如何完成任务\n推荐方案：做一个清晰入口\n原型范围：首屏和确认页\n本轮不做：后台系统\n主目标：提升完成率\n反指标：不增加误导\n不可虚构项：不承诺真实价格\nEOF\ntouch -t 200001010000 \"$brief\"\nbin/pmw-controller intake --goal '做一个新页面原型' --materials '' --skill pm-workspace --product-path 全新功能 --depth deep --stage intake >/dev/null\nbin/pmw-controller confirm --kind goal_mode --value 验证价值 >/dev/null\nbin/pmw-controller confirm --kind autoplan --summary '我建议进入产品方向审查。当前最早门槛是确认问题价值。下一技能是 $pm-jobs。' >/dev/null\nbin/pmw-controller confirm --kind product_direction --summary '前提：用户有明确问题。现状替代：手工解决。当前损失：效率低。PM 判断：推荐推进。' >/dev/null\nbin/pmw-controller lock-brief --brief-path \"$brief\" --brief-version v1 --user-confirmed true --image-output-mode single_page_confirmed --summary '用户明确说只要 1 个方案，候选简报没有问题。' >/dev/null\nbin/pmw-run event --type gate --status 已确认 --title 线上参考 --summary '新功能无线上参考，不适用' >/dev/null\nbin/pmw-run event --type gate --status 已确认 --title 设计规范目标确认 --summary '已确认使用 PMW 默认移动端产品 UI 基线。' >/dev/null\nbin/pmw-run event --type decision --status 已确认 --title 方案方向确认 --summary '已确认单页主方案 A。' >/dev/null\nbin/pmw-prototype-board add --scheme A --screen 首屏 --brief-version v1 --goal 主目标 --anti-metric 反指标 --non-fiction 不可虚构 --product-path 路径 --behavior-assumption 假设 --current-loss 损失 --tradeoff 取舍 --prototype-thinking 思考 --information-architecture 架构 --user-problem-fit 解决逻辑 --anti-metric-protection 保护 --design-score 8 --design-gap 差距 --ten-out-of-ten-standard 标准 --prompt-design-fix 修正 --anti-ai-slop-constraints 约束 --state-coverage 状态 --first-second-third-hierarchy 层级 --design-spec-target PMW --design-system-profile 移动端 --platform-pattern 标准 --inspiration-sources 本地 --inspiration-patterns 模式 --no-copy-boundary 不照搬 >/dev/null\nbin/pmw-image-preflight check --json\nrm -rf \"$tmp\""
+      ],
+      "exit_code": 0,
+      "contains": [
+        "\"image_output_mode\": \"single_page_confirmed\"",
+        "\"expected_output_units\": 1",
+        "\"ready\": true"
+      ]
+    }
+  ]
+}

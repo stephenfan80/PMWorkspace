@@ -42,9 +42,9 @@ PMWorkspace 产物流动层让每一步产物都能被下游技能读取，而�
 | `$pm-brief` | `product_brief` | `$pm-prototype-shotgun`、`$pm-handoff` | 作为出图前短版产品简述 / 产品简报真源，并保留真实问题、证据边界、PM 判断摘要、产品判断对抗校验和下一步产品作业。 |
 | 浏览器 / 截图 / Zoon 检查 | `browser_evidence` | `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` | 记录线上流程截图、状态页、竞品参考、设计启发或 Zoon 漂移证据，支撑线上参考和设计规范目标门槛。 |
 | 视觉基线 | `visual_baseline` | `$pm-brief`、`$pm-prototype-shotgun`、`$pm-prototype-review`、`$pm-handoff` | 记录参考图路径、像素尺寸、逻辑宽度推断、目标输出像素、核心字号层级、页面边距、模块间距、底部栏高度和参考优先级。 |
-| `$pm-prototype-shotgun` | `prototype_manifest` | `$pm-prototype-review` | 绑定三条产品路径、方案、屏幕、主目标、反指标、不可虚构项和 brief 版本。 |
+| `$pm-prototype-shotgun` | `prototype_manifest` | `$pm-prototype-review` | 绑定页面方案 / 页面实验版本、屏幕、主目标、反指标、不可虚构项、`image_output_mode` 和 brief 版本。 |
 | `$pm-prototype-review` | `prototype_review`、`repair_brief` | `$pm-prototype-shotgun`、`$pm-handoff` | 决定可通过、需要重出、需要 PM 拍板或补参考，并保留原型可信度对抗复审结论。 |
-| `$pm-handoff` | `product_design_doc` | `$pm-handoff`、后续评审、研发交付 | 汇总产品简述、产品判断对抗校验、三条产品路径、原型设计完整度、原型可信度对抗复审、信息架构思考、产品判断演进、推荐方案、风险和下一步，作为最终产品设计文档。 |
+| `$pm-handoff` | `product_design_doc` | `$pm-handoff`、后续评审、研发交付 | 汇总产品简述、产品判断对抗校验、页面方案 / 页面实验版本、原型设计完整度、原型可信度对抗复审、信息架构思考、产品判断演进、推荐方案、风险和下一步，作为最终产品设计文档。 |
 | `$pm-handoff` | `handoff`、`acceptance_seed`、`release_doc_seed` | `document-release`、`ship`、`qa` | 让文档同步、发布准备和 QA 不重新猜验收口径。 |
 
 ## 命令

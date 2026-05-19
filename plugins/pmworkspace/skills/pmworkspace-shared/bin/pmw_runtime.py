@@ -299,6 +299,56 @@ def brief_lock_is_locked(row: dict[str, Any]) -> bool:
     return str(row.get("lock_status") or row.get("status") or "") == "locked"
 
 
+IMAGE_OUTPUT_MODES = {"three_page_exploration", "three_page_experiment", "single_page_confirmed"}
+
+
+def normalize_image_output_mode(value: str = "", summary: str = "", locked: bool = True) -> str:
+    raw = str(value or "").strip()
+    if raw in IMAGE_OUTPUT_MODES:
+        return raw
+    text = f"{raw} {summary or ''}"
+    compact = re.sub(r"\s+", "", text)
+    single_tokens = [
+        "只要1个",
+        "只要一个",
+        "只出1个",
+        "只出一个",
+        "只生成1个",
+        "只生成一个",
+        "单页主方案",
+        "单方案",
+        "1个方案",
+        "一个方案",
+    ]
+    if any(token in compact for token in single_tokens):
+        return "single_page_confirmed"
+    if not locked:
+        return "three_page_exploration"
+    return "three_page_experiment"
+
+
+def image_output_mode_from_lock(lock: dict[str, Any], locked: bool = True) -> str:
+    return normalize_image_output_mode(
+        str(lock.get("image_output_mode") or ""),
+        str(lock.get("summary") or ""),
+        locked=locked,
+    )
+
+
+def expected_output_units(mode: str) -> int:
+    return 1 if normalize_image_output_mode(mode) == "single_page_confirmed" else 3
+
+
+def image_output_mode_label(mode: str) -> str:
+    normalized = normalize_image_output_mode(mode)
+    labels = {
+        "three_page_exploration": "三页探索模式",
+        "three_page_experiment": "三页实验模式",
+        "single_page_confirmed": "单页主方案模式",
+    }
+    return labels.get(normalized, labels["three_page_experiment"])
+
+
 def gate_id(subject: str, context: dict[str, str]) -> str:
     revision = context.get("input_revision") or "no-revision"
     return f"{revision}:{subject}"

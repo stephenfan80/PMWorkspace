@@ -117,18 +117,6 @@ def validate_permit(project: dict[str, Any], permit_id: str, scheme: str, screen
     return True, "", permit
 
 
-def confirmed_less_than_three(project: dict[str, Any], run_id: str = "") -> bool:
-    run_id = run_id or str(project.get("current_run_id") or "")
-    context = rt.resolve_context(project, run_id)
-    for row in read_jsonl(project_dir() / "runs" / f"{run_id}.jsonl"):
-        if not rt.row_matches_context(row, context):
-            continue
-        text = f"{row.get('status', '')} {row.get('title', '')} {row.get('summary', '')}"
-        if "少于 3" in text and ("豁免" in text or "例外" in text) and ("已确认" in text or "已批准" in text):
-            return True
-    return False
-
-
 def controller_preflight(run_id: str = "") -> tuple[int, dict[str, Any], str]:
     if run_id:
         command = [str(SCRIPT_DIR / "pmw-dashboard"), "readiness", "--target", "prototype", "--run", run_id, "--json"]
@@ -152,13 +140,17 @@ def evaluate_preflight(project: dict[str, Any], run_id: str = "") -> dict[str, A
     context = rt.resolve_context(project, run_id or None)
     exit_code, payload, stderr = controller_preflight(run_id)
     items = current_board_items(project, run_id)
+    lock = rt.latest_brief_lock(project)
+    image_output_mode = rt.image_output_mode_from_lock(lock)
+    expected_units = rt.expected_output_units(image_output_mode)
+    mode_label = rt.image_output_mode_label(image_output_mode)
     failures = []
     if exit_code != 0 or not payload.get("ready"):
         failures.append(str(payload.get("reason") or stderr or "prototype preflight blocked"))
     if not items:
         failures.append("当前 run 没有已绑定 prototype-board 输出单元")
-    if len(items) < 3 and not confirmed_less_than_three(project, run_id):
-        failures.append("默认最少 3 个方案；少于 3 个必须有当前 run 的明确豁免原因")
+    if len(items) < expected_units:
+        failures.append(f"{mode_label} 要求 {expected_units} 个完整页面输出单元；当前只有 {len(items)} 个。只有 brief_lock.image_output_mode=single_page_confirmed 才允许 1 个页面。")
     allowed = not failures
     return {
         "ready": allowed,
@@ -166,6 +158,9 @@ def evaluate_preflight(project: dict[str, Any], run_id: str = "") -> dict[str, A
         "first_blocker": failures[0] if failures else "",
         "failures": failures,
         "output_units": len(items),
+        "expected_output_units": expected_units,
+        "image_output_mode": image_output_mode,
+        "image_output_mode_label": mode_label,
         "run_id": context.get("run_id", ""),
         "task_digest": context.get("task_digest", ""),
         "input_revision": context.get("input_revision", ""),
@@ -220,6 +215,9 @@ def command_issue_permit(args: argparse.Namespace) -> int:
         "input_revision": context.get("input_revision", ""),
         "scheme": args.scheme,
         "screen": args.screen,
+        "output_mode": item.get("output_mode") or result_payload.get("image_output_mode", ""),
+        "page_variant_role": item.get("page_variant_role", ""),
+        "experiment_hypothesis": item.get("experiment_hypothesis", ""),
         "brief_version": item.get("brief_version", ""),
         "design_spec_target": item.get("design_spec_target") or project.get("design_spec_target", ""),
         "task_digest_source": "current_revision",

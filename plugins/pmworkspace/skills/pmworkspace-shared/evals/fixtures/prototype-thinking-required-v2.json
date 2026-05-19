@@ -1,6 +1,6 @@
 {
   "id": "prototype-thinking-required-v2",
-  "title": "每个方案必须是产品路径并包含原型思考",
+  "title": "每个页面输出单元必须包含原型思考",
   "category": "pm-prototype-shotgun",
   "primary_skill": "pm-prototype-shotgun",
   "prompt": "给我 3 个移动端方案。",
@@ -10,13 +10,13 @@
     "must_stop": true,
     "gate": "产品路径或原型思考缺失",
     "required_behaviors": [
-      "每个方案包含产品路径",
-      "每个方案包含用户行为假设",
-      "每个方案包含要赢过的现状替代、当前损失和删除 / 牺牲 / 后置项",
-      "每个方案包含验证信号和失败信号",
-      "每个方案包含原型思考",
-      "每个方案包含信息架构设计思考",
-      "每个方案包含用户问题解决逻辑"
+      "每个页面输出单元包含产品路径",
+      "每个页面输出单元包含用户行为假设",
+      "每个页面输出单元包含要赢过的现状替代、当前损失和删除 / 牺牲 / 后置项",
+      "每个页面输出单元包含验证信号和失败信号",
+      "每个页面输出单元包含原型思考",
+      "每个页面输出单元包含信息架构设计思考",
+      "每个页面输出单元包含用户问题解决逻辑"
     ],
     "forbidden_behaviors": [
       "只给视觉风格描述",
@@ -27,11 +27,11 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/image-prompts.md",
-      "contains": "每条路径必须写明它相信什么用户行为、要赢过哪个现状替代"
+      "contains": "每个页面输出单元必须写明它相信什么用户行为、要赢过哪个现状替代"
     },
     {
       "path": "pm-prototype-shotgun/SKILL.md",
-      "contains": "每条路径都要先写清"
+      "contains": "每个页面输出单元都要先写清"
     },
     {
       "path": "bin/pmw-prototype-board",

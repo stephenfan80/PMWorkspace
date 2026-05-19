@@ -1,8 +1,8 @@
 # Prototype Shotgun Board
 
-Prototype Shotgun Board 用来比较多方案，但比较对象首先是产品路径，不是视觉风格。一个方案必须代表一条清晰的产品路径，同时不改变 image-2 输出规则：一个产品路径 + 一个屏幕仍然是一张独立图片。默认最少 3 条产品路径；少于 3 条必须写明确豁免原因。
+Prototype Shotgun Board 用来比较页面方案，但比较对象首先是产品路径和实验假设，不是视觉风格。一个 board item 代表一个完整页面输出单元，同时不改变 image-2 输出规则：一个页面方案 + 一个屏幕仍然是一张独立图片。默认数量由 `brief_lock.image_output_mode` 决定：三页探索 / 三页实验需要 3 个页面输出单元，只有 `single_page_confirmed` 允许 1 个页面输出单元。
 
-单图生成协议：一次 image-2 调用 = 一张图 = 一个产品路径 + 一个屏幕任务。批量生成只是顺序执行多个单图任务；`3 条产品路径` 必须拆成 3 个输出单元，`3 条产品路径 x 2 个屏幕` 必须拆成 6 个输出单元。
+单图生成协议：一次 image-2 调用 = 一张图 = 一个完整页面输出单元 + 一个屏幕任务。批量生成只是顺序执行多个单图任务；`three_page_experiment` 必须拆成 3 个输出单元，`single_page_confirmed` 必须拆成 1 个输出单元。
 
 ## 记录方式
 
@@ -13,6 +13,9 @@ pmw-controller preflight --target prototype --json
 pmw-prototype-board add \
   --scheme "<方案名>" \
   --screen "<屏幕任务>" \
+  --output-mode "<three_page_exploration|three_page_experiment|single_page_confirmed>" \
+  --page-variant-role "<A/B/C 局部实验角色；单页时写主方案>" \
+  --experiment-hypothesis "<本页面版本验证什么>" \
   --brief-version "<产品简报版本>" \
   --goal "<主目标>" \
   --anti-metric "<反指标>" \
@@ -51,7 +54,7 @@ pmw-prototype-board add \
 
 脚本会把当前 controller 的 `run_id`、`task_digest`、`input_revision` 和 `controller_verdict` 写入 board item。没有当前 controller run，或 board item 只匹配旧任务时，该输出单元只能作为参考方案，不能进入 image-2 prompt、复审或交付。
 
-`--product-path`、`--behavior-assumption`、`--current-loss` 和 `--tradeoff` 是新写入记录的必填字段；这里的 product path 记录产品路径判断。旧记录缺字段时继续可读，但新输出单元缺任一字段都不能登记为已写入。
+`--output-mode`、`--page-variant-role`、`--experiment-hypothesis`、`--product-path`、`--behavior-assumption`、`--current-loss` 和 `--tradeoff` 是新写入记录的关键字段；这里的 product path 记录产品路径判断。脚本可从 brief lock 和方案名补默认值，但新输出单元必须能被 readiness 读成“一个完整页面实验版本”。
 
 设计完整度字段第一阶段为可选字段，旧记录缺失时展示为 `未记录`。但 `$pm-prototype-shotgun` 的新输出必须写入 `--design-score`、`--design-gap`、`--ten-out-of-ten-standard`、`--prompt-design-fix`、`--anti-ai-slop-constraints`、`--state-coverage` 和 `--first-second-third-hierarchy`；否则只能标记 `方案比较板：设计完整度未写入`，不能声称已完成设计完整度判断。
 
@@ -102,12 +105,12 @@ pmw-prototype-board list
 - 多方案必须在产品策略、信息架构、交互模型、信任模型或关键任务路径上不同。
 - 多方案必须能落到不同产品策略、信息架构、交互模型、信任模型或关键任务路径。
 - 不把配色、插画、圆角、卡片样式或风格皮肤包装成多方案。
-- 默认最少 3 条产品路径；少于 3 条必须记录 `少于 3 条路径豁免原因`，并说明为什么不影响产品判断。
+- 出图数量必须满足 `brief_lock.image_output_mode`：三页探索 / 三页实验为 3 个完整页面输出单元，单页主方案为 1 个完整页面输出单元；旧的少于 3 条路径豁免文本不再放行。
 - 每个方案必须包含 `产品路径`、`用户行为假设`、`要赢过的现状替代`、`当前损失`、`删除 / 牺牲 / 后置项`、`验证信号`、`失败信号`、`原型思考`、`信息架构设计思考`、`用户问题解决逻辑`、`反指标保护` 和 `不可虚构边界`。
 - 每个方案必须说明它相信什么用户行为、要赢过哪个现状替代、解决什么当前损失、牺牲什么、保护哪个反指标，以及哪些内容不可虚构。
 - 每个方案必须包含 `设计完整度评分`、`为什么是这个分数`、`距离 10/10 的最大差距`、`10/10 原型标准`、`本轮 prompt 如何补齐`、`反 AI 模板味约束`、`状态覆盖策略` 和 `第一眼 / 第二眼 / 第三眼信息层级`。
 - 每个方案必须包含 `设计规范目标`、`设计系统 / 平台模式`、`灵感来源摘要`、`禁止照搬项` 和 `版权边界`。设计启发可以来自 Dribbble、Pinterest、公开页面、用户截图或平台模式库，但只能沉淀抽象模式，不能复制素材。
-- 三条产品路径必须同时是三种设计判断：信息架构、交互模型、信任模型、状态策略或降噪策略至少一项不同。不能只是在同一产品路径下替换配色、圆角、插画、卡片密度或文案语气。
+- 三页探索 / 三页实验必须同时是三种页面级设计判断：局部模块策略、信息架构、交互模型、信任模型、状态策略或降噪策略至少一项不同。不能只是在同一产品路径下替换配色、圆角、插画、卡片密度或文案语气。
 - 方案质量规则不局限留资业务；社区、直播、产品库、交易、内容、工具、看板等场景也必须适用。
 - 默认输出“方案对比表 + 单图清单”，不是拼图。
 - 不允许把多个方案或多个屏幕合成一张三联图、并排比较图、一图多屏或多屏故事板。

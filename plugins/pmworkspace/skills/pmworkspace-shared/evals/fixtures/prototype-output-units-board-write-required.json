@@ -28,7 +28,7 @@
     },
     {
       "path": "pm-prototype-shotgun/SKILL.md",
-      "contains": "一个输出单元等于一张图片，不能把多个方案或多个屏幕合成拼图。"
+      "contains": "一个输出单元等于一张完整页面图片，不能把多个方案或多个屏幕合成拼图。"
     },
     {
       "path": "pmworkspace-shared/references/prototype-shotgun-board.md",

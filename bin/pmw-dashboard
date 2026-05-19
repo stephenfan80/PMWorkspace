@@ -296,10 +296,12 @@ def target_matches_baseline(target_text: str, baseline: dict) -> tuple[bool, str
     baseline_width, baseline_height = baseline_target_size(baseline)
     if not baseline_width and not baseline_height:
         return True, ""
-    target_width, target_height = parse_target_size(f"目标输出：{target_text}")
+    full_target_text = f"目标输出：{target_text}"
+    target_width, target_height = parse_target_size(full_target_text)
     if baseline_width and target_width != baseline_width:
         return False, f"目标宽度 {target_width or '未记录'} 与 visual_baseline {baseline_width} 不一致"
-    if baseline_height and (target_height is None or target_height < baseline_height):
+    adaptive_height = any(token in full_target_text for token in ["内容自适应长图", "高度可随内容增长", "高度随内容增长", "可随内容增长"])
+    if baseline_height and not adaptive_height and (target_height is None or target_height < baseline_height):
         return False, f"目标高度 {target_height or '未记录'} 低于 visual_baseline {baseline_height}"
     return True, ""
 
@@ -309,7 +311,7 @@ def screenshot_edit_status(item: dict, baseline: dict) -> tuple[bool, str]:
     if not mode:
         return False, "缺 generation_mode"
     if mode == "redraw":
-        return False, "视觉基线下默认禁止 redraw；先回到产品简报确认整页重构范围"
+        return False, "视觉基线下默认禁止 redraw；有线上截图时必须以线上截图为底做 screenshot_edit，不能 redraw 重画整页"
     if mode != "screenshot_edit":
         return False, f"generation_mode={mode} 不支持"
     base_image = str(item.get("base_image") or "")
@@ -323,6 +325,40 @@ def screenshot_edit_status(item: dict, baseline: dict) -> tuple[bool, str]:
     if not str(item.get("preserve_regions") or "").strip():
         return False, "缺 preserve_regions"
     return True, ""
+
+
+SCREENSHOT_ANALYSIS_FIELDS = [
+    ("baseline_information_architecture", "线上截图信息架构"),
+    ("baseline_browse_path", "用户浏览路径"),
+    ("baseline_task_path", "用户完成任务路径"),
+]
+
+
+def screenshot_analysis_status(item: dict) -> tuple[bool, str]:
+    for key, label in SCREENSHOT_ANALYSIS_FIELDS:
+        value = str(item.get(key) or "").strip()
+        if not value:
+            return False, f"缺{label}"
+        if contains_any(value, ["待补充", "未定义", "不明确", "TBD", "未判断", "不适用"]):
+            return False, f"{label}待补充"
+    analysis_text = " ".join(str(item.get(key) or "") for key, _label in SCREENSHOT_ANALYSIS_FIELDS)
+    if contains_any(analysis_text, ["照着改", "直接改", "随便改", "重画整页", "重新设计整页"]):
+        return False, "线上截图分析不能跳过路径判断或要求重画整页"
+    return True, ""
+
+
+def screenshot_same_base_status(items: list[dict], expected_output_units: int, output_mode_label: str) -> tuple[bool, str]:
+    if not items:
+        return False, "prototype-board 暂无当前 run 输出单元"
+    base_images = {str(item.get("base_image") or "").strip() for item in items}
+    base_images.discard("")
+    if len(items) >= expected_output_units and len(base_images) == 1:
+        return True, f"{len(items)} 个完整页面输出单元使用同一张 base_image 做 {output_mode_label} A/B/C 局部实验"
+    if not base_images:
+        return False, "缺 base_image"
+    if len(base_images) > 1:
+        return False, f"发现 {len(base_images)} 个 base_image；有线上截图时三页实验必须围绕同一张线上截图做 A/B/C 局部实验"
+    return False, f"{len(items)} 个完整页面输出单元；{output_mode_label} 要求 {expected_output_units} 个同源截图实验版本"
 
 
 BASELINE_CHANGE_FIELDS = [
@@ -1003,6 +1039,10 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         )
     )
 
+    image_output_mode = rt.image_output_mode_from_lock(brief_lock, locked=brief_ready)
+    expected_output_units = rt.expected_output_units(image_output_mode)
+    output_mode_label = rt.image_output_mode_label(image_output_mode)
+
     if visual_required:
         edit_failures = []
         for item in board:
@@ -1031,8 +1071,59 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
             visual_required,
             edit_status,
             redact_sensitive(edit_evidence),
-            "继续" if edit_ready else "视觉还原优先时默认使用 screenshot_edit；输出单元必须绑定 base_image、edit_scope 和 preserve_regions，redraw 只能显式选择",
+            "继续" if edit_ready else "有线上截图时必须以线上截图为底做 screenshot_edit；输出单元必须绑定 base_image、edit_scope 和 preserve_regions，不得 redraw 重画整页",
             edit_ready,
+        )
+    )
+
+    if visual_required and image_output_mode in {"three_page_exploration", "three_page_experiment"}:
+        same_base_ready, same_base_evidence = screenshot_same_base_status(board, expected_output_units, output_mode_label)
+        same_base_status = "同源截图实验" if same_base_ready else "截图实验基线不一致"
+    else:
+        same_base_ready = True
+        same_base_status = "不适用"
+        same_base_evidence = "单页主方案或无线上截图视觉基线，不要求三页同源 A/B/C 实验"
+    rows.append(
+        gate_result(
+            "截图同源实验",
+            visual_required and image_output_mode in {"three_page_exploration", "three_page_experiment"},
+            same_base_status,
+            redact_sensitive(same_base_evidence),
+            "继续" if same_base_ready else "有线上截图时，三页实验必须使用同一张 base_image；三张完整页面只改各自局部模块，未调整区域保持与线上截图一致",
+            same_base_ready,
+        )
+    )
+
+    if visual_required:
+        screenshot_analysis_failures = []
+        for item in board:
+            analysis_ok, analysis_failure = screenshot_analysis_status(item)
+            if not analysis_ok:
+                screenshot_analysis_failures.append(
+                    f"{item.get('scheme') or '未命名'} / {item.get('screen') or '未命名屏幕'}：{analysis_failure}"
+                )
+        screenshot_analysis_ready = bool(board) and not screenshot_analysis_failures
+        if not board:
+            screenshot_analysis_status_text = "未登记"
+            screenshot_analysis_evidence = "prototype-board 暂无当前 run 输出单元"
+        elif screenshot_analysis_ready:
+            screenshot_analysis_status_text = "已分析"
+            screenshot_analysis_evidence = f"{len(board)} 个输出单元已记录线上截图信息架构、用户浏览路径和用户完成任务路径"
+        else:
+            screenshot_analysis_status_text = "缺路径分析"
+            screenshot_analysis_evidence = "未通过：" + "；".join(screenshot_analysis_failures[:5])
+    else:
+        screenshot_analysis_ready = True
+        screenshot_analysis_status_text = "不适用"
+        screenshot_analysis_evidence = "无线上截图视觉基线；新概念页按产品简报和设计规范目标判断"
+    rows.append(
+        gate_result(
+            "线上截图路径分析",
+            visual_required,
+            screenshot_analysis_status_text,
+            redact_sensitive(screenshot_analysis_evidence),
+            "继续" if screenshot_analysis_ready else "先分析线上截图的信息架构、用户浏览路径和用户完成任务路径；再写局部 edit_scope，未调整区域必须与线上截图保持对齐",
+            screenshot_analysis_ready,
         )
     )
 
@@ -1073,24 +1164,53 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
     if scheme_event and controller_active and not row_matches_task(scheme_event, project):
         scheme_event = {}
     scheme_text = f"{scheme_event.get('status', '')} {scheme_event.get('summary', '')}"
-    min_three_exemption = latest_event(events, ["少于 3", "少于三", "路径豁免"], {"gate", "decision"})
-    if min_three_exemption and controller_active and not row_matches_task(min_three_exemption, project):
-        min_three_exemption = {}
-    min_three_ready = (
-        len({str(item.get("scheme") or "") for item in board}) >= 3
-        or bool(min_three_exemption)
-        or (not board and bool(scheme_event) and event_is_confirmed(scheme_event))
+    page_meta_failures = []
+    for item in board:
+        for key, label in [
+            ("output_mode", "出图模式"),
+            ("page_variant_role", "页面实验角色"),
+            ("experiment_hypothesis", "实验假设"),
+        ]:
+            if not str(item.get(key) or "").strip():
+                page_meta_failures.append(f"{item.get('scheme') or '未命名'} / {item.get('screen') or '未命名屏幕'}：缺{label}")
+    enough_pages = len(board) >= expected_output_units
+    event_only_handoff_ready = (
+        not board
+        and effective_target == "handoff"
+        and bool(scheme_event)
+        and event_is_confirmed(scheme_event)
     )
-    scheme_ready = bool(board or scheme_event) and min_three_ready and not contains_any(scheme_text, ["只换皮", "未通过", "缺失", "待确认"])
-    scheme_status = "已登记" if board and min_three_ready else ("少于 3 个方案且无豁免" if board and not min_three_ready else (scheme_event.get("status") or "未登记"))
-    scheme_evidence = f"{len(board)} 个输出单元" if board and min_three_ready else (f"{len(board)} 个输出单元；缺少少于 3 个方案豁免" if board else (scheme_event.get("summary") or "prototype-board 暂无方案"))
+    scheme_ready = (
+        event_only_handoff_ready
+        or (
+            bool(board or scheme_event)
+            and enough_pages
+            and not page_meta_failures
+            and not contains_any(scheme_text, ["只换皮", "未通过", "缺失", "待确认"])
+        )
+    )
+    if board and enough_pages and not page_meta_failures:
+        scheme_status = f"已登记（{output_mode_label}）"
+        scheme_evidence = f"{len(board)} 个完整页面输出单元；当前模式要求 {expected_output_units} 个"
+    elif event_only_handoff_ready:
+        scheme_status = scheme_event.get("status") or "已登记"
+        scheme_evidence = scheme_event.get("summary") or "交付阶段沿用已登记方案差异事件"
+    elif board and not enough_pages:
+        scheme_status = "页面输出单元不足"
+        scheme_evidence = f"{len(board)} 个完整页面输出单元；{output_mode_label} 要求 {expected_output_units} 个"
+    elif board and page_meta_failures:
+        scheme_status = "页面实验字段不完整"
+        scheme_evidence = "；".join(page_meta_failures[:5])
+    else:
+        scheme_status = scheme_event.get("status") or "未登记"
+        scheme_evidence = scheme_event.get("summary") or f"prototype-board 暂无页面输出单元；当前模式：{output_mode_label}，要求 {expected_output_units} 个"
     rows.append(
         gate_result(
             "方案差异",
             True,
             scheme_status,
             scheme_evidence,
-            "继续" if scheme_ready else "先登记默认 3 条产品路径；少于 3 条必须记录当前 run 的明确豁免原因，并说明方案在页面结构、信息架构、交互路径、信任表达或关键任务上的差异",
+            "继续" if scheme_ready else f"先按 {output_mode_label} 登记 {expected_output_units} 个完整页面输出单元；每个单元是一张独立页面，差异来自局部模块策略、信息层级、信任表达或任务路径，不接受页面内三方案拼图",
             scheme_ready,
         )
     )
@@ -1402,13 +1522,17 @@ READINESS_GATE_GUIDANCE: dict[str, tuple[str, str]] = {
         "截图编辑字段不完整会让既有功能迭代无法保护生产页面中的保留区域。",
         "补齐 base_image、edit_scope 和 preserve_regions；之后才能生成可审计的截图改造原型。",
     ),
+    "线上截图路径分析": (
+        "缺少截图信息架构和用户路径分析时，Agent 容易按想象重画整页，而不是基于线上任务链路做局部改造。",
+        "先补齐线上截图信息架构、用户浏览路径、用户完成任务路径；之后再确定局部 edit_scope。",
+    ),
     "生产基线改动证明": (
         "缺少生产基线改动证明会让 PMW 把 Agent 想象的新方案画出来，却不知道它是否真的比当前线上方案更好。",
         "先说明当前线上问题、改动区域、为什么优于当前线上、保留 / 删除边界；证明成立后才解锁 image-2 prompt。",
     ),
     "方案差异": (
-        "方案差异不足会让多方案退化成视觉换皮，无法帮助用户做产品取舍。",
-        "补齐页面结构、信息架构、交互路径、信任表达或关键任务差异；之后进入三条产品路径原型计划。",
+        "方案差异不足会让三页实验退化成视觉换皮，无法帮助用户做产品取舍。",
+        "按 brief_lock.image_output_mode 补齐完整页面输出单元，并说明局部模块策略、信息架构、交互路径、信任表达或关键任务差异。",
     ),
     "原型设计完整度": (
         "设计完整度缺失会让原型只像提示词草稿，无法判断信息层级、状态覆盖和反模板味风险。",

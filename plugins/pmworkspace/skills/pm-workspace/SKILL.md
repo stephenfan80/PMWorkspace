@@ -38,7 +38,7 @@ PMWorkspace 是产品方案工作台：对齐、出图、复审、交付。
 ### 共享门槛
 
 - 真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。
-- 摘要：运行前更新检查；产品任务先过 `pmw-controller intake`；STOP gate 必须停住；当前任务绑定 run / `task_digest` / `input_revision`；中文本地化、事实优先、等待门槛和隐私边界不能被跳过。
+- 摘要：运行前更新检查；PMW 命中先过 trigger guard / operation router；只有 `new_product_workflow` 才 intake，流程内 operation 不重新 intake；STOP gate 必须停住；当前任务绑定 run / `task_digest` / `input_revision`；中文本地化、事实优先、等待门槛和隐私边界不能被跳过。
 
 ### 默认用户可见输出字段
 

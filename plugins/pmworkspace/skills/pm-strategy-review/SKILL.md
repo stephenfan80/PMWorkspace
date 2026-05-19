@@ -49,7 +49,7 @@ description: |
 
 - 真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。
 - 快速更新：每个 skill 运行前用 `pmw-update-check --quick`；如果输出 `UPGRADE_AVAILABLE`，先询问用户是否执行 `UPGRADE_COMMAND`，除非 `auto_upgrade` 为 `true`。
-- 运行时入口：每个 PMW 产品任务先过 `pmw-controller intake`，由 controller 判定是否继承或新建 run，并写入 `task_digest` / `input_revision`。
+- 运行时入口：PMW 触发后先过 `pmw-trigger-guard` / `pmw-operation-router classify`；只有 `operation_type=new_product_workflow` 才运行 `pmw-controller intake`，流程内回答、补材料、改 brief、原型局部修改、复审、重出和交付续跑不得重新 intake。
 - STOP gate：`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能进入下游产物；`WRITE_PENDING_BRIEF` 只能路由到产品简报。
 - 当前任务绑定：brief、visual baseline、prototype-board、review、handoff 和用户确认必须匹配当前 run、`task_digest` 与 `input_revision`；旧产物只能参考，不能放行。
 - 摘要：中文本地化、记忆不覆盖本轮事实、只有 `ALLOW_IMAGE_PROMPT` 才能写 image-2 prompt，方向选择不能替代产品简报确认，禁止泄露 token/ownerSecret/私密资料。
@@ -110,7 +110,7 @@ fi
 4. Read `../pmworkspace-shared/references/scenario-experts.md` and use the dominant scenario lens.
 5. Read `../pmworkspace-shared/references/product-memory.md`; use memory only as preference signal, not as fact source.
 6. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 策略审查 stage fields.
-7. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-strategy-review` 且没有当前 run，再创建 runtime run.
+7. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Operation Router + Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-strategy-review` 且没有当前 run，先用 `pmw-operation-router classify` 判断本轮是否是 `new_product_workflow`，只有新工作流才创建 runtime run；流程内回答、补材料、修改 brief、原型反馈或复审不得重新 intake。
 8. 先读取或建立 `产品信息对齐包`，再 Build the 产品方向审查控制器 from `adversarial-review.md`: 来源门槛、已确认事实、产品信息对齐状态、前提挑战、现状替代、不做推演、路径对比、最大策略矛盾、如果现在直接做会错在哪里、产品判断对抗校验、范围模式、建议姿态、本周期验证、本周期验证价值、产品动作、策略取舍、当前 D / 后续 D 队列、下一技能.
 9. 如果来自 `$pm-jobs`，只接住产品追问交出的策略门槛：范围、价值交换、信任/风险、反指标、可行性、定位或业务冲突；不要重新展开 Q 诊断全流程。
 10. `$pm-strategy-review` 不展开研发能力依赖长清单；只判断能力前提是否改变方向、范围或承诺。详细数据 / 接口 / 算法 / 后台 / 运营依赖交给 `$pm-handoff` 的研发可行性反问。

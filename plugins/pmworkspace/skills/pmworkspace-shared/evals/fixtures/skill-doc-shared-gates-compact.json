@@ -37,7 +37,23 @@
     },
     {
       "path": "pm-brief/SKILL.md",
-      "contains": "运行时入口：每个 PMW 产品任务先过 `pmw-controller intake`"
+      "contains": "运行时入口：PMW 触发后先过 `pmw-trigger-guard` / `pmw-operation-router classify`"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "contains": "只有 `operation_type=new_product_workflow` 才运行 `pmw-controller intake`"
+    },
+    {
+      "path": "pm-brief/SKILL.md",
+      "not_contains": "运行时入口：每个 PMW 产品任务先过 `pmw-controller intake`"
+    },
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "contains": "For `prototype_revision`"
+    },
+    {
+      "path": "pm-prototype-shotgun/SKILL.md",
+      "not_contains": "If called directly, run `pmw-controller intake"
     },
     {
       "path": "pm-brief/SKILL.md",

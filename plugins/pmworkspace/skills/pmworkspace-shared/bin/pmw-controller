@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -1399,6 +1400,173 @@ def command_adopt_history(args: argparse.Namespace) -> int:
     return 0
 
 
+def parse_variant_roles(value: str) -> list[str]:
+    return [item.strip() for item in re.split(r"[,，/、\s]+", value or "") if item.strip()]
+
+
+def operation_output_units(expected: int, roles: list[str]) -> int:
+    if expected > 0:
+        return max(1, min(expected, 12))
+    if roles:
+        return max(1, min(len(roles), 12))
+    return 1
+
+
+def edit_contract_conflict(edit_scope: str, preserve_scope: str) -> str:
+    edit = re.sub(r"\s+", "", edit_scope or "")
+    preserve = re.sub(r"\s+", "", preserve_scope or "")
+    if not edit or not preserve:
+        return ""
+    if edit == preserve:
+        return "修改区域和保留区域完全相同。"
+    if len(edit) >= 4 and edit in preserve:
+        return "修改区域被写入保留区域。"
+    return ""
+
+
+def operation_block_payload(args: argparse.Namespace, project: dict[str, Any], blocker: str, reason: str) -> dict[str, Any]:
+    return {
+        "ok": False,
+        "operation_type": args.operation_type,
+        "operation_status": "blocked",
+        "operation_blocker": blocker,
+        "first_blocker": blocker,
+        "reason": reason,
+        "may_run_intake": False,
+        "must_not_run_intake": True,
+        "allowed_next_action": "OPERATION_BLOCKED",
+        **task_context(project),
+    }
+
+
+def command_continue_operation(args: argparse.Namespace) -> int:
+    project = read_project()
+    run_id = str(project.get("current_run_id") or "")
+    if not run_id or not run_file(run_id).exists():
+        payload = operation_block_payload(args, project, "OPERATION_CONTEXT_MISSING", "找不到 active run；流程内操作不能创建新 intake。")
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else payload["reason"])
+        return 2
+    context = rt.resolve_context(project)
+    parent = rt.resolve_parent_context(project)
+    operation_type = str(args.operation_type or "").strip()
+    summary = str(args.summary or "").strip() or f"继续 PMW 操作：{operation_type}"
+    source_image = str(args.source_image or "").strip()
+    edit_scope = str(args.edit_scope or "").strip()
+    preserve_scope = str(args.preserve_scope or "").strip()
+    boundary_change = bool_arg(str(args.boundary_change or "false"))
+    roles = parse_variant_roles(str(args.variant_roles or ""))
+    expected_units = operation_output_units(int(args.expected_output_units or 0), roles)
+    while len(roles) < expected_units:
+        roles.append(f"variant_{len(roles) + 1}")
+
+    if operation_type == "prototype_revision":
+        if not source_image:
+            payload = operation_block_payload(args, project, "OPERATION_SOURCE_IMAGE_REQUIRED", "原型局部修改缺 source_image；不能签发 image permit。")
+            print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else payload["reason"])
+            return 2
+        if not edit_scope:
+            payload = operation_block_payload(args, project, "OPERATION_EDIT_SCOPE_REQUIRED", "原型局部修改缺 edit_scope；需要说明只改哪里。")
+            print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else payload["reason"])
+            return 2
+        if conflict := edit_contract_conflict(edit_scope, preserve_scope):
+            payload = operation_block_payload(args, project, "OPERATION_EDIT_PRESERVE_CONFLICT", conflict)
+            print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else payload["reason"])
+            return 2
+        lock = rt.latest_brief_lock(project)
+        if not rt.brief_lock_is_locked(lock):
+            payload = operation_block_payload(args, project, "OPERATION_CONTEXT_MISSING", "当前任务缺 locked brief；原型修改不能继承未锁定产品事实。")
+            print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else payload["reason"])
+            return 2
+        if not str(project.get("design_spec_target") or "").strip() and design_spec_required(project):
+            payload = operation_block_payload(args, project, "OPERATION_CONTEXT_MISSING", "当前任务缺设计规范目标；需先确认一次，然后后续修改继承。")
+            print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else payload["reason"])
+            return 2
+    if boundary_change:
+        append_event(
+            "brief_change",
+            run_id,
+            "needs_relock",
+            "原型反馈改变产品边界",
+            summary,
+            project,
+            {
+                "change_type": "boundary_change",
+                "lock_status": "needs_relock",
+                "brief_path": str(project.get("latest_brief") or ""),
+                "brief_version": str(project.get("latest_brief_version") or "v1"),
+                "source_operation_type": operation_type,
+            },
+        )
+        project["brief_lock_status"] = "needs_relock"
+        project["last_controller_verdict"] = "原型反馈改变产品承诺或范围，需要重新锁定 brief"
+
+    operation_id = rt.operation_id(operation_type, context, summary)
+    lock = rt.latest_brief_lock(project)
+    visual_baseline = current_artifact("visual_baseline", project)
+    operation_status = "brief_relock_required" if boundary_change else "ready_for_image_permit" if operation_type == "prototype_revision" else "recorded"
+    row = append_event(
+        "operation",
+        run_id,
+        operation_status,
+        "PMW 操作续跑",
+        summary,
+        project,
+        {
+            "operation_id": operation_id,
+            "operation_type": operation_type,
+            "operation_status": operation_status,
+            "parent_run_id": parent.get("parent_run_id", ""),
+            "parent_task_digest": parent.get("parent_task_digest", ""),
+            "parent_input_revision": parent.get("parent_input_revision", ""),
+            "parent_artifact_id": str(args.artifact_id or ""),
+            "source_image": source_image,
+            "source_image_id": source_image,
+            "edit_scope": edit_scope,
+            "preserve_scope": preserve_scope,
+            "boundary_change": boundary_change,
+            "expected_output_units": expected_units,
+            "variant_roles": roles,
+            "inherited_context": {
+                "brief_lock_id": str(lock.get("lock_id") or ""),
+                "design_spec_target": str(project.get("design_spec_target") or ("汽车之家 AutoDesign" if design_spec_required(project) else "")),
+                "visual_baseline_id": str(visual_baseline.get("artifact_id") or visual_baseline.get("path") or ""),
+            },
+            "may_run_intake": False,
+            "must_not_run_intake": True,
+        },
+    )
+    project["current_operation_id"] = operation_id
+    project["current_operation_type"] = operation_type
+    project["current_operation_status"] = operation_status
+    project["last_controller_verdict"] = f"operation={operation_type}；status={operation_status}"
+    write_project(project)
+    action, reason = action_from_state(read_project())
+    payload = {
+        "ok": not boundary_change,
+        "event": "operation",
+        "operation_id": operation_id,
+        "operation_type": operation_type,
+        "operation_status": operation_status,
+        "parent_run_id": parent.get("parent_run_id", ""),
+        "parent_task_digest": parent.get("parent_task_digest", ""),
+        "parent_input_revision": parent.get("parent_input_revision", ""),
+        "source_image": source_image,
+        "edit_scope": edit_scope,
+        "preserve_scope": preserve_scope,
+        "boundary_change": boundary_change,
+        "expected_output_units": expected_units,
+        "variant_roles": roles,
+        "inherited_context": row.get("inherited_context", {}),
+        "allowed_next_action": "BRIEF_RELOCK_REQUIRED" if boundary_change else "OPERATION_IMAGE_PERMIT_READY" if operation_type == "prototype_revision" else action,
+        "reason": "这会改变产品承诺，需要重新锁 brief。" if boundary_change else reason,
+        "may_run_intake": False,
+        "must_not_run_intake": True,
+        **task_context(read_project()),
+    }
+    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else operation_id)
+    return 2 if boundary_change else 0
+
+
 CAPABILITY_KEYS = {
     "write_brief": "can_write_brief",
     "register_prototype_units": "can_register_prototype_units",
@@ -1521,6 +1689,31 @@ def build_parser() -> argparse.ArgumentParser:
     modify_brief.add_argument("--summary", default="")
     modify_brief.add_argument("--json", action="store_true")
     modify_brief.set_defaults(func=command_modify_brief)
+
+    continue_operation = sub.add_parser("continue-operation")
+    continue_operation.add_argument(
+        "--operation-type",
+        choices=[
+            "attach_evidence",
+            "modify_brief",
+            "prototype_plan",
+            "prototype_revision",
+            "prototype_review",
+            "prototype_regenerate",
+            "handoff_continue",
+        ],
+        required=True,
+    )
+    continue_operation.add_argument("--summary", default="")
+    continue_operation.add_argument("--source-image", default="")
+    continue_operation.add_argument("--artifact-id", default="")
+    continue_operation.add_argument("--edit-scope", default="")
+    continue_operation.add_argument("--preserve-scope", default="")
+    continue_operation.add_argument("--boundary-change", default="false")
+    continue_operation.add_argument("--expected-output-units", type=int, default=0)
+    continue_operation.add_argument("--variant-roles", default="")
+    continue_operation.add_argument("--json", action="store_true")
+    continue_operation.set_defaults(func=command_continue_operation)
 
     stamp = sub.add_parser("stamp")
     stamp.add_argument("--kind", required=True)

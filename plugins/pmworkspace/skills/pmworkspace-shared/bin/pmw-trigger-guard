@@ -64,6 +64,10 @@ def runtime_available(runtime_dir: pathlib.Path) -> bool:
     return (runtime_dir / "pmw-controller").exists() and (runtime_dir / "pmw-controller").is_file()
 
 
+def operation_router_available(runtime_dir: pathlib.Path) -> bool:
+    return (runtime_dir / "pmw-operation-router").exists() and (runtime_dir / "pmw-operation-router").is_file()
+
+
 def evaluate(text: str, skill: str, runtime_dir: pathlib.Path) -> dict[str, Any]:
     direct_hits = contains_hint(text, PMW_DIRECT_HINTS)
     task_hits = contains_hint(text, PMW_TASK_HINTS)
@@ -71,8 +75,13 @@ def evaluate(text: str, skill: str, runtime_dir: pathlib.Path) -> dict[str, Any]
     skill_hit = skill.startswith("pm-") or skill.startswith("$pm-")
     pmw_required = bool(direct_hits or skill_hit or (task_hits and autohome_hits))
     runtime_ok = runtime_available(runtime_dir)
+    router_ok = operation_router_available(runtime_dir)
     if not pmw_required:
         action = "NO_PMW_GUARD"
+        must_stop = False
+        first_blocker = ""
+    elif runtime_ok and router_ok:
+        action = "RUN_OPERATION_ROUTER"
         must_stop = False
         first_blocker = ""
     elif runtime_ok:
@@ -94,10 +103,17 @@ def evaluate(text: str, skill: str, runtime_dir: pathlib.Path) -> dict[str, Any]
         },
         "runtime_dir": str(runtime_dir),
         "runtime_available": runtime_ok,
+        "operation_router_available": router_ok,
         "action": action,
         "must_stop": must_stop,
         "first_blocker": first_blocker,
-        "required_next": "pmw-controller intake" if pmw_required and runtime_ok else "",
+        "required_next": (
+            "pmw-operation-router classify"
+            if pmw_required and runtime_ok and router_ok
+            else "pmw-controller intake"
+            if pmw_required and runtime_ok
+            else ""
+        ),
         "allowed_fallback": not pmw_required,
         "forbidden_fallbacks": FORBIDDEN_FALLBACKS if pmw_required else [],
         "user_visible_stop": (

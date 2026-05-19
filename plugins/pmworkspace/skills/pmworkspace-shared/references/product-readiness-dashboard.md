@@ -50,6 +50,8 @@ pmw-dashboard status
 | 当前任务 | Required | Required | 必须存在 controller active run，且 run 不能是已完成 / 可交付等 terminal 状态；`current_task_digest` 和 `current_input_revision` 是本轮唯一合法上下文。 |
 | 产品简报 | Required | Required | 必须是当前 run / 当前 `task_digest` / 当前 `input_revision` 下的 `brief_lock=locked`；候选 brief、旧 aligned brief 或 Markdown 状态行只能显示为“待确认 / 可参考，不可放行”。 |
 | 产品简报确认 | Required | Required | 当前 run 必须有 `brief_lock=locked`；不能只凭 Markdown 中出现 `已对齐` 放行。`boundary_change` 会把简报改成 `needs_relock`，只要求重新确认受影响边界。 |
+| 当前操作 | Conditional | no | 存在 `prototype_revision` operation 时展示 operation 类型、继承的 locked brief / 设计规范 / 源图和本轮最小门槛；局部修改不得重跑目标模式、自动评审、产品方向或策略审查。 |
+| 编辑合同 | Conditional | no | `prototype_revision` 必须有 `source_image`、`edit_scope`、`preserve_scope`，且修改区域和保留区域不能冲突；若 `boundary_change=true`，不签发 permit，退回 brief relock。 |
 | Zoon | Conditional | Conditional | 未启用时使用本地已对齐 Markdown，不阻断出图 / 交付；已启用、已有 URL 或用户选择在线协作时，必须已同步且无实质漂移。 |
 | 线上参考 | Required | Required | 已提供线上参考、已确认无线上参考，或明确不适用；未判断时不继续。优先读取最新 `browser_evidence` 产物，没有时回退到 run evidence / gate 事件。 |
 | 视觉基线 | Conditional | Conditional | 已采集线上截图或生产视觉参考时必须登记 `visual_baseline`，包含参考尺寸和目标输出像素；缺视觉基线或缺目标像素时不写 image-2 prompt。新概念页且用户确认无参考时显示不适用。 |
@@ -58,7 +60,7 @@ pmw-dashboard status
 | 截图编辑模式 | Conditional | Conditional | 有 `visual_baseline` 且是已有功能迭代 / 视觉还原优先时，输出单元必须使用 `screenshot_edit`，绑定 `base_image`、`edit_scope`、`preserve_regions`；不能默认从零重画整页。 |
 | 线上截图路径分析 | Conditional | Conditional | 有 `visual_baseline` 时，输出单元必须先说明线上截图信息架构、用户浏览路径、用户完成任务路径，再决定局部改造范围；未分析时不写 image-2 prompt。 |
 | 生产基线改动证明 | Conditional | Conditional | 有 `visual_baseline` 时，输出单元必须说明当前线上问题、改动区域、为什么优于当前线上、保留 / 删除边界；证明不成立时不写 image-2 prompt。 |
-| 方案差异 | Required | Required | 输出数量和页面方案由 `brief_lock.image_output_mode` 决定；三页探索 / 三页实验必须是 3 张独立完整页面，单页主方案必须来自 `single_page_confirmed`。 |
+| 方案差异 | Required | Required | 新原型工作流的输出数量和页面方案由 `brief_lock.image_output_mode` 决定；三页探索 / 三页实验必须是 3 张独立完整页面，单页主方案必须来自 `single_page_confirmed`。`prototype_revision` 使用 operation 的 `expected_output_units`，不强制三页实验。 |
 | 原型设计完整度 | Required | Conditional | 出图前必须完成；交付前如存在 prototype-board 输出单元，则每个输出单元必须记录设计评分、主要设计差距、10/10 原型标准、prompt 设计修正、状态覆盖、第一眼 / 第二眼 / 第三眼和反 AI 模板味约束。缺失时不写 image-2 prompt，也不能把该原型作为交付依据。 |
 | 设计规范目标 | Required | Conditional | 出图前必须明确并确认设计规范目标：用户提供、AutoDesign、平台模式库或 PMW 默认假设；每个输出单元必须写入设计系统 / 平台模式、灵感来源摘要和禁止照搬项。缺失或未确认时先给用户设计规范目标卡，或确认默认假设。 |
 | 方案方向确认 | Required | Required | 当前 run 必须记录用户已确认或批准默认方案方向；未确认时不写 image-2 prompt。 |
@@ -72,7 +74,7 @@ pmw-dashboard status
 
 ## Verdict 规则
 
-- `READY_FOR_PROTOTYPE / 可出图`：产品简报、产品简报确认、线上参考、必要的视觉基线、输出画布、截图编辑模式、线上截图路径分析、生产基线改动证明、方案差异、原型设计完整度、设计规范目标及确认、方案方向确认和不可虚构项都通过；Zoon 未启用时使用本地简报，已启用时必须同步且无漂移；数据佐证缺失只提示未验证风险；复审状态仅展示，不阻断出图。
+- `READY_FOR_PROTOTYPE / 可出图`：新原型工作流中，产品简报、产品简报确认、线上参考、必要的视觉基线、输出画布、截图编辑模式、线上截图路径分析、生产基线改动证明、方案差异、原型设计完整度、设计规范目标及确认、方案方向确认和不可虚构项都通过；Zoon 未启用时使用本地简报，已启用时必须同步且无漂移；数据佐证缺失只提示未验证风险；复审状态仅展示，不阻断出图。`prototype_revision` 中，locked brief、设计规范目标、source image、edit scope、preserve scope 和 operation-scoped permit 通过即可出受影响单图 / 多状态图。
 - `READY_FOR_HANDOFF / 可交付`：出图前门槛全部通过，且原型复审为 `可通过`，研发可行性反问已完成，关键 D 已拍板，交付缺口不会改变承诺或验收。
 - `NOT_READY / 不可出图 / 不可交付`：任一 required 行未通过。输出必须给出第一条阻断行的行动建议，并路由到能补齐它的最早技能。
 

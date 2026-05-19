@@ -12,7 +12,7 @@
     "required_behaviors": [
       "pmw-upgrade 必须安装或刷新全局 Codex AGENTS guard",
       "全局 guard 明确要求先运行 pmw-trigger-guard",
-      "PMW 命中后必须运行 pmw-controller intake",
+      "PMW 命中后必须先运行 pmw-operation-router classify，只有新任务才 intake",
       "命令不可用时必须停止，不能退回普通方案或 imagegen"
     ],
     "forbidden_behaviors": [
@@ -29,6 +29,10 @@
     {
       "path": "bin/pmw-install-global-guard",
       "contains": "pmw-trigger-guard"
+    },
+    {
+      "path": "bin/pmw-install-global-guard",
+      "contains": "pmw-operation-router"
     },
     {
       "path": "bin/pmw-upgrade",

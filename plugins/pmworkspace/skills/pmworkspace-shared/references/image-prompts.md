@@ -99,6 +99,8 @@ C. <名称> - <产品路径；相信的用户行为；要赢过的现状替代�
 
 Directions follow `brief_lock.image_output_mode`: three-page exploration / experiment uses 3 complete page output units; single-page confirmed uses 1 page output unit. Page versions must differ by product strategy, information architecture, interaction model, trust model, or key task path. Do not offer three visual skins of the same idea. After confirmation, generate each page as a separate image, even when several images are generated in one batch.
 
+For `prototype_revision` operations, output count follows the operation edit contract instead of `brief_lock.image_output_mode`. If the user asks for two states, such as logged-in and logged-out, register / permit two operation-scoped output units. Do not force the old three-page experiment gate. The prompt must bind `source_image`, `edit_scope`, `preserve_scope`, inherited locked brief, design spec target, and the operation-scoped `image_permit_id`; without these fields, no image-2 prompt is allowed.
+
 Each direction must also be a different design judgment. At least one of these must differ materially: information hierarchy, interaction model, trust model, state strategy, or subtraction / de-noising strategy. Do not treat three color palettes, three illustration styles, or three card treatments as three directions.
 
 The scheme quality rule is business-agnostic: it applies to lead forms, community, live streaming, product libraries, transaction flows, content screens, tools, and dashboards. Visual style is only the expression inside an approved scheme; it is not the scheme itself.

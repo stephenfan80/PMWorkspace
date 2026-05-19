@@ -357,3 +357,81 @@ def gate_id(subject: str, context: dict[str, str]) -> str:
 def fingerprint(parts: list[Any]) -> str:
     raw = json.dumps(parts, ensure_ascii=False, sort_keys=True)
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def operation_id(operation_type: str, context: dict[str, str], summary: str = "") -> str:
+    seed = "|".join(
+        [
+            now_fragment(),
+            operation_type or "operation",
+            context.get("run_id", ""),
+            context.get("task_digest", ""),
+            context.get("input_revision", ""),
+            summary or "",
+        ]
+    )
+    return f"op_{hashlib.sha256(seed.encode('utf-8')).hexdigest()[:20]}"
+
+
+def resolve_parent_context(project: dict[str, Any], run_id: str | None = None) -> dict[str, str]:
+    context = resolve_context(project, run_id)
+    return {
+        "parent_run_id": context.get("run_id", ""),
+        "parent_task_digest": context.get("task_digest", ""),
+        "parent_input_revision": context.get("input_revision", ""),
+        "context_source": context.get("context_source", ""),
+        "legacy_context_status": context.get("legacy_context_status", "current"),
+    }
+
+
+def latest_operation(project: dict[str, Any], operation_type: str = "") -> dict[str, Any]:
+    run_id = str(project.get("current_run_id") or "")
+    if not run_id:
+        return {}
+    context = resolve_context(project)
+    rows = read_jsonl(run_path(run_id, str(project.get("slug") or "") or None))
+    for row in reversed(rows):
+        if row.get("event") != "operation":
+            continue
+        if operation_type and row.get("operation_type") != operation_type:
+            continue
+        if not operation_matches_context(row, context):
+            continue
+        return row
+    return {}
+
+
+def operation_matches_context(row: dict[str, Any], context: dict[str, str]) -> bool:
+    if context.get("legacy_context_status") == "legacy_no_snapshot":
+        return False
+    mappings = {
+        "parent_run_id": context.get("run_id", ""),
+        "parent_task_digest": context.get("task_digest", ""),
+        "parent_input_revision": context.get("input_revision", ""),
+    }
+    for key, value in mappings.items():
+        if value and str(row.get(key) or "") != str(value):
+            return False
+    return True
+
+
+def operation_expected_units(operation: dict[str, Any], default: int = 1) -> int:
+    try:
+        value = int(operation.get("expected_output_units") or default)
+    except (TypeError, ValueError):
+        value = default
+    return max(1, min(value, 12))
+
+
+def operation_variant_roles(operation: dict[str, Any]) -> list[str]:
+    raw = operation.get("variant_roles") or operation.get("variant_role") or []
+    if isinstance(raw, str):
+        roles = [item.strip() for item in re.split(r"[,，/、\s]+", raw) if item.strip()]
+    elif isinstance(raw, list):
+        roles = [str(item).strip() for item in raw if str(item).strip()]
+    else:
+        roles = []
+    expected = operation_expected_units(operation, len(roles) or 1)
+    while len(roles) < expected:
+        roles.append(f"variant_{len(roles) + 1}")
+    return roles[:expected]

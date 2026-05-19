@@ -25,7 +25,17 @@ PMWorkspace 的第一道门不是 `$pm-workspace` 里的口头路由，而是 `p
 pmw-trigger-guard --text "<本轮用户原话和材料摘要>" --skill <skill> --json
 ```
 
-若返回 `pmw_required=true` 且 `runtime_available=true`，下一步只能是 `pmw-controller intake`。若返回 `pmw_required=true` 但 PMW runtime、controller 或专用动作不可用，必须停止并向用户说明：`PMW runtime 未接管当前任务，已阻断普通方案输出和出图`。这种情况下不能退回普通产品分析、不能先读数据后输出方案、不能生成 HTML 线框，也不能调用宿主级 `imagegen`。
+若返回 `pmw_required=true` 且 `runtime_available=true`，下一步只能是 operation router：
+
+```bash
+pmw-operation-router classify \
+  --text "<本轮用户原话>" \
+  --materials "<材料摘要>" \
+  --skill <skill> \
+  --json
+```
+
+只有 router 返回 `operation_type=new_product_workflow` 且 `required_controller_command="pmw-controller intake"` 时，才进入完整 intake。若返回 `answer_pending_gate`、`attach_evidence`、`modify_brief`、`lock_or_confirm_brief`、`prototype_revision`、`prototype_review`、`prototype_regenerate` 或 `handoff_continue`，必须执行 router 指定的最小续跑命令，不能重新 intake。若返回 `pmw_required=true` 但 PMW runtime、controller、operation router 或专用动作不可用，必须停止并向用户说明：`PMW runtime 未接管当前任务，已阻断普通方案输出和出图`。这种情况下不能退回普通产品分析、不能先读数据后输出方案、不能生成 HTML 线框，也不能调用宿主级 `imagegen`。
 
 以下话术代表硬违规，eval 必须拦截：
 
@@ -35,9 +45,9 @@ pmw-trigger-guard --text "<本轮用户原话和材料摘要>" --skill <skill> -
 
 正确行为是停在入口守卫或 controller 最早门槛，展示工作方式卡片、当前阻断和下一步，而不是“先给方案 / 先出一张图”。
 
-## Controller Authority
+## Operation Router 与 Controller Authority
 
-PMWorkspace 的运行时真源是 `pmw-controller`，不是单个 skill 的口头判断、全局 `current-project` 或历史 latest artifact。每个产品任务进入 PMW 时都必须先完成 intake：
+PMWorkspace 的运行时真源是 `pmw-operation-router` + `pmw-controller`，不是单个 skill 的口头判断、全局 `current-project` 或历史 latest artifact。每个 PMW 命中必须先分类 operation；只有新的产品工作流才完成 intake：
 
 ```bash
 pmw-controller intake \
@@ -50,7 +60,18 @@ pmw-controller intake \
 pmw-controller next --json
 ```
 
-controller 会写入 `project.json` 的 `current_task_digest`、`current_input_revision`、`current_task_goal`、`current_stage`、`allowed_next_action` 和 `last_controller_verdict`。如果当前 active run 已完成、目标语义不匹配或材料 revision 变化，controller 必须创建新 run 或新 revision；旧 brief、旧 board、旧 review 只能作为参考，不能放行本轮。
+controller 会写入 `project.json` 的 `current_task_digest`、`current_input_revision`、`current_task_goal`、`current_stage`、`allowed_next_action` 和 `last_controller_verdict`。如果当前 active run 已完成、目标语义不匹配或材料 revision 变化，`new_product_workflow` 的 intake 必须创建新 run 或新 revision；旧 brief、旧 board、旧 review 只能作为参考，不能放行本轮。
+
+流程内 operation 不得改变 `current_task_digest` / `current_input_revision`。它们通过已有命令继承上下文：
+
+```bash
+pmw-controller answer --gate-id current --value "<用户原话或选择>" --summary "<结构化确认摘要>" --json
+pmw-controller lock-brief --brief-path "<当前 brief.md>" --brief-version "<vN>" --user-confirmed true --json
+pmw-controller modify-brief --change-type "<editorial|non_boundary_addition|boundary_change>" --summary "<修改摘要>" --json
+pmw-controller continue-operation --operation-type prototype_revision --summary "<本轮修改摘要>" --source-image "<path-or-id>" --edit-scope "<只改哪里>" --preserve-scope "<不改哪里>" --json
+```
+
+`continue-operation` 会写入 operation event，包含 `operation_id`、`operation_type`、`parent_run_id`、`parent_task_digest`、`parent_input_revision`、`parent_artifact_id`、`source_image_id` 和显式继承的 locked brief / design spec / visual baseline。`prototype_revision` 只审 edit contract，不重跑 `goal_mode`、`autoplan`、`product_direction` 或 `strategy`。如果 `boundary_change=true`，不得签发 image permit，必须回到 brief relock。
 
 `pmw-controller next --json` 必须返回 `workflow_stage`、`allowed_next_skill`、`allowed_user_visible_action`、`first_blocker`、`required_user_action`、`can_write_brief`、`can_register_prototype_units`、`can_issue_image_permit` 和 `can_handoff`。skill 只看这些能力位推进：`can_write_brief=false` 时不能保存已对齐 brief；`can_register_prototype_units=false` 时不能登记 prototype-board；`can_issue_image_permit=false` 时不能写 image-2 prompt；`can_handoff=false` 时不能输出 PRD / 产品设计文档。
 
@@ -120,7 +141,7 @@ pmw-controller assert --capability handoff
 
 PMW 的续跑真源是当前 run 的 `task_intake` snapshot。`project.json` current 指针只用于默认 active work；一旦命令显式传入 `--run <run_id>`，脚本必须从目标 run 的 `task_intake` 读取 `task_digest`、`input_revision` 和 controller verdict，不得借用当前 project 指针。缺少 snapshot 的旧 run 标记为 `legacy_no_snapshot`，只能作为候选上下文展示，不能放行正式产物。
 
-用户短回复不能重新触发 intake。当前门槛由 `pmw-controller next --json` 返回的 `pending_gate_id` 和 `expected_subject` 表示；用户回复“确认策略审查”“同意这个 brief”“按 A 继续”等短确认时，必须使用：
+用户短回复不能重新触发 intake。当前门槛由 operation router 识别为 `answer_pending_gate`，再由 `pmw-controller next --json` 返回的 `pending_gate_id` 和 `expected_subject` 绑定；用户回复“确认策略审查”“同意这个 brief”“按 A 继续”等短确认时，必须使用：
 
 ```bash
 pmw-controller answer \
@@ -148,7 +169,7 @@ pmw-controller answer \
 
 新 runtime 只能用 `confirm_state` 判断确认是否通过；`summary` 只用于展示和审计。`summary` 中出现“待确认项”“需核验项”等产品边界词，不得反向污染 `confirmed` 状态。若 `confirm_state=rejected`，同一 subject revision 的下游 readiness、permit 和交付必须失效。
 
-产品简报采用两段式机制：先保存候选简报，再在用户确认后锁定。机器放行不再读取 Markdown 中某一行 `状态：已对齐`；当前 run / task / revision 下的 `brief_lock=locked` 才是唯一正式事实源。
+产品简报采用两段式机制：先保存候选简报，再在用户确认后锁定。机器放行不再读取 Markdown 中某一行 `状态：已对齐`；当前 run / task / revision 下的 `brief_lock=locked` 才是唯一正式事实源。用户说“确认没有问题”时，operation router 应识别为 `lock_or_confirm_brief`，不得创建新 revision。
 
 ```bash
 pmw-controller lock-brief \
@@ -161,7 +182,7 @@ pmw-controller lock-brief \
 
 该命令一次完成边界检查、写入 `brief_lock`、设置 `latest_brief` / `latest_brief_version`，并登记当前 revision 的 `product_brief` artifact。命令按 `run_id / task_digest / input_revision / brief_path / brief_version` 幂等，重试不能产生重复 current artifact。`confirm-brief` 作为兼容入口保留，但语义等同于 `lock-brief --user-confirmed true`。
 
-简报修改必须先分类：`editorial` 和 `non_boundary_addition` 只记录修改并保持锁定；`boundary_change` 会把锁定态改为 `needs_relock`，只要求重新确认受影响边界，不重跑完整产品方向审查。
+简报修改必须先分类：`editorial` 和 `non_boundary_addition` 只记录修改并保持锁定；`boundary_change` 会把锁定态改为 `needs_relock`，只要求重新确认受影响边界，不重跑完整产品方向审查。原型反馈若改变用户承诺、范围、数据真实性或交付责任，也必须走同一条 brief relock 路线。
 
 preflight 连续卡在同一 blocker 时会进入恢复模式。`pmw-controller preflight --target prototype|handoff --json` 会记录 blocker fingerprint；相同 run、target 和 fingerprint 连续失败第二次返回 `RECOVERY_REQUIRED`。Agent 必须停止硬跑，展示 readiness diagnostics 和推荐恢复命令。
 
@@ -177,7 +198,7 @@ pmw-controller intake --goal "<本轮目标>" --materials "<本轮材料摘要>"
 
 ### Run Owner 协议
 
-- `$pm-workspace` 是路由型会话的 run owner：完成 D0 工作方式判定和路由后，先调用 `pmw-controller intake`，并记录当前门槛、证据状态和下一技能。
+- `$pm-workspace` 是路由型会话的 run owner：完成 D0 工作方式判定和 operation router 后，只有 `new_product_workflow` 先调用 `pmw-controller intake`；流程内 operation 使用 router 指定的续跑命令，并记录当前门槛、证据状态和下一技能。
 - 子 skill 发现已有当前 run 时复用当前 run，但必须先通过 controller 检查当前 `task_digest` / `input_revision` 是否匹配；匹配才复用，不匹配则由 controller 建立新 run 或 revision。
 - 用户直接调用子 skill 且没有当前 run 时，子 skill 也先调用 `pmw-controller intake`，skill id 使用自己的名称。
 - 检查当前 run 时，可用 `pmw-project show` 查看 `current_run_id`；复用时 `pmw-run event` 可以省略 `--run`，由平台写入当前 run。

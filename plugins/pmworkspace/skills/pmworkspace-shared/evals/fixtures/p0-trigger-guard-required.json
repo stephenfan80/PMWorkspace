@@ -1,6 +1,6 @@
 {
   "id": "p0-trigger-guard-required",
-  "title": "PMW 命中信号必须先进入 trigger guard 和 controller",
+  "title": "PMW 命中信号必须先进入 trigger guard 和 operation router",
   "category": "pm-workspace-runtime",
   "primary_skill": "pm-workspace",
   "prompt": "AI 产品工作站帮我思考一个方案，针对提升汽车之家新能源独号转化率的方案及原型。",
@@ -11,12 +11,12 @@
     "gate": "PMW trigger guard",
     "required_behaviors": [
       "命中 AI 产品工作站、汽车之家、独号、转化率、方案及原型时 pmw_required=true",
-      "PMW runtime 可用时 required_next 必须是 pmw-controller intake",
+      "PMW runtime 可用且 router 存在时 required_next 必须是 pmw-operation-router classify",
       "PMW runtime 不可用时必须停止，不能退回普通产品分析或 imagegen",
       "guard 输出 forbidden_fallbacks，明确禁止 generic_product_plan 和 imagegen_without_permit"
     ],
     "forbidden_behaviors": [
-      "没有运行 pmw-controller intake 就开始读数据出方案",
+      "没有运行 pmw-operation-router classify 就开始读数据出方案",
       "把插件触发失败当作继续普通产品分析的许可",
       "PMW 命中后直接生成图片"
     ]
@@ -46,7 +46,7 @@
       "contains": [
         "\"pmw_required\": true",
         "\"allowed_fallback\": false",
-        "\"required_next\": \"pmw-controller intake\"",
+        "\"required_next\": \"pmw-operation-router classify\"",
         "generic_product_plan",
         "imagegen_without_permit"
       ]

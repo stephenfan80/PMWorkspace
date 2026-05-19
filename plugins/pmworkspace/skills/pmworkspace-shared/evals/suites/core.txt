@@ -24,6 +24,16 @@ p0-trigger-guard-required
 p0-no-generic-fallback
 p0-global-guard-installed
 p0-runtime-recovery-short-answer
+p0-operation-router-new-workflow-runs-intake
+p0-operation-router-answer-does-not-intake
+p0-operation-router-prototype-revision-no-intake
+p0-operation-router-prototype-revision-inherits-locked-context
+p0-operation-router-boundary-change-routes-brief
+p0-operation-router-source-image-required
+p0-operation-router-multiple-source-images-asks-selection
+p0-operation-router-design-spec-inherited
+p0-operation-router-image-permit-bound-to-operation
+p0-operation-router-no-generic-fallback
 p0-run-snapshot-stamping
 p0-structured-confirmation
 p0-atomic-brief-confirm

@@ -44,7 +44,7 @@
         "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=p0-structured; bin/pmw-controller intake --goal '提升汽车之家新能源独号转化率方案及原型' --materials '' --skill pm-workspace --product-path 待判断 --depth deep --stage intake >/dev/null; bin/pmw-controller confirm --kind goal_mode --value '优化线上指标' >/dev/null; bin/pmw-controller confirm --kind autoplan --summary '我建议先做产品方向审查。当前最早门槛是判断真实损失和方向机会。下一技能是 $pm-jobs。' >/dev/null; bin/pmw-controller confirm --kind product_direction --summary '前提：独号转化问题来自既有链路。现状替代：用户靠搜索和车系页自己比较。当前损失：高意向用户没有被有效承接。PM 判断：推荐车系页强意图入口。' >/dev/null; bin/pmw-controller answer --gate-id current --value '确认策略审查' --summary '范围模式：选择性收缩。最大策略矛盾：提升转化不能增加打扰风险。策略 D：本周期优先车系页 CTA。待确认项是价格需核验。' --confirm-state confirmed >/dev/null; bin/pmw-controller next --json"
       ],
       "exit_code": 0,
-      "contains": "\"allowed_next_action\": \"NEEDS_BASELINE\""
+      "contains": "\"allowed_next_action\": \"WRITE_PENDING_BRIEF\""
     },
     {
       "command": [

@@ -148,17 +148,20 @@ pmw-controller answer \
 
 新 runtime 只能用 `confirm_state` 判断确认是否通过；`summary` 只用于展示和审计。`summary` 中出现“待确认项”“需核验项”等产品边界词，不得反向污染 `confirmed` 状态。若 `confirm_state=rejected`，同一 subject revision 的下游 readiness、permit 和交付必须失效。
 
-产品简报确认使用原子命令，避免“latest_brief 已更新、artifact 没登记”或反过来的半成功状态：
+产品简报采用两段式机制：先保存候选简报，再在用户确认后锁定。机器放行不再读取 Markdown 中某一行 `状态：已对齐`；当前 run / task / revision 下的 `brief_lock=locked` 才是唯一正式事实源。
 
 ```bash
-pmw-controller confirm-brief \
+pmw-controller lock-brief \
   --brief-path "<当前 brief.md>" \
   --brief-version "<vN>" \
+  --user-confirmed true \
   --summary "<关键前提已确认或按标注假设推进>" \
   --json
 ```
 
-该命令一次完成三件事：设置 `latest_brief` / `latest_brief_version`，写入结构化 `brief` confirmation，并登记当前 revision 的 `product_brief` artifact。命令按 `run_id / task_digest / input_revision / brief_path / brief_version` 幂等，重试不能产生重复 current artifact。
+该命令一次完成边界检查、写入 `brief_lock`、设置 `latest_brief` / `latest_brief_version`，并登记当前 revision 的 `product_brief` artifact。命令按 `run_id / task_digest / input_revision / brief_path / brief_version` 幂等，重试不能产生重复 current artifact。`confirm-brief` 作为兼容入口保留，但语义等同于 `lock-brief --user-confirmed true`。
+
+简报修改必须先分类：`editorial` 和 `non_boundary_addition` 只记录修改并保持锁定；`boundary_change` 会把锁定态改为 `needs_relock`，只要求重新确认受影响边界，不重跑完整产品方向审查。
 
 preflight 连续卡在同一 blocker 时会进入恢复模式。`pmw-controller preflight --target prototype|handoff --json` 会记录 blocker fingerprint；相同 run、target 和 fingerprint 连续失败第二次返回 `RECOVERY_REQUIRED`。Agent 必须停止硬跑，展示 readiness diagnostics 和推荐恢复命令。
 

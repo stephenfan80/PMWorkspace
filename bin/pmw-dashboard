@@ -634,15 +634,11 @@ def has_non_fiction_boundary(text: str) -> bool:
 
 
 def extract_brief_status(text: str) -> str:
-    for line in text.splitlines()[:120]:
-        stripped = line.strip().lstrip("-# ").strip()
-        if stripped.startswith("确认状态"):
-            return stripped
-    return ""
+    return rt.extract_brief_status_line(text)
 
 
 def status_is_aligned(text: str) -> bool:
-    return "已对齐" in text and not contains_any(text, ["待确认", "草稿", "缺失门槛", "有漂移", "实质漂移"])
+    return rt.brief_is_aligned(text)
 
 
 def event_is_confirmed(event: dict) -> bool:
@@ -732,16 +728,17 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
     brief_text = read_text(brief_path)
     brief_name, brief_meta = latest_brief_summary(brief_path)
     brief_version = str(project.get("latest_brief_version") or "")
-    brief_status = extract_brief_status(brief_text)
     product_brief = current_brief_artifact(root, brief_path, run_id, project)
-    brief_status_text = f"{brief_meta} {brief_status}"
-    brief_ready = bool(brief_path) and bool(brief_text) and status_is_aligned(brief_status_text)
+    brief_lock = rt.latest_brief_lock(project)
+    lock_status = str(brief_lock.get("lock_status") or brief_lock.get("status") or "")
     controller_active = task_is_controller_active(project)
+    legacy_brief_ready = (not controller_active) and bool(brief_path) and bool(brief_text) and status_is_aligned(brief_text)
+    brief_ready = (bool(brief_path) and rt.brief_lock_is_locked(brief_lock)) or legacy_brief_ready
     digest, revision = task_context(project)
     current_task_ready = bool(run_id) and (not controller_active or (bool(digest) and bool(revision)))
     if controller_active and not current_task_ready:
         current_task_status = "未通过"
-        current_task_evidence = "current_task_digest / current_input_revision 缺失，或当前 run 已结束"
+        current_task_evidence = "current_task_digest / current_input_revision 缺失，或当前 run 已结束；旧简报可参考，不可放行"
     elif controller_active:
         current_task_status = "已绑定"
         digest, revision = task_context(project)
@@ -751,8 +748,26 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         current_task_evidence = "当前项目未启用 controller task revision；保持兼容，但新 PMW 入口应先运行 pmw-controller intake"
     else:
         current_task_status = "无 active run"
-        current_task_evidence = "project.json 没有可用 current_run_id，或 latest_run_status 已是终态"
-    brief_current_ok = current_task_ready and brief_ready and (not controller_active or bool(product_brief))
+        current_task_evidence = "project.json 没有可用 current_run_id，或 latest_run_status 已是终态；旧简报可参考，不可放行"
+    brief_current_ok = current_task_ready and brief_ready
+    if not brief_path:
+        brief_status_label = "简报未产出"
+        brief_action = "进入 $pm-brief 产出候选简报"
+    elif lock_status == "needs_relock":
+        brief_status_label = "简报被实质修改，需要重新锁定"
+        brief_action = "只确认受影响边界，然后运行 pmw-controller lock-brief"
+    elif lock_status == "blocked":
+        brief_status_label = f"简报边界未通过：{brief_lock.get('first_blocker') or '需要补齐关键边界'}"
+        brief_action = "补齐这一个边界后重新 lock-brief"
+    elif brief_current_ok and legacy_brief_ready and not rt.brief_lock_is_locked(brief_lock):
+        brief_status_label = "已对齐（legacy 兼容）"
+        brief_action = "继续；新 PMW run 应使用 brief_lock"
+    elif brief_current_ok:
+        brief_status_label = "简报已锁定，可进入原型"
+        brief_action = "继续"
+    else:
+        brief_status_label = "简报待用户确认"
+        brief_action = "把候选简报和待确认问题给用户确认；确认后运行 pmw-controller lock-brief"
     rows = [
         gate_result(
             "当前任务",
@@ -765,16 +780,17 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         gate_result(
             "产品简报",
             True,
-            "已对齐" if brief_current_ok else ("旧简报可参考，不可放行" if brief_ready else ("未记录" if not brief_path else "未达已对齐")),
+            brief_status_label,
             "；".join(
                 item
                 for item in [
                     brief_name if brief_path else "project.json 未记录 latest_brief",
-                    f"artifact：{product_brief.get('status')}" if product_brief else "artifact 未记录当前 brief",
+                    f"brief_lock：{lock_status or '未记录'}",
+                    f"artifact：{product_brief.get('status')}" if product_brief else "artifact 可由 lock 自动修复" if brief_ready else "artifact 未记录当前 brief",
                 ]
                 if item
             ),
-            "继续" if brief_current_ok else "退回 $pm-brief 完成并确认本轮 task revision 的产品核心信息契约",
+            brief_action,
             brief_current_ok,
         )
     ]
@@ -782,14 +798,14 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
     brief_confirm = latest_event(events, ["产品简报确认", "前提确认"], {"gate", "decision"})
     if brief_confirm and controller_active and not row_matches_task(brief_confirm, project):
         brief_confirm = {}
-    brief_confirm_ready = bool(brief_confirm) and event_is_confirmed(brief_confirm)
+    brief_confirm_ready = brief_current_ok or (bool(brief_confirm) and event_is_confirmed(brief_confirm))
     rows.append(
         gate_result(
             "产品简报确认",
             True,
             "已确认" if brief_confirm_ready else ("未记录" if not brief_confirm else brief_confirm.get("status", "待确认")),
-            brief_confirm.get("summary") or "当前 run 未记录用户确认产品简报 / 前提确认",
-            "继续" if brief_confirm_ready else "先把产品简报 / 关键前提展示给用户确认；确认前不能进入 image-2",
+            brief_lock.get("summary") or brief_confirm.get("summary") or "当前 run 未记录 brief_lock；确认前不能进入 image-2",
+            "继续" if brief_confirm_ready else "先把候选简报给用户确认，再运行 lock-brief 一次性锁定",
             brief_confirm_ready,
         )
     )
@@ -1498,7 +1514,7 @@ def context_diagnostics(root: pathlib.Path, project: dict, run_id: str, target: 
         )
     blocker_name = str(first_blocker.get("name") or "")
     if "产品简报" in blocker_name:
-        recovery = "pmw-controller confirm-brief --brief-path <current-brief.md> --brief-version <vN> --summary <已确认前提> --json"
+        recovery = "pmw-controller lock-brief --brief-path <current-brief.md> --brief-version <vN> --user-confirmed true --summary <用户确认候选简报没有问题> --json"
     elif "视觉基线" in blocker_name or "线上参考" in blocker_name:
         recovery = "pmw-artifact add --kind visual_baseline --status 已登记 --summary '<目标输出像素和基线边界>' --run <run_id>"
     elif "方案" in blocker_name or "输出单元" in blocker_name:

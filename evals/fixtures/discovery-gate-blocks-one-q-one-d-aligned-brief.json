@@ -1,6 +1,6 @@
 {
   "id": "discovery-gate-blocks-one-q-one-d-aligned-brief",
-  "title": "Discovery gate 必须阻止一个 Q/D 后保存已对齐简报",
+  "title": "Markdown 已对齐不能替代 brief_lock",
   "category": "pm-workspace-runtime",
   "primary_skill": "pm-brief",
   "prompt": "候选产品简报声明已对齐，但当前 run 只有一个方向 D，缺少用户现状、真实痛点、目标和反指标。",
@@ -8,22 +8,22 @@
     "mode": "deep",
     "status": "需要补充",
     "must_stop": true,
-    "gate": "discovery gate blocked",
+    "gate": "brief lock required",
     "required_behaviors": [
-      "pmw-log brief 调用 pmw-discovery-gate",
-      "拒绝保存为已对齐",
-      "返回缺失产品发现维度"
+      "pmw-log brief 只保存候选简报",
+      "Markdown 已对齐只触发 BRIEF_LOCK_REQUIRED",
+      "不生成正式 product_brief artifact"
     ],
     "forbidden_behaviors": [
-      "只凭产品简报确认就保存已对齐",
-      "绕过产品发现深度门槛",
+      "只凭 Markdown 状态保存正式已对齐 artifact",
+      "绕过 brief_lock",
       "自动进入原型"
     ]
   },
   "contract_checks": [
     {
       "path": "bin/pmw-log",
-      "contains": "pmw-discovery-gate"
+      "contains": "BRIEF_LOCK_REQUIRED"
     },
     {
       "path": "bin/pmw-discovery-gate",
@@ -37,10 +37,10 @@
         "-lc",
         "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\"; export PMW_PROJECT_SLUG=gate-test; mkdir -p \"$PMW_HOME/projects/gate-test/runs\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\"}\\n' > \"$PMW_HOME/projects/gate-test/project.json\"; printf '{\"event\":\"gate\",\"status\":\"已对齐\",\"title\":\"产品简报确认\",\"summary\":\"用户确认\"}\\n{\"event\":\"decision\",\"status\":\"已确认\",\"title\":\"D1 产品重心\",\"summary\":\"用户选择 A\"}\\n' > \"$PMW_HOME/projects/gate-test/runs/r1.jsonl\"; brief=\"$tmp/brief.md\"; printf '# 产品设计简报：测试\\n确认状态：已对齐\\n\\n## 核心价值判断\\n- 一句话判断：这是一个测试简报。\\n' > \"$brief\"; bin/pmw-log brief 测试 < \"$brief\"; code=$?; rm -rf \"$tmp\"; exit $code"
       ],
-      "exit_code": 2,
+      "exit_code": 0,
       "contains": [
-        "DISCOVERY_GATE_BLOCKED",
-        "missing_dimensions"
+        "BRIEF_LOCK_REQUIRED",
+        "/briefs/"
       ]
     }
   ]

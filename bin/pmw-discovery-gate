@@ -13,6 +13,11 @@ from typing import Optional
 
 
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+import pmw_runtime as rt
+
 STATE_DIR = pathlib.Path(os.environ.get("PMW_HOME", str(pathlib.Path.home() / ".pmworkspace"))).expanduser()
 
 DIMENSIONS = {
@@ -414,7 +419,7 @@ def has_competitor_material(run_id: str, text: str) -> bool:
 
 def brief_declares_aligned(path_value: str) -> bool:
     text = read_text(path_value)
-    return bool(re.search(r"确认状态[：:]\s*已对齐", text))
+    return rt.brief_is_aligned(text)
 
 
 def baseline_state(args: argparse.Namespace, run_id: str) -> dict:

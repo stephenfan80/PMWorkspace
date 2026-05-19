@@ -134,7 +134,7 @@
         "tmp=$(mktemp -d); export PMW_HOME=\"$tmp/home\" PMW_PROJECT_SLUG=artifact-brief-no-confirm; root=\"$PMW_HOME/projects/$PMW_PROJECT_SLUG\"; mkdir -p \"$root/runs\" \"$root/briefs\"; printf '{\"current_run_id\":\"r1\",\"latest_run_id\":\"r1\"}\\n' > \"$root/project.json\"; for dim in product_role target_trigger current_alternative pain_loss goal_countermetric; do bin/pmw-log discovery --dimension \"$dim\" --source 用户 --summary \"已确认 $dim 的具体事实\" --confidence confirmed >/dev/null; done; bin/pmw-log question D1 首屏策略 推荐A A 用户选择A >/dev/null; bin/pmw-log question D2 承诺边界 推荐B B 用户选择B >/dev/null; brief=\"$root/briefs/current.md\"; printf '# 产品简报\\n确认状态：已对齐\\n\\n## 核心价值判断\\n- 产品定位：帮助用户决策。\\n- 目标用户：高意向用户。\\n- 当前替代：比价或放弃。\\n- 真实痛点：信任不足。\\n- 主目标：提升转化；反指标：不增加骚扰。\\n' > \"$brief\"; set +e; out=$(bin/pmw-artifact add --kind product_brief --title 测试 --status 已对齐 --source-skill pm-brief --path \"$brief\" --next-skill pm-prototype-shotgun,pm-handoff 2>&1); code=$?; printf '%s\\n' \"$out\"; rm -rf \"$tmp\"; exit $code"
       ],
       "exit_code": 1,
-      "contains": "未记录产品简报确认"
+      "contains": "当前 run 没有 brief_lock=locked"
     },
     {
       "command": [

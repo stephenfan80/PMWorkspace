@@ -25,7 +25,7 @@
   "contract_checks": [
     {
       "path": "pmworkspace-shared/references/product-plan-handoff.md",
-      "contains": "只有用户选择同步、提供 Zoon URL 或任务明确需要多人协作且简报已对齐时，才把业务简报版同步到 Zoon"
+      "contains": "只有用户选择同步、提供 Zoon URL 或任务明确需要多人协作且简报已锁定时，才把业务简报版同步到 Zoon"
     },
     {
       "path": "pm-brief/SKILL.md",

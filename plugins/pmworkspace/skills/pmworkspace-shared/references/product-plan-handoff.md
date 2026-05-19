@@ -99,7 +99,7 @@ For Chinese users, call this artifact `产品简报` in user-facing output. Keep
 
 快速对齐也必须先确认最少前提：通常只列 1-3 条假设和一个关键确认问题。用户确认前，状态保持 `待确认`。
 
-如果用户已经提供完整 Zoon 产品文档，创建简短对齐摘要，并把最新 Zoon 快照作为事实来源。否则产品简报生成后默认先保存本地 Markdown 业务简报和本地审计副本；如果还有待确认信息，必须先告诉用户缺什么、为什么影响判断、不补齐可能导致的产品方案偏差，以及本轮补齐动作。只有产品简报确认状态已对齐后，才询问用户是否需要同步到在线协作文档。只有用户选择同步、提供 Zoon URL 或任务明确需要多人协作且简报已对齐时，才把业务简报版同步到 Zoon；完整 Q/D、来源、准备度、产物流动、复审专家和资产路径始终只进入本地审计副本。创建或更新成功后，自动在 Codex 内置浏览器中打开可编辑 URL。
+如果用户已经提供完整 Zoon 产品文档，创建简短对齐摘要，并把最新 Zoon 快照作为事实来源。否则产品简报生成后默认先保存本地 Markdown 业务简报和本地审计副本；如果还有待确认信息，必须先告诉用户缺什么、为什么影响判断、不补齐可能导致的产品方案偏差，以及本轮补齐动作。只有当前 revision 已通过 `brief_lock=locked` 后，才询问用户是否需要同步到在线协作文档。只有用户选择同步、提供 Zoon URL 或任务明确需要多人协作且简报已锁定时，才把业务简报版同步到 Zoon；完整 Q/D、来源、准备度、产物流动、复审专家和资产路径始终只进入本地审计副本。创建或更新成功后，自动在 Codex 内置浏览器中打开可编辑 URL。
 
 ## 版本与状态
 
@@ -165,17 +165,17 @@ For Chinese users, call this artifact `产品简报` in user-facing output. Keep
 
 ## 对齐门槛
 
-在写图片提示词或生成原型图片前，产品简报必须通过以下信号之一达到“已对齐”：
+在写图片提示词或生成原型图片前，产品简报必须进入锁定态：
 
-- 用户在对话中确认产品简报。
-- 用户编辑或批准 Zoon 产品简报，并要求使用最新版本。
-- 用户明确说使用产品简报中列出的假设，并且前提确认已经完成。
+- 用户在对话中确认候选简报，且 `pmw-controller lock-brief` 写入 `brief_lock=locked`。
+- 用户编辑或批准 Zoon 产品简报，并要求使用最新版本；仍需把该版本锁定到当前 run / revision。
+- 用户明确说使用产品简报中列出的假设，并且边界检查通过；仍需通过 `lock-brief` 生成机器锁。
 
-产品简报生成后必须停在 `产品简报确认`，并把待确认信息、偏差风险和确认动作写给用户；不能只把 Markdown 中的 `确认状态` 改成 `已对齐` 后直接进入原型。平台脚本可用时，如果当前 run 没有 `产品简报确认` 或 `前提确认` 的已确认记录，`pmw-log brief` 不应保存为已对齐版本。
+产品简报生成后必须停在 `产品简报确认`，并把待确认信息、偏差风险和确认动作写给用户；不能只把 Markdown 中的 `确认状态` 改成 `已对齐` 后直接进入原型。平台脚本可用时，用户确认候选简报后运行 `pmw-controller lock-brief`，由它一次完成边界检查、`brief_lock=locked`、latest brief 和 product_brief artifact 登记；未锁定简报只能作为 draft / 待确认事实源。
 
 如果页面需要线上参考，必须先满足：用户已提供参考，或明确确认没有线上参考并批准按概念稿推进。
 
-如果没有这些信号，分享本地产品简报后停止，并请用户补齐、确认或编辑。状态不是 `已对齐` 时，不询问 Zoon 同步、不写 image-2 提示词、不生成图片、不生成 HTML、不输出交付稿。
+如果没有 `brief_lock=locked`，分享本地候选产品简报后停止，并请用户补齐、确认或编辑。不询问 Zoon 同步、不写 image-2 提示词、不生成图片、不生成 HTML、不输出交付稿。
 
 ## 前提确认
 
@@ -188,7 +188,7 @@ For Chinese users, call this artifact `产品简报` in user-facing output. Keep
 3. <前提>。状态：已同意 / 已修改后同意 / 待确认。
 ```
 
-只要任一关键前提是 `待确认`，产品简报确认状态不能写成 `已对齐`。
+只要任一关键前提是 `待确认`，不能运行 `lock-brief`；Markdown 可以显示候选状态，但不能成为出图事实源。
 
 ## 数据佐证
 
@@ -335,7 +335,7 @@ Add only the modules that fit the product. Do not include all modules by default
 如果没有现有 Zoon 文档：
 
 - 默认使用 `pmw-log brief <功能名>` 保存本地产品简报；它不自动创建 Zoon。
-- 只有产品简报确认状态已对齐后，才询问用户是否需要同步到在线协作文档。用户选择需要后，可以直接使用 `pmw-zoon create --title "产品设计简报：<功能名>"` 新建 Zoon 文档，或显式开启 `PMW_ZOON_SYNC_ON_BRIEF=true PMW_ZOON_AUTO_CREATE=true pmw-log brief <功能名>`。
+- 只有当前 revision 已通过 `brief_lock=locked` 后，才询问用户是否需要同步到在线协作文档。用户选择需要后，可以直接使用 `pmw-zoon create --title "产品设计简报：<功能名>"` 新建 Zoon 文档，或显式开启 `PMW_ZOON_SYNC_ON_BRIEF=true PMW_ZOON_AUTO_CREATE=true pmw-log brief <功能名>`。
 - 创建成功后，用 `pmw-project link-zoon <url>` 保存到本地项目记录。
 - 创建成功后，自动在 Codex 内置浏览器中打开可编辑 URL，方便用户直接编辑。
 - 只把返回的可编辑 `url` 发给用户，不展示 API 原始响应。

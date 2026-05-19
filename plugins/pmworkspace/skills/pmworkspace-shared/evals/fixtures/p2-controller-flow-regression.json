@@ -11,7 +11,7 @@
     "gate": "P2 controller flow",
     "required_behaviors": [
       "自动评审后先进入产品方向审查，而不是直接 NEEDS_BASELINE",
-      "完成产品方向审查和策略审查后，缺线上基线才阻断已对齐 brief / 原型",
+      "完成产品方向审查和策略审查后先允许写候选 brief，缺线上基线在 lock-brief 阶段阻断",
       "handoff preflight 需要 controller 显式核验当前 prototype_manifest 和 prototype_review",
       "汽车之家 / AutoDesign 命中后，入口 JSON 提前暴露设计规范 D"
     ],
@@ -64,9 +64,9 @@
       ],
       "exit_code": 0,
       "contains": [
-        "\"allowed_next_action\": \"NEEDS_BASELINE\"",
-        "\"workflow_stage\": \"discovery_pending\"",
-        "写已对齐 brief"
+        "\"allowed_next_action\": \"WRITE_PENDING_BRIEF\"",
+        "\"workflow_stage\": \"brief_pending\"",
+        "本轮还没有产品简报"
       ]
     },
     {

@@ -48,8 +48,8 @@ pmw-dashboard status
 | 门槛 | 出图前 | 交付前 | 判断 |
 |---|---|---|---|
 | 当前任务 | Required | Required | 必须存在 controller active run，且 run 不能是已完成 / 可交付等 terminal 状态；`current_task_digest` 和 `current_input_revision` 是本轮唯一合法上下文。 |
-| 产品简报 | Required | Required | 必须是当前 run / 当前 `task_digest` / 当前 `input_revision` 下的 `已对齐` brief，且没有缺失门槛或实质漂移；旧 aligned brief 显示为“可参考，不可放行”。 |
-| 产品简报确认 | Required | Required | 当前 run 必须记录与当前 `input_revision` 匹配的用户确认产品简报或关键前提；不能只凭 Markdown 中出现 `已对齐` 放行。 |
+| 产品简报 | Required | Required | 必须是当前 run / 当前 `task_digest` / 当前 `input_revision` 下的 `brief_lock=locked`；候选 brief、旧 aligned brief 或 Markdown 状态行只能显示为“待确认 / 可参考，不可放行”。 |
+| 产品简报确认 | Required | Required | 当前 run 必须有 `brief_lock=locked`；不能只凭 Markdown 中出现 `已对齐` 放行。`boundary_change` 会把简报改成 `needs_relock`，只要求重新确认受影响边界。 |
 | Zoon | Conditional | Conditional | 未启用时使用本地已对齐 Markdown，不阻断出图 / 交付；已启用、已有 URL 或用户选择在线协作时，必须已同步且无实质漂移。 |
 | 线上参考 | Required | Required | 已提供线上参考、已确认无线上参考，或明确不适用；未判断时不继续。优先读取最新 `browser_evidence` 产物，没有时回退到 run evidence / gate 事件。 |
 | 视觉基线 | Conditional | Conditional | 已采集线上截图或生产视觉参考时必须登记 `visual_baseline`，包含参考尺寸和目标输出像素；缺视觉基线或缺目标像素时不写 image-2 prompt。新概念页且用户确认无参考时显示不适用。 |

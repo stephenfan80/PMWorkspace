@@ -465,6 +465,91 @@ def latest_confirm(project: dict[str, Any], kind: str) -> dict[str, Any]:
     return {}
 
 
+BRIEF_BOUNDARY_GROUPS = [
+    ("目标用户", ["目标用户", "目标人群", "用户"]),
+    ("核心问题", ["核心问题", "真实问题", "用户痛点", "当前损失"]),
+    ("推荐方案", ["推荐方案", "推荐路径", "方案"]),
+    ("原型范围", ["原型范围", "本轮原型", "输出范围"]),
+    ("本轮不做", ["本轮不做", "范围外", "不做"]),
+    ("主目标", ["主目标", "目标指标", "成功指标"]),
+    ("反指标", ["反指标", "护栏指标"]),
+    ("不可虚构项", ["不可虚构", "不可承诺", "不能承诺"]),
+]
+
+
+def brief_text(path_value: str) -> str:
+    path = pathlib.Path(path_value)
+    return path.read_text(encoding="utf-8", errors="ignore") if path.exists() else ""
+
+
+def first_missing_boundary(text: str) -> str:
+    for label, tokens in BRIEF_BOUNDARY_GROUPS:
+        if not contains_hint(text, tokens):
+            return f"缺少{label}"
+    return ""
+
+
+def brief_boundary_check(project: dict[str, Any], path_value: str) -> tuple[bool, str, str]:
+    text = brief_text(path_value)
+    if not text.strip():
+        return False, "简报文件为空或不可读取", text
+    missing = first_missing_boundary(text)
+    if missing:
+        return False, missing, text
+    if reference_required(project) and not current_reference_artifact(project):
+        return False, "缺线上/视觉基线，不能锁定为原型事实源", text
+    risky = contains_hint(text, ["价格", "补贴", "库存", "金融", "利率", "置换", "真实成交", "报价"])
+    if risky and not contains_hint(text, ["不可承诺", "不可虚构", "不能承诺", "需核验", "待核验"]):
+        return False, "有价格/交易承诺风险，但缺少不可承诺边界", text
+    return True, "", text
+
+
+def current_product_brief_artifact(project: dict[str, Any], brief_path: str, brief_version: str) -> dict[str, Any]:
+    context = rt.resolve_context(project)
+    for row in reversed(artifact_rows("product_brief")):
+        if not rt.row_matches_context(row, context):
+            continue
+        if str(row.get("path") or "") == brief_path and str(row.get("brief_version") or "") == brief_version:
+            return row
+    return {}
+
+
+def product_brief_artifact_id(run_id: str, context: dict[str, str], brief_path: str, brief_version: str) -> str:
+    raw = "|".join(["brief_lock", run_id, context.get("task_digest", ""), context.get("input_revision", ""), brief_path, brief_version])
+    return f"{now_fragment()}-product-brief-{hashlib.sha256(raw.encode('utf-8')).hexdigest()[:8]}"
+
+
+def ensure_locked_brief_artifact(project: dict[str, Any], lock: dict[str, Any], summary: str = "") -> tuple[str, bool]:
+    brief_path = str(lock.get("brief_path") or project.get("latest_brief") or "")
+    brief_version = str(lock.get("brief_version") or project.get("latest_brief_version") or "v1")
+    existing = current_product_brief_artifact(project, brief_path, brief_version)
+    if existing:
+        return str(existing.get("artifact_id") or ""), False
+    context = rt.resolve_context(project)
+    run_id = str(context.get("run_id") or project.get("current_run_id") or "")
+    artifact_id = product_brief_artifact_id(run_id, context, brief_path, brief_version)
+    row: dict[str, Any] = {
+        "ts": now(),
+        "artifact_id": artifact_id,
+        "kind": "product_brief",
+        "title": "已锁定产品简报",
+        "status": "已锁定",
+        "source_skill": "pm-brief",
+        "path": brief_path,
+        "url": "",
+        "summary": summary or str(lock.get("summary") or "产品简报已锁定，是当前原型事实源。"),
+        "pm_judgment_summary": "由 brief_lock 自动登记。",
+        "product_homework": "",
+        "upstream": ["autoplan", "product_direction", "strategy"],
+        "next_skill": ["pm-prototype-shotgun"],
+        "brief_version": brief_version,
+        "idempotency_key": "|".join(["brief_lock", run_id, context.get("task_digest", ""), context.get("input_revision", ""), brief_path, brief_version]),
+    }
+    rt.stamp_row(row, context)
+    append_jsonl(project_dir() / "artifact-flow.jsonl", row)
+    return artifact_id, True
+
+
 def task_text(project: dict[str, Any]) -> str:
     pieces = [
         str(project.get("current_task_goal") or ""),
@@ -645,19 +730,18 @@ def action_from_state(project: dict[str, Any]) -> tuple[str, str]:
         return "PRODUCT_DIRECTION_REQUIRED", "还没有完成产品方向审查内核；数据分析、历史材料或方案方向选择不能替代“为什么做、赢在哪里、不做会怎样”的产品判断。"
     if strategy_review_required(project) and not latest_confirm(project, "strategy"):
         return "STRATEGY_REVIEW_REQUIRED", "本轮涉及指标、线索、交易、承诺或实验口径，需要完成策略 / 范围审查并记录当前 D。"
-    if reference_required(project) and not current_reference_artifact(project):
-        return "NEEDS_BASELINE", "产品方向审查和策略审查可以先推进；但已有功能迭代 / 线上留资转化链路在写已对齐 brief、登记原型或出图前，必须绑定当前生产截图、关键节点截图、线上 URL、Figma / 设计稿或等价视觉基线。缺基线会进入产品作业卡；方向选择不能替代产品简报对齐。"
     latest_brief = str(project.get("latest_brief") or "")
     if not latest_brief:
         return "WRITE_PENDING_BRIEF", "本轮还没有产品简报。"
-    brief_artifact = current_artifact("product_brief", project)
-    if not brief_artifact:
-        return "ASK_CONFIRMATION", "latest_brief 未绑定本轮 task revision，旧简报只能作为参考。"
-    brief_text = pathlib.Path(latest_brief).read_text(encoding="utf-8", errors="ignore") if pathlib.Path(latest_brief).exists() else ""
-    if "确认状态：已对齐" not in brief_text and "确认状态: 已对齐" not in brief_text:
-        return "BRIEF_PENDING", "产品简报不是已对齐。"
-    if not latest_event(project, ["产品简报确认", "前提确认"]):
-        return "ASK_CONFIRMATION", "当前 input_revision 尚未记录产品简报确认 / 前提确认。"
+    brief_lock = rt.latest_brief_lock(project)
+    lock_status = str(brief_lock.get("lock_status") or brief_lock.get("status") or "")
+    if lock_status == "needs_relock":
+        return "ASK_CONFIRMATION", "简报被实质修改，需要重新锁定；只需确认受影响边界，不需要重跑全流程。"
+    if lock_status == "blocked":
+        return "BRIEF_PENDING", f"简报边界未通过：{brief_lock.get('first_blocker') or brief_lock.get('summary') or '需要补齐关键边界'}"
+    if not rt.brief_lock_is_locked(brief_lock):
+        return "ASK_CONFIRMATION", "产品简报待用户确认；方向选择不能替代产品简报对齐；用户确认没有问题后，运行 pmw-controller lock-brief 一次性锁定简报。"
+    ensure_locked_brief_artifact(project, brief_lock)
     if design_spec_required(project) and not latest_confirm(project, "design_spec"):
         return "DESIGN_SPEC_REQUIRED", "命中汽车之家 / AutoDesign / 线索转化相关信号，出图前必须确认本轮设计规范目标；默认推荐汽车之家 AutoDesign，但允许用户选择截图/Figma/线上基线或其他规范。"
     items = board_items(project)
@@ -1041,62 +1125,92 @@ def append_artifact_row(row: dict[str, Any]) -> None:
     append_jsonl(project_dir() / "artifact-flow.jsonl", row)
 
 
-def command_confirm_brief(args: argparse.Namespace) -> int:
+def bool_arg(value: str) -> bool:
+    return str(value or "").strip().lower() in {"1", "true", "yes", "y", "已确认", "确认"}
+
+
+def command_lock_brief(args: argparse.Namespace) -> int:
     project = read_project()
     run_id = str(project.get("current_run_id") or "")
     if not run_id or not run_file(run_id).exists():
-        print("CONFIRM_BRIEF_BLOCKED: 当前没有 active run；先运行 pmw-controller intake。", file=sys.stderr)
+        print("LOCK_BRIEF_BLOCKED: 当前没有 active run；先运行 pmw-controller intake。", file=sys.stderr)
         return 2
     brief_path = str(pathlib.Path(args.brief_path).expanduser())
     brief_version = str(args.brief_version or "").strip() or "v1"
-    summary = str(args.summary or "").strip() or "产品简报关键前提已确认。"
+    summary = str(args.summary or "").strip() or "用户确认候选产品简报没有问题。"
+    if hasattr(args, "user_confirmed") and not bool_arg(str(args.user_confirmed)):
+        print("LOCK_BRIEF_BLOCKED: 产品简报还未获得用户确认，不能锁定。", file=sys.stderr)
+        return 2
     project["latest_brief"] = brief_path
     project["latest_brief_version"] = brief_version
-    project["last_controller_verdict"] = "产品简报确认：已对齐"
+    project["last_controller_verdict"] = "产品简报待锁定"
     write_project(project)
     project = read_project()
     context = rt.resolve_context(project)
-    idempotency_key = "|".join(
-        [
-            "confirm_brief",
+    ok, blocker, text = brief_boundary_check(project, brief_path)
+    if not ok:
+        lock_id = f"lock_{now_fragment()}_{hashlib.sha256((brief_path + blocker).encode('utf-8')).hexdigest()[:8]}"
+        append_event(
+            "brief_lock",
             run_id,
-            context.get("task_digest", ""),
-            context.get("input_revision", ""),
-            brief_path,
-            brief_version,
-        ]
-    )
-    append_controller_confirm(project, run_id, "brief", "已对齐", summary, "已对齐", "confirmed")
-    existing = {}
-    for row in reversed(artifact_rows("product_brief")):
-        if row.get("idempotency_key") == idempotency_key and rt.row_matches_context(row, context):
-            existing = row
-            break
-    if existing:
-        artifact_id = str(existing.get("artifact_id") or "")
-        created = False
-    else:
-        artifact_id = f"{now_fragment()}-product-brief-{hashlib.sha256(idempotency_key.encode('utf-8')).hexdigest()[:8]}"
-        row: dict[str, Any] = {
-            "ts": now(),
-            "artifact_id": artifact_id,
-            "kind": "product_brief",
-            "title": "当前 revision 产品简报",
-            "status": "已对齐",
-            "source_skill": "pm-brief",
-            "path": brief_path,
-            "url": "",
-            "summary": summary,
-            "pm_judgment_summary": "由 pmw-controller confirm-brief 原子确认。",
-            "product_homework": "",
-            "upstream": ["autoplan", "product_direction", "strategy"],
-            "next_skill": ["pm-prototype-shotgun"],
+            "blocked",
+            "产品简报锁定",
+            f"简报边界未通过：{blocker}",
+            project,
+            {
+                "lock_id": lock_id,
+                "lock_status": "blocked",
+                "brief_path": brief_path,
+                "brief_version": brief_version,
+                "brief_fingerprint": rt.brief_fingerprint(text),
+                "first_blocker": blocker,
+                "user_confirmed": True,
+            },
+        )
+        project["brief_lock_status"] = "blocked"
+        project["last_controller_verdict"] = f"简报边界未通过：{blocker}"
+        write_project(project)
+        payload = {
+            "ok": False,
+            "brief_path": brief_path,
             "brief_version": brief_version,
-            "idempotency_key": idempotency_key,
+            "brief_lock_status": "blocked",
+            "first_blocker": blocker,
+            "reason": f"简报边界未通过：{blocker}",
+            **workflow_payload(project, "BRIEF_PENDING", f"简报边界未通过：{blocker}"),
+            **task_context(project),
         }
-        rt.stamp_row(row, context)
-        append_artifact_row(row)
-        created = True
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else f"BRIEF_LOCK_BLOCKED: {blocker}")
+        return 2
+    existing_lock = rt.latest_brief_lock(project)
+    if rt.brief_lock_is_locked(existing_lock) and str(existing_lock.get("brief_path") or "") == brief_path and str(existing_lock.get("brief_version") or "") == brief_version:
+        lock_id = str(existing_lock.get("lock_id") or "")
+        lock_created = False
+    else:
+        lock_id = f"lock_{now_fragment()}_{hashlib.sha256((brief_path + brief_version + context.get('input_revision', '')).encode('utf-8')).hexdigest()[:8]}"
+        append_event(
+            "brief_lock",
+            run_id,
+            "locked",
+            "产品简报锁定",
+            summary,
+            project,
+            {
+                "lock_id": lock_id,
+                "lock_status": "locked",
+                "brief_path": brief_path,
+                "brief_version": brief_version,
+                "brief_fingerprint": rt.brief_fingerprint(text),
+                "user_confirmed": True,
+            },
+        )
+        lock_created = True
+    project["brief_lock_status"] = "locked"
+    project["last_controller_verdict"] = "简报已锁定，可进入原型"
+    write_project(project)
+    project = read_project()
+    lock = rt.latest_brief_lock(project)
+    artifact_id, artifact_created = ensure_locked_brief_artifact(project, lock or {"brief_path": brief_path, "brief_version": brief_version, "summary": summary}, summary)
     action, reason = action_from_state(project)
     project["allowed_next_action"] = action
     project["last_controller_verdict"] = reason
@@ -1105,14 +1219,71 @@ def command_confirm_brief(args: argparse.Namespace) -> int:
         "ok": True,
         "brief_path": brief_path,
         "brief_version": brief_version,
+        "brief_lock_id": lock_id,
+        "brief_lock_status": "locked",
         "artifact_id": artifact_id,
-        "created": created,
+        "created": lock_created or artifact_created,
+        "artifact_created": artifact_created,
         "allowed_next_action": action,
         "reason": reason,
         **workflow_payload(project, action, reason),
         **task_context(project),
     }
     print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else artifact_id)
+    return 0
+
+
+def command_confirm_brief(args: argparse.Namespace) -> int:
+    args.user_confirmed = "true"
+    return command_lock_brief(args)
+
+
+def command_modify_brief(args: argparse.Namespace) -> int:
+    project = read_project()
+    run_id = str(project.get("current_run_id") or "")
+    if not run_id or not run_file(run_id).exists():
+        print("MODIFY_BRIEF_BLOCKED: 当前没有 active run；先运行 pmw-controller intake。", file=sys.stderr)
+        return 2
+    brief_path = str(pathlib.Path(args.brief_path).expanduser()) if args.brief_path else str(project.get("latest_brief") or "")
+    brief_version = str(args.brief_version or project.get("latest_brief_version") or "v1")
+    change_type = str(args.change_type or "editorial")
+    summary = str(args.summary or "").strip() or "记录产品简报修改。"
+    if brief_path:
+        project["latest_brief"] = brief_path
+    project["latest_brief_version"] = brief_version
+    lock_status = "needs_relock" if change_type == "boundary_change" else str(project.get("brief_lock_status") or "locked")
+    row = append_event(
+        "brief_change",
+        run_id,
+        "needs_relock" if change_type == "boundary_change" else "recorded",
+        "产品简报修改",
+        summary,
+        project,
+        {
+            "change_type": change_type,
+            "lock_status": lock_status,
+            "brief_path": brief_path,
+            "brief_version": brief_version,
+        },
+    )
+    if change_type == "boundary_change":
+        project["brief_lock_status"] = "needs_relock"
+        project["last_controller_verdict"] = "简报被实质修改，需要重新锁定"
+    else:
+        project["last_controller_verdict"] = "简报非边界修改已记录，锁定态保持"
+    write_project(project)
+    action, reason = action_from_state(read_project())
+    payload = {
+        "ok": True,
+        "change_type": change_type,
+        "brief_lock_status": lock_status,
+        "event_id": row.get("event_id", ""),
+        "allowed_next_action": action,
+        "reason": reason,
+        **workflow_payload(read_project(), action, reason),
+        **task_context(read_project()),
+    }
+    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else f"{change_type}: {lock_status}")
     return 0
 
 
@@ -1306,6 +1477,22 @@ def build_parser() -> argparse.ArgumentParser:
     confirm_brief.add_argument("--summary", default="")
     confirm_brief.add_argument("--json", action="store_true")
     confirm_brief.set_defaults(func=command_confirm_brief)
+
+    lock_brief = sub.add_parser("lock-brief")
+    lock_brief.add_argument("--brief-path", required=True)
+    lock_brief.add_argument("--brief-version", required=True)
+    lock_brief.add_argument("--user-confirmed", default="false")
+    lock_brief.add_argument("--summary", default="")
+    lock_brief.add_argument("--json", action="store_true")
+    lock_brief.set_defaults(func=command_lock_brief)
+
+    modify_brief = sub.add_parser("modify-brief")
+    modify_brief.add_argument("--brief-path", default="")
+    modify_brief.add_argument("--brief-version", default="")
+    modify_brief.add_argument("--change-type", choices=["editorial", "non_boundary_addition", "boundary_change"], default="editorial")
+    modify_brief.add_argument("--summary", default="")
+    modify_brief.add_argument("--json", action="store_true")
+    modify_brief.set_defaults(func=command_modify_brief)
 
     stamp = sub.add_parser("stamp")
     stamp.add_argument("--kind", required=True)

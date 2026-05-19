@@ -158,16 +158,16 @@ fi
     - 把 `$pm-jobs` 的 `PM 判断摘要` 写入简报正文；如果上游没有提供，`$pm-brief` 必须基于已知事实补出暂定摘要，并清楚标注证据边界、建议范围模式和不可承诺项。
     - 把 `$pm-jobs` 或 `$pm-strategy-review` 的 `产品判断对抗校验` 写入事实/假设边界、风险 / 待验证和内部审计；如果缺失，`$pm-brief` 只能基于已知事实补出暂定校验，并标注为 `假设驱动`。
     - 把本阶段 `产品作业` 写入待验证问题与下一步；作业必须是现实动作，不能写成“继续沟通”。
-23. 已对齐且用户要原型时，下一技能是 `$pm-prototype-shotgun`；已对齐且用户要交付时，下一技能是 `$pm-handoff`；未对齐时停在 `$pm-brief` 或回到上游缺失门槛。
+23. 已对齐且用户要原型时，下一技能是 `$pm-prototype-shotgun`；已对齐且用户要交付时，下一技能是 `$pm-handoff`；机器判断以当前 revision 的 `brief_lock=locked` 为准，未锁定时停在 `$pm-brief` 或回到上游缺失门槛。
 24. 从功能名或产品简报标题提炼中文项目名，并用 `pmw-project set-name "<中文项目名>"` 保存。
-25. 产品简报生成后必须先停在 `产品简报确认`：把 2-4 条关键前提、方案方向、反指标、不可虚构项、`风险 / 待验证` 压缩进短版业务简报，并在 `当前需要确认` 中逐项展示待确认问题卡。每张待确认问题卡必须包含 `还缺什么`、`为什么影响判断`、`不补齐的偏差风险`、`你现在可以怎么做`；禁止只问“是否认可这版简报，并允许按假设继续”。已有功能优化如果缺线上截图 / 关键节点截图 / 视觉基线，第一条待确认问题必须是 `线上截图 / 视觉基线`；如果用户主动提到其他页面或竞品平台但未给材料，第一条或紧随其后的待确认问题必须是 `线上 / 竞品基线`，要求截图、URL 或具体可借鉴点。用户可以上传材料后继续，或明确确认 `按当前假设先做可讨论原型`。只有用户明确确认产品简报、补齐关键待确认信息或批准按已标注假设继续后，当前 run 才能记录 `产品简报确认：已对齐`，并且产品简报确认状态才能写成 `已对齐`；未确认时保存为 `待确认`，不能把下一技能指向 `$pm-prototype-shotgun`，也不能询问 Zoon 同步。
-26. Save the brief with `pmw-log brief <name>` when platform scripts are available. It uses local-first, Zoon-optional publishing: save the business brief as latest brief, save the full input as a local audit copy, and automatically register `product_brief` in Product Artifact Flow. 完整审计副本保存在本地. It syncs to Zoon only when `PMW_ZOON_SYNC_ON_BRIEF=true` / `zoon_sync_on_brief: true` or the user explicitly chose online collaboration. 如果输入简报声明 `确认状态：已对齐`，但当前 run 没有与当前 `task_digest` / `input_revision` 匹配的 `产品简报确认 / 前提确认：已对齐` 记录，或 `pmw-discovery-gate check --target brief` 未通过，平台脚本会拒绝保存为已对齐。`pmw-log brief` / `pmw-artifact` 会把当前 controller verdict、`task_digest` 和 `input_revision` stamp 到 artifact-flow；显式传入 `--pm-judgment-summary` / `--product-homework` 时优先使用参数，否则从 Markdown 章节提取。
+25. 产品简报生成后必须先停在 `产品简报确认`：把 2-4 条关键前提、方案方向、反指标、不可虚构项、`风险 / 待验证` 压缩进短版业务简报，并在 `当前需要确认` 中逐项展示待确认问题卡。每张待确认问题卡必须包含 `还缺什么`、`为什么影响判断`、`不补齐的偏差风险`、`你现在可以怎么做`；禁止只问“是否认可这版简报，并允许按假设继续”。已有功能优化如果缺线上截图 / 关键节点截图 / 视觉基线，第一条待确认问题必须是 `线上截图 / 视觉基线`；如果用户主动提到其他页面或竞品平台但未给材料，第一条或紧随其后的待确认问题必须是 `线上 / 竞品基线`，要求截图、URL 或具体可借鉴点。用户可以上传材料后继续，或明确确认 `按当前假设先做可讨论原型`。只有用户明确确认候选简报、补齐关键待确认信息或批准按已标注假设继续后，才能运行 `pmw-controller lock-brief`；未锁定时保存为 `待确认`，不能把下一技能指向 `$pm-prototype-shotgun`，也不能询问 Zoon 同步。
+26. Save the brief with `pmw-log brief <name>` when platform scripts are available. It uses local-first, Zoon-optional publishing: save the business brief as latest brief and save the full input as a local audit copy. 完整审计副本保存在本地。`pmw-log brief` 不再把 Markdown 中的 `状态：已对齐` 当作机器真源；用户确认候选简报后运行 `pmw-controller lock-brief`，由它一次完成边界检查、`brief_lock=locked`、latest brief 和 current `product_brief` artifact 登记。`pmw-log brief` / `pmw-artifact` 会把当前 controller verdict、`task_digest` 和 `input_revision` stamp 到 artifact-flow；显式传入 `--pm-judgment-summary` / `--product-homework` 时优先使用参数，否则从 Markdown 章节提取。
     - 如果保存的是 `待确认` 产品简报，用户可见 `下一步` 必须要求补齐待确认信息或确认假设偏差风险，不能默认推荐 Zoon。
-    - 产品简报确认状态已对齐并且本地 Markdown 保存成功后，用户可见 `下一步` 必须默认推荐 Zoon，但不能自动同步：`Zoon 协作建议：这次已对齐简报适合多人评审 / 后续原型或 PRD 复用，建议同步到 Zoon；不同步也不影响继续使用本地 Markdown。`
+    - 产品简报已通过 `brief_lock=locked` 并且本地 Markdown 保存成功后，用户可见 `下一步` 必须默认推荐 Zoon，但不能自动同步：`Zoon 协作建议：这次已对齐简报适合多人评审 / 后续原型或 PRD 复用，建议同步到 Zoon；不同步也不影响继续使用本地 Markdown。`
     - 推荐必须说明 Zoon 的好处：多人协作、事实源统一、后续 image-2 原型 / PRD 防漂移；同时说明 `不自动同步，不作为出图或交付阻断`。
     - 推荐后必须让用户用一个轻量 `D` 选择：`D：是否同步到在线协作文档（Zoon）？A. 先不需要，使用本地 Markdown 继续；B. 需要，同步到 Zoon 供团队在线修改。`
 27. Ask before creating or updating a Zoon online brief:
-    - 只有产品简报确认状态已对齐后，才询问或执行 Zoon 同步；如果仍有待确认信息，先让用户补齐或确认假设偏差风险。
+    - 只有 `brief_lock=locked` 后，才询问或执行 Zoon 同步；如果仍有待确认信息，先让用户补齐或确认假设偏差风险。
     - If a Zoon URL is already available, ask whether to append this brief to that document before calling `pmw-zoon sync` / `pmw-zoon append --url <url>`.
     - If no Zoon URL exists, do not auto-create one. Ask `是否同步到在线协作文档（Zoon）？A. 先不需要，使用本地 Markdown 继续；B. 需要，同步到 Zoon 供团队在线修改。`
     - If the user chooses B, use `PMW_ZOON_SYNC_ON_BRIEF=true PMW_ZOON_AUTO_CREATE=true pmw-log brief <name>` or `pmw-zoon create --title "产品设计简报：<功能名>"`, then store the local audit copy and Zoon URL.

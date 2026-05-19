@@ -26,6 +26,7 @@ p0-runtime-recovery-short-answer
 p0-run-snapshot-stamping
 p0-structured-confirmation
 p0-atomic-brief-confirm
+brief-lock-two-stage-fast-path
 p0-readiness-diagnostics
 p0-failure-budget
 p0-image-permit-recovery-e2e

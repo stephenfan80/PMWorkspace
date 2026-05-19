@@ -364,25 +364,7 @@ case "$EVENT" in
     fi
     brief_aligned="false"
     if brief_declares_aligned "$input_file"; then
-      require_controller_capability write_brief || exit 2
-      run_id="$(current_run_id || true)"
-      if ! run_has_brief_confirmation "$run_id"; then
-        echo "BRIEF_NOT_CONFIRMED: 当前产品简报声明为已对齐，但当前 run 未记录「产品简报确认 / 前提确认：已对齐」。请先让用户确认产品简报或关键前提。" >&2
-        exit 2
-      fi
-      if [ ! -x "$SCRIPT_DIR/pmw-discovery-gate" ]; then
-        echo "DISCOVERY_GATE_UNAVAILABLE: 缺少 pmw-discovery-gate，不能把产品简报保存为已对齐。" >&2
-        exit 2
-      fi
-      discovery_report="$(mktemp "${TMPDIR:-/tmp}/pmw-discovery-gate.XXXXXX")"
-      if ! "$SCRIPT_DIR/pmw-discovery-gate" check --target brief --brief "$input_file" --json >"$discovery_report" 2>&1; then
-        echo "DISCOVERY_GATE_BLOCKED: 产品发现深度不足，不能把产品简报保存为已对齐。请继续通过 Q/D 补齐产品价值判断。" >&2
-        cat "$discovery_report" >&2
-        rm -f "$discovery_report" 2>/dev/null || true
-        exit 2
-      fi
-      rm -f "$discovery_report" 2>/dev/null || true
-      brief_aligned="true"
+      echo "BRIEF_LOCK_REQUIRED: Markdown 中的已对齐只作为用户可见状态；机器放行必须等待用户确认后运行 pmw-controller lock-brief。" >&2
     fi
     previous_version_number="$(latest_project_brief_version_number || true)"
     input_version_number="$(version_number_from_file "$input_file" || true)"

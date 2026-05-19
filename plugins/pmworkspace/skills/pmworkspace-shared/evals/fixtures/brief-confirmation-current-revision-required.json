@@ -1,23 +1,23 @@
 {
   "id": "brief-confirmation-current-revision-required",
-  "title": "产品简报确认必须匹配当前 input_revision",
+  "title": "产品简报锁定必须匹配当前 input_revision",
   "category": "pm-workspace-runtime",
   "primary_skill": "pm-brief",
-  "prompt": "如果产品简报确认早于最新 input_revision，不能把本轮 brief 标记为已对齐并进入原型。",
+  "prompt": "如果产品简报确认早于最新 input_revision，不能把本轮 brief 锁定并进入原型。",
   "expected": {
     "mode": "maintenance",
     "status": "待确认",
     "must_stop": true,
     "gate": "产品简报确认",
     "required_behaviors": [
-      "确认事件必须匹配当前 task_digest/input_revision",
+      "brief_lock 必须匹配当前 task_digest/input_revision",
       "旧 revision 的确认被忽略",
-      "readiness first_blocker 指向产品简报确认"
+      "readiness first_blocker 指向产品简报"
     ],
     "forbidden_behaviors": [
       "把旧确认用于新材料",
       "只凭 Markdown 的确认状态放行",
-      "跳过用户确认直接出图"
+      "跳过 brief_lock 直接出图"
     ]
   },
   "contract_checks": [
@@ -39,9 +39,9 @@
       ],
       "exit_code": 0,
       "contains": [
-        "\"first_blocker\": \"产品简报确认\"",
+        "\"first_blocker\": \"产品简报\"",
         "\"ready\": false",
-        "当前 run 未记录用户确认产品简报 / 前提确认"
+        "当前 run 未记录 brief_lock"
       ]
     }
   ]

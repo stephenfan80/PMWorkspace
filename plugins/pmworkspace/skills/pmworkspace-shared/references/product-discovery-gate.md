@@ -100,10 +100,12 @@
 pmw-log discovery --dimension product_role --source "用户回答 / 截图 / Zoon / 数据" --summary "<事实摘要>" --confidence confirmed
 ```
 
-候选产品简报声明 `确认状态：已对齐` 前，必须运行：
+候选产品简报声明 `已对齐` 前，必须运行：
 
 ```bash
 pmw-discovery-gate check --target brief --brief <brief.md>
 ```
 
 如果返回 `blocked`，只能保存 `待确认` 简报或继续 `$pm-jobs`，不能写 image-2 prompt、不能出图、不能交付。
+
+Markdown 中的 `确认状态：已对齐`、`对齐状态：已对齐` 或 `状态：已对齐` 只作为用户可见展示，不是机器放行真源。用户确认候选简报后，必须由 `pmw-controller lock-brief` 写入当前 revision 的 `brief_lock=locked`；controller、dashboard、image preflight 和交付门禁都以 `brief_lock` 为准。

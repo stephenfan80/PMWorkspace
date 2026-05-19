@@ -1,6 +1,6 @@
 # Zoon 工作流
 
-产品简报阶段默认使用 **local-first，Zoon-optional**：先保存本地 Markdown 业务简报和完整本地审计副本，并把待确认信息、偏差风险和用户补齐动作告诉用户；只有产品简报确认状态已对齐后，才默认推荐 Zoon 的协作价值，并让用户用 A/B 选择是否同步。只有用户明确选择同步到在线协作文档、提供现有 Zoon URL，或当前任务需要多人在线协作且简报已对齐时，才创建或更新 Zoon。创建或追加成功后让 `pmworkspace` agent 自动加入协作态，并在成功后自动打开到 Codex 内置浏览器。
+产品简报阶段默认使用 **local-first，Zoon-optional**：先保存本地 Markdown 业务简报和完整本地审计副本，并把待确认信息、偏差风险和用户补齐动作告诉用户；只有当前 revision 已通过 `brief_lock=locked` 后，才默认推荐 Zoon 的协作价值，并让用户用 A/B 选择是否同步。只有用户明确选择同步到在线协作文档、提供现有 Zoon URL，或当前任务需要多人在线协作且简报已锁定时，才创建或更新 Zoon。创建或追加成功后让 `pmworkspace` agent 自动加入协作态，并在成功后自动打开到 Codex 内置浏览器。
 
 这个规则的目标是减少真实执行时间卡点：Zoon 是协作增强，不是每次产品简报的默认阻断门槛。
 
@@ -17,7 +17,7 @@
 - 创建或更新 Zoon 成功后，必须先自动加入协作态，再尝试自动打开可编辑 URL；不能只保存本地 Markdown 后结束。
 - 创建新文档的 payload 只能表达一次正文写入：使用 `title` + 单个 `markdown` 字段，不同时发送 `content`、`initialMarkdown` 等同义字段，避免 Zoon 服务端兼容解析时把同一份简报写入多遍。
 - 追加 / 同步文档时只使用 `operations[].markdown` 表达新增内容，不再额外发送顶层 `markdown` 同义字段；同步块必须带 `PMWorkspace document sync hash`，同一 hash 已存在时跳过重复追加；读取旧文档时仍兼容历史 `PMWorkspace brief sync hash`。
-- `pmw-log brief` 默认只记录本地 latest brief 和完整审计副本，并把 `last_zoon_sync_status` 标记为 `disabled`；即使 `zoon_sync_on_brief` 或 `PMW_ZOON_SYNC_ON_BRIEF` 显式开启，产品简报未 `已对齐` 时也必须输出 `ZOON_SYNC_DEFERRED_UNTIL_ALIGNED=true` 并延后同步；只有简报已对齐时才执行 `pmw-zoon sync` 并记录 `last_zoon_sync_status`、`last_zoon_sync_brief`、`last_zoon_join_status` 和 Zoon URL。
+- `pmw-log brief` 默认只记录本地 latest brief 和完整审计副本，并把 `last_zoon_sync_status` 标记为 `disabled`；即使 `zoon_sync_on_brief` 或 `PMW_ZOON_SYNC_ON_BRIEF` 显式开启，产品简报未 `brief_lock=locked` 时也必须输出 `ZOON_SYNC_DEFERRED_UNTIL_ALIGNED=true` 并延后同步；只有简报已锁定时才执行 `pmw-zoon sync` 并记录 `last_zoon_sync_status`、`last_zoon_sync_brief`、`last_zoon_join_status` 和 Zoon URL。
 - 未启用 Zoon 时，出图 / 交付准备度中的 Zoon 行显示 `未启用，使用本地简报`，不作为阻断；已启用或已有 URL 时，才必须检查同步与漂移。
 
 ## 连接步骤
@@ -50,7 +50,7 @@
 
 ## 产品简报创建
 
-当产品追问已经产出产品简报时，默认先保存本地产品简报。若确认状态仍是 `待确认`，下一步只展示待确认信息、偏差风险和用户补齐动作，不询问 Zoon 同步。只有产品简报确认状态已对齐后，才用一个轻量选择推荐并询问是否同步到 Zoon。推荐文案要说明 Zoon 的好处：多人协作、事实源统一、后续 image-2 原型 / PRD 防漂移；同时说明不自动同步、不作为出图或交付阻断。
+当产品追问已经产出产品简报时，默认先保存本地产品简报。若还没有 `brief_lock=locked`，下一步只展示待确认信息、偏差风险和用户补齐动作，不询问 Zoon 同步。只有简报已锁定后，才用一个轻量选择推荐并询问是否同步到 Zoon。推荐文案要说明 Zoon 的好处：多人协作、事实源统一、后续 image-2 原型 / PRD 防漂移；同时说明不自动同步、不作为出图或交付阻断。
 
 ```text
 Zoon 协作建议：这次已对齐简报适合多人评审 / 后续原型或 PRD 复用，建议同步到 Zoon；不同步也不影响继续使用本地 Markdown。

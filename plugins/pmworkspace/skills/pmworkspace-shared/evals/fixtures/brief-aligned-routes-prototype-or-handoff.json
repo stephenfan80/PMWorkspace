@@ -10,7 +10,7 @@
     "must_stop": false,
     "gate": "产品简报已对齐",
     "required_behaviors": [
-      "检查确认状态",
+      "检查 brief_lock 锁定状态",
       "检查线上参考门槛",
       "运行准备度短 verdict",
       "按用户目标路由到 $pm-prototype-shotgun 或 $pm-handoff",
@@ -38,7 +38,7 @@
     },
     {
       "path": "pmworkspace-shared/references/pm-eval-system.md",
-      "contains": "产品简报：只有确认状态已对齐、线上参考门槛通过且无未解决缺失门槛时"
+      "contains": "产品简报：只有当前 revision 存在 `brief_lock=locked`、线上参考门槛通过且无未解决缺失门槛时"
     }
   ]
 }

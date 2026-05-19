@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import subprocess
 from datetime import datetime, timezone
 from typing import Any
@@ -20,6 +21,23 @@ TERMINAL_STATUS_TOKENS = [
     "已结束",
     "DONE",
     "complete",
+]
+
+BRIEF_STATUS_LABELS = [
+    "确认状态",
+    "对齐状态",
+    "状态",
+]
+
+BRIEF_STATUS_NEGATIVE_TOKENS = [
+    "待确认",
+    "草稿",
+    "缺失门槛",
+    "有漂移",
+    "实质漂移",
+    "未对齐",
+    "需要补充",
+    "待补充",
 ]
 
 
@@ -226,6 +244,59 @@ def event_is_rejected(row: dict[str, Any]) -> bool:
     if state:
         return state == "rejected"
     return confirmation_state(str(row.get("status") or ""), str(row.get("summary") or "")) == "rejected"
+
+
+def clean_brief_status_line(line: str) -> str:
+    return re.sub(r"^[\s#>*\-•]+", "", line or "").strip()
+
+
+def extract_brief_status_line(text: str) -> str:
+    for line in (text or "").splitlines()[:160]:
+        stripped = clean_brief_status_line(line)
+        for label in BRIEF_STATUS_LABELS:
+            if re.match(rf"^{re.escape(label)}\s*[：:]", stripped):
+                return stripped
+    return ""
+
+
+def brief_is_aligned(text: str) -> bool:
+    status_line = extract_brief_status_line(text)
+    if not status_line:
+        return False
+    return "已对齐" in status_line and not any(token in status_line for token in BRIEF_STATUS_NEGATIVE_TOKENS)
+
+
+def brief_fingerprint(text: str) -> str:
+    normalized = "\n".join(line.rstrip() for line in (text or "").splitlines()).strip()
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:16]
+
+
+def latest_brief_lock(project: dict[str, Any]) -> dict[str, Any]:
+    context = resolve_context(project)
+    run_id = str(context.get("run_id") or "")
+    if not run_id:
+        return {}
+    latest_brief = str(project.get("latest_brief") or "")
+    latest_version = str(project.get("latest_brief_version") or "")
+    rows = read_jsonl(run_path(run_id, str(project.get("slug") or "") or None))
+    for row in reversed(rows):
+        if not row_matches_context(row, context):
+            continue
+        event = str(row.get("event") or "")
+        if event == "brief_change" and str(row.get("lock_status") or "") == "needs_relock":
+            return row
+        if event != "brief_lock":
+            continue
+        if latest_brief and str(row.get("brief_path") or "") != latest_brief:
+            continue
+        if latest_version and str(row.get("brief_version") or "") != latest_version:
+            continue
+        return row
+    return {}
+
+
+def brief_lock_is_locked(row: dict[str, Any]) -> bool:
+    return str(row.get("lock_status") or row.get("status") or "") == "locked"
 
 
 def gate_id(subject: str, context: dict[str, str]) -> str:

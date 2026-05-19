@@ -157,7 +157,9 @@ def run_has_brief_confirmation(run_id: str = "") -> bool:
         return False
     run_file = project_dir() / "runs" / f"{run_id}.jsonl"
     context = rt.resolve_context(current_project(), run_id)
-    for row in read_jsonl(run_file):
+    for row in reversed(read_jsonl(run_file)):
+        if row.get("event") == "brief_lock" and rt.row_matches_context(row, context) and rt.brief_lock_is_locked(row):
+            return True
         if row.get("event") not in {"gate", "decision"}:
             continue
         if not rt.row_matches_context(row, context):
@@ -266,15 +268,9 @@ def validate_formal_artifact_gate(args: argparse.Namespace) -> None:
     if status_is_nonformal(status):
         validate_nonformal_next_skill(kind, next_skills(args))
         return
-    if kind == "product_brief" and "已对齐" in status:
-        ok, detail = controller_capability("write_brief")
-        if not ok:
-            raise SystemExit(f"ARTIFACT_GATE_BLOCKED: product_brief 声明已对齐，但 controller 未放行 can_write_brief。{detail}")
+    if kind == "product_brief" and ("已对齐" in status or "已锁定" in status):
         if not run_has_brief_confirmation(args.run or current_run_id()):
-            raise SystemExit("ARTIFACT_GATE_BLOCKED: product_brief 声明已对齐，但当前 run 未记录产品简报确认 / 前提确认。")
-        ok, detail = discovery_gate_ready(args.path)
-        if not ok:
-            raise SystemExit(f"ARTIFACT_GATE_BLOCKED: product_brief 声明已对齐，但产品发现门槛未通过。{detail}")
+            raise SystemExit("ARTIFACT_GATE_BLOCKED: product_brief 声明为正式简报，但当前 run 没有 brief_lock=locked。")
     readiness_targets = {
         "prototype_manifest": ("prototype", "可出图"),
         "handoff": ("handoff", "可交付"),

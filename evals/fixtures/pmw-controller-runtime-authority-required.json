@@ -1,18 +1,18 @@
 {
   "id": "pmw-controller-runtime-authority-required",
-  "title": "PMW 任务必须先经过 controller intake 并绑定 task revision",
+  "title": "PMW 新任务必须经过 operation router 和 controller intake 并绑定 task revision",
   "category": "pm-workspace-runtime",
   "primary_skill": "pm-workspace",
-  "prompt": "任何 PMW 任务都不能直接复用旧 run 或旧产物，必须先由 pmw-controller intake 判断是否继承或新建本轮 run/revision。",
+  "prompt": "任何 PMW 任务都不能直接复用旧 run 或旧产物，必须先由 operation router 判断本轮操作；只有新产品任务才由 pmw-controller intake 判断是否继承或新建本轮 run/revision。",
   "expected": {
     "mode": "maintenance",
     "status": "可检查",
     "must_stop": false,
     "gate": "Controller Runtime Authority",
     "required_behaviors": [
-      "提供 pmw-controller intake/next/preflight/stamp 命令",
+      "提供 pmw-operation-router classify 和 pmw-controller intake/next/preflight/stamp 命令",
       "project.json 写入 current_task_digest 和 current_input_revision",
-      "不同目标再次 intake 会创建新 run 或新 revision",
+      "不同新目标再次 intake 会创建新 run 或新 revision",
       "skill 文档包含 controller preamble 和 STOP gate 文案"
     ],
     "forbidden_behaviors": [
@@ -35,8 +35,16 @@
       "contains": "pmw-controller intake"
     },
     {
+      "path": "pmworkspace-shared/skill-docs/skill-docs.manifest.json",
+      "contains": "operation_type=new_product_workflow"
+    },
+    {
       "path": "pm-workspace/SKILL.md",
-      "contains": "pmw-controller intake"
+      "contains": "operation router"
+    },
+    {
+      "path": "pm-workspace/SKILL.md",
+      "contains": "只有 `new_product_workflow` 才 intake"
     },
     {
       "path": "pm-autoplan/SKILL.md",

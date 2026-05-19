@@ -127,4 +127,5 @@ eval-runner-contract
 eval-suite-layering-required
 plugin-revision-packaged-source-required
 skill-doc-generator-required
+skill-doc-shared-gates-compact
 update-check-fast-and-clean-upgrade

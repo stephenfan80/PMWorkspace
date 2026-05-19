@@ -54,7 +54,7 @@ description: |
 
 - 真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。
 - 快速更新：每个 skill 运行前用 `pmw-update-check --quick`；如果输出 `UPGRADE_AVAILABLE`，先询问用户是否执行 `UPGRADE_COMMAND`，除非 `auto_upgrade` 为 `true`。
-- 运行时入口：每个 PMW 产品任务先过 `pmw-controller intake`，由 controller 判定是否继承或新建 run，并写入 `task_digest` / `input_revision`。
+- 运行时入口：PMW 触发后先过 `pmw-trigger-guard` / `pmw-operation-router classify`；只有 `operation_type=new_product_workflow` 才运行 `pmw-controller intake`，流程内回答、补材料、改 brief、原型局部修改、复审、重出和交付续跑不得重新 intake。
 - STOP gate：`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能进入下游产物；`WRITE_PENDING_BRIEF` 只能路由到产品简报。
 - 当前任务绑定：brief、visual baseline、prototype-board、review、handoff 和用户确认必须匹配当前 run、`task_digest` 与 `input_revision`；旧产物只能参考，不能放行。
 - 摘要：中文本地化、记忆不覆盖本轮事实、只有 `ALLOW_IMAGE_PROMPT` 才能写 image-2 prompt，方向选择不能替代产品简报确认，禁止泄露 token/ownerSecret/私密资料。
@@ -131,7 +131,7 @@ fi
 13. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 产品交付 stage fields.
 14. Read `../pmworkspace-shared/references/artifact-flow.md` and read latest `product_brief` / `prototype_review` artifacts before writing delivery assets.
 15. Read `../pmworkspace-shared/references/pm-eval-system.md` and preserve delivery contracts.
-16. Follow `runtime-kernel.md` Run Owner 协议 through `pmw-controller`. If called directly, run `pmw-controller intake --goal "<本轮交付目标>" --materials "<本轮用户材料摘要>" --skill pm-handoff --product-path "<全新功能|已有功能迭代>" --depth deep --stage handoff`, then run `pmw-controller preflight --target handoff --json`.
+16. Follow `runtime-kernel.md` Operation Router + Run Owner 协议 through `pmw-trigger-guard` / `pmw-operation-router` / `pmw-controller`. If called directly, first classify with `pmw-operation-router classify`; only `operation_type=new_product_workflow` may run `pmw-controller intake --goal "<本轮交付目标>" --materials "<本轮用户材料摘要>" --skill pm-handoff --product-path "<全新功能|已有功能迭代>" --depth deep --stage handoff`. For `handoff_continue` or other flow-internal operations, execute the router-specified minimal command and inherit current brief / prototype / review context instead of creating a new intake. Then run `pmw-controller preflight --target handoff --json` when handoff readiness is required.
     - If controller returns `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`BRIEF_PENDING`、`D_REQUIRED` or `BLOCKED`, stop and route to the first gate; do not write PRD、验收、实验口径 or交付稿.
     - Handoff can only consume current-run/current-task `product_brief`、`prototype_review`、`prototype_manifest` and board units. Old artifacts are reference material until stamped to the current `task_digest` / `input_revision`.
 17. 如果用户要 PRD、研发交付、实验标准、埋点或接口梳理，先提示：`如果你有现成 PRD、接口文档、埋点方案、实验方案、Zoon 或截图，可以上传给我参考；没有的话，我会基于当前已对齐 brief 生成精简 PRD，并把缺失项留空待补充。`

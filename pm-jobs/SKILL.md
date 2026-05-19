@@ -56,7 +56,7 @@ description: |
 
 - 真源：`pmworkspace-shared/skill-docs/skill-docs.manifest.json` 的 `shared_gates`。
 - 快速更新：每个 skill 运行前用 `pmw-update-check --quick`；如果输出 `UPGRADE_AVAILABLE`，先询问用户是否执行 `UPGRADE_COMMAND`，除非 `auto_upgrade` 为 `true`。
-- 运行时入口：每个 PMW 产品任务先过 `pmw-controller intake`，由 controller 判定是否继承或新建 run，并写入 `task_digest` / `input_revision`。
+- 运行时入口：PMW 触发后先过 `pmw-trigger-guard` / `pmw-operation-router classify`；只有 `operation_type=new_product_workflow` 才运行 `pmw-controller intake`，流程内回答、补材料、改 brief、原型局部修改、复审、重出和交付续跑不得重新 intake。
 - STOP gate：`pmw-controller next` 返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时必须停住，不能进入下游产物；`WRITE_PENDING_BRIEF` 只能路由到产品简报。
 - 当前任务绑定：brief、visual baseline、prototype-board、review、handoff 和用户确认必须匹配当前 run、`task_digest` 与 `input_revision`；旧产物只能参考，不能放行。
 - 摘要：中文本地化、记忆不覆盖本轮事实、只有 `ALLOW_IMAGE_PROMPT` 才能写 image-2 prompt，方向选择不能替代产品简报确认，禁止泄露 token/ownerSecret/私密资料。
@@ -130,7 +130,7 @@ fi
 5. Read `../pmworkspace-shared/references/pm-decision-principles.md` and apply its fact priority before using memory or defaults.
 6. Read `../pmworkspace-shared/references/pm-eval-system.md` so diagnostic output preserves PMWorkspace gate contracts.
 7. Read `../pmworkspace-shared/references/pm-workbench-map.md` and use its 产品方向审查内核 stage fields.
-8. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-jobs` 且没有当前 run，再创建 runtime run.
+8. Read `../pmworkspace-shared/references/runtime-kernel.md`; follow its Operation Router + Run Owner 协议：如果 `pmw-project show` 已有 `current_run_id`，复用当前 run；如果用户直接调用 `$pm-jobs` 且没有当前 run，先用 `pmw-operation-router classify` 判断本轮是否是 `new_product_workflow`，只有新工作流才创建 runtime run；流程内回答、补材料或修改 brief 不得重新 intake。
 9. 先建立 `产品信息对齐包` 和 `产品作业卡`，再建立产品方向审查控制器。脚本可用时读取 `pmw-dashboard status` 和 `pmw-discovery-gate check --target alignment`；脚本不可用时手动整理已知事实、证据边界、5 个核心事实维度、当前主阻断、关键缺口队列、PMW 产品建议、PMW 信息架构建议、对抗校验状态、用户作业和补齐后解锁什么。这个包是本轮判断的入口，不是审计附录。
 10. Build the 产品方向审查控制器 from `product-office-hours.md`: 产品路径、对齐深度、工作目标模式、产品信息对齐包、产品作业卡、当前判断、判断价值、前提挑战、现状替代、不做推演、路径对比、范围模式、Agent 可协助事项、需要用户补充事项、已知事实、假设驱动项、证据状态、线上参考需求、视觉基线状态、我对真实问题的判断、PM 判断摘要、产品判断对抗校验、阻断影响、解锁动作、产品作业、当前 Q、当前 D、产品简述状态、三条产品路径计划状态、下一技能。
 10. 如果来自 `$pm-autoplan`，只解决自动评审交给 `$pm-jobs` 的最早门槛：工作目标、场景、Q 诊断或前提确认；不要假装后续产品简报、原型或交付已完成。

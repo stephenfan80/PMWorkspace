@@ -190,7 +190,7 @@ preflight 连续卡在同一 blocker 时会进入恢复模式。`pmw-controller 
 
 ## 运行审计
 
-平台脚本可用时，在选择模式后由 controller 启动或继承 run；不要绕过 controller 直接用 `pmw-run start` 放行产品任务。底层 run 命令仍用于记录事件和终态：
+平台脚本可用时，在选择模式后由 operation router 决定是否由 controller 启动或继承 run；不要绕过 router / controller 直接用 `pmw-run start` 放行产品任务。底层 run 命令仍用于记录事件和终态。只有 `operation_type=new_product_workflow` 才运行完整 intake：
 
 ```bash
 pmw-controller intake --goal "<本轮目标>" --materials "<本轮材料摘要>" --skill <skill> --depth deep
@@ -199,8 +199,8 @@ pmw-controller intake --goal "<本轮目标>" --materials "<本轮材料摘要>"
 ### Run Owner 协议
 
 - `$pm-workspace` 是路由型会话的 run owner：完成 D0 工作方式判定和 operation router 后，只有 `new_product_workflow` 先调用 `pmw-controller intake`；流程内 operation 使用 router 指定的续跑命令，并记录当前门槛、证据状态和下一技能。
-- 子 skill 发现已有当前 run 时复用当前 run，但必须先通过 controller 检查当前 `task_digest` / `input_revision` 是否匹配；匹配才复用，不匹配则由 controller 建立新 run 或 revision。
-- 用户直接调用子 skill 且没有当前 run 时，子 skill 也先调用 `pmw-controller intake`，skill id 使用自己的名称。
+- 子 skill 发现已有当前 run 时复用当前 run，但必须先通过 controller 检查当前 `task_digest` / `input_revision` 是否匹配；匹配才复用，不匹配则由 router / controller 选择继续当前 operation、建立新 revision 或建立新 run。
+- 用户直接调用子 skill 且没有当前 run 时，子 skill 也必须先运行 `pmw-trigger-guard` 和 `pmw-operation-router classify`；只有 router 返回 `operation_type=new_product_workflow` 时才调用 `pmw-controller intake`，skill id 使用自己的名称。若 router 返回流程内 operation 且缺少可继承上下文，停在 `missing_context` / `requires_user_selection`，不能用 intake 伪造新任务。
 - 检查当前 run 时，可用 `pmw-project show` 查看 `current_run_id`；复用时 `pmw-run event` 可以省略 `--run`，由平台写入当前 run。
 - 只有到达本轮终态时才调用 `pmw-run finish`；如果只是路由到下一技能、等待 D0/Q/D 回答或停在证据门槛，先记录 gate/evidence 事件，保留当前 run 供下一轮复用。
 

@@ -22,12 +22,13 @@ _PMW_BIN="$HOME/.agents/plugins/plugins/pmworkspace/skills/pmworkspace-shared/bi
 "$_PMW_BIN/pmw-trigger-guard" --text "<本轮用户原话和材料摘要>" --skill pm-workspace --json
 ```
 
-如果 `pmw_required=true`，下一步必须运行：
+如果 `pmw_required=true`，下一步必须先运行操作路由，再按路由结果运行指定 controller 命令：
 
 ```bash
-"$_PMW_BIN/pmw-controller" intake --goal "<本轮产品目标>" --materials "<本轮用户材料摘要>" --skill pm-workspace --product-path "待判断" --depth deep --stage intake --json
-"$_PMW_BIN/pmw-controller" next --json
+"$_PMW_BIN/pmw-operation-router" classify --text "<本轮用户原话和材料摘要>" --materials "<本轮用户材料摘要>" --skill pm-workspace --json
 ```
+
+只有 router 返回 `operation_type=new_product_workflow` 且 `required_controller_command="pmw-controller intake"` 时，才运行 `pmw-controller intake`。短确认、补材料、修改 brief、基于现有图修改、复审、重出和交付续跑不得重新 intake。
 
 如果上述命令不能运行，必须停止，并说明：`PMW runtime 未接管当前任务，已阻断普通方案输出和出图`。不能继续普通产品分析，不能读数据后直接给方案，不能调用 imagegen，不能用 HTML / 线框图替代。
 {END}"""

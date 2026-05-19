@@ -21,9 +21,27 @@ PMWorkspace 对用户只暴露四个动作：`对齐`、`出图`、`复审`、`�
 
 路由前同时读取 `pm-workbench-map.md`。本文件决定“下一技能是什么”，`pm-workbench-map.md` 决定“当前链路阶段、共享状态字段和 eval 分类怎么对齐”。
 
-路由前先建立 `产品信息对齐包`。脚本可用时，先运行 `pmw-controller intake` 生成或继承本轮 run / `task_digest` / `input_revision`，再读取 `pmw-dashboard status` 默认摘要；脚本不可用时，也要用当前对话、已对齐 brief、截图、Zoon、artifact-flow 和 run 事实手动整理同样字段。路由不能只看用户最后一句“要原型 / 使用方案 A / 参考截图”，必须先判断当前事实是否足以继续下游。
+路由前先建立 `产品信息对齐包`。脚本可用时，先运行 `pmw-trigger-guard`，再运行 `pmw-operation-router classify` 判断本轮 operation；只有 router 返回 `new_product_workflow` 时才运行 `pmw-controller intake` 生成或继承本轮 run / `task_digest` / `input_revision`。流程内回答、补材料、修改 brief、基于现有图修改、复审、重出和交付续跑必须继承当前 locked context 或 artifact context，不得重新 intake。脚本不可用时，也要用当前对话、已对齐 brief、截图、Zoon、artifact-flow 和 run 事实手动整理同样字段。路由不能只看用户最后一句“要原型 / 使用方案 A / 参考截图”，必须先判断当前事实是否足以继续下游。
 
-路由前先运行 `pmw-trigger-guard --text "<本轮用户原话和材料摘要>" --skill pm-workspace --json`。只要返回 `pmw_required=true`，就不能退回普通 Agent 行为；如果 PMW runtime 或专用动作不可用，必须停止并说明 `PMW runtime 未接管当前任务，已阻断普通方案输出和出图`。禁止说“插件触发到了但没有直接暴露 pmworkspace 动作，所以我继续用本地数据做方案”；这类 fallback 会绕过工作方式卡片、自动产品评审、产品方向审查、brief 确认、设计规范 D、readiness 和 image permit。
+路由前先运行 `pmw-trigger-guard --text "<本轮用户原话和材料摘要>" --skill pm-workspace --json`。只要返回 `pmw_required=true`，就不能退回普通 Agent 行为；下一步必须运行 `pmw-operation-router classify --text "<本轮用户原话>" --materials "<材料摘要>" --skill pm-workspace --json`，再按 `required_controller_command` 执行。若 router 不可用但旧 controller 可用，才允许兼容执行 `pmw-controller intake`；如果 PMW runtime 或专用动作不可用，必须停止并说明 `PMW runtime 未接管当前任务，已阻断普通方案输出和出图`。禁止说“插件触发到了但没有直接暴露 pmworkspace 动作，所以我继续用本地数据做方案”，也禁止用“插件触发到了但没有直接暴露 pmworkspace 的专用动作”包装同一种 fallback；这类 fallback 会绕过工作方式卡片、自动产品评审、产品方向审查、brief 确认、设计规范 D、readiness 和 image permit。
+
+## Operation Router
+
+PMW runtime 先判断用户当前这句话是什么操作，而不是默认把所有命中都当成新任务：
+
+| operation_type | 典型用户输入 | 下一命令 | 是否 intake |
+|---|---|---|---:|
+| `new_product_workflow` | “帮我思考方案及原型” | `pmw-controller intake` | 是 |
+| `answer_pending_gate` | “确认策略审查” | `pmw-controller answer` | 否 |
+| `lock_or_confirm_brief` | “确认没有问题” | `pmw-controller lock-brief` | 否 |
+| `attach_evidence` | “补充一张截图” | `pmw-controller continue-operation` | 否 |
+| `modify_brief` | “目标改成...” | `pmw-controller modify-brief` | 否 |
+| `prototype_revision` | “在这张图基础上修改，不要改 100 元券样式” | `pmw-controller continue-operation` | 否 |
+| `prototype_review` | “这张图能交付吗” | `$pm-prototype-review` | 否 |
+| `prototype_regenerate` | “重出第三张” | `pmw-controller continue-operation` | 否 |
+| `handoff_continue` | “生成 PRD / 交付稿” | `pmw-controller preflight --target handoff` | 否 |
+
+`prototype_revision` 的最小门槛是 edit contract：`source_image`、`edit_scope`、`preserve_scope`、继承的 locked brief、设计规范目标和 operation-scoped image permit。它不重跑 `goal_mode`、`autoplan`、`product_direction` 或 `strategy`。如果反馈改变用户承诺、范围、数据真实性或交付责任，必须转成 `modify_brief --change-type boundary_change` 并重新锁 brief。
 
 `pmw-controller next` 是路由后的唯一合法下一动作来源。返回 `ASK_CONFIRMATION`、`NEEDS_BASELINE`、`WRITE_PENDING_BRIEF`、`BRIEF_PENDING`、`D_REQUIRED` 或 `BLOCKED` 时，路由必须停在当前门槛；不要因为历史资料充足、旧 brief 已对齐或旧 board 有 3 个方案就继续下游。
 
@@ -160,7 +178,7 @@ run_id：
 
 ## Run 衔接
 
-`$pm-workspace` 是路由型会话的 run owner：完成 D0 和路由判定后先调用 `pmw-controller intake`，由 controller 判断是否复用当前 active run、创建新 revision 或新 run，并记录当前门槛、证据状态和下一技能。被路由到的子 skill 必须复用当前 controller run/revision；只有用户直接调用子 skill 且没有当前 run 时，子 skill 才通过 controller 创建自己的 run。全局 `current-project` 只是候选上下文，不能跳过 controller 的语义匹配。
+`$pm-workspace` 是路由型会话的 run owner：完成 D0 和 operation 判定后，只有 `new_product_workflow` 调用 `pmw-controller intake`，由 controller 判断是否复用当前 active run、创建新 revision 或新 run，并记录当前门槛、证据状态和下一技能。流程内 operation 通过 `answer`、`lock-brief`、`modify-brief` 或 `continue-operation` 继承当前 run/revision，不改变 `task_digest` / `input_revision`。被路由到的子 skill 必须复用当前 controller run/revision；只有用户直接调用子 skill 且没有当前 run 时，子 skill 才通过 operation router 判断是否需要 controller 创建 run。全局 `current-project` 只是候选上下文，不能跳过 controller 的语义匹配。
 
 ## 端到端地图衔接
 

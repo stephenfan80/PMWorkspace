@@ -6,7 +6,7 @@
 
 - Codex plugin display name: **AI 产品工作站**
 - Skill entrypoint: `$pm-workspace`
-- Current version: `0.1.29`
+- Current version: `0.1.36`
 
 ## First Use
 

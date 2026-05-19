@@ -846,6 +846,74 @@ def product_readiness_rows(project: dict, events: list[dict], target: str) -> li
         )
     )
 
+    operation = rt.latest_operation(project, "prototype_revision") if effective_target == "prototype" else {}
+    if operation and rt.operation_matches_context(operation, ACTIVE_CONTEXT or rt.resolve_context(project)):
+        inherited = operation.get("inherited_context") if isinstance(operation.get("inherited_context"), dict) else {}
+        operation_status = str(operation.get("operation_status") or "")
+        op_failures = []
+        if operation_status != "ready_for_image_permit":
+            op_failures.append(f"operation_status={operation_status or '未记录'}")
+        if not str(operation.get("source_image") or "").strip():
+            op_failures.append("缺 source_image")
+        if not str(operation.get("edit_scope") or "").strip():
+            op_failures.append("缺 edit_scope")
+        if not str(operation.get("preserve_scope") or "").strip():
+            op_failures.append("缺 preserve_scope")
+        if operation.get("boundary_change"):
+            op_failures.append("产品边界变化，需要 brief relock")
+        design_target = str(inherited.get("design_spec_target") or project.get("design_spec_target") or "")
+        if not design_target:
+            op_failures.append("缺 design_spec")
+        operation_ready = not op_failures
+        rows.append(
+            gate_result(
+                "当前操作",
+                True,
+                "原型局部修改已就绪" if operation_ready else "原型局部修改未就绪",
+                "；".join(
+                    [
+                        f"operation_id={operation.get('operation_id') or ''}",
+                        f"继承：brief_lock={inherited.get('brief_lock_id') or '未记录'}",
+                        f"design_spec={design_target or '未记录'}",
+                        f"source_image={operation.get('source_image') or '未记录'}",
+                    ]
+                ),
+                "继续签发 operation-scoped image permit" if operation_ready else "补齐 operation edit contract；本轮不重跑 goal_mode / autoplan / product_direction / strategy",
+                operation_ready,
+            )
+        )
+        rows.append(
+            gate_result(
+                "编辑合同",
+                True,
+                "已记录" if operation_ready else "未通过",
+                "；".join(op_failures) if op_failures else f"只改：{operation.get('edit_scope')}；保留：{operation.get('preserve_scope')}",
+                "继续" if operation_ready else "补齐 source_image / edit_scope / preserve_scope；若改变产品承诺，回到 brief relock",
+                operation_ready,
+            )
+        )
+        rows.append(
+            gate_result(
+                "输出单元",
+                True,
+                f"operation 输出 {rt.operation_expected_units(operation, 1)} 张",
+                "；".join(rt.operation_variant_roles(operation)),
+                "继续；局部修改不要求 brief_lock 的三页实验数量",
+                True,
+            )
+        )
+        rows.append(
+            gate_result(
+                "image permit",
+                True,
+                "待签发",
+                "pmw-image-preflight issue-permit 会绑定 operation_id / scheme / screen / 当前 revision",
+                "签发每张图的一次性 permit 后再调用 imagegen",
+                operation_ready,
+            )
+        )
+        return rows
+
     zoon_url = str(project.get("zoon_url") or "")
     zoon_sync = str(project.get("last_zoon_sync_status") or "")
     zoon_join = str(project.get("last_zoon_join_status") or "")

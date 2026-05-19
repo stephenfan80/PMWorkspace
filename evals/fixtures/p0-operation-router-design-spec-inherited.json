@@ -1,0 +1,48 @@
+{
+  "id": "p0-operation-router-design-spec-inherited",
+  "title": "P0：原型局部修改继承设计规范目标",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-prototype-shotgun",
+  "prompt": "prototype_revision operation 必须把设计规范目标写入 inherited_context。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": true,
+    "gate": "design spec inheritance",
+    "required_behaviors": [
+      "inherited_context.design_spec_target 存在",
+      "后续修改不重新询问 AutoDesign"
+    ],
+    "forbidden_behaviors": [
+      "原型局部修改再次阻断到 DESIGN_SPEC_REQUIRED",
+      "operation event 缺设计规范目标"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-controller",
+      "contains": "design_spec_target"
+    },
+    {
+      "path": "pmworkspace-shared/references/routing.md",
+      "contains": "设计规范目标"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=op-design; brief=\"$tmp/brief.md\"; printf '# 产品简报\\n状态：已对齐\\n简报版本：v1\\n目标用户：用户\\n核心问题：问题\\n推荐方案：方案\\n原型范围：范围\\n本轮不做：真实价格承诺\\n主目标：提升领取 CTR\\n反指标：不增加骚扰\\n不可虚构项：不得承诺真实成交价\\n' > \"$brief\"; bin/pmw-controller intake --goal '补贴弹窗原型' --materials '活动弹窗' --skill pm-workspace --product-path 全新功能 --depth deep --stage intake >/dev/null; bin/pmw-controller confirm --kind goal_mode --value '优化线上指标' >/dev/null; bin/pmw-controller confirm --kind autoplan --summary '我建议先做产品方向审查。当前最早门槛是明确损失。下一技能是 $pm-jobs。' >/dev/null; bin/pmw-controller confirm --kind product_direction --summary '前提：用户打开弹窗。现状替代：关闭弹窗。当前损失：领取动作不清楚。PM 判断：降低理解成本。' >/dev/null; bin/pmw-controller lock-brief --brief-path \"$brief\" --brief-version v1 --user-confirmed true --image-output-mode single_page_confirmed >/dev/null; bin/pmw-controller confirm --kind design_spec --value '汽车之家 AutoDesign' >/dev/null; bin/pmw-controller continue-operation --operation-type prototype_revision --source-image /tmp/source.png --edit-scope '按钮区' --preserve-scope '100元券样式' --json"
+      ],
+      "exit_code": 0,
+      "contains": [
+        "\"design_spec_target\": \"汽车之家 AutoDesign\"",
+        "\"operation_status\": \"ready_for_image_permit\""
+      ],
+      "not_contains": [
+        "DESIGN_SPEC_REQUIRED"
+      ]
+    }
+  ]
+}

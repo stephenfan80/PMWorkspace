@@ -111,6 +111,9 @@ def validate_permit(project: dict[str, Any], permit_id: str, scheme: str, screen
         "scheme": scheme,
         "screen": screen,
     }
+    operation = rt.latest_operation(project, "prototype_revision")
+    if operation and permit.get("operation_id"):
+        expected["operation_id"] = str(operation.get("operation_id") or "")
     for key, value in expected.items():
         if value and str(permit.get(key) or "") != str(value):
             return False, f"IMAGEGEN_BLOCKED_BEFORE_PERMIT: image_permit_id 与当前 {key} 不匹配。", permit
@@ -135,9 +138,59 @@ def controller_preflight(run_id: str = "") -> tuple[int, dict[str, Any], str]:
     return result.returncode, payload if isinstance(payload, dict) else {}, result.stderr
 
 
+def operation_preflight(project: dict[str, Any], run_id: str = "") -> dict[str, Any]:
+    operation = rt.latest_operation(project, "prototype_revision")
+    if not operation:
+        return {}
+    context = rt.resolve_context(project, run_id or None)
+    failures: list[str] = []
+    if not rt.operation_matches_context(operation, context):
+        failures.append("OPERATION_PERMIT_MISMATCH: 当前 operation 与 run/task/revision 不匹配")
+    if str(operation.get("operation_status") or "") != "ready_for_image_permit":
+        failures.append("OPERATION_NOT_READY: 当前 operation 还没有 ready_for_image_permit")
+    if not str(operation.get("source_image") or "").strip():
+        failures.append("OPERATION_SOURCE_IMAGE_REQUIRED: 缺 source_image")
+    if not str(operation.get("edit_scope") or "").strip():
+        failures.append("OPERATION_EDIT_SCOPE_REQUIRED: 缺 edit_scope")
+    if not str(operation.get("preserve_scope") or "").strip():
+        failures.append("OPERATION_PRESERVE_SCOPE_REQUIRED: 缺 preserve_scope")
+    if operation.get("boundary_change"):
+        failures.append("OPERATION_BOUNDARY_CHANGE_REQUIRES_BRIEF_RELOCK: 产品承诺或范围变化必须回到 brief relock")
+    lock = rt.latest_brief_lock(project)
+    if not rt.brief_lock_is_locked(lock):
+        failures.append("OPERATION_CONTEXT_MISSING: 缺 locked brief")
+    inherited = operation.get("inherited_context") if isinstance(operation.get("inherited_context"), dict) else {}
+    if not str(inherited.get("design_spec_target") or project.get("design_spec_target") or "").strip():
+        failures.append("OPERATION_CONTEXT_MISSING: 缺 design_spec")
+    expected_units = rt.operation_expected_units(operation, 1)
+    return {
+        "operation_mode": True,
+        "ready": not failures,
+        "verdict": "ALLOW_IMAGE_PROMPT" if not failures else "BLOCKED",
+        "first_blocker": failures[0] if failures else "",
+        "failures": failures,
+        "output_units": expected_units,
+        "expected_output_units": expected_units,
+        "image_output_mode": "prototype_revision",
+        "image_output_mode_label": "原型局部修改",
+        "operation_id": operation.get("operation_id", ""),
+        "operation_type": operation.get("operation_type", ""),
+        "variant_roles": rt.operation_variant_roles(operation),
+        "source_image": operation.get("source_image", ""),
+        "edit_scope": operation.get("edit_scope", ""),
+        "preserve_scope": operation.get("preserve_scope", ""),
+        "run_id": context.get("run_id", ""),
+        "task_digest": context.get("task_digest", ""),
+        "input_revision": context.get("input_revision", ""),
+    }
+
+
 def evaluate_preflight(project: dict[str, Any], run_id: str = "") -> dict[str, Any]:
     project = read_json(project_dir() / "project.json")
     context = rt.resolve_context(project, run_id or None)
+    operation_payload = operation_preflight(project, run_id)
+    if operation_payload:
+        return operation_payload
     exit_code, payload, stderr = controller_preflight(run_id)
     items = current_board_items(project, run_id)
     lock = rt.latest_brief_lock(project)
@@ -180,8 +233,9 @@ def command_issue_permit(args: argparse.Namespace) -> int:
     context = rt.resolve_context(project, args.run or None)
     result_payload = evaluate_preflight(project, args.run)
     item = current_board_item(project, args.scheme, args.screen, args.run)
+    operation_mode = bool(result_payload.get("operation_mode"))
     failures = list(result_payload.get("failures") or [])
-    if not item:
+    if not item and not operation_mode:
         failures.append("当前 run / task revision 没有匹配的 prototype-board 输出单元，不能签发图片许可证")
     if failures:
         blocked = {
@@ -215,12 +269,14 @@ def command_issue_permit(args: argparse.Namespace) -> int:
         "input_revision": context.get("input_revision", ""),
         "scheme": args.scheme,
         "screen": args.screen,
-        "output_mode": item.get("output_mode") or result_payload.get("image_output_mode", ""),
-        "page_variant_role": item.get("page_variant_role", ""),
-        "experiment_hypothesis": item.get("experiment_hypothesis", ""),
-        "brief_version": item.get("brief_version", ""),
-        "design_spec_target": item.get("design_spec_target") or project.get("design_spec_target", ""),
-        "task_digest_source": "current_revision",
+        "operation_id": result_payload.get("operation_id", ""),
+        "operation_type": result_payload.get("operation_type", ""),
+        "output_mode": (item.get("output_mode") if item else "") or result_payload.get("image_output_mode", ""),
+        "page_variant_role": (item.get("page_variant_role") if item else "") or args.screen,
+        "experiment_hypothesis": (item.get("experiment_hypothesis") if item else "") or result_payload.get("edit_scope", ""),
+        "brief_version": (item.get("brief_version") if item else "") or project.get("latest_brief_version", ""),
+        "design_spec_target": (item.get("design_spec_target") if item else "") or project.get("design_spec_target", ""),
+        "task_digest_source": "operation" if operation_mode else "current_revision",
         "status": "issued",
         "expires_after_use": True,
     }
@@ -238,8 +294,9 @@ def command_assert_imagegen(args: argparse.Namespace) -> int:
     project = read_json(project_dir() / "project.json")
     result_payload = evaluate_preflight(project, args.run)
     item = current_board_item(project, args.scheme, args.screen, args.run)
+    operation_mode = bool(result_payload.get("operation_mode"))
     failures = list(result_payload.get("failures") or [])
-    if not item:
+    if not item and not operation_mode:
         failures.append("当前 run / task revision 没有匹配的 prototype-board 输出单元，不能写 image-2 prompt 或调用 imagegen")
     permit_ok, permit_error, permit = validate_permit(project, args.image_permit_id, args.scheme, args.screen)
     if not permit_ok:

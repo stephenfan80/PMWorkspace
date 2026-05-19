@@ -1,0 +1,43 @@
+{
+  "id": "p0-operation-router-boundary-change-routes-brief",
+  "title": "P0：边界变化必须回到 brief relock",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-brief",
+  "prompt": "用户说“把目标改成提升复购率，并承诺真实成交价”时，router 必须进入 modify_brief。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": true,
+    "gate": "brief relock",
+    "required_behaviors": [
+      "operation_type=modify_brief",
+      "minimal_gate=brief_relock",
+      "prototype boundary_change 不签发 image permit"
+    ],
+    "forbidden_behaviors": [
+      "边界变化继续出图",
+      "边界变化重新跑完整 intake"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-controller",
+      "contains": "BRIEF_RELOCK_REQUIRED"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=router-boundary; bin/pmw-operation-router classify --text '把目标改成提升复购率，并承诺真实成交价' --json"
+      ],
+      "exit_code": 0,
+      "contains": [
+        "\"operation_type\": \"modify_brief\"",
+        "\"minimal_gate\": \"brief_relock\"",
+        "\"required_controller_command\": \"pmw-controller modify-brief\""
+      ]
+    }
+  ]
+}

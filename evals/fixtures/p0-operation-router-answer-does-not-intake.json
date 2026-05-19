@@ -1,0 +1,46 @@
+{
+  "id": "p0-operation-router-answer-does-not-intake",
+  "title": "P0：短确认必须回答当前 gate，不得 intake",
+  "category": "pm-workspace-runtime",
+  "primary_skill": "pm-workspace",
+  "prompt": "用户说“确认策略审查”时，router 必须输出 answer_pending_gate 和 pmw-controller answer。",
+  "expected": {
+    "mode": "maintenance",
+    "status": "可检查",
+    "must_stop": true,
+    "gate": "operation router",
+    "required_behaviors": [
+      "operation_type=answer_pending_gate",
+      "must_not_run_intake=true",
+      "required_controller_command=pmw-controller answer"
+    ],
+    "forbidden_behaviors": [
+      "短确认重新触发 pmw-controller intake",
+      "短确认创建新 task_digest 或 input_revision"
+    ]
+  },
+  "contract_checks": [
+    {
+      "path": "bin/pmw-operation-router",
+      "contains": "answer_pending_gate"
+    }
+  ],
+  "command_checks": [
+    {
+      "command": [
+        "bash",
+        "-lc",
+        "tmp=$(mktemp -d); export PMW_HOME=\"$tmp\" PMW_PROJECT_SLUG=router-answer; bin/pmw-operation-router classify --text '确认策略审查' --json"
+      ],
+      "exit_code": 0,
+      "contains": [
+        "\"operation_type\": \"answer_pending_gate\"",
+        "\"required_controller_command\": \"pmw-controller answer\"",
+        "\"must_not_run_intake\": true"
+      ],
+      "not_contains": [
+        "\"required_controller_command\": \"pmw-controller intake\""
+      ]
+    }
+  ]
+}

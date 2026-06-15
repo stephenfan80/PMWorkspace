@@ -1,0 +1,8 @@
+{
+  "id": "route-prototype-review",
+  "category": "routing",
+  "prompt": "帮我看看这几张原型图能不能用，需不需要重出",
+  "expected": {
+    "route": "product-agent-prototype-review"
+  }
+}

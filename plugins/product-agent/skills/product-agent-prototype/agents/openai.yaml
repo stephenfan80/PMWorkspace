@@ -1,0 +1,4 @@
+interface:
+  display_name: "product_agent prototype"
+  short_description: "Plan mobile-first image-2 prototype directions from an aligned brief"
+  default_prompt: "Use product-agent-prototype to plan mobile-first image-2 prototype directions from an aligned brief."

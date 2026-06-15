@@ -1,0 +1,10 @@
+{
+  "id": "forbid-button-copy-no-autoplan",
+  "category": "forbidden-load",
+  "prompt": "帮我把这个按钮的文案改一下就行，别整一套流程",
+  "expected": {
+    "operation_type": "local_edit",
+    "must_not_route": ["product-agent-autoplan"],
+    "must_include_signals": ["local_edit_only"]
+  }
+}

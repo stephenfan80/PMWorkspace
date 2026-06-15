@@ -1,0 +1,4 @@
+interface:
+  display_name: "product_agent handoff"
+  short_description: "Create a compact PRD or product handoff from aligned assets"
+  default_prompt: "Use product-agent-handoff to create a compact PRD or product handoff from aligned assets."

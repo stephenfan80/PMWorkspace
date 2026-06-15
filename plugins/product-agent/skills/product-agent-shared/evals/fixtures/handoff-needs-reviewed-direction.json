@@ -1,0 +1,10 @@
+{
+  "id": "handoff-needs-reviewed-direction",
+  "category": "gotcha",
+  "prompt": "方向还没复审，但先整理成 PRD 给研发",
+  "expected": {
+    "route": "product-agent-handoff",
+    "operation_type": "handoff_continue",
+    "must_include_signals": ["no_fake_interfaces"]
+  }
+}

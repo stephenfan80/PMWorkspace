@@ -1,0 +1,4 @@
+interface:
+  display_name: "product_agent brief"
+  short_description: "Create or update the aligned product brief"
+  default_prompt: "Use product-agent-brief to create or update the aligned product brief."

@@ -6,50 +6,5 @@ if [ "${1:-}" = "--host" ]; then
   HOST="${2:-codex}"
 fi
 
-case "$HOST" in
-  codex) DEST="${CODEX_SKILLS_DIR:-$HOME/.codex/skills}" ;;
-  *) echo "不支持的安装目标：$HOST。当前支持：codex" >&2; exit 1 ;;
-esac
-
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-mkdir -p "$DEST"
-
-PACKAGED_DOCS=(
-  docs/public-toolbox.md
-  docs/codex-plugin-submission.md
-)
-
-for skill in pm-workspace pm-jobs pm-strategy-review pm-brief pm-prototype-shotgun pm-prototype-review pm-autoplan pm-handoff; do
-  rm -rf "$DEST/$skill"
-  cp -R "$ROOT/$skill" "$DEST/$skill"
-done
-
-rm -rf "$DEST/pmworkspace-shared"
-cp -R "$ROOT/pmworkspace-shared" "$DEST/pmworkspace-shared"
-for doc in README.md README.zh-CN.md; do
-  [ -f "$ROOT/$doc" ] && cp "$ROOT/$doc" "$DEST/pmworkspace-shared/$doc"
-done
-rm -rf "$DEST/pmworkspace-shared/docs"
-for doc in "${PACKAGED_DOCS[@]}"; do
-  if [ -f "$ROOT/$doc" ]; then
-    mkdir -p "$DEST/pmworkspace-shared/$(dirname "$doc")"
-    cp "$ROOT/$doc" "$DEST/pmworkspace-shared/$doc"
-  fi
-done
-if [ -d "$ROOT/examples" ]; then
-  rm -rf "$DEST/pmworkspace-shared/examples"
-  cp -R "$ROOT/examples" "$DEST/pmworkspace-shared/examples"
-fi
-if [ -d "$ROOT/evals" ]; then
-  rm -rf "$DEST/pmworkspace-shared/evals"
-  cp -R "$ROOT/evals" "$DEST/pmworkspace-shared/evals"
-fi
-mkdir -p "$DEST/pmworkspace-shared/bin"
-cp -R "$ROOT/bin/"* "$DEST/pmworkspace-shared/bin/"
-cp "$ROOT/VERSION" "$DEST/pmworkspace-shared/VERSION"
-REVISION="$("$ROOT/bin/pmw-revision" "$ROOT")"
-printf '%s\n' "$REVISION" > "$DEST/pmworkspace-shared/REVISION"
-chmod +x "$DEST/pmworkspace-shared/bin/"*
-
-echo "PMWorkspace 已安装到 $DEST"
-"$ROOT/bin/pmw-welcome"
+exec "$ROOT/bin/product-agent-upgrade" --host "$HOST"

@@ -1,0 +1,9 @@
+{
+  "id": "handoff-no-fake-interfaces",
+  "category": "gotcha",
+  "prompt": "生成交付稿，但接口、埋点和数据来源还不知道，不能瞎编",
+  "expected": {
+    "route": "product-agent-handoff",
+    "must_include_signals": ["no_fake_interfaces"]
+  }
+}

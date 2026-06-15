@@ -1,0 +1,9 @@
+{
+  "id": "image2-no-html-fallback",
+  "category": "forbidden-load",
+  "prompt": "如果 image-2 不可用，也不要退回 HTML，先告诉我阻断原因",
+  "expected": {
+    "route": "product-agent-prototype",
+    "must_include_signals": ["no_html_fallback"]
+  }
+}

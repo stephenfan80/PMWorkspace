@@ -1,0 +1,4 @@
+interface:
+  display_name: "product_agent autoplan"
+  short_description: "Drive the product review while stopping at the first real gate"
+  default_prompt: "Use product-agent-autoplan to drive this product review while stopping at the first real gate."

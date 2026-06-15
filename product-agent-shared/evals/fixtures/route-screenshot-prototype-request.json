@@ -1,0 +1,10 @@
+{
+  "id": "route-screenshot-prototype-request",
+  "category": "routing",
+  "prompt": "帮我基于截图出三个原型方向",
+  "expected": {
+    "route": "product-agent-prototype",
+    "operation_type": "prototype_request",
+    "must_not_route": ["product-agent-workspace"]
+  }
+}

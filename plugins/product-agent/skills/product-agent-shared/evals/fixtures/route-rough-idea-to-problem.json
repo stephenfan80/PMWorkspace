@@ -1,0 +1,8 @@
+{
+  "id": "route-rough-idea-to-problem",
+  "category": "routing",
+  "prompt": "我有一个产品想法，但不确定用户痛点是否成立，帮我判断值不值得做",
+  "expected": {
+    "route": "product-agent-problem"
+  }
+}

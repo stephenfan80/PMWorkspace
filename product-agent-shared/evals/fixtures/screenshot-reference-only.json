@@ -1,0 +1,9 @@
+{
+  "id": "screenshot-reference-only",
+  "category": "gotcha",
+  "prompt": "我补充一张当前线上截图，先别自动出方案",
+  "expected": {
+    "route": "product-agent-workspace",
+    "operation_type": "attach_evidence"
+  }
+}

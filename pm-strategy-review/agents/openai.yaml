@@ -1,8 +1,0 @@
-interface:
-  display_name: "策略审查"
-  short_description: "审查产品策略和范围"
-  brand_color: "#7C3AED"
-  default_prompt: "使用 $pm-strategy-review 在出原型或交付前审查这个产品方向。"
-
-policy:
-  allow_implicit_invocation: true

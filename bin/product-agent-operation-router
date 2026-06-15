@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+if [ "${1:-}" = "classify" ]; then
+  shift
+fi
+exec python3 "$ROOT/bin/product_agent_runtime.py" classify "$@"

@@ -1,0 +1,4 @@
+interface:
+  display_name: "product_agent problem"
+  short_description: "Clarify whether a product idea maps to a real user problem"
+  default_prompt: "Use product-agent-problem to test whether this product idea maps to a real user problem."

@@ -1,65 +1,32 @@
 # AGENTS
 
-本项目维护 `PMWorkspace` Codex skill 套件，用于把产品想法、PRD、截图、访谈/支持洞察转成产品简介 / 产品简报、方案方向、移动端优先 image-2 UI 原型图、PRD 和可交付产品资产。
+This file is for agents working in this repository. Keep it short: use it to decide what context to load, what not to touch, and where product_agent guidance lives.
 
-本地工作规则：
+## Repository Context
 
-- PMWorkspace 是产品方案工作台，不是单纯原型生成器；核心定位是“先对齐，再出图，最后交付”。
-- PMW 触发后先运行 `pmw-operation-router classify` 判断本轮是新任务、gate 回答、补材料、修改 brief、原型局部修改、复审、重出还是交付续跑；只有 `new_product_workflow` 才进入 `pmw-controller intake`，流程内循环不得重新 intake。
-- 前台入口先判断 `全新功能` 或 `已有功能迭代`；对齐深度固定为深度产品对齐，不再提供轻量旁路模式。
-- 全新功能和已有功能迭代都必须按“产品路径 -> 工作目标模式 -> 产品方向审查内核 -> 产品简报确认 -> 三条产品路径 image-2 原型 -> 原型复审 -> 产品设计文档 / 产品交付”推进。
-- 每次进入或切换工作流时，必须给用户一个短的“工作方式卡片”：产品路径、对齐深度、为什么这样判定、已完成、当前任务、下一步、Agent 可协助什么、需要用户补什么；不能只在内部审计里记录模式。
-- 所有路径都要体现一步步引导：本轮只推进一个最早门槛，但输出里要轻量显示“已完成 / 当前一步 / 下一步”，让用户知道离原型、复审或交付还有多远。
-- 先确认工作目标模式：验证价值、优化线上指标、业务评审、设计评审或研发交付；不同目标决定追问力度和产物深度。
-- `Q` / `D` 只作为关键卡点的交互方式，不是完整产品发现流程；Agent 可以先协助整理材料、拆解截图、生成访谈提纲、梳理数据口径、检索最佳实践和归纳路径机会。拍板问题使用 `D`，信息足够后一次只展开一个完整选择题。
-- 产品简报前必须完成 2-4 条关键前提确认；未确认前不能标记为“已对齐”。
-- 做原型前先完成产品对齐：确认场景、目标人群、核心问题、目标、反指标、原型内容重点、约束、数据可用性和产品简报状态。
-- 只有当前 `input_revision` 的产品简报达到“已对齐”，才写图片提示词或生成原型图。
-- 产品简报不是“已对齐”时，不写 image-2 提示词，不生成图片，不生成 HTML，不输出交付稿。
-- 用户选择方案 A/B/C、确认“按 A 继续”或确认方向，只代表方向选择，不能替代产品简报对齐。
-- 默认原型输出移动端优先：无线上截图时使用 `standard_first_screen` 模板；有生产截图 / `visual_baseline` 时必须使用 `physical_longboard` 模板和截图物理像素长板。
-- 要求输出设计原型方案时，使用 image-2 / 图像生成输出方案图片。
-- HTML 只在用户明确要求“HTML / 可交互网页 / 前端实现 / 本地网页原型”时允许；不能作为 image-2 不可用时的替代品。
-- 不要把多个方案合成在同一张图里；每个方案、每个屏幕都单独输出一张图。
-- 可以批量生成多张，但每张图必须对应一个明确的方案名和屏幕任务。
-- 每张图必须绑定方案名、屏幕任务、主目标、反指标、不可虚构项和产品简报版本。
-- 默认最少 3 个方案；少于 3 个必须有明确豁免原因。
-- 多方案必须在产品策略、信息架构、交互模型或信任模型上有差异，不能只是换配色。
-- 每个方案必须包含原型思考、信息架构设计思考、用户问题解决逻辑、反指标保护和不可虚构边界。
-- 已上线功能迭代必须先拿到当前生产截图、关键节点截图、线上页面 URL、Figma / 设计稿或等价视觉基线；用户提供录屏时，要求补关键节点截图或先转成截图再进入 PMW。
-- 新页面也要评估是否需要线上参考；承接线上流程、结果页/状态页、活动页、表单页或生产样式时，缺截图、关键节点截图或相似页面要先问，不可直接出图。
-- 用户提供截图或线上参考时，只更新视觉基线和参考状态，不自动产出完整 md 方案、HTML 或原型图。
-- 产品简报阶段可以按主场景做轻量互联网最佳实践检索，但检索结果只用于案例启发和原型重点建议，不能增加 Q 数量。
-- 关键 PM 决策默认使用选择题拍板，一次只问一个；如果有多个待拍板，只用一行轻量队列提示后续标题，用户回答后再进入下一个。
-- 产品简报阶段默认先保存本地 Markdown 业务简报和本地审计副本；生成后如果还有待确认信息，必须告诉用户缺什么、不补齐可能导致什么产品方案偏差，并让用户补齐、拍板或确认按假设推进；产品简报确认状态已对齐后，才提醒用户是否同步到 Zoon 在线协作文档；不要自动创建或更新 Zoon 在线文档。
-- 只有用户明确选择“同步到在线协作文档 / Zoon”、提供现有 Zoon URL，或当前任务需要多人在线协作时，才创建或更新 Zoon；创建/更新成功后再自动打开到 Codex 内置浏览器。
-- 如果未启用 Zoon，产品简报、原型和交付以本地已对齐 Markdown 为事实源；Product Readiness Dashboard 中 Zoon 行应显示“未启用，使用本地简报”，不作为出图阻断。
-- 用户在对话中调整产品简报后，必须更新本地审计副本；只有已启用 Zoon 时才重新同步到 Zoon，并在原型或交付前做 Zoon 漂移检查。
-- 平台脚本可用时，用 `pmw-run` 记录本轮 run、门槛、证据、决策、产物、复审和下一步；最终用 `pmw-dashboard status` 汇总证据状态。
-- 出图或交付前必须展示 Product Readiness Dashboard；用 `pmw-dashboard readiness --target prototype|handoff` 统一检查 brief、Zoon、线上参考、方案差异、不可虚构项和复审状态，verdict 不是 `可出图` / `可交付` 时退回第一条阻断门槛。
-- 平台脚本可用时，用 `pmw-artifact` 登记 Product Artifact Flow；下游技能先读取最新上游产物，再输出 `上游产物`、`本轮产物`、`下游可读` 和 `产物流动`。
-- 维护 `SKILL.md` 共享契约时，用 `pmw-gen-skill-docs` 从 manifest 生成和检查 preamble、必读协议、输出字段和共享门槛；不要手写修改生成区块。
-- 多方案原型进入 `pmw-prototype-board`，用表格比较方案；不要为了比较把多张 image-2 图合成一张。
-- 原型复审默认使用 PM Review Army / Product Review Squad：先跑策略、信任 / 风险、设计系统、数据可行性四个可插拔专家；每个专家必须独立输出短结论，再由 `$pm-prototype-review` 合并。深度交付、高风险、批量交付、研发交付或用户要求多角色 review 时，追加 CEO、Eng、Design、DX、安全、QA、发布工程师短结论。
-- 用户反馈某类 Q/D 追问方式时，用 `pmw-question-tuning` 沉淀问题偏好；偏好不能覆盖本轮事实、反指标或不可虚构项。
-- 原型图生成后、交付前默认做原型复审，检查产品简报、反指标、不可虚构项、线上参考和设计系统是否一致。
-- 原型图生成和复审后必须给出反馈入口和下一步引导：选择一个方案继续、指出要改的字段/区域、继续探索新方案、补充截图/数据参考，或进入 `$pm-handoff` 生成产品设计文档 / 精简 PRD / 交付稿。
-- 用户对原型提出修改时，先判断是“设计改动”“产品承诺变化”还是“交付范围变化”；设计改动可直接重出受影响单图，产品承诺或范围变化必须回写产品简报并重新确认。
-- 产品交付在原型图和复审后默认可输出产品设计文档；PRD 交付默认输出精简 PRD，只保留需求背景、需求价值、需求方案、需求功能及描述、接口以及数据来源、埋点信息、实验标准、待补充项和不可虚构；测试计划、开发周期、排期和人力默认不写。
-- 交付阶段可先询问用户是否有现成 PRD、接口文档、埋点方案、实验方案、Zoon 或截图可上传参考；没有时基于已对齐 brief 生成，并把缺口留空待补充。
-- 用户补充的接口、数据来源、埋点、实验标准和指标口径要脱敏保存为本地交付资产，作为后续参考，不能覆盖当前 brief、Zoon、反指标或不可虚构项。
-- 平台状态资产默认保存在 `~/.pmworkspace/`，只保存中文项目名、产品简报、选择题决策、Zoon 链接、产物流动元数据、可插拔复审专家短结论、原型清单、偏好反馈、脱敏产品学习和本地使用日志。
-- 不要把真实 token、内部录音、私密截图、客户资料或未脱敏 Zoon 内容写进公开仓库。
-- 面向中文用户时，尽可能使用纯中文标题、字段名、状态和示例数据；只保留 `$pm-*`、PRD、Zoon、image-2、token、API、URL 等必要术语。
+- This repository maintains the `product_agent` skill suite.
+- The public product is `product_agent`; do not introduce legacy product names or legacy command prefixes.
+- Do not infer that every task needs the full product workflow. For simple docs, script, eval, packaging, or cleanup tasks, inspect only the relevant files.
 
-## Skill routing
+## What To Read
 
-- 全新功能 / 已有功能迭代 / 简述 + 三条产品路径 + 原型图 -> `$pm-autoplan`
-- 产品想法 / 问题定义 / 是否值得做 -> `$pm-jobs`
-- 一次自动跑完整产品评审 / 按推荐推进但关键点拍板 -> `$pm-autoplan`
-- 策略、范围、价值交换、风险挑战 -> `$pm-strategy-review`
-- 生成或更新产品简报 -> `$pm-brief`
-- 多方案原型、image-2 出图、截图修改 -> `$pm-prototype-shotgun`
-- 复审已生成原型图 / 判断是否重出 / 偏好沉淀 -> `$pm-prototype-review`
-- 产品设计文档 / PRD / 设计 / 实验 / 研发交付 -> `$pm-handoff`
-- 不确定从哪里开始 -> `$pm-workspace`
+- For user-facing behavior, read [docs/product-agent-usage.md](docs/product-agent-usage.md).
+- For routing or capability boundaries, read [docs/product-agent-capability-map.md](docs/product-agent-capability-map.md) and [product-agent-shared/references/product-agent-routing.md](product-agent-shared/references/product-agent-routing.md).
+- For a specific skill change, read that skill's `SKILL.md` first, then only the directly referenced shared files needed for the change.
+- For eval changes, read [product-agent-shared/references/product-agent-eval-system.md](product-agent-shared/references/product-agent-eval-system.md), then the target fixture or suite.
+- For packaging changes, read [docs/codex-plugin-submission.md](docs/codex-plugin-submission.md) and `bin/product-agent-build-plugin`.
+
+## Working Rules
+
+- Default to Chinese for user-facing product explanations and project docs unless the surrounding file is clearly English.
+- Explain product-impacting bugs in product language: name the product bias, user misunderstanding, review risk, or delivery risk.
+- Keep changes surgical. Do not broaden the workflow or add stages unless the user explicitly asks.
+- Do not write real tokens, private screenshots, internal recordings, customer data, or unredacted collaboration-doc content into the repository.
+- Keep skill entry files compact. Put heavy references, cases, templates, schemas, assets, scripts, and eval fixtures in their dedicated folders.
+- If user intent conflicts with current docs, follow the latest explicit user instruction and update the relevant docs.
+
+## Verification
+
+- For docs-only changes, reread edited sections and check for contradictory routing.
+- For skill behavior changes, add or update focused eval fixtures.
+- For script changes, run the narrowest relevant command before reporting completion.

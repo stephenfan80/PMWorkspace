@@ -1,0 +1,4 @@
+interface:
+  display_name: "product_agent workspace"
+  short_description: "Route product work to the earliest useful product_agent capability"
+  default_prompt: "Use product-agent-workspace to route this product task to the earliest useful product_agent capability."

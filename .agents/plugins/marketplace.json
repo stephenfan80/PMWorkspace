@@ -1,14 +1,14 @@
 {
-  "name": "pmworkspace",
+  "name": "personal",
   "interface": {
-    "displayName": "AI 产品工作站"
+    "displayName": "Personal"
   },
   "plugins": [
     {
-      "name": "pmworkspace",
+      "name": "product-agent",
       "source": {
         "source": "local",
-        "path": "./plugins/pmworkspace"
+        "path": "./plugins/product-agent"
       },
       "policy": {
         "installation": "AVAILABLE",

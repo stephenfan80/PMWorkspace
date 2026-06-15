@@ -1,0 +1,9 @@
+{
+  "id": "brief-alignment-before-prototype",
+  "category": "gotcha",
+  "prompt": "还没有确认产品简报，但先帮我出三个 image-2 原型方向",
+  "expected": {
+    "route": "product-agent-prototype",
+    "must_include_signals": ["needs_brief_alignment", "no_html_fallback"]
+  }
+}

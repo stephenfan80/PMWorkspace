@@ -1,0 +1,4 @@
+interface:
+  display_name: "product_agent strategy review"
+  short_description: "Challenge scope, promise, risk, and validation"
+  default_prompt: "Use product-agent-strategy-review to challenge scope, promise, risk, and validation."

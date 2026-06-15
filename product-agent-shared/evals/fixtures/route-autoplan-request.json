@@ -1,0 +1,8 @@
+{
+  "id": "route-autoplan-request",
+  "category": "routing",
+  "prompt": "请按推荐流程一路推进这个产品评审，但关键点让我拍板",
+  "expected": {
+    "route": "product-agent-autoplan"
+  }
+}

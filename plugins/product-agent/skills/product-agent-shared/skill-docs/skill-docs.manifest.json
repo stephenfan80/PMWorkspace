@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "generated_section_title": "product_agent generated contract",
+  "skills": {
+    "product-agent-workspace": {"stage": "workspace", "purpose": "Route the user to the earliest useful product capability."},
+    "product-agent-problem": {"stage": "problem", "purpose": "Clarify whether a product idea maps to a real problem and current loss."},
+    "product-agent-autoplan": {"stage": "autoplan", "purpose": "Drive the recommended product-agent chain while stopping at decision gates."},
+    "product-agent-strategy-review": {"stage": "strategy", "purpose": "Challenge scope, value exchange, promise, and risk."},
+    "product-agent-brief": {"stage": "brief", "purpose": "Create or update the aligned product brief."},
+    "product-agent-prototype": {"stage": "prototype", "purpose": "Plan mobile-first image-2 prototype directions from an aligned brief."},
+    "product-agent-prototype-review": {"stage": "prototype_review", "purpose": "Review prototype images against product intent and boundaries."},
+    "product-agent-handoff": {"stage": "handoff", "purpose": "Produce compact PRD or product handoff assets without false certainty."}
+  }
+}

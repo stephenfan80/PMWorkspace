@@ -1,0 +1,10 @@
+{
+  "id": "forbid-online-change-needs-visual-baseline",
+  "category": "forbidden-load",
+  "prompt": "没有线上截图，但帮我改一下线上这个功能",
+  "expected": {
+    "route": "product-agent-workspace",
+    "must_not_route": ["product-agent-prototype"],
+    "must_include_signals": ["needs_visual_baseline"]
+  }
+}

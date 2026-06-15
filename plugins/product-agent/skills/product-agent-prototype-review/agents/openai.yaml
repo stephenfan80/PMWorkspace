@@ -1,0 +1,4 @@
+interface:
+  display_name: "product_agent prototype review"
+  short_description: "Review prototype images against product intent"
+  default_prompt: "Use product-agent-prototype-review to review prototype images against product intent."

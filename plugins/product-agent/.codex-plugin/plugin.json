@@ -1,0 +1,51 @@
+{
+  "name": "product-agent",
+  "version": "0.2.0",
+  "description": "product_agent turns product ideas, screenshots, PRDs, and feedback into aligned briefs, prototype directions, reviews, and handoff assets.",
+  "author": {
+    "name": "Stephen Fan",
+    "url": "https://github.com/stephenfan80"
+  },
+  "homepage": "https://github.com/stephenfan80/product-agent",
+  "repository": "https://github.com/stephenfan80/product-agent",
+  "license": "MIT",
+  "keywords": [
+    "product-agent",
+    "product_agent",
+    "product management",
+    "prd",
+    "prototype",
+    "产品 Agent",
+    "产品简报",
+    "原型复审"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "产品 Agent",
+    "shortDescription": "Product briefs, prototypes, reviews, and handoff assets",
+    "longDescription": "product_agent is a product capability skill suite that routes product ideas, screenshots, PRDs, and feedback through alignment, prototype, review, and delivery.",
+    "developerName": "Stephen Fan",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/stephenfan80/product-agent",
+    "privacyPolicyURL": "https://github.com/stephenfan80/product-agent#privacy",
+    "termsOfServiceURL": "https://github.com/stephenfan80/product-agent#license",
+    "defaultPrompt": [
+      "使用 product-agent-workspace 帮我判断这个产品想法应该怎么推进。",
+      "使用 product-agent-brief 把这次产品对齐整理成产品简报。",
+      "使用 product-agent-prototype 基于已对齐 brief 规划三个移动端原型方向。"
+    ],
+    "brandColor": "#2563EB",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/logo.png",
+    "screenshots": [
+      "./assets/screenshot-onboarding.png",
+      "./assets/screenshot-brief.png",
+      "./assets/screenshot-prototype.png"
+    ]
+  }
+}

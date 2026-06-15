@@ -1,0 +1,11 @@
+{
+  "id": "forbid-select-a-not-handoff",
+  "category": "forbidden-load",
+  "prompt": "我选 A，按这个继续",
+  "expected": {
+    "route": "product-agent-workspace",
+    "operation_type": "answer_pending_gate",
+    "must_not_route": ["product-agent-handoff"],
+    "must_include_signals": ["answer_pending_gate_only"]
+  }
+}
